@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "La-Peturnidad",
-    "slug": "La-Peturnidad",
+    "slug": "la-peturnidad",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.idarko.lapeturnidad",
       "supportsTablet": true
     },
     "android": {
@@ -16,7 +17,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.idarko.lapeturnidad"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +39,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e6e9e77a-c1aa-41f3-8b1a-4902bc4bac78"
+      }
+    },
+    "owner": "idarko"
   }
 }
