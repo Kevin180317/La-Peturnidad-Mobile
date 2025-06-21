@@ -21,7 +21,8 @@ export default function LoginScreen() {
   const showToast = (
     type: "success" | "error",
     text1: string,
-    text2?: string
+    text2?: string,
+    onComplete?: () => void
   ) => {
     Toast.show({
       type,
@@ -29,15 +30,8 @@ export default function LoginScreen() {
       text2,
       visibilityTime: 2000,
       onHide: () => {
-        if (type === "success") {
-          router.push({
-            pathname: "/dashboard",
-            params: { email },
-          });
-          setLoading(false);
-        } else {
-          setLoading(false);
-        }
+        setLoading(false);
+        if (onComplete) onComplete();
       },
     });
   };
@@ -64,7 +58,21 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        showToast("success", "Login exitoso", data.message || "");
+        const { is_complete } = data;
+
+        showToast("success", "Login exitoso", data.message || "", () => {
+          if (is_complete === 1) {
+            router.push({
+              pathname: "/dashboard",
+              params: { email },
+            });
+          } else {
+            router.push({
+              pathname: "/register-extended",
+              params: { email },
+            });
+          }
+        });
       } else {
         showToast("error", "Error", data.error || "Credenciales incorrectas");
       }
@@ -79,7 +87,7 @@ export default function LoginScreen() {
     <View style={styles.container}>
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#ff592c" />
           <Text style={{ marginTop: 10 }}>Cargando...</Text>
         </View>
       ) : (
@@ -110,18 +118,17 @@ export default function LoginScreen() {
             title="Iniciar sesión"
             onPress={handleLogin}
             disabled={loading}
+            color="#ff592c"
           />
 
-          <Text style={styles.registerText}>
+          <Text style={styles.registerText} selectionColor="#ff592c">
             ¿No tienes cuenta?{" "}
-            <Link href="/register" style={styles.registerLink}>
+            <Link href="/register" style={styles.registerButton}>
               Regístrate
             </Link>
           </Text>
         </>
       )}
-
-      {/* Importante: agregar el Toast en el root del componente */}
       <Toast />
     </View>
   );
@@ -138,6 +145,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 5,
   },
-  registerText: { marginTop: 20, textAlign: "center" },
-  registerLink: { color: "blue" },
+  registerText: { marginTop: 20, textAlign: "center", color: "black" },
+  registerButton: { color: "#ff592c", fontWeight: "bold" },
 });

@@ -49,7 +49,11 @@ export default function RegisterScreen() {
           autoHide: true,
           onHide: () => {
             setLoading(false);
-            router.push("/");
+            // Redirigir a la pantalla de registro extendido con el email como parámetro
+            router.push({
+              pathname: "/register-extended",
+              params: { email: email },
+            });
           },
         });
       } else {
@@ -75,7 +79,7 @@ export default function RegisterScreen() {
     <View style={styles.container}>
       {loading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color="#ff592c" />
           <Text style={{ marginTop: 10 }}>Procesando registro...</Text>
         </View>
       ) : (
@@ -99,7 +103,11 @@ export default function RegisterScreen() {
             secureTextEntry
           />
 
-          <Button title="Registrarse" onPress={handleRegister} />
+          <Button
+            title="Registrarse"
+            onPress={handleRegister}
+            color="#ff592c"
+          />
         </>
       )}
 
@@ -122,7 +130,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 20,
     fontWeight: "bold",
-    textAlign: "center",
   },
   input: {
     borderWidth: 1,

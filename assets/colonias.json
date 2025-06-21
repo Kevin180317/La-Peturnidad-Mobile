@@ -1,0 +1,3786 @@
+[
+  {
+    "Código Postal": 22000,
+    "Asentamiento": "Zona Centro"
+  },
+  {
+    "Código Postal": 22000,
+    "Asentamiento": "Zona Este"
+  },
+  {
+    "Código Postal": 22000,
+    "Asentamiento": "Zona Norte"
+  },
+  {
+    "Código Postal": 22010,
+    "Asentamiento": "Empleados Federales"
+  },
+  {
+    "Código Postal": 22010,
+    "Asentamiento": "Cuauhtémoc"
+  },
+  {
+    "Código Postal": 22010,
+    "Asentamiento": "Zona Urbana Río Tijuana"
+  },
+  {
+    "Código Postal": 22014,
+    "Asentamiento": "Escolar Agua Caliente"
+  },
+  {
+    "Código Postal": 22014,
+    "Asentamiento": "Agua Caliente Sección Pinos"
+  },
+  {
+    "Código Postal": 22014,
+    "Asentamiento": "Aviación"
+  },
+  {
+    "Código Postal": 22015,
+    "Asentamiento": "Marrón"
+  },
+  {
+    "Código Postal": 22015,
+    "Asentamiento": "Revolución"
+  },
+  {
+    "Código Postal": 22015,
+    "Asentamiento": "Plan de Barranquitas"
+  },
+  {
+    "Código Postal": 22020,
+    "Asentamiento": "Chapultepec"
+  },
+  {
+    "Código Postal": 22020,
+    "Asentamiento": "Hipódromo"
+  },
+  {
+    "Código Postal": 22020,
+    "Asentamiento": "Neidhart"
+  },
+  {
+    "Código Postal": 22020,
+    "Asentamiento": "Rincón Colonial Chapultepec"
+  },
+  {
+    "Código Postal": 22020,
+    "Asentamiento": "Campo de Golf"
+  },
+  {
+    "Código Postal": 22020,
+    "Asentamiento": "Chapultepec Este"
+  },
+  {
+    "Código Postal": 22020,
+    "Asentamiento": "Chapultepec Decima Sección"
+  },
+  {
+    "Código Postal": 22024,
+    "Asentamiento": "Hipódromo Agua Caliente"
+  },
+  {
+    "Código Postal": 22024,
+    "Asentamiento": "Lomas de Agua Caliente"
+  },
+  {
+    "Código Postal": 22024,
+    "Asentamiento": "Agua Caliente"
+  },
+  {
+    "Código Postal": 22024,
+    "Asentamiento": "Puerta de Hierro"
+  },
+  {
+    "Código Postal": 22025,
+    "Asentamiento": "Lomas de Agua Caliente 1ra. Sección"
+  },
+  {
+    "Código Postal": 22025,
+    "Asentamiento": "Rancho el Grande"
+  },
+  {
+    "Código Postal": 22025,
+    "Asentamiento": "Conjunto Residencial Cataviña"
+  },
+  {
+    "Código Postal": 22025,
+    "Asentamiento": "Jardines de Chapultepec"
+  },
+  {
+    "Código Postal": 22025,
+    "Asentamiento": "Privada Catalana"
+  },
+  {
+    "Código Postal": 22025,
+    "Asentamiento": "San Jerónimo"
+  },
+  {
+    "Código Postal": 22025,
+    "Asentamiento": "Colinas de Chapultepec"
+  },
+  {
+    "Código Postal": 22030,
+    "Asentamiento": "Burócrata Hipódromo"
+  },
+  {
+    "Código Postal": 22030,
+    "Asentamiento": "Colinas de Agua Caliente"
+  },
+  {
+    "Código Postal": 22030,
+    "Asentamiento": "Lomas Hipódromo"
+  },
+  {
+    "Código Postal": 22030,
+    "Asentamiento": "López Mateos"
+  },
+  {
+    "Código Postal": 22030,
+    "Asentamiento": "Hacienda las Palomas"
+  },
+  {
+    "Código Postal": 22030,
+    "Asentamiento": "La Remosa"
+  },
+  {
+    "Código Postal": 22030,
+    "Asentamiento": "Hacienda Agua Caliente"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "El Bosque"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Herradura"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Villa Lomas"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Lomas de Agua Caliente 5ta. Sección"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Lomas de Agua Caliente 6ta. Sección (Lomas Altas)"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Jardines de Chapultepec S-E"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Planetario"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Cañón Oasis"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Pueblo Bonito"
+  },
+  {
+    "Código Postal": 22034,
+    "Asentamiento": "Vista Dorada"
+  },
+  {
+    "Código Postal": 22035,
+    "Asentamiento": "Cañón de La Pedrera"
+  },
+  {
+    "Código Postal": 22035,
+    "Asentamiento": "Herradura Sur"
+  },
+  {
+    "Código Postal": 22035,
+    "Asentamiento": "Cañón de La Pedrera Este"
+  },
+  {
+    "Código Postal": 22035,
+    "Asentamiento": "Cañón Primavera"
+  },
+  {
+    "Código Postal": 22040,
+    "Asentamiento": "Juárez"
+  },
+  {
+    "Código Postal": 22040,
+    "Asentamiento": "Madero (Cacho)"
+  },
+  {
+    "Código Postal": 22044,
+    "Asentamiento": "América"
+  },
+  {
+    "Código Postal": 22044,
+    "Asentamiento": "Dávila"
+  },
+  {
+    "Código Postal": 22044,
+    "Asentamiento": "Calete"
+  },
+  {
+    "Código Postal": 22044,
+    "Asentamiento": "Gabilondo"
+  },
+  {
+    "Código Postal": 22045,
+    "Asentamiento": "Cubillas"
+  },
+  {
+    "Código Postal": 22045,
+    "Asentamiento": "Cubillas Sur"
+  },
+  {
+    "Código Postal": 22045,
+    "Asentamiento": "Chula Vista"
+  },
+  {
+    "Código Postal": 22045,
+    "Asentamiento": "Lomas Doctores (Chapultepec Doctores)"
+  },
+  {
+    "Código Postal": 22046,
+    "Asentamiento": "Madero Sur"
+  },
+  {
+    "Código Postal": 22046,
+    "Asentamiento": "Guadalajara"
+  },
+  {
+    "Código Postal": 22046,
+    "Asentamiento": "Monterrey"
+  },
+  {
+    "Código Postal": 22046,
+    "Asentamiento": "Cumbres de Juárez"
+  },
+  {
+    "Código Postal": 22046,
+    "Asentamiento": "Laderas de Monterrey"
+  },
+  {
+    "Código Postal": 22046,
+    "Asentamiento": "Rincón Toscano"
+  },
+  {
+    "Código Postal": 22050,
+    "Asentamiento": "Castillo"
+  },
+  {
+    "Código Postal": 22050,
+    "Asentamiento": "Alemán"
+  },
+  {
+    "Código Postal": 22054,
+    "Asentamiento": "Altamira"
+  },
+  {
+    "Código Postal": 22054,
+    "Asentamiento": "Roma"
+  },
+  {
+    "Código Postal": 22054,
+    "Asentamiento": "Linda Vista"
+  },
+  {
+    "Código Postal": 22055,
+    "Asentamiento": "Altamira Sur"
+  },
+  {
+    "Código Postal": 22055,
+    "Asentamiento": "Azcona"
+  },
+  {
+    "Código Postal": 22055,
+    "Asentamiento": "Independencia"
+  },
+  {
+    "Código Postal": 22055,
+    "Asentamiento": "Guerrero"
+  },
+  {
+    "Código Postal": 22056,
+    "Asentamiento": "Hidalgo"
+  },
+  {
+    "Código Postal": 22056,
+    "Asentamiento": "México"
+  },
+  {
+    "Código Postal": 22056,
+    "Asentamiento": "Morelos"
+  },
+  {
+    "Código Postal": 22100,
+    "Asentamiento": "Anexa 20 de Noviembre"
+  },
+  {
+    "Código Postal": 22100,
+    "Asentamiento": "20 de Noviembre"
+  },
+  {
+    "Código Postal": 22104,
+    "Asentamiento": "Los Españoles"
+  },
+  {
+    "Código Postal": 22104,
+    "Asentamiento": "El Pedregal"
+  },
+  {
+    "Código Postal": 22104,
+    "Asentamiento": "Alfonso Corona del Rosal"
+  },
+  {
+    "Código Postal": 22104,
+    "Asentamiento": "El Pedregal Oeste"
+  },
+  {
+    "Código Postal": 22104,
+    "Asentamiento": "Los Santos"
+  },
+  {
+    "Código Postal": 22104,
+    "Asentamiento": "San José del Alto"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "El Prado"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "Anáhuac"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "Ceceña"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "Dimenstein"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "José Sandoval"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "La Mesa"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "López"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "Los Ángeles"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "Santa Cruz"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "Las Lilas"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "Moreno"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "El Prado Este"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "FOVISSSTE Los Volcanes"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "La Mesa Sur"
+  },
+  {
+    "Código Postal": 22105,
+    "Asentamiento": "López Oeste"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Santa Rosa"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Cortez"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Alcalá"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Alicia Carrillo"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Angélica"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "El Paraíso"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Gerónimo Meza"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "La Escondida"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Las Palmas"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "López Lucio"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Luz Juárez"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Reynoso"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Jardines de San Carlos"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Camichin"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Contreras"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Gertrudis Green"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Guillen"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Leos Montoya"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Magaña"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Sonoita"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Electricistas"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Contreras Oeste"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Gerónimo Meza Este"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Quinta Alta"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Reynoso Parcela 162"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "Electricistas"
+  },
+  {
+    "Código Postal": 22106,
+    "Asentamiento": "San Carlos"
+  },
+  {
+    "Código Postal": 22110,
+    "Asentamiento": "Residencial Villaflores"
+  },
+  {
+    "Código Postal": 22110,
+    "Asentamiento": "Buenaventura"
+  },
+  {
+    "Código Postal": 22110,
+    "Asentamiento": "Los Pirules"
+  },
+  {
+    "Código Postal": 22110,
+    "Asentamiento": "Chapultepec Alamar"
+  },
+  {
+    "Código Postal": 22110,
+    "Asentamiento": "Los Álamos"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "Chihuahua La Mesa"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "Fortín de las Flores"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "Santa Elena"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "Yamille"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "San Antonio"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "Fortín de las Flores Oeste"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "INFONAVIT La Mesa"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "La Ciénega Poniente"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "San Antonio Oeste"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "Vaim"
+  },
+  {
+    "Código Postal": 22114,
+    "Asentamiento": "Río Tijuana 2da. Etapa"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Moreno 2da. Sección"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Las Brisas"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Benton"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Guadalajara (La Mesa)"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Las Vegas"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Ramírez"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Castro"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Las Huertas 3ra. Sección"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "La Joya"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Gas y Anexas"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "La Joya Este"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Las Brisas Norte"
+  },
+  {
+    "Código Postal": 22115,
+    "Asentamiento": "Los Olivos"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Jalisco"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Balcón Las Huertas"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Huertas 1ra. Sección"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Huertas 2da. Sección"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Ramos"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Maurilio Magallón"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Plan de Iguala"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Cañón el Salado"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Rubio"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Urías"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "El Valle"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Lomas Conjunto Residencial"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Pinos del Agüero"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Ramos Sur"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Hacienda Acueducto"
+  },
+  {
+    "Código Postal": 22116,
+    "Asentamiento": "Jardín de las Bugambilias"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Anexa Durango"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Chapultepec California"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Durango"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "La Esmeralda"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Las Fuentes"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Las Huertas 4ta. Sección"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Los Árboles"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Santa Fe"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Veracruz"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Anexa Veracruz"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "La Villa"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Emperadores"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Guanajuato"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Anexa Santa Fe"
+  },
+  {
+    "Código Postal": 22117,
+    "Asentamiento": "Lomas Las Huertas"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "Arboledas de La Mesa"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "Constitución del 17"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "18 de Marzo"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "La Ciénega"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "Zermeño (Mérida)"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "Niños Héroes (La Mesa)"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "Arboledas"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "La Ciénega Sur"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "Niños Héroes Este"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "Vivienda Magisterial 37"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "Los Pinos (Limón)"
+  },
+  {
+    "Código Postal": 22120,
+    "Asentamiento": "División del Norte"
+  },
+  {
+    "Código Postal": 22123,
+    "Asentamiento": "Arboledas"
+  },
+  {
+    "Código Postal": 22123,
+    "Asentamiento": "García"
+  },
+  {
+    "Código Postal": 22123,
+    "Asentamiento": "Los Venados"
+  },
+  {
+    "Código Postal": 22123,
+    "Asentamiento": "Los Venados Oeste"
+  },
+  {
+    "Código Postal": 22123,
+    "Asentamiento": "Jardines de Las Arboledas"
+  },
+  {
+    "Código Postal": 22123,
+    "Asentamiento": "El Olivar"
+  },
+  {
+    "Código Postal": 22123,
+    "Asentamiento": "Camino Viejo"
+  },
+  {
+    "Código Postal": 22123,
+    "Asentamiento": "Villa de Alcázar"
+  },
+  {
+    "Código Postal": 22124,
+    "Asentamiento": "Tona"
+  },
+  {
+    "Código Postal": 22124,
+    "Asentamiento": "Presa Rodriguez"
+  },
+  {
+    "Código Postal": 22124,
+    "Asentamiento": "Terrazas de La Presa"
+  },
+  {
+    "Código Postal": 22125,
+    "Asentamiento": "Colinas de la Presa Sección Montebello"
+  },
+  {
+    "Código Postal": 22125,
+    "Asentamiento": "Lomas de La Presa"
+  },
+  {
+    "Código Postal": 22125,
+    "Asentamiento": "Los Reyes"
+  },
+  {
+    "Código Postal": 22125,
+    "Asentamiento": "Villas de Baja California"
+  },
+  {
+    "Código Postal": 22125,
+    "Asentamiento": "Los Naranjos"
+  },
+  {
+    "Código Postal": 22125,
+    "Asentamiento": "Bosques de La Presa"
+  },
+  {
+    "Código Postal": 22125,
+    "Asentamiento": "Colinas de la Presa"
+  },
+  {
+    "Código Postal": 22126,
+    "Asentamiento": "Cañón Palmas"
+  },
+  {
+    "Código Postal": 22126,
+    "Asentamiento": "Colinas de La Mesa"
+  },
+  {
+    "Código Postal": 22126,
+    "Asentamiento": "Jardines de La Mesa"
+  },
+  {
+    "Código Postal": 22126,
+    "Asentamiento": "México Lindo"
+  },
+  {
+    "Código Postal": 22126,
+    "Asentamiento": "3 de Octubre"
+  },
+  {
+    "Código Postal": 22126,
+    "Asentamiento": "El Ranchito"
+  },
+  {
+    "Código Postal": 22126,
+    "Asentamiento": "Villa Urrutia"
+  },
+  {
+    "Código Postal": 22126,
+    "Asentamiento": "Residencial Alameda"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Castro Green"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Las Huertas 5ta. Sección"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Luna Park"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Orizaba"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Baja California"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Campos"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Pinos de Narez"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Villa Floresta"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Colinas de La Cruz"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "INFONAVIT Lomas Verdes"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Loma Dorada Campos"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Martínez"
+  },
+  {
+    "Código Postal": 22127,
+    "Asentamiento": "Anexa Loma Dorada"
+  },
+  {
+    "Código Postal": 22160,
+    "Asentamiento": "Generación 2000"
+  },
+  {
+    "Código Postal": 22160,
+    "Asentamiento": "Granjas Buenos Aires Sección La Palma"
+  },
+  {
+    "Código Postal": 22163,
+    "Asentamiento": "Puerta Plata"
+  },
+  {
+    "Código Postal": 22163,
+    "Asentamiento": "Tomas Alva Edison"
+  },
+  {
+    "Código Postal": 22163,
+    "Asentamiento": "La Ilusión"
+  },
+  {
+    "Código Postal": 22163,
+    "Asentamiento": "Hacienda Las Delicias"
+  },
+  {
+    "Código Postal": 22163,
+    "Asentamiento": "Hacienda los Venados"
+  },
+  {
+    "Código Postal": 22164,
+    "Asentamiento": "Palma Real"
+  },
+  {
+    "Código Postal": 22164,
+    "Asentamiento": "Los Valles"
+  },
+  {
+    "Código Postal": 22165,
+    "Asentamiento": "Natura Sección Arboledas"
+  },
+  {
+    "Código Postal": 22165,
+    "Asentamiento": "Natura Sección Vistas del Sol"
+  },
+  {
+    "Código Postal": 22165,
+    "Asentamiento": "Hacienda las Delicias III"
+  },
+  {
+    "Código Postal": 22165,
+    "Asentamiento": "Natura Sección Amanecer"
+  },
+  {
+    "Código Postal": 22165,
+    "Asentamiento": "Zona Cerril General"
+  },
+  {
+    "Código Postal": 22165,
+    "Asentamiento": "Natura Sección Montes"
+  },
+  {
+    "Código Postal": 22165,
+    "Asentamiento": "Natura Sección Bosques"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Rancho Santa Cruz"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Hacienda los Laureles"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Santa Cruz"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Granjas Buenos Aires"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Santa Cruz"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Paseos del Prado"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Emiliano Zapata"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "San Luis"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Cañón del Sainz"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Valle Dorado"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Colinas San Rafael"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Villa del Prado"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Villa del Prado Segunda Sección"
+  },
+  {
+    "Código Postal": 22170,
+    "Asentamiento": "Villa del Álamo"
+  },
+  {
+    "Código Postal": 22180,
+    "Asentamiento": "INFONAVIT Latinos"
+  },
+  {
+    "Código Postal": 22180,
+    "Asentamiento": "Lomas de La Amistad"
+  },
+  {
+    "Código Postal": 22180,
+    "Asentamiento": "Ampliación Reforma"
+  },
+  {
+    "Código Postal": 22180,
+    "Asentamiento": "INFONAVIT Cachanillas"
+  },
+  {
+    "Código Postal": 22180,
+    "Asentamiento": "Parque Industrial La Mesa"
+  },
+  {
+    "Código Postal": 22183,
+    "Asentamiento": "Reforma"
+  },
+  {
+    "Código Postal": 22183,
+    "Asentamiento": "Amparo Sánchez"
+  },
+  {
+    "Código Postal": 22183,
+    "Asentamiento": "Sánchez Taboada II"
+  },
+  {
+    "Código Postal": 22183,
+    "Asentamiento": "Cañón Centenario"
+  },
+  {
+    "Código Postal": 22183,
+    "Asentamiento": "División del Norte"
+  },
+  {
+    "Código Postal": 22183,
+    "Asentamiento": "María Medina"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "Ampliación Sánchez Taboada"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "Sánchez Taboada PRODUTSA"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "Niño Artillero"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "Colinas de La Cantera"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "El Triunfo"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "Durán"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "Colima"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "Sánchez Taboada III"
+  },
+  {
+    "Código Postal": 22185,
+    "Asentamiento": "Sánchez Taboada IV"
+  },
+  {
+    "Código Postal": 22186,
+    "Asentamiento": "Anexa Sánchez Taboada"
+  },
+  {
+    "Código Postal": 22186,
+    "Asentamiento": "La Esperanza"
+  },
+  {
+    "Código Postal": 22186,
+    "Asentamiento": "Carmen Castillo"
+  },
+  {
+    "Código Postal": 22186,
+    "Asentamiento": "Colinas de Cortés"
+  },
+  {
+    "Código Postal": 22190,
+    "Asentamiento": "Camino Verde (Cañada Verde)"
+  },
+  {
+    "Código Postal": 22190,
+    "Asentamiento": "Felipa Velázquez"
+  },
+  {
+    "Código Postal": 22190,
+    "Asentamiento": "Cuauhtémoc"
+  },
+  {
+    "Código Postal": 22194,
+    "Asentamiento": "Los Olivos"
+  },
+  {
+    "Código Postal": 22194,
+    "Asentamiento": "Villa Colonial"
+  },
+  {
+    "Código Postal": 22194,
+    "Asentamiento": "Santa Cecilia"
+  },
+  {
+    "Código Postal": 22194,
+    "Asentamiento": "Residencial Agua Caliente"
+  },
+  {
+    "Código Postal": 22194,
+    "Asentamiento": "Jardines de Agua Caliente"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "Camino Real"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "El Mirador (La Mesa)"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "Hipódromo Dos"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "Monte Bello"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "Real del Monte"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "Santa Anita"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "Sonora"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "Los Olivos Norte"
+  },
+  {
+    "Código Postal": 22195,
+    "Asentamiento": "Colinas de San Ángel"
+  },
+  {
+    "Código Postal": 22196,
+    "Asentamiento": "Sirak M Baloyan"
+  },
+  {
+    "Código Postal": 22200,
+    "Asentamiento": "Loma Bonita"
+  },
+  {
+    "Código Postal": 22200,
+    "Asentamiento": "Buenos Aires Norte"
+  },
+  {
+    "Código Postal": 22200,
+    "Asentamiento": "Ampliación Loma Bonita"
+  },
+  {
+    "Código Postal": 22200,
+    "Asentamiento": "Jardín Dorado"
+  },
+  {
+    "Código Postal": 22203,
+    "Asentamiento": "Cañón del Padre"
+  },
+  {
+    "Código Postal": 22203,
+    "Asentamiento": "Granjas Familiares de Matamoros"
+  },
+  {
+    "Código Postal": 22203,
+    "Asentamiento": "Montecarlo"
+  },
+  {
+    "Código Postal": 22203,
+    "Asentamiento": "Lomas Terrabella"
+  },
+  {
+    "Código Postal": 22203,
+    "Asentamiento": "Rincón Dorado"
+  },
+  {
+    "Código Postal": 22203,
+    "Asentamiento": "Pedregal del Matamoros"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "El Encinal"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Alta Vista"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Ejido Matamoros"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Colas del Matamoros"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Valle Verde"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "El Peñón"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Altiplano"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Planicie"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Altiplano 5ta. Sección"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Valle Imperial"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Villa Residencial del Bosque"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "El Mirador"
+  },
+  {
+    "Código Postal": 22204,
+    "Asentamiento": "Ribera del Bosque"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "FIDUZET"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real I"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real II"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real III"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real IV"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real V"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real VI"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real VII"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real VIII"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Sol I"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Sol II"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana I"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana II"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana IX"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana VI"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana XIII"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana XIV"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana XVI"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana VII"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Sol III"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Sol IV"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana III"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana XII"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa Fontana XVIII"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real XI"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Real X"
+  },
+  {
+    "Código Postal": 22205,
+    "Asentamiento": "Villa del Sol V"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Tierra y Libertad"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Mariano Matamoros (Norte)"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Héroes de Independencia"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "El Pípila"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Lomas de Matamoros"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Villa Fontana IV"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Villa Fontana V"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Villa Fontana X"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Villa Fontana XI"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Las Torres de Matamoros"
+  },
+  {
+    "Código Postal": 22206,
+    "Asentamiento": "Villa Fontana VIII"
+  },
+  {
+    "Código Postal": 22207,
+    "Asentamiento": "Puerta del Sol"
+  },
+  {
+    "Código Postal": 22207,
+    "Asentamiento": "Ampliación Gabriel Rodriguez"
+  },
+  {
+    "Código Postal": 22207,
+    "Asentamiento": "Buenos Aires Sur"
+  },
+  {
+    "Código Postal": 22207,
+    "Asentamiento": "Los Lobos"
+  },
+  {
+    "Código Postal": 22207,
+    "Asentamiento": "Misión de las Californias"
+  },
+  {
+    "Código Postal": 22210,
+    "Asentamiento": "El Lago 19500"
+  },
+  {
+    "Código Postal": 22210,
+    "Asentamiento": "El Lago 19600"
+  },
+  {
+    "Código Postal": 22210,
+    "Asentamiento": "El Lago 19800"
+  },
+  {
+    "Código Postal": 22210,
+    "Asentamiento": "Mientorno Residencial El Lago"
+  },
+  {
+    "Código Postal": 22210,
+    "Asentamiento": "El Lago"
+  },
+  {
+    "Código Postal": 22210,
+    "Asentamiento": "Colinas del Alamar (Torres del Lago)"
+  },
+  {
+    "Código Postal": 22210,
+    "Asentamiento": "Vista Hermosa"
+  },
+  {
+    "Código Postal": 22214,
+    "Asentamiento": "Mesetas del Guaycura"
+  },
+  {
+    "Código Postal": 22214,
+    "Asentamiento": "Patria Nueva"
+  },
+  {
+    "Código Postal": 22214,
+    "Asentamiento": "Loma Dorada"
+  },
+  {
+    "Código Postal": 22214,
+    "Asentamiento": "Pórticos del Lago"
+  },
+  {
+    "Código Postal": 22214,
+    "Asentamiento": "Ampliación Guaycura"
+  },
+  {
+    "Código Postal": 22214,
+    "Asentamiento": "Urbiquinta Marsella"
+  },
+  {
+    "Código Postal": 22214,
+    "Asentamiento": "Residencial El Fuerte"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Presidentes"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Baja Maq. El Águila"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Las Misiones"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Las Américas"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Ampliación Las Américas"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Presidentes"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Rancho el Águila"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "El Águila"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Paseos de Guaycura"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Praderas del Sol"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Pórticos de Tijuana"
+  },
+  {
+    "Código Postal": 22215,
+    "Asentamiento": "Misión de las Américas"
+  },
+  {
+    "Código Postal": 22216,
+    "Asentamiento": "Guaycura"
+  },
+  {
+    "Código Postal": 22216,
+    "Asentamiento": "Bugambilias (Jacarandas)"
+  },
+  {
+    "Código Postal": 22217,
+    "Asentamiento": "Jardines del Lago"
+  },
+  {
+    "Código Postal": 22217,
+    "Asentamiento": "Lago Sur"
+  },
+  {
+    "Código Postal": 22220,
+    "Asentamiento": "Hacienda el Colorado"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "San Carlos"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Cerro Colorado I"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Cerro Colorado 2da. Sección (Lomas del Colorado)"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Kino"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Capistrano INFONAVIT"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Estadio Potros"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "José López Portillo"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Las Praderas"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Mirador Capistrano"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Cerro Colorado 3ra. Sección"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Kino II"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Cerro II"
+  },
+  {
+    "Código Postal": 22223,
+    "Asentamiento": "Cerro Colorado"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "Azteca"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "El Porvenir"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "Praderas de La Mesa"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "Fidel Velázquez"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "Cañón de La Raza"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "Villa Cruz"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "Agraristas"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "Monte Real"
+  },
+  {
+    "Código Postal": 22224,
+    "Asentamiento": "Insurgentes"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "Los Saucillos"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "Praderas de La Mesa Sección Valle de las Flores"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "La Campiña"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "IMAQ Tijuana"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "Rodeo"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "Anexa Porvenir"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "Pórticos de La Mesa"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "Meseta del Chema"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "Libramiento (Zona AO)"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "El Seminario"
+  },
+  {
+    "Código Postal": 22225,
+    "Asentamiento": "Insurgentes"
+  },
+  {
+    "Código Postal": 22226,
+    "Asentamiento": "Vista del Río"
+  },
+  {
+    "Código Postal": 22226,
+    "Asentamiento": "Paraíso del Río"
+  },
+  {
+    "Código Postal": 22226,
+    "Asentamiento": "Villas del Río"
+  },
+  {
+    "Código Postal": 22226,
+    "Asentamiento": "Alba Roja"
+  },
+  {
+    "Código Postal": 22226,
+    "Asentamiento": "Río Tijuana 3ra. Etapa"
+  },
+  {
+    "Código Postal": 22226,
+    "Asentamiento": "Privada Hacienda Córdoba"
+  },
+  {
+    "Código Postal": 22226,
+    "Asentamiento": "Puerta del Río"
+  },
+  {
+    "Código Postal": 22230,
+    "Asentamiento": "Horóscopo"
+  },
+  {
+    "Código Postal": 22234,
+    "Asentamiento": "Mariano Matamoros (Centro)"
+  },
+  {
+    "Código Postal": 22234,
+    "Asentamiento": "Mariano Matamoros (Sur)"
+  },
+  {
+    "Código Postal": 22234,
+    "Asentamiento": "Ejido Francisco Villa Sur"
+  },
+  {
+    "Código Postal": 22235,
+    "Asentamiento": "Villas del Dorado"
+  },
+  {
+    "Código Postal": 22236,
+    "Asentamiento": "El Carmen"
+  },
+  {
+    "Código Postal": 22236,
+    "Asentamiento": "Ejido Francisco Villa 2da. Sección"
+  },
+  {
+    "Código Postal": 22236,
+    "Asentamiento": "Ejido Francisco Villa"
+  },
+  {
+    "Código Postal": 22236,
+    "Asentamiento": "Real de San Francisco"
+  },
+  {
+    "Código Postal": 22237,
+    "Asentamiento": "El Florido 1ra. Sección"
+  },
+  {
+    "Código Postal": 22237,
+    "Asentamiento": "El Florido 2da. Sección"
+  },
+  {
+    "Código Postal": 22237,
+    "Asentamiento": "El Florido 3ra. Sección"
+  },
+  {
+    "Código Postal": 22244,
+    "Asentamiento": "Lomas Virreyes"
+  },
+  {
+    "Código Postal": 22244,
+    "Asentamiento": "El Florido I"
+  },
+  {
+    "Código Postal": 22244,
+    "Asentamiento": "El Florido II"
+  },
+  {
+    "Código Postal": 22244,
+    "Asentamiento": "Hacienda Casa Grande"
+  },
+  {
+    "Código Postal": 22244,
+    "Asentamiento": "Residencial Los Abedules"
+  },
+  {
+    "Código Postal": 22244,
+    "Asentamiento": "El Florido Sección Colinas"
+  },
+  {
+    "Código Postal": 22244,
+    "Asentamiento": "Sevilla Residencial"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Paseo Santa María"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "La Morita 2da. Sección"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "El Florido 4ta. Sección"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "La Morita"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Las Abejas"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Hacienda las Fuentes"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Cañadas del Florido"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Las Colonias"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Paseos del Florido"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Hacienda Santa María"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Fideicomiso el Florido"
+  },
+  {
+    "Código Postal": 22245,
+    "Asentamiento": "Cañadas del Florido 2da. Sección"
+  },
+  {
+    "Código Postal": 22246,
+    "Asentamiento": "Terrazas del Valle"
+  },
+  {
+    "Código Postal": 22246,
+    "Asentamiento": "Viñedos Casa Blanca"
+  },
+  {
+    "Código Postal": 22250,
+    "Asentamiento": "Parque Industrial El Florido Sección La Encantada"
+  },
+  {
+    "Código Postal": 22250,
+    "Asentamiento": "Los Olivos"
+  },
+  {
+    "Código Postal": 22250,
+    "Asentamiento": "El Realito"
+  },
+  {
+    "Código Postal": 22250,
+    "Asentamiento": "Valle Bonito"
+  },
+  {
+    "Código Postal": 22250,
+    "Asentamiento": "Hábitat Piedras Blancas"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "Rancho El Refugio"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "Quintas Campestre El Refugio"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "Terrazas La Morita"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "El Refugio"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "Lomas del Refugio"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "El Laurel I"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "Paseos del Vergel"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "Vistas de Palmillas"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "La Muralla"
+  },
+  {
+    "Código Postal": 22253,
+    "Asentamiento": "El Laurel II"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Lomas del Pedregal"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Partido del Trabajo"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Colinas del Florido"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Santa Fe"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Ampliación Lomas de Tlatelolco"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Rincón del Mediterraneo"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Ojo de Agua (El Florido)"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "El Gandul"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Villa del Campo II"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Florido"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Maclovio Rojas"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Ojo de Agua"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Granjas Princesas del Sol"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Florido Viejo"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Villa del Campo"
+  },
+  {
+    "Código Postal": 22254,
+    "Asentamiento": "Lomas de Tlatelolco"
+  },
+  {
+    "Código Postal": 22255,
+    "Asentamiento": "Nuevo Progreso"
+  },
+  {
+    "Código Postal": 22255,
+    "Asentamiento": "Los Girasoles"
+  },
+  {
+    "Código Postal": 22255,
+    "Asentamiento": "El Roble Tres R"
+  },
+  {
+    "Código Postal": 22260,
+    "Asentamiento": "Asociación de Colonos Portezuelos"
+  },
+  {
+    "Código Postal": 22260,
+    "Asentamiento": "Valle de las Palmas"
+  },
+  {
+    "Código Postal": 22263,
+    "Asentamiento": "Lomas de San Pedro"
+  },
+  {
+    "Código Postal": 22330,
+    "Asentamiento": "Tres M (Pérez)"
+  },
+  {
+    "Código Postal": 22330,
+    "Asentamiento": "La Fuente del Valle"
+  },
+  {
+    "Código Postal": 22330,
+    "Asentamiento": "Ejido Ojo de Agua"
+  },
+  {
+    "Código Postal": 22330,
+    "Asentamiento": "Terrazas del Valle 2da. Sección"
+  },
+  {
+    "Código Postal": 22330,
+    "Asentamiento": "Rancho 3 Piedras (La Ladrillera)"
+  },
+  {
+    "Código Postal": 22330,
+    "Asentamiento": "Lomas del Valle"
+  },
+  {
+    "Código Postal": 22330,
+    "Asentamiento": "El Niño"
+  },
+  {
+    "Código Postal": 22330,
+    "Asentamiento": "Vista del Valle"
+  },
+  {
+    "Código Postal": 22333,
+    "Asentamiento": "Establo Ramírez"
+  },
+  {
+    "Código Postal": 22333,
+    "Asentamiento": "Javier Rojo Gómez"
+  },
+  {
+    "Código Postal": 22334,
+    "Asentamiento": "Santa Fe"
+  },
+  {
+    "Código Postal": 22334,
+    "Asentamiento": "Mirador del Valle"
+  },
+  {
+    "Código Postal": 22334,
+    "Asentamiento": "El Platanal"
+  },
+  {
+    "Código Postal": 22334,
+    "Asentamiento": "Parajes del Valle"
+  },
+  {
+    "Código Postal": 22335,
+    "Asentamiento": "Valle Redondo"
+  },
+  {
+    "Código Postal": 22335,
+    "Asentamiento": "Margarita Residencial"
+  },
+  {
+    "Código Postal": 22400,
+    "Asentamiento": "Libertad"
+  },
+  {
+    "Código Postal": 22404,
+    "Asentamiento": "Aeropuerto"
+  },
+  {
+    "Código Postal": 22404,
+    "Asentamiento": "Las Californias"
+  },
+  {
+    "Código Postal": 22405,
+    "Asentamiento": "Anexa Postal"
+  },
+  {
+    "Código Postal": 22406,
+    "Asentamiento": "Burócrata Ruiz Cortines"
+  },
+  {
+    "Código Postal": 22406,
+    "Asentamiento": "Anexa Ruiz Cortines"
+  },
+  {
+    "Código Postal": 22410,
+    "Asentamiento": "Alfonso Garzón"
+  },
+  {
+    "Código Postal": 22410,
+    "Asentamiento": "Centro Urbano 70-76"
+  },
+  {
+    "Código Postal": 22410,
+    "Asentamiento": "Lomas Taurinas"
+  },
+  {
+    "Código Postal": 22414,
+    "Asentamiento": "Anexa Buena Vista"
+  },
+  {
+    "Código Postal": 22414,
+    "Asentamiento": "Tomas Aquino"
+  },
+  {
+    "Código Postal": 22414,
+    "Asentamiento": "Kennedy"
+  },
+  {
+    "Código Postal": 22415,
+    "Asentamiento": "SEPANAL"
+  },
+  {
+    "Código Postal": 22415,
+    "Asentamiento": "Buena Vista"
+  },
+  {
+    "Código Postal": 22415,
+    "Asentamiento": "Chamizal"
+  },
+  {
+    "Código Postal": 22416,
+    "Asentamiento": "Anexa Del Río"
+  },
+  {
+    "Código Postal": 22416,
+    "Asentamiento": "Empleado Postal"
+  },
+  {
+    "Código Postal": 22416,
+    "Asentamiento": "Mineral de Santa Fe"
+  },
+  {
+    "Código Postal": 22416,
+    "Asentamiento": "López Leyva"
+  },
+  {
+    "Código Postal": 22416,
+    "Asentamiento": "Defensores de Baja California"
+  },
+  {
+    "Código Postal": 22416,
+    "Asentamiento": "Del Río"
+  },
+  {
+    "Código Postal": 22420,
+    "Asentamiento": "Otay Insurgentes"
+  },
+  {
+    "Código Postal": 22420,
+    "Asentamiento": "Altabrisa"
+  },
+  {
+    "Código Postal": 22420,
+    "Asentamiento": "Ampliación Lomas Taurinas"
+  },
+  {
+    "Código Postal": 22420,
+    "Asentamiento": "Insurgentes"
+  },
+  {
+    "Código Postal": 22424,
+    "Asentamiento": "Terrazas Residencial"
+  },
+  {
+    "Código Postal": 22424,
+    "Asentamiento": "Internacional Tijuana"
+  },
+  {
+    "Código Postal": 22425,
+    "Asentamiento": "Bosque de las Araucarias"
+  },
+  {
+    "Código Postal": 22425,
+    "Asentamiento": "La Pechuga"
+  },
+  {
+    "Código Postal": 22425,
+    "Asentamiento": "Centro Comercial Otay"
+  },
+  {
+    "Código Postal": 22425,
+    "Asentamiento": "Villas Otay"
+  },
+  {
+    "Código Postal": 22425,
+    "Asentamiento": "Parque Industrial Misiones de las Californias"
+  },
+  {
+    "Código Postal": 22426,
+    "Asentamiento": "Guadalupe Victoria"
+  },
+  {
+    "Código Postal": 22426,
+    "Asentamiento": "Ex Ejido Tampico"
+  },
+  {
+    "Código Postal": 22426,
+    "Asentamiento": "Misiones del Pedregal"
+  },
+  {
+    "Código Postal": 22427,
+    "Asentamiento": "Laderas de Otay"
+  },
+  {
+    "Código Postal": 22427,
+    "Asentamiento": "Otay Jardín"
+  },
+  {
+    "Código Postal": 22427,
+    "Asentamiento": "Otay Universidad"
+  },
+  {
+    "Código Postal": 22427,
+    "Asentamiento": "INDECO Universidad"
+  },
+  {
+    "Código Postal": 22427,
+    "Asentamiento": "Ignacio Zaragoza"
+  },
+  {
+    "Código Postal": 22427,
+    "Asentamiento": "Universidad Sur"
+  },
+  {
+    "Código Postal": 22427,
+    "Asentamiento": "Otay Jardín II"
+  },
+  {
+    "Código Postal": 22430,
+    "Asentamiento": "Garita Otay"
+  },
+  {
+    "Código Postal": 22430,
+    "Asentamiento": "Garita Internacional"
+  },
+  {
+    "Código Postal": 22430,
+    "Asentamiento": "Vista Lago"
+  },
+  {
+    "Código Postal": 22430,
+    "Asentamiento": "Mesa de Otay"
+  },
+  {
+    "Código Postal": 22434,
+    "Asentamiento": "Perimetral Norte"
+  },
+  {
+    "Código Postal": 22434,
+    "Asentamiento": "Residencial Frontera"
+  },
+  {
+    "Código Postal": 22435,
+    "Asentamiento": "Roberto de La Madrid"
+  },
+  {
+    "Código Postal": 22435,
+    "Asentamiento": "Nueva Tijuana"
+  },
+  {
+    "Código Postal": 22435,
+    "Asentamiento": "Bellas Artes"
+  },
+  {
+    "Código Postal": 22436,
+    "Asentamiento": "Xicoténcatl Leyva (OE)"
+  },
+  {
+    "Código Postal": 22436,
+    "Asentamiento": "Otay Galerías"
+  },
+  {
+    "Código Postal": 22436,
+    "Asentamiento": "Otay Colonial"
+  },
+  {
+    "Código Postal": 22439,
+    "Asentamiento": "Tijuana (General Abelardo L. Rodríguez)"
+  },
+  {
+    "Código Postal": 22440,
+    "Asentamiento": "Ejido Chilpancingo"
+  },
+  {
+    "Código Postal": 22440,
+    "Asentamiento": "Chilpancingo"
+  },
+  {
+    "Código Postal": 22444,
+    "Asentamiento": "Ciudad Industrial"
+  },
+  {
+    "Código Postal": 22446,
+    "Asentamiento": "Ejido Chilpancingo"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "Plaza Otay"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "FOVISSSTE II"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "Otay Campestre"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "Vista Alamar"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "FOVISSSTE V"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "Manuel Rivera Anaya"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "Río Vista"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "INFONAVIT Loma II"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "Rincón de Otay"
+  },
+  {
+    "Código Postal": 22450,
+    "Asentamiento": "Otay Vista"
+  },
+  {
+    "Código Postal": 22454,
+    "Asentamiento": "Tecnológico"
+  },
+  {
+    "Código Postal": 22455,
+    "Asentamiento": "Campestre Murua"
+  },
+  {
+    "Código Postal": 22456,
+    "Asentamiento": "Valle Vista 1ra. Sección"
+  },
+  {
+    "Código Postal": 22456,
+    "Asentamiento": "Melchor Ocampo"
+  },
+  {
+    "Código Postal": 22456,
+    "Asentamiento": "Murua Poniente"
+  },
+  {
+    "Código Postal": 22456,
+    "Asentamiento": "Valle Vista 2da. Sección"
+  },
+  {
+    "Código Postal": 22457,
+    "Asentamiento": "FOVISSSTE"
+  },
+  {
+    "Código Postal": 22457,
+    "Asentamiento": "Maestros Universitarios"
+  },
+  {
+    "Código Postal": 22457,
+    "Asentamiento": "Otay Constituyentes"
+  },
+  {
+    "Código Postal": 22457,
+    "Asentamiento": "Rinconada de Otay"
+  },
+  {
+    "Código Postal": 22457,
+    "Asentamiento": "Delicias"
+  },
+  {
+    "Código Postal": 22457,
+    "Asentamiento": "Plazas"
+  },
+  {
+    "Código Postal": 22460,
+    "Asentamiento": "Arenales B"
+  },
+  {
+    "Código Postal": 22460,
+    "Asentamiento": "Rancho Rivera"
+  },
+  {
+    "Código Postal": 22464,
+    "Asentamiento": "Fernández"
+  },
+  {
+    "Código Postal": 22464,
+    "Asentamiento": "Los Arenales A"
+  },
+  {
+    "Código Postal": 22464,
+    "Asentamiento": "Riberas del Alamar"
+  },
+  {
+    "Código Postal": 22465,
+    "Asentamiento": "Privada San Miguel"
+  },
+  {
+    "Código Postal": 22465,
+    "Asentamiento": "Patrimonio Alamar"
+  },
+  {
+    "Código Postal": 22465,
+    "Asentamiento": "Alamar"
+  },
+  {
+    "Código Postal": 22465,
+    "Asentamiento": "Hidalgo"
+  },
+  {
+    "Código Postal": 22465,
+    "Asentamiento": "INFONAVIT Patrimonio"
+  },
+  {
+    "Código Postal": 22465,
+    "Asentamiento": "Murua Oriente"
+  },
+  {
+    "Código Postal": 22470,
+    "Asentamiento": "Santa Anita"
+  },
+  {
+    "Código Postal": 22470,
+    "Asentamiento": "Rancho los Olivos"
+  },
+  {
+    "Código Postal": 22470,
+    "Asentamiento": "Valle del Alamar II"
+  },
+  {
+    "Código Postal": 22470,
+    "Asentamiento": "Magisterial"
+  },
+  {
+    "Código Postal": 22470,
+    "Asentamiento": "Anexa Magisterial"
+  },
+  {
+    "Código Postal": 22470,
+    "Asentamiento": "Las Torres"
+  },
+  {
+    "Código Postal": 22470,
+    "Asentamiento": "Alamar II"
+  },
+  {
+    "Código Postal": 22473,
+    "Asentamiento": "Nido de las Águilas"
+  },
+  {
+    "Código Postal": 22473,
+    "Asentamiento": "Rancho Escondido"
+  },
+  {
+    "Código Postal": 22474,
+    "Asentamiento": "Rinconada 1"
+  },
+  {
+    "Código Postal": 22474,
+    "Asentamiento": "Rinconada 2"
+  },
+  {
+    "Código Postal": 22474,
+    "Asentamiento": "Pegaso II"
+  },
+  {
+    "Código Postal": 22474,
+    "Asentamiento": "Pegaso I"
+  },
+  {
+    "Código Postal": 22474,
+    "Asentamiento": "Granjas División del Norte"
+  },
+  {
+    "Código Postal": 22476,
+    "Asentamiento": "Pontevedra"
+  },
+  {
+    "Código Postal": 22476,
+    "Asentamiento": "10 de Mayo"
+  },
+  {
+    "Código Postal": 22476,
+    "Asentamiento": "Granjas Familiares Unidas"
+  },
+  {
+    "Código Postal": 22476,
+    "Asentamiento": "Insurgentes"
+  },
+  {
+    "Código Postal": 22500,
+    "Asentamiento": "Playas de Tijuana Sección Jardines"
+  },
+  {
+    "Código Postal": 22504,
+    "Asentamiento": "Playas de Tijuana Sección Playas Coronado"
+  },
+  {
+    "Código Postal": 22504,
+    "Asentamiento": "Playas de Tijuana Sección Costa"
+  },
+  {
+    "Código Postal": 22504,
+    "Asentamiento": "Playas de Tijuana Sección Terrazas"
+  },
+  {
+    "Código Postal": 22504,
+    "Asentamiento": "Playas de Tijuana Sección Monumental"
+  },
+  {
+    "Código Postal": 22504,
+    "Asentamiento": "Playa Diamante"
+  },
+  {
+    "Código Postal": 22504,
+    "Asentamiento": "Puesta del Sol"
+  },
+  {
+    "Código Postal": 22505,
+    "Asentamiento": "Playas de Tijuana Sección el Dorado"
+  },
+  {
+    "Código Postal": 22505,
+    "Asentamiento": "Playas de Tijuana Sección Jardines del Sol"
+  },
+  {
+    "Código Postal": 22505,
+    "Asentamiento": "Playas de Tijuana Sección La Riviera"
+  },
+  {
+    "Código Postal": 22505,
+    "Asentamiento": "Leonardo Rodriguez Alcaine"
+  },
+  {
+    "Código Postal": 22505,
+    "Asentamiento": "La Perla Residencial"
+  },
+  {
+    "Código Postal": 22505,
+    "Asentamiento": "Mar de Cortez"
+  },
+  {
+    "Código Postal": 22505,
+    "Asentamiento": "Coral Beach"
+  },
+  {
+    "Código Postal": 22505,
+    "Asentamiento": "La Perla Bahía"
+  },
+  {
+    "Código Postal": 22506,
+    "Asentamiento": "Playas de Tijuana Sección Triangulo de Oro"
+  },
+  {
+    "Código Postal": 22506,
+    "Asentamiento": "Playas de Tijuana Sección Costa Hermosa"
+  },
+  {
+    "Código Postal": 22506,
+    "Asentamiento": "Playas de Tijuana Sección Costa de Oro"
+  },
+  {
+    "Código Postal": 22506,
+    "Asentamiento": "Playas de Tijuana Sección Costa Azul"
+  },
+  {
+    "Código Postal": 22510,
+    "Asentamiento": "Colegio Ibero Tijuana"
+  },
+  {
+    "Código Postal": 22510,
+    "Asentamiento": "Lázaro Cárdenas"
+  },
+  {
+    "Código Postal": 22510,
+    "Asentamiento": "Alberto Bustamante"
+  },
+  {
+    "Código Postal": 22510,
+    "Asentamiento": "Lázaro Cárdenas 3ra. Mesa"
+  },
+  {
+    "Código Postal": 22510,
+    "Asentamiento": "Mar Vista"
+  },
+  {
+    "Código Postal": 22510,
+    "Asentamiento": "Xicotencatl Leyva Alemán"
+  },
+  {
+    "Código Postal": 22515,
+    "Asentamiento": "Albatros"
+  },
+  {
+    "Código Postal": 22515,
+    "Asentamiento": "Milenio 2000"
+  },
+  {
+    "Código Postal": 22516,
+    "Asentamiento": "Costa Coronado Residencial"
+  },
+  {
+    "Código Postal": 22516,
+    "Asentamiento": "Villa Mar"
+  },
+  {
+    "Código Postal": 22517,
+    "Asentamiento": "Vista Mar Residencial"
+  },
+  {
+    "Código Postal": 22517,
+    "Asentamiento": "TECNOMEX"
+  },
+  {
+    "Código Postal": 22517,
+    "Asentamiento": "Laderas del Mar"
+  },
+  {
+    "Código Postal": 22517,
+    "Asentamiento": "La Cúspide"
+  },
+  {
+    "Código Postal": 22520,
+    "Asentamiento": "Cañón del Matadero Este"
+  },
+  {
+    "Código Postal": 22520,
+    "Asentamiento": "Los Laureles"
+  },
+  {
+    "Código Postal": 22520,
+    "Asentamiento": "Mar Vista"
+  },
+  {
+    "Código Postal": 22520,
+    "Asentamiento": "El Mirador"
+  },
+  {
+    "Código Postal": 22520,
+    "Asentamiento": "Lomas del Mirador"
+  },
+  {
+    "Código Postal": 22520,
+    "Asentamiento": "Anexo los Laureles"
+  },
+  {
+    "Código Postal": 22520,
+    "Asentamiento": "Cañón Tampico"
+  },
+  {
+    "Código Postal": 22523,
+    "Asentamiento": "Gran Tenochtitlán"
+  },
+  {
+    "Código Postal": 22523,
+    "Asentamiento": "Cañón de las Rosas"
+  },
+  {
+    "Código Postal": 22523,
+    "Asentamiento": "Cañón Azteca"
+  },
+  {
+    "Código Postal": 22523,
+    "Asentamiento": "Cañón del Matadero"
+  },
+  {
+    "Código Postal": 22523,
+    "Asentamiento": "Cañón Miramar"
+  },
+  {
+    "Código Postal": 22523,
+    "Asentamiento": "Manuel Paredes"
+  },
+  {
+    "Código Postal": 22524,
+    "Asentamiento": "Michoacán"
+  },
+  {
+    "Código Postal": 22524,
+    "Asentamiento": "San Ángel"
+  },
+  {
+    "Código Postal": 22525,
+    "Asentamiento": "Ecologista"
+  },
+  {
+    "Código Postal": 22525,
+    "Asentamiento": "Divina Providencia"
+  },
+  {
+    "Código Postal": 22525,
+    "Asentamiento": "Anexa Divina Providencia"
+  },
+  {
+    "Código Postal": 22525,
+    "Asentamiento": "La Jolla"
+  },
+  {
+    "Código Postal": 22525,
+    "Asentamiento": "Rancho Macías"
+  },
+  {
+    "Código Postal": 22525,
+    "Asentamiento": "Vista Encantada"
+  },
+  {
+    "Código Postal": 22525,
+    "Asentamiento": "San Bernardo (Terrazas de San Bernardo)"
+  },
+  {
+    "Código Postal": 22525,
+    "Asentamiento": "Corona Encantada"
+  },
+  {
+    "Código Postal": 22526,
+    "Asentamiento": "Miramar"
+  },
+  {
+    "Código Postal": 22526,
+    "Asentamiento": "Rancho las Flores 1ra. Sección"
+  },
+  {
+    "Código Postal": 22526,
+    "Asentamiento": "Cañón Rosales"
+  },
+  {
+    "Código Postal": 22526,
+    "Asentamiento": "Anexa Miramar"
+  },
+  {
+    "Código Postal": 22526,
+    "Asentamiento": "Rancho las Flores 2da. Sección"
+  },
+  {
+    "Código Postal": 22530,
+    "Asentamiento": "Colina del Mediterráneo"
+  },
+  {
+    "Código Postal": 22530,
+    "Asentamiento": "Soler"
+  },
+  {
+    "Código Postal": 22530,
+    "Asentamiento": "Lomas Misión"
+  },
+  {
+    "Código Postal": 22530,
+    "Asentamiento": "Misión del Sol"
+  },
+  {
+    "Código Postal": 22530,
+    "Asentamiento": "Segunda Parte del Soler"
+  },
+  {
+    "Código Postal": 22534,
+    "Asentamiento": "Herrera"
+  },
+  {
+    "Código Postal": 22534,
+    "Asentamiento": "Unión"
+  },
+  {
+    "Código Postal": 22534,
+    "Asentamiento": "Santa Rosa (Ciudad)"
+  },
+  {
+    "Código Postal": 22535,
+    "Asentamiento": "Las Palmeras"
+  },
+  {
+    "Código Postal": 22535,
+    "Asentamiento": "INFONAVIT Lomas del Porvenir"
+  },
+  {
+    "Código Postal": 22535,
+    "Asentamiento": "Cañón de las Palmeras"
+  },
+  {
+    "Código Postal": 22535,
+    "Asentamiento": "Lomas Tijuana"
+  },
+  {
+    "Código Postal": 22536,
+    "Asentamiento": "Los Altos (Ruíz Valencia)"
+  },
+  {
+    "Código Postal": 22536,
+    "Asentamiento": "División los Altos"
+  },
+  {
+    "Código Postal": 22536,
+    "Asentamiento": "Hacienda Linda Vista"
+  },
+  {
+    "Código Postal": 22537,
+    "Asentamiento": "Cañón del Matadero Norte"
+  },
+  {
+    "Código Postal": 22537,
+    "Asentamiento": "La Isla"
+  },
+  {
+    "Código Postal": 22540,
+    "Asentamiento": "Puente La Joya"
+  },
+  {
+    "Código Postal": 22544,
+    "Asentamiento": "Corona del Mar"
+  },
+  {
+    "Código Postal": 22545,
+    "Asentamiento": "Roberto Yahuaca"
+  },
+  {
+    "Código Postal": 22545,
+    "Asentamiento": "Las Cumbres"
+  },
+  {
+    "Código Postal": 22550,
+    "Asentamiento": "Punta Bandera"
+  },
+  {
+    "Código Postal": 22550,
+    "Asentamiento": "Punta del Mar"
+  },
+  {
+    "Código Postal": 22555,
+    "Asentamiento": "Terrazas del Sol"
+  },
+  {
+    "Código Postal": 22555,
+    "Asentamiento": "Antorcha Campesina"
+  },
+  {
+    "Código Postal": 22555,
+    "Asentamiento": "El Monte"
+  },
+  {
+    "Código Postal": 22557,
+    "Asentamiento": "Antorcha II"
+  },
+  {
+    "Código Postal": 22557,
+    "Asentamiento": "Granjas Familiares La Esperanza"
+  },
+  {
+    "Código Postal": 22557,
+    "Asentamiento": "Vista Azul"
+  },
+  {
+    "Código Postal": 22560,
+    "Asentamiento": "Baja Malibú"
+  },
+  {
+    "Código Postal": 22560,
+    "Asentamiento": "Baja Malibú (Sección Playas)"
+  },
+  {
+    "Código Postal": 22560,
+    "Asentamiento": "Playa Blanca"
+  },
+  {
+    "Código Postal": 22560,
+    "Asentamiento": "San Antonio del Mar"
+  },
+  {
+    "Código Postal": 22564,
+    "Asentamiento": "Lomas Santa Fe"
+  },
+  {
+    "Código Postal": 22564,
+    "Asentamiento": "Viñas del Mar"
+  },
+  {
+    "Código Postal": 22564,
+    "Asentamiento": "Viñas del Mar II"
+  },
+  {
+    "Código Postal": 22564,
+    "Asentamiento": "Burdeos"
+  },
+  {
+    "Código Postal": 22564,
+    "Asentamiento": "Lomas del Mar"
+  },
+  {
+    "Código Postal": 22564,
+    "Asentamiento": "Urbi Quinta del Cedro"
+  },
+  {
+    "Código Postal": 22564,
+    "Asentamiento": "Urbi Quinta del Cedro Segunda Sección"
+  },
+  {
+    "Código Postal": 22565,
+    "Asentamiento": "Real del Mar"
+  },
+  {
+    "Código Postal": 22565,
+    "Asentamiento": "Pacifico Campestre"
+  },
+  {
+    "Código Postal": 22566,
+    "Asentamiento": "Baja Malibú (Sección Lomas)"
+  },
+  {
+    "Código Postal": 22566,
+    "Asentamiento": "Campo Koa"
+  },
+  {
+    "Código Postal": 22566,
+    "Asentamiento": "Los Delfines"
+  },
+  {
+    "Código Postal": 22566,
+    "Asentamiento": "Sección Campestre"
+  },
+  {
+    "Código Postal": 22566,
+    "Asentamiento": "Hacienda del Mar"
+  },
+  {
+    "Código Postal": 22566,
+    "Asentamiento": "Santa Mónica"
+  },
+  {
+    "Código Postal": 22566,
+    "Asentamiento": "Brisas del Mar"
+  },
+  {
+    "Código Postal": 22567,
+    "Asentamiento": "Sueños del Mar"
+  },
+  {
+    "Código Postal": 22567,
+    "Asentamiento": "Residencial San Marino"
+  },
+  {
+    "Código Postal": 22600,
+    "Asentamiento": "Montes Olímpicos"
+  },
+  {
+    "Código Postal": 22600,
+    "Asentamiento": "Anexa Niños Héroes"
+  },
+  {
+    "Código Postal": 22600,
+    "Asentamiento": "Cañón Rubí"
+  },
+  {
+    "Código Postal": 22600,
+    "Asentamiento": "Artesanal"
+  },
+  {
+    "Código Postal": 22600,
+    "Asentamiento": "El Cortez"
+  },
+  {
+    "Código Postal": 22604,
+    "Asentamiento": "Pedregal de Santa Julia"
+  },
+  {
+    "Código Postal": 22604,
+    "Asentamiento": "Nueva Aurora"
+  },
+  {
+    "Código Postal": 22604,
+    "Asentamiento": "Loma Bonita Norte"
+  },
+  {
+    "Código Postal": 22604,
+    "Asentamiento": "Nueva Aurora Sur"
+  },
+  {
+    "Código Postal": 22604,
+    "Asentamiento": "Nuevo Milenio"
+  },
+  {
+    "Código Postal": 22604,
+    "Asentamiento": "Real de Loma Bonita"
+  },
+  {
+    "Código Postal": 22604,
+    "Asentamiento": "Valle Sur"
+  },
+  {
+    "Código Postal": 22605,
+    "Asentamiento": "El Cerrito"
+  },
+  {
+    "Código Postal": 22605,
+    "Asentamiento": "Reacomodo Obras Publicas"
+  },
+  {
+    "Código Postal": 22605,
+    "Asentamiento": "Cañón de las Carretas"
+  },
+  {
+    "Código Postal": 22605,
+    "Asentamiento": "Fausto González"
+  },
+  {
+    "Código Postal": 22605,
+    "Asentamiento": "Loma Bonita"
+  },
+  {
+    "Código Postal": 22606,
+    "Asentamiento": "Xicotencatl Leyva"
+  },
+  {
+    "Código Postal": 22606,
+    "Asentamiento": "Flores Magón"
+  },
+  {
+    "Código Postal": 22606,
+    "Asentamiento": "El Jibarito"
+  },
+  {
+    "Código Postal": 22607,
+    "Asentamiento": "Brisa Marina"
+  },
+  {
+    "Código Postal": 22607,
+    "Asentamiento": "Salvatierra"
+  },
+  {
+    "Código Postal": 22607,
+    "Asentamiento": "Ampliación Salvatierra"
+  },
+  {
+    "Código Postal": 22607,
+    "Asentamiento": "Modesto Ponce"
+  },
+  {
+    "Código Postal": 22607,
+    "Asentamiento": "San Mateo"
+  },
+  {
+    "Código Postal": 22607,
+    "Asentamiento": "Granja Puesta del Sol"
+  },
+  {
+    "Código Postal": 22607,
+    "Asentamiento": "La Cueva"
+  },
+  {
+    "Código Postal": 22610,
+    "Asentamiento": "Ciudad Jardín"
+  },
+  {
+    "Código Postal": 22610,
+    "Asentamiento": "Manuel Paredes II"
+  },
+  {
+    "Código Postal": 22610,
+    "Asentamiento": "5 y 8 Hectáreas"
+  },
+  {
+    "Código Postal": 22614,
+    "Asentamiento": "Anexa Herrera"
+  },
+  {
+    "Código Postal": 22614,
+    "Asentamiento": "Patrimonial Benito Juárez"
+  },
+  {
+    "Código Postal": 22614,
+    "Asentamiento": "Lomas del Pacifico"
+  },
+  {
+    "Código Postal": 22614,
+    "Asentamiento": "I Ayuntamiento"
+  },
+  {
+    "Código Postal": 22614,
+    "Asentamiento": "Anexa Roma"
+  },
+  {
+    "Código Postal": 22615,
+    "Asentamiento": "Francisco Villa"
+  },
+  {
+    "Código Postal": 22615,
+    "Asentamiento": "El Progreso"
+  },
+  {
+    "Código Postal": 22616,
+    "Asentamiento": "Rancho La Cima"
+  },
+  {
+    "Código Postal": 22616,
+    "Asentamiento": "Monte San Antonio"
+  },
+  {
+    "Código Postal": 22620,
+    "Asentamiento": "Manuel Paredes I"
+  },
+  {
+    "Código Postal": 22620,
+    "Asentamiento": "Niños Héroes"
+  },
+  {
+    "Código Postal": 22620,
+    "Asentamiento": "Chihuahua"
+  },
+  {
+    "Código Postal": 22620,
+    "Asentamiento": "Oaxaca (Ángel Fernández)"
+  },
+  {
+    "Código Postal": 22624,
+    "Asentamiento": "Obrera 2da. Sección"
+  },
+  {
+    "Código Postal": 22624,
+    "Asentamiento": "Obrera 3ra. Sección"
+  },
+  {
+    "Código Postal": 22625,
+    "Asentamiento": "Obrera 1ra. Sección"
+  },
+  {
+    "Código Postal": 22626,
+    "Asentamiento": "El Rubí"
+  },
+  {
+    "Código Postal": 22626,
+    "Asentamiento": "Rubí Aguadores"
+  },
+  {
+    "Código Postal": 22630,
+    "Asentamiento": "Valle del Rubí Sección Lomas"
+  },
+  {
+    "Código Postal": 22630,
+    "Asentamiento": "Vivienda Popular"
+  },
+  {
+    "Código Postal": 22630,
+    "Asentamiento": "Cumbres del Sol"
+  },
+  {
+    "Código Postal": 22634,
+    "Asentamiento": "La Sierra"
+  },
+  {
+    "Código Postal": 22634,
+    "Asentamiento": "Liberal Lomas del Rubí"
+  },
+  {
+    "Código Postal": 22634,
+    "Asentamiento": "Residencial Las Cascadas"
+  },
+  {
+    "Código Postal": 22634,
+    "Asentamiento": "Colinas del Rey"
+  },
+  {
+    "Código Postal": 22634,
+    "Asentamiento": "Roberto Curiel"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Valle del Pedregal"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Simón Bolívar"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Ignacio Ramírez"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Tepeyac"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Tejamen"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Alfonso Ballesteros"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Anexa Simón Bolívar"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Cumbres del Rubí"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Lomas del Río"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Lomas Villas"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "El Palmar"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "La Esperanza"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Santa Paula"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "El Rincón"
+  },
+  {
+    "Código Postal": 22635,
+    "Asentamiento": "Villa Bonita"
+  },
+  {
+    "Código Postal": 22636,
+    "Asentamiento": "Gutiérrez Ovalle"
+  },
+  {
+    "Código Postal": 22636,
+    "Asentamiento": "Llamas Amaya"
+  },
+  {
+    "Código Postal": 22636,
+    "Asentamiento": "Patrimonio Familiar"
+  },
+  {
+    "Código Postal": 22636,
+    "Asentamiento": "Jardines de las Cruces"
+  },
+  {
+    "Código Postal": 22636,
+    "Asentamiento": "Villegas"
+  },
+  {
+    "Código Postal": 22636,
+    "Asentamiento": "28 Batallón de Infantería"
+  },
+  {
+    "Código Postal": 22636,
+    "Asentamiento": "Nueva Era"
+  },
+  {
+    "Código Postal": 22636,
+    "Asentamiento": "Militar"
+  },
+  {
+    "Código Postal": 22637,
+    "Asentamiento": "Valle del Sur 2"
+  },
+  {
+    "Código Postal": 22637,
+    "Asentamiento": "Valle del Sur"
+  },
+  {
+    "Código Postal": 22637,
+    "Asentamiento": "Valle del Rubí Sección Terrazas"
+  },
+  {
+    "Código Postal": 22637,
+    "Asentamiento": "Jardines del Rubí"
+  },
+  {
+    "Código Postal": 22637,
+    "Asentamiento": "Anexa Pro Hogar"
+  },
+  {
+    "Código Postal": 22637,
+    "Asentamiento": "Valle del Sur 1"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Aguaje de la Tuna 1ra. Sección"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Aguaje de La Tuna 2da. Sección"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Internacional"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Luis Echeverría"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "De los Maestros"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Las Plazas"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Residencial La Esmeralda"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Condesa"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Anexa Internacional"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Nueva Esperanza (La Cuesta)"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Sánchez Díaz"
+  },
+  {
+    "Código Postal": 22640,
+    "Asentamiento": "Residencial La Esperanza"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "La Rioja Residencial"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Industrial Pacífico IV"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Industrial Pacífico I"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Industrial Pacífico III"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Leandro Valle"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Xochimilco Solidaridad"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Industrial Pacífico II"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Las Flores"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Paseos del Pacífico"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Mi Patrimonio"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Hacienda del Pacifico"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "San Quintín"
+  },
+  {
+    "Código Postal": 22643,
+    "Asentamiento": "Lomas de San Martín"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "Banus Residencial"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "El Tecolote"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "Genaro Vázquez"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "Nordika"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "Granjas el Tecolote"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "Cumbres del Pacífico (Terrazas del Pacífico)"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "XVIII Ayuntamiento"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "Genaro Vázquez Sección Tres"
+  },
+  {
+    "Código Postal": 22644,
+    "Asentamiento": "Residencial Barcelona"
+  },
+  {
+    "Código Postal": 22645,
+    "Asentamiento": "Monarca"
+  },
+  {
+    "Código Postal": 22645,
+    "Asentamiento": "La Gloria"
+  },
+  {
+    "Código Postal": 22645,
+    "Asentamiento": "Campestre La Gloria"
+  },
+  {
+    "Código Postal": 22645,
+    "Asentamiento": "Jardines de La Gloria"
+  },
+  {
+    "Código Postal": 22645,
+    "Asentamiento": "Real de La Gloria"
+  },
+  {
+    "Código Postal": 22645,
+    "Asentamiento": "La Jolla"
+  },
+  {
+    "Código Postal": 22645,
+    "Asentamiento": "Condominios Villas California"
+  },
+  {
+    "Código Postal": 22646,
+    "Asentamiento": "Lagunitas"
+  },
+  {
+    "Código Postal": 22647,
+    "Asentamiento": "Bonaterra"
+  },
+  {
+    "Código Postal": 22647,
+    "Asentamiento": "Panamericano"
+  },
+  {
+    "Código Postal": 22647,
+    "Asentamiento": "Alfa Panamericano"
+  },
+  {
+    "Código Postal": 22647,
+    "Asentamiento": "Industrial Morelos"
+  },
+  {
+    "Código Postal": 22647,
+    "Asentamiento": "Colinas de California"
+  },
+  {
+    "Código Postal": 22647,
+    "Asentamiento": "Villa Campestre"
+  },
+  {
+    "Código Postal": 22647,
+    "Asentamiento": "Jardines de La Misión"
+  },
+  {
+    "Código Postal": 22650,
+    "Asentamiento": "Puerta San Pedro Residencial"
+  },
+  {
+    "Código Postal": 22650,
+    "Asentamiento": "Cuesta Blanca"
+  },
+  {
+    "Código Postal": 22650,
+    "Asentamiento": "Las 2 Palmas"
+  },
+  {
+    "Código Postal": 22650,
+    "Asentamiento": "Loma Blanca"
+  },
+  {
+    "Código Postal": 22654,
+    "Asentamiento": "Hacienda San Martín"
+  },
+  {
+    "Código Postal": 22654,
+    "Asentamiento": "El Chicote"
+  },
+  {
+    "Código Postal": 22654,
+    "Asentamiento": "Bonilla"
+  },
+  {
+    "Código Postal": 22654,
+    "Asentamiento": "Alfredo Ames"
+  },
+  {
+    "Código Postal": 22654,
+    "Asentamiento": "Ejido Lázaro Cárdenas"
+  },
+  {
+    "Código Postal": 22654,
+    "Asentamiento": "Alcatraces"
+  },
+  {
+    "Código Postal": 22654,
+    "Asentamiento": "Ampliación Ejido Lázaro Cárdenas"
+  },
+  {
+    "Código Postal": 22660,
+    "Asentamiento": "Colinas del Sol"
+  },
+  {
+    "Código Postal": 22660,
+    "Asentamiento": "Francisco Zarco"
+  },
+  {
+    "Código Postal": 22660,
+    "Asentamiento": "Xicoténcatl Dos"
+  },
+  {
+    "Código Postal": 22660,
+    "Asentamiento": "Lomas Encantadas"
+  },
+  {
+    "Código Postal": 22660,
+    "Asentamiento": "Estrella"
+  },
+  {
+    "Código Postal": 22663,
+    "Asentamiento": "Valparaíso Residencial"
+  },
+  {
+    "Código Postal": 22663,
+    "Asentamiento": "San Agustin"
+  },
+  {
+    "Código Postal": 22663,
+    "Asentamiento": "Hacienda las Flores"
+  },
+  {
+    "Código Postal": 22664,
+    "Asentamiento": "Villa Residencial Santa Fe 4ta. Sección"
+  },
+  {
+    "Código Postal": 22664,
+    "Asentamiento": "Bonanza"
+  },
+  {
+    "Código Postal": 22664,
+    "Asentamiento": "La Cuestecita"
+  },
+  {
+    "Código Postal": 22664,
+    "Asentamiento": "Villa Residencial Santa Fe 3ra. Sección"
+  },
+  {
+    "Código Postal": 22664,
+    "Asentamiento": "Villa Residencial Santa Fe 2da. Sección"
+  },
+  {
+    "Código Postal": 22664,
+    "Asentamiento": "Leonardo Rodriguez Alcaine"
+  },
+  {
+    "Código Postal": 22664,
+    "Asentamiento": "Villa Residencial Santa Fe 5ta. Sección"
+  },
+  {
+    "Código Postal": 22664,
+    "Asentamiento": "Quinta Versalles"
+  },
+  {
+    "Código Postal": 22665,
+    "Asentamiento": "Cumbres del Sol"
+  },
+  {
+    "Código Postal": 22665,
+    "Asentamiento": "Privadas del Rosario"
+  },
+  {
+    "Código Postal": 22665,
+    "Asentamiento": "Urbihacienda Balboa"
+  },
+  {
+    "Código Postal": 22665,
+    "Asentamiento": "Ley del Servicio Civil"
+  },
+  {
+    "Código Postal": 22665,
+    "Asentamiento": "Terrazas de San Ángel"
+  },
+  {
+    "Código Postal": 22665,
+    "Asentamiento": "Lomas de San Antonio"
+  },
+  {
+    "Código Postal": 22665,
+    "Asentamiento": "Isla Coronado"
+  },
+  {
+    "Código Postal": 22665,
+    "Asentamiento": "Fuentes del Sol"
+  },
+  {
+    "Código Postal": 22666,
+    "Asentamiento": "Las Villas Santa Fe"
+  },
+  {
+    "Código Postal": 22666,
+    "Asentamiento": "Pórticos de San Antonio"
+  },
+  {
+    "Código Postal": 22666,
+    "Asentamiento": "Real de San Antonio"
+  },
+  {
+    "Código Postal": 22666,
+    "Asentamiento": "Vista Bella"
+  },
+  {
+    "Código Postal": 22666,
+    "Asentamiento": "Residencial Isla Cedros"
+  },
+  {
+    "Código Postal": 22666,
+    "Asentamiento": "Isla Mujeres"
+  },
+  {
+    "Código Postal": 22666,
+    "Asentamiento": "La Escondida"
+  },
+  {
+    "Código Postal": 22666,
+    "Asentamiento": "Lomas del Real"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Estrella del Pacífico"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Siena Residencial"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Tossa"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Residencial Victoria"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Vistas de Santa Fe"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Tossá Residencial"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Costa Dorada"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Villa Residencial Santa Fe 1ra. Sección"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Las Villas Tijuana"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "San Miguel"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Praderas de la Gloria"
+  },
+  {
+    "Código Postal": 22667,
+    "Asentamiento": "Verona Residencial"
+  }
+]
