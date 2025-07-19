@@ -8,7 +8,6 @@ import mysql from "mysql2";
 const app = express();
 const PORT = 3000;
 
-// Conexión directa a MySQL
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -16,7 +15,6 @@ const db = mysql.createConnection({
   database: "la_peturnidad",
 });
 
-// Verificar conexión a MySQL
 db.connect((err) => {
   if (err) {
     console.error("❌ Error al conectar a MySQL:", err.message);
@@ -24,17 +22,14 @@ db.connect((err) => {
   }
   console.log("✅ Conexión a MySQL exitosa");
 
-  // Iniciar servidor solo si se conectó correctamente
   app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   });
 });
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Configuración de Cloudinary
 cloudinary.config({
   cloud_name: "okhuysen", // tu cloud name
   api_key: "956224944828959", // tu API key
@@ -45,7 +40,6 @@ cloudinary.config({
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Obtener perfil completo por email
 app.get("/api/user-profile", (req, res) => {
   const { email } = req.query;
 
@@ -65,7 +59,8 @@ app.get("/api/user-profile", (req, res) => {
       up.city,
       up.created_at,
       up.updated_at,
-      up.postal_code
+      up.postal_code,
+      up.profile_picture_url
     FROM user_profiles up
     JOIN users u ON up.user_id = u.id
     WHERE u.email = ?
@@ -82,91 +77,6 @@ app.get("/api/user-profile", (req, res) => {
     }
 
     res.json(results[0]);
-  });
-});
-// Ruta para registrar usuarios
-app.post("/api/register", (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: "Email y password son obligatorios" });
-  }
-
-  // Verificar si el usuario ya existe
-  db.query("SELECT id FROM users WHERE email = ?", [email], (err, rows) => {
-    if (err) {
-      console.error("❌ Error en SELECT:", err.message);
-      return res.status(500).json({ error: "Error interno del servidor" });
-    }
-
-    if (rows.length > 0) {
-      return res.status(400).json({ error: "El usuario ya existe" });
-    }
-
-    // Hashear la contraseña
-    bcrypt.hash(password, 10, (err, hashedPassword) => {
-      if (err) {
-        console.error("❌ Error al hashear:", err.message);
-        return res.status(500).json({ error: "Error al procesar contraseña" });
-      }
-
-      // Insertar usuario
-      db.query(
-        "INSERT INTO users (email, password) VALUES (?, ?)",
-        [email, hashedPassword],
-        (err, result) => {
-          if (err) {
-            console.error("❌ Error en INSERT:", err.message);
-            return res.status(500).json({ error: "Error al guardar usuario" });
-          }
-
-          return res
-            .status(201)
-            .json({ message: "Usuario registrado correctamente" });
-        }
-      );
-    });
-  });
-});
-
-// Modificar ruta de login para verificar usuarios completos
-app.post("/api/login", (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password)
-    return res.status(400).json({ error: "Email y password son obligatorios" });
-
-  db.query("SELECT * FROM users WHERE email = ?", [email], (err, rows) => {
-    if (err) {
-      console.error("❌ Error en SELECT:", err.message);
-      return res.status(500).json({ error: "Error interno del servidor" });
-    }
-
-    if (rows.length === 0) {
-      return res.status(401).json({ error: "Usuario no encontrado" });
-    }
-
-    const user = rows[0];
-
-    // Comparar contraseña
-    bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err) {
-        console.error("❌ Error en bcrypt compare:", err.message);
-        return res.status(500).json({ error: "Error interno del servidor" });
-      }
-
-      if (!isMatch) {
-        return res.status(401).json({ error: "Contraseña incorrecta" });
-      }
-
-      // Login exitoso: devolvemos is_complete
-      res.json({
-        message: "Login exitoso",
-        userId: user.id,
-        email: user.email,
-        is_complete: user.is_complete, // 👈 esto es clave
-      });
-    });
   });
 });
 
@@ -216,7 +126,46 @@ app.post("/api/register", (req, res) => {
   });
 });
 
-// Ruta para completar perfil de usuario (registro extendido) - TRANSACCIONAL
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password)
+    return res.status(400).json({ error: "Email y password son obligatorios" });
+
+  db.query("SELECT * FROM users WHERE email = ?", [email], (err, rows) => {
+    if (err) {
+      console.error("❌ Error en SELECT:", err.message);
+      return res.status(500).json({ error: "Error interno del servidor" });
+    }
+
+    if (rows.length === 0) {
+      return res.status(401).json({ error: "Usuario no encontrado" });
+    }
+
+    const user = rows[0];
+
+    // Comparar contraseña
+    bcrypt.compare(password, user.password, (err, isMatch) => {
+      if (err) {
+        console.error("❌ Error en bcrypt compare:", err.message);
+        return res.status(500).json({ error: "Error interno del servidor" });
+      }
+
+      if (!isMatch) {
+        return res.status(401).json({ error: "Contraseña incorrecta" });
+      }
+
+      // Login exitoso: devolvemos is_complete
+      res.json({
+        message: "Login exitoso",
+        userId: user.id,
+        email: user.email,
+        is_complete: user.is_complete, // 👈 esto es clave
+      });
+    });
+  });
+});
+
 app.post("/api/register-extended", (req, res) => {
   const {
     email,
@@ -336,7 +285,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   });
 });
 
-// Ruta para limpiar usuarios incompletos (tarea de mantenimiento)
 app.delete("/api/cleanup-incomplete-users", (req, res) => {
   // Eliminar usuarios que no completaron su registro después de 24 horas
   db.query(
@@ -391,4 +339,221 @@ app.post("/api/upload-image", upload.single("image"), async (req, res) => {
     console.error("❌ Error al subir imagen:", error.message);
     res.status(500).json({ error: "Error al subir la imagen" });
   }
+});
+
+app.put("/api/user-profile-picture", (req, res) => {
+  const { email, imageUrl } = req.body;
+
+  if (!email || !imageUrl) {
+    return res.status(400).json({ error: "Email e imagen son requeridos" });
+  }
+
+  const sql = `
+    UPDATE user_profiles 
+    JOIN users ON user_profiles.user_id = users.id
+    SET user_profiles.profile_picture_url = ?
+    WHERE users.email = ?
+  `;
+
+  db.query(sql, [imageUrl, email], (err, result) => {
+    if (err) {
+      console.error("❌ Error al guardar imagen:", err.message);
+      return res.status(500).json({ error: "Error al guardar la imagen" });
+    }
+
+    res.json({ message: "Imagen de perfil guardada exitosamente" });
+  });
+});
+
+app.post("/api/pet", (req, res) => {
+  const { email, type, name, color, size, features, photoUrl } = req.body;
+
+  if (!email || !type || !name || !color || !size) {
+    return res.status(400).json({ error: "Faltan campos obligatorios" });
+  }
+
+  // Buscar el user_id por email
+  db.query("SELECT id FROM users WHERE email = ?", [email], (err, users) => {
+    if (err) {
+      console.error("❌ Error al buscar usuario:", err.message);
+      return res.status(500).json({ error: "Error interno del servidor" });
+    }
+    if (users.length === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
+    }
+
+    const userId = users[0].id;
+
+    // Insertar la mascota CON foto
+    db.query(
+      `INSERT INTO pets (user_id, type, name, color, size, features, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [userId, type, name, color, size, features || null, photoUrl || null],
+      (err, result) => {
+        if (err) {
+          console.error("❌ Error al guardar mascota:", err.message);
+          return res.status(500).json({ error: "Error al guardar mascota" });
+        }
+
+        res.status(201).json({
+          message: "Mascota registrada correctamente",
+          petId: result.insertId,
+        });
+      }
+    );
+  });
+});
+
+app.get("/api/pets", (req, res) => {
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ error: "Email requerido" });
+
+  db.query("SELECT id FROM users WHERE email = ?", [email], (err, users) => {
+    if (err) return res.status(500).json({ error: "Error interno" });
+    if (users.length === 0)
+      return res.status(404).json({ error: "Usuario no encontrado" });
+
+    const userId = users[0].id;
+    db.query(
+      "SELECT * FROM pets WHERE user_id = ? ORDER BY id DESC",
+      [userId],
+      (err, pets) => {
+        if (err)
+          return res.status(500).json({ error: "Error al obtener mascotas" });
+        res.json(pets);
+      }
+    );
+  });
+});
+
+app.post("/api/send-emergency", async (req, res) => {
+  const { email, colonia, pet } = req.body;
+
+  if (!email || !colonia || !pet) {
+    return res.status(400).json({ error: "Datos incompletos." });
+  }
+
+  // Insertar el reporte en la tabla emergency_alerts
+  const insertQuery = `
+    INSERT INTO emergency_alerts 
+      (user_id, pet_name, type, description, last_seen_location, disappearance_date, image_url, created_at)
+    VALUES
+      (
+        (SELECT id FROM users WHERE email = ?), 
+        ?, ?, ?, ?, ?, ?, NOW()
+      )
+  `;
+
+  // Asegúrate de que pet contenga las propiedades: name, type, description, last_seen_location, disappearance_date, image_url
+  db.query(
+    insertQuery,
+    [
+      email,
+      pet.name,
+      pet.type,
+      pet.features || null,
+      colonia || null,
+      pet.disappearance_date || new Date().toISOString().slice(0, 10),
+      pet.image_url || null,
+    ],
+    (insertErr) => {
+      if (insertErr) {
+        console.error("Error guardando emergencia:", insertErr);
+        return res.status(500).json({ error: "Error guardando emergencia." });
+      }
+
+      // Después de guardar, enviar notificaciones push
+      db.query(
+        `SELECT u.push_token
+   FROM users u
+   JOIN user_profiles up ON up.user_id = u.id
+   WHERE up.address = ? AND u.email != ? AND u.push_token IS NOT NULL`,
+        [colonia, email],
+        async (err, users) => {
+          if (err) return res.status(500).json({ error: "Error en DB." });
+
+          const tokens = users.map((u) => u.push_token);
+
+          if (tokens.length === 0) {
+            return res
+              .status(200)
+              .json({ message: "No hay vecinos con Expo push." });
+          }
+
+          const messages = tokens.map((token) => ({
+            to: token,
+            sound: "default",
+            title: `⚠️ Mascota perdida: ${pet.name}`,
+            body: `Un vecino de tu colonia reportó a su ${pet.type} perdido.`,
+            data: { petId: pet.id },
+          }));
+
+          try {
+            await fetch("https://exp.host/--/api/v2/push/send", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(messages),
+            });
+
+            res
+              .status(200)
+              .json({ message: "Emergencia guardada y notificación enviada" });
+          } catch (err) {
+            console.error("Expo push error:", err.message);
+            res.status(500).json({ error: "Error al enviar notificación." });
+          }
+        }
+      );
+    }
+  );
+});
+
+app.get("/api/emergency", (req, res) => {
+  db.query(
+    `SELECT ea.*, u.email
+     FROM emergency_alerts ea
+     JOIN users u ON ea.user_id = u.id
+     ORDER BY ea.created_at DESC`,
+    (err, alerts) => {
+      if (err) {
+        console.error("❌ Error al obtener alertas:", err.message);
+        return res.status(500).json({ error: "Error al obtener alertas" });
+      }
+
+      res.json(alerts);
+    }
+  );
+});
+
+app.put("/api/save-push-token", (req, res) => {
+  const { email, push_token } = req.body;
+
+  if (!email || !push_token) {
+    return res.status(400).json({ error: "Faltan datos." });
+  }
+
+  db.query(
+    "UPDATE users SET push_token = ? WHERE email = ?",
+    [push_token, email],
+    (err) => {
+      if (err) return res.status(500).json({ error: "Error en DB." });
+      res.status(200).json({ message: "Push token guardado." });
+    }
+  );
+});
+
+app.get("/api/lost-pets", (req, res) => {
+  const { colonia } = req.query;
+  if (!colonia) return res.status(400).json({ error: "Colonia requerida" });
+
+  db.query(
+    "SELECT * FROM emergency_alerts WHERE last_seen_location = ? ORDER BY created_at DESC",
+    [colonia],
+    (err, pets) => {
+      if (err)
+        return res
+          .status(500)
+          .json({ error: "Error al obtener mascotas perdidas" });
+      res.json(pets);
+    }
+  );
 });

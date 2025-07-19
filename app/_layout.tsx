@@ -6,7 +6,14 @@ export default function RootLayout() {
     <Stack>
       <Stack.Screen name="index" options={{ title: "Iniciar Sesión" }} />
       <Stack.Screen name="register" options={{ title: "Registro" }} />
-      <Stack.Screen name="dashboard" options={{ title: "Dashboard" }} />
+      <Stack.Screen
+        name="dashboard"
+        options={{
+          title: "Dashboard",
+          headerLeft: () => null,
+          gestureEnabled: false,
+        }}
+      />
       <Stack.Screen
         name="register-extended"
         options={{ title: "Registro de usuario" }}
