@@ -557,3 +557,215 @@ app.get("/api/lost-pets", (req, res) => {
     }
   );
 });
+
+app.get("/api/pets/recovery", (req, res) => {
+  const { user_id } = req.query;
+
+  if (!user_id) {
+    return res.status(400).json({ error: "Falta el user_id en la consulta" });
+  }
+
+  const query = `
+    SELECT *
+    FROM emergency_alerts
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+  `;
+
+  db.query(query, [user_id], (err, results) => {
+    if (err) {
+      console.error(
+        "❌ Error al obtener mascotas en recuperación:",
+        err.message
+      );
+      return res
+        .status(500)
+        .json({ error: "Error al obtener mascotas en recuperación" });
+    }
+
+    res.json(results);
+  });
+});
+
+app.post("/api/i-found-a-pet", (req, res) => {
+  const { pet_id, user_id } = req.body;
+
+  if (!pet_id || !user_id) {
+    return res.status(400).json({ error: "pet_id y user_id son requeridos" });
+  }
+
+  db.query(
+    "INSERT INTO found_pets (pet_id, user_id) VALUES (?, ?)",
+    [pet_id, user_id],
+    (err, result) => {
+      if (err) {
+        console.error(
+          "❌ Error al marcar mascota como encontrada:",
+          err.message
+        );
+        return res
+          .status(500)
+          .json({ error: "Error al marcar mascota como encontrada" });
+      }
+      res.json({ message: "Mascota marcada como encontrada" });
+    }
+  );
+});
+
+app.get("/api/found-pets/:owner_id", (req, res) => {
+  const { owner_id } = req.params;
+
+  if (!owner_id) {
+    return res.status(400).json({ error: "Falta el owner_id en la consulta" });
+  }
+
+  const query = `
+    SELECT 
+      fp.id AS found_pet_id,
+      fp.user_id AS finder_user_id,
+      fp.pet_id,
+      
+      ea.id AS alert_id,
+      ea.user_id AS owner_user_id,
+      ea.pet_name,
+      ea.type,
+      ea.description,
+      ea.last_seen_location,
+      ea.disappearance_date,
+      ea.image_url,
+      ea.created_at AS alert_created_at,
+      
+      up.id AS profile_id,
+      up.user_id,
+      up.first_name,
+      up.last_name,
+      up.phone,
+      up.birth_date,
+      up.address,
+      up.city,
+      up.postal_code,
+      up.profile_picture_url
+    FROM found_pets fp
+    INNER JOIN emergency_alerts ea 
+      ON fp.pet_id = ea.id
+    INNER JOIN user_profiles up 
+      ON fp.user_id = up.user_id
+    WHERE ea.user_id = ?
+  `;
+
+  db.query(query, [owner_id], (err, results) => {
+    if (err) {
+      console.error("❌ Error al obtener mascotas encontradas:", err.message);
+      return res
+        .status(500)
+        .json({ error: "Error al obtener mascotas encontradas" });
+    }
+    res.json(results);
+  });
+});
+
+app.delete("/api/emergency-alert", (req, res) => {
+  const { email, petName, petType } = req.body;
+
+  if (!email || !petName || !petType) {
+    return res.status(400).json({
+      error: "Email, nombre de mascota y tipo son requeridos",
+    });
+  }
+
+  // Primero obtén la colonia del usuario que reportó la mascota
+  const getColoniaQuery = `
+    SELECT up.address 
+    FROM users u
+    JOIN user_profiles up ON u.id = up.user_id
+    WHERE u.email = ?
+  `;
+
+  db.query(getColoniaQuery, [email], (errColonia, resultsColonia) => {
+    if (errColonia || resultsColonia.length === 0) {
+      console.error("❌ Error al obtener colonia:", errColonia?.message);
+      return res
+        .status(500)
+        .json({ error: "Error al obtener datos del usuario" });
+    }
+
+    const colonia = resultsColonia[0].address;
+
+    // Ahora eliminar la alerta
+    const deleteQuery = `
+      DELETE FROM emergency_alerts 
+      WHERE user_id = (SELECT id FROM users WHERE email = ?) 
+        AND pet_name = ? 
+        AND type = ?
+    `;
+
+    db.query(deleteQuery, [email, petName, petType], (err, result) => {
+      if (err) {
+        console.error("❌ Error al eliminar alerta:", err.message);
+        return res.status(500).json({ error: "Error al eliminar la alerta" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "No se encontró la alerta" });
+      }
+
+      // Obtener tokens push de vecinos (menos el que hizo la acción)
+      const getTokensQuery = `
+        SELECT u.push_token
+        FROM users u
+        JOIN user_profiles up ON up.user_id = u.id
+        WHERE up.address = ? AND u.email != ? AND u.push_token IS NOT NULL
+      `;
+
+      db.query(getTokensQuery, [colonia, email], async (errTokens, users) => {
+        if (errTokens) {
+          console.error("❌ Error al obtener tokens:", errTokens.message);
+          // Aún así respondemos OK porque se eliminó la alerta
+          return res.json({
+            message:
+              "Mascota marcada como recuperada. Error al enviar notificaciones.",
+            success: true,
+          });
+        }
+
+        const tokens = users.map((u) => u.push_token);
+
+        if (tokens.length === 0) {
+          return res.json({
+            message:
+              "Mascota marcada como recuperada. No hay vecinos con Expo push.",
+            success: true,
+          });
+        }
+
+        const messages = tokens.map((token) => ({
+          to: token,
+          sound: "default",
+          title: `✅ Mascota recuperada: ${petName}`,
+          body: `Un vecino de tu colonia marcó como recuperada a su ${petType}.`,
+          data: { petName, petType },
+        }));
+
+        try {
+          await fetch("https://exp.host/--/api/v2/push/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(messages),
+          });
+
+          res.json({
+            message: "Mascota marcada como recuperada y notificación enviada",
+            success: true,
+          });
+        } catch (pushError) {
+          console.error("Expo push error:", pushError.message);
+          res.json({
+            message:
+              "Mascota marcada como recuperada. Error al enviar notificaciones.",
+            success: true,
+          });
+        }
+      });
+    });
+  });
+});
