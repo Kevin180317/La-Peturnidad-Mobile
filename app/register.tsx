@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-const API_URL = "http://192.168.100.8:3000/api/register";
+const API_URL = "http://192.168.100.11:3000/api/register";
 
 export default function RegisterScreen() {
   const router = useRouter();

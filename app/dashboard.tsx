@@ -161,7 +161,7 @@ export default function DashboardScreen() {
       }
 
       const response = await fetch(
-        "http://192.168.100.8:3000/api/upload-image",
+        "http://192.168.100.11:3000/api/upload-image",
         {
           method: "POST",
           body: formData,
@@ -178,7 +178,7 @@ export default function DashboardScreen() {
         setSelectedImage(null);
 
         // Guardar imagen en base de datos
-        await fetch("http://192.168.100.8:3000/api/user-profile-picture", {
+        await fetch("http://192.168.100.11:3000/api/user-profile-picture", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -231,7 +231,7 @@ export default function DashboardScreen() {
       }
 
       const response = await fetch(
-        "http://192.168.100.8:3000/api/upload-image",
+        "http://192.168.100.11:3000/api/upload-image",
         {
           method: "POST",
           body: formData,
@@ -262,7 +262,7 @@ export default function DashboardScreen() {
     setLoadingProfile(true);
     try {
       const response = await fetch(
-        `http://192.168.100.8:3000/api/user-profile?email=${email}`
+        `http://192.168.100.11:3000/api/user-profile?email=${email}`
       );
       const data = await response.json();
 
@@ -295,7 +295,7 @@ export default function DashboardScreen() {
 
       const token = (await Notifications.getExpoPushTokenAsync()).data;
 
-      await fetch("http://192.168.100.8:3000/api/save-push-token", {
+      await fetch("http://192.168.100.11:3000/api/save-push-token", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, push_token: token }),
@@ -326,7 +326,7 @@ export default function DashboardScreen() {
     }
 
     try {
-      const response = await fetch("http://192.168.100.8:3000/api/pet", {
+      const response = await fetch("http://192.168.100.11:3000/api/pet", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -373,7 +373,7 @@ export default function DashboardScreen() {
     setLoadingPets(true);
     try {
       const response = await fetch(
-        `http://192.168.100.8:3000/api/pets?email=${email}`
+        `http://192.168.100.11:3000/api/pets?email=${email}`
       );
       const data = await response.json();
       if (response.ok) {
@@ -401,7 +401,7 @@ export default function DashboardScreen() {
         <Text
           style={[styles.tabText, activeTab === "home" && styles.activeTabText]}
         >
-          🏠 Home
+          Mascotas
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -414,7 +414,7 @@ export default function DashboardScreen() {
             activeTab === "profile" && styles.activeTabText,
           ]}
         >
-          👤 Profile
+          Perfil
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -427,7 +427,7 @@ export default function DashboardScreen() {
             activeTab === "profile" && styles.activeTabText,
           ]}
         >
-          🚨 Emergency
+          Emergencia
         </Text>
       </TouchableOpacity>
     </View>
@@ -456,7 +456,7 @@ export default function DashboardScreen() {
             marginBottom: 8,
           }}
         >
-          Bienvenido al Dashboard 🐾
+          Mascotas 🐾
         </Text>
         {/* <Text style={styles.userEmail}>Usuario: {email}</Text> */}
       </View>
@@ -1225,7 +1225,7 @@ export default function DashboardScreen() {
 
     try {
       const response = await fetch(
-        "http://192.168.100.8:3000/api/send-emergency",
+        "http://192.168.100.11:3000/api/send-emergency",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1268,7 +1268,7 @@ export default function DashboardScreen() {
     setLoadingLostPets(true);
     try {
       const response = await fetch(
-        `http://192.168.100.8:3000/api/lost-pets?colonia=${encodeURIComponent(profile.address)}`
+        `http://192.168.100.11:3000/api/lost-pets?colonia=${encodeURIComponent(profile.address)}`
       );
       const data = await response.json();
       if (response.ok) {
@@ -1298,7 +1298,7 @@ export default function DashboardScreen() {
 
     try {
       const response = await fetch(
-        "http://192.168.100.8:3000/api/i-found-a-pet",
+        "http://192.168.100.11:3000/api/i-found-a-pet",
         {
           method: "POST",
           headers: {
@@ -1328,7 +1328,7 @@ export default function DashboardScreen() {
   const fetchFoundPets = async () => {
     try {
       const response = await fetch(
-        "http://192.168.100.8:3000/api/found-pets/" + profile.user_id
+        "http://192.168.100.11:3000/api/found-pets/" + profile.user_id
       );
       const data = await response.json();
       console.log(data);
@@ -1947,7 +1947,7 @@ export default function DashboardScreen() {
   const handlePetRecovered = async (pet: { pet_name: any; type: any }) => {
     try {
       const response = await fetch(
-        "http://192.168.100.8:3000/api/emergency-alert",
+        "http://192.168.100.11:3000/api/emergency-alert",
         {
           method: "DELETE",
           headers: {
@@ -1981,7 +1981,7 @@ export default function DashboardScreen() {
 
   const renderEmergencyTab = () => (
     <ScrollView contentContainerStyle={styles.tabContent}>
-      <Text style={styles.title}>Emergencias 🚨</Text>
+      <Text style={styles.title}>Emergencia 🚨</Text>
       <Text style={{ fontSize: 16, textAlign: "center", marginVertical: 10 }}>
         Si perdiste una mascota, notifícalo para que los vecinos puedan
         ayudarte.
@@ -2197,52 +2197,71 @@ export default function DashboardScreen() {
           </View>
         </View>
 
+        {/* Card 4 - Mascota encontrada */}
+
         <View
           style={{
-            backgroundColor: "#e8f5e8",
-            paddingVertical: 12,
-            paddingHorizontal: 16,
-            borderBottomWidth: 1,
-            borderBottomColor: "#c8e6c9",
+            flex: 1,
+            backgroundColor: "#ffffff",
+            borderRadius: 12,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 4,
+            overflow: "hidden",
           }}
         >
-          <Text
+          <View
             style={{
-              fontSize: 16,
-              fontWeight: "600",
-              textAlign: "center",
-              marginBottom: 8,
-            }}
-          >
-            Mascotas encontradas
-          </Text>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#4f4f75",
+              backgroundColor: "#e3f2fd",
               paddingVertical: 12,
               paddingHorizontal: 16,
-              borderRadius: 8,
-              alignItems: "center",
+              borderBottomWidth: 1,
+              borderBottomColor: "#bbdefb",
             }}
-            onPress={() => {
-              if (!showFoundPets) fetchFoundPets();
-              setShowFoundPets((prev) => !prev);
-              setShowLostPets(false);
-              setShowRecoveredSection(false);
-              setSelectingPet(false);
-            }}
-            activeOpacity={0.8}
           >
             <Text
               style={{
-                color: "#ffffff",
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: "600",
+                color: "#1976d2",
+                textAlign: "center",
               }}
             >
-              Mascotas Encontradas
+              Mascotas encontradas
             </Text>
-          </TouchableOpacity>
+          </View>
+
+          <View style={{ padding: 16 }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#2196f3",
+                paddingVertical: 12,
+                paddingHorizontal: 16,
+                borderRadius: 8,
+                alignItems: "center",
+              }}
+              onPress={() => {
+                if (!showFoundPets) fetchFoundPets();
+                setShowFoundPets((prev) => !prev);
+                setShowLostPets(false);
+                setShowRecoveredSection(false);
+                setSelectingPet(false);
+              }}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={{
+                  color: "#ffffff",
+                  fontSize: 12,
+                  fontWeight: "600",
+                }}
+              >
+                🔍 Ver Mascotas Encontradas
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
       {showLostPets && (
@@ -2656,76 +2675,420 @@ export default function DashboardScreen() {
         </View>
       )}
       {showRecoveredSection && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>
-            Mis mascotas perdidas - Marcar como recuperada
-          </Text>
-          {loadingLostPets ? (
-            <ActivityIndicator size="large" color="#007AFF" />
-          ) : lostPets.filter((pet) => pet.user_id === profile.user_id)
-              .length === 0 ? (
-            <Text style={{ textAlign: "center", marginVertical: 10 }}>
-              No tienes mascotas perdidas reportadas.
+        <View
+          style={{
+            backgroundColor: "#ffffff",
+            borderRadius: 12,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 4,
+            margin: 16,
+            overflow: "hidden",
+          }}
+        >
+          {/* Header de la sección */}
+          <View
+            style={{
+              backgroundColor: "#fff3e0",
+              paddingVertical: 14,
+              paddingHorizontal: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: "#ffcc02",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "600",
+                color: "#f57c00",
+                textAlign: "center",
+              }}
+            >
+              🔍 Mis mascotas perdidas - Marcar como recuperada
             </Text>
-          ) : (
-            // Filtrar solo las mascotas del usuario actual
-            lostPets
-              .filter((pet) => pet.user_id === profile.user_id)
-              .map((pet, idx) => (
-                <View key={pet.id || idx} style={styles.recoveredPetCard}>
-                  {pet.image_url && (
-                    <Image
-                      source={{ uri: pet.image_url }}
-                      style={styles.recoveredPetImage}
-                    />
-                  )}
-                  <View style={styles.recoveredPetInfo}>
-                    <Text style={styles.recoveredPetName}>{pet.pet_name}</Text>
-                    <Text>Tipo: {pet.type}</Text>
-                    <Text>Descripción: {pet.description}</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.recoveredButton}
-                    onPress={() => handlePetRecovered(pet)}
-                  >
-                    <Text style={styles.recoveredButtonText}>
-                      ✅ Recuperada
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              ))
-          )}
+          </View>
+
+          {/* Contenido */}
+          <View style={{ padding: 16 }}>
+            {loadingLostPets ? (
+              <View
+                style={{
+                  paddingVertical: 30,
+                  alignItems: "center",
+                }}
+              >
+                <ActivityIndicator size="large" color="#ff9800" />
+                <Text
+                  style={{
+                    marginTop: 12,
+                    fontSize: 14,
+                    color: "#757575",
+                    textAlign: "center",
+                  }}
+                >
+                  Cargando mascotas perdidas...
+                </Text>
+              </View>
+            ) : lostPets.filter((pet) => pet.user_id === profile.user_id)
+                .length === 0 ? (
+              <View
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  padding: 20,
+                  borderRadius: 8,
+                  alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: "#e0e0e0",
+                  borderStyle: "dashed",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: "#757575",
+                    textAlign: "center",
+                    fontWeight: "500",
+                  }}
+                >
+                  📭 No tienes mascotas perdidas reportadas.
+                </Text>
+              </View>
+            ) : (
+              <View style={{ gap: 16 }}>
+                {lostPets
+                  .filter((pet) => pet.user_id === profile.user_id)
+                  .map((pet, idx) => (
+                    <View
+                      key={pet.id || idx}
+                      style={{
+                        backgroundColor: "#fafafa",
+                        borderRadius: 12,
+                        borderWidth: 1,
+                        borderColor: "#e0e0e0",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {/* Header de la mascota */}
+                      <View
+                        style={{
+                          backgroundColor: "#ffebee",
+                          paddingVertical: 10,
+                          paddingHorizontal: 14,
+                          borderBottomWidth: 1,
+                          borderBottomColor: "#ffcdd2",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: "600",
+                            color: "#c62828",
+                            textAlign: "center",
+                          }}
+                        >
+                          🐾 {pet.pet_name}
+                        </Text>
+                      </View>
+
+                      {/* Contenido de la mascota */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          padding: 16,
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        {/* Imagen */}
+                        {pet.image_url && (
+                          <View style={{ marginRight: 16 }}>
+                            <Image
+                              source={{ uri: pet.image_url }}
+                              style={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: 40,
+                                borderWidth: 2,
+                                borderColor: "#ff5722",
+                              }}
+                            />
+                          </View>
+                        )}
+
+                        {/* Información de la mascota */}
+                        <View style={{ flex: 1, gap: 8 }}>
+                          <View
+                            style={{
+                              backgroundColor: "#e8f5e8",
+                              padding: 8,
+                              borderRadius: 6,
+                              borderLeftWidth: 3,
+                              borderLeftColor: "#4caf50",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 13,
+                                color: "#2e7d32",
+                                fontWeight: "600",
+                              }}
+                            >
+                              🏷️ Tipo:{" "}
+                              <Text style={{ fontWeight: "400" }}>
+                                {pet.type}
+                              </Text>
+                            </Text>
+                          </View>
+
+                          <View
+                            style={{
+                              backgroundColor: "#f3e5f5",
+                              padding: 8,
+                              borderRadius: 6,
+                              borderLeftWidth: 3,
+                              borderLeftColor: "#9c27b0",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 13,
+                                color: "#6a1b9a",
+                                fontWeight: "600",
+                                marginBottom: 2,
+                              }}
+                            >
+                              📝 Descripción:
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 13,
+                                color: "#424242",
+                                lineHeight: 18,
+                              }}
+                            >
+                              {pet.description}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Botón de recuperada */}
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: "#4caf50",
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            borderRadius: 8,
+                            alignItems: "center",
+                            marginLeft: 12,
+                            minWidth: 80,
+                          }}
+                          onPress={() => handlePetRecovered(pet)}
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            style={{
+                              color: "#ffffff",
+                              fontSize: 11,
+                              fontWeight: "600",
+                              textAlign: "center",
+                            }}
+                          >
+                            ✅ Recuperada
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+              </View>
+            )}
+          </View>
         </View>
       )}
       {showFoundPets && (
         <View>
           {foundPets.length === 0 ? (
-            <Text>No se encontraron mascotas encontradas</Text>
+            <View
+              style={{
+                backgroundColor: "#ffffff",
+                borderRadius: 12,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 4,
+                margin: 16,
+                padding: 20,
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "#757575",
+                  textAlign: "center",
+                  fontWeight: "500",
+                }}
+              >
+                📭 No se encontraron mascotas encontradas
+              </Text>
+            </View>
           ) : (
             foundPets.map((pet, idx) => (
-              <View key={pet.id || idx} style={styles.recoveredPetCard}>
-                {pet.image_url && (
-                  <Image
-                    source={{ uri: pet.image_url }}
-                    style={styles.recoveredPetImage}
-                  />
-                )}
-                <View style={styles.recoveredPetInfo}>
-                  <Text style={styles.recoveredPetName}>{pet.pet_name}</Text>
-                  <Text>
-                    Nombre de la persona que encontró la mascota:{" "}
-                    {pet.first_name}
+              <View
+                key={pet.id || idx}
+                style={{
+                  backgroundColor: "#ffffff",
+                  borderRadius: 12,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 8,
+                  elevation: 4,
+                  margin: 16,
+                  overflow: "hidden",
+                }}
+              >
+                {/* Header de la tarjeta */}
+                <View
+                  style={{
+                    backgroundColor: "#e3f2fd",
+                    paddingVertical: 12,
+                    paddingHorizontal: 16,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#bbdefb",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: "#1976d2",
+                      textAlign: "center",
+                    }}
+                  >
+                    🐾 {pet.pet_name}
                   </Text>
-                  <Text>
-                    Apellido de la persona que encontró la mascota:{" "}
-                    {pet.last_name}
-                  </Text>
+                </View>
 
-                  <Text>Colonia: {pet.address}</Text>
-                  <Text>
-                    Numero de contacto de la persona que encontró la mascota:{" "}
-                    {pet.phone}
-                  </Text>
+                {/* Contenido de la tarjeta */}
+                <View style={{ padding: 16 }}>
+                  {pet.image_url && (
+                    <View
+                      style={{
+                        alignItems: "center",
+                        marginBottom: 16,
+                      }}
+                    >
+                      <Image
+                        source={{ uri: pet.image_url }}
+                        style={{
+                          width: 120,
+                          height: 120,
+                          borderRadius: 60,
+                          borderWidth: 3,
+                          borderColor: "#2196f3",
+                        }}
+                      />
+                    </View>
+                  )}
+
+                  <View style={{ gap: 12 }}>
+                    {/* Información del rescatista */}
+                    <View
+                      style={{
+                        backgroundColor: "#f8f9fa",
+                        padding: 12,
+                        borderRadius: 8,
+                        borderLeftWidth: 4,
+                        borderLeftColor: "#2196f3",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: "600",
+                          color: "#1976d2",
+                          marginBottom: 4,
+                        }}
+                      >
+                        👤 Persona que encontró la mascota
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          color: "#424242",
+                          marginBottom: 2,
+                        }}
+                      >
+                        <Text style={{ fontWeight: "600" }}>Nombre:</Text>{" "}
+                        {pet.first_name} {pet.last_name}
+                      </Text>
+                    </View>
+
+                    {/* Información de contacto */}
+                    <View
+                      style={{
+                        backgroundColor: "#f1f8e9",
+                        padding: 12,
+                        borderRadius: 8,
+                        borderLeftWidth: 4,
+                        borderLeftColor: "#4caf50",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: "600",
+                          color: "#2e7d32",
+                          marginBottom: 4,
+                        }}
+                      >
+                        📞 Información de contacto
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          color: "#424242",
+                          marginBottom: 2,
+                        }}
+                      >
+                        <Text style={{ fontWeight: "600" }}>Teléfono:</Text>{" "}
+                        {pet.phone}
+                      </Text>
+                    </View>
+
+                    {/* Información de ubicación */}
+                    <View
+                      style={{
+                        backgroundColor: "#fff3e0",
+                        padding: 12,
+                        borderRadius: 8,
+                        borderLeftWidth: 4,
+                        borderLeftColor: "#ff9800",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: "600",
+                          color: "#f57c00",
+                          marginBottom: 4,
+                        }}
+                      >
+                        📍 Ubicación
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          color: "#424242",
+                        }}
+                      >
+                        <Text style={{ fontWeight: "600" }}>Colonia:</Text>{" "}
+                        {pet.address}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               </View>
             ))

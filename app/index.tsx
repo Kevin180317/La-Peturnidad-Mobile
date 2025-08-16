@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-const API_URL = "http://192.168.100.8:3000/api/login";
+const API_URL = "http://192.168.100.11:3000/api/login";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");

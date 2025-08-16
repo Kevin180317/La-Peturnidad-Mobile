@@ -9,7 +9,7 @@ export default function RootLayout() {
       <Stack.Screen
         name="dashboard"
         options={{
-          title: "Dashboard",
+          title: "La Peturnidad",
           headerLeft: () => null,
           gestureEnabled: false,
         }}
