@@ -424,7 +424,7 @@ export default function DashboardScreen() {
         <Text
           style={[
             styles.tabText,
-            activeTab === "profile" && styles.activeTabText,
+            activeTab === "emergency" && styles.activeTabText,
           ]}
         >
           Emergencia
