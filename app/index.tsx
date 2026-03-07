@@ -1,16 +1,15 @@
+import { dashboardService } from "@/services/dashboard.service";
+import { supabase } from "@/utils/supabase";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Button,
-  StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
-
-const API_URL = "http://192.168.100.11:3000/api/login";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -18,133 +17,167 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const showToast = (
-    type: "success" | "error",
-    text1: string,
-    text2?: string,
-    onComplete?: () => void
-  ) => {
-    Toast.show({
-      type,
-      text1,
-      text2,
-      visibilityTime: 2000,
-      onHide: () => {
-        setLoading(false);
-        if (onComplete) onComplete();
-      },
-    });
-  };
-
   const handleLogin = async () => {
     if (!email || !password) {
-      showToast(
-        "error",
-        "Campos requeridos",
-        "Email y contraseña son obligatorios"
-      );
+      Toast.show({
+        type: "error",
+        text1: "Campos requeridos",
+        text2: "Email y contraseña son obligatorios",
+        visibilityTime: 3000,
+      });
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+      // 1. Autenticar usuario
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        const { is_complete } = data;
-
-        showToast("success", "Login exitoso", data.message || "", () => {
-          if (is_complete === 1) {
-            router.push({
-              pathname: "/dashboard",
-              params: { email },
-            });
-          } else {
-            router.push({
-              pathname: "/register-extended",
-              params: { email },
-            });
-          }
+      if (error) {
+        Toast.show({
+          type: "error",
+          text1: "Error de autenticación",
+          text2: error.message,
+          visibilityTime: 3000,
         });
-      } else {
-        showToast("error", "Error", data.error || "Credenciales incorrectas");
+        setLoading(false);
+        return;
       }
-    } catch (error) {
+
+      if (data.user) {
+        console.log("✅ Usuario autenticado:", data.user.id);
+        console.log("📧 Email:", data.user.email);
+
+        // 2. Buscar perfil por user_id (más directo)
+        const profileResult = await dashboardService.getProfileByUserId(
+          data.user.id,
+        );
+
+        if (profileResult.success && profileResult.data) {
+          // ✅ Tiene perfil completo, vamos al dashboard
+          console.log("✅ Perfil encontrado:", profileResult.data);
+
+          Toast.show({
+            type: "success",
+            text1: "¡Bienvenido!",
+            text2: `Hola ${profileResult.data.first_name}`,
+            visibilityTime: 2000,
+            onHide: () => {
+              router.replace({
+                pathname: "/dashboard",
+                params: {
+                  email: data.user?.email,
+                  userId: data.user?.id,
+                },
+              });
+            },
+          });
+        } else {
+          // ❌ No tiene perfil, va a registro extendido
+          console.log(
+            "⚠️ No se encontró perfil, redirigiendo a registro extendido",
+          );
+
+          Toast.show({
+            type: "info",
+            text1: "Completa tu perfil",
+            text2: "Necesitamos algunos datos adicionales",
+            visibilityTime: 2000,
+            onHide: () => {
+              router.replace({
+                pathname: "/register-extended",
+                params: {
+                  email: data.user?.email ?? "",
+                  userId: data.user?.id ?? "",
+                },
+              });
+            },
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error("❌ Error en login:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error inesperado",
+        text2: error.message || "Intenta de nuevo más tarde",
+        visibilityTime: 3000,
+      });
       setLoading(false);
-      showToast("error", "Error de red", "Intenta de nuevo más tarde");
-      console.error("Error de red:", error);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 justify-center p-6 bg-white">
       {loading ? (
-        <View style={styles.loaderContainer}>
+        <View className="items-center">
           <ActivityIndicator size="large" color="#ff592c" />
-          <Text style={{ marginTop: 10 }}>Cargando...</Text>
+          <Text className="mt-4 text-gray-600 font-medium">
+            Iniciando sesión...
+          </Text>
         </View>
       ) : (
         <>
-          <Text style={styles.title}>Iniciar Sesión</Text>
+          <View className="mb-8">
+            <Text className="text-3xl font-bold text-red-800 mb-2">
+              La Peturnidad
+            </Text>
+            <Text className="text-gray-600 text-lg">
+              Inicia sesión para continuar
+            </Text>
+          </View>
 
-          <TextInput
-            placeholder="Correo electrónico"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            editable={!loading}
-          />
+          <View className="mb-6">
+            <Text className="text-gray-700 font-semibold mb-2">
+              Correo electrónico
+            </Text>
+            <TextInput
+              className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+              placeholder="ejemplo@correo.com"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              editable={!loading}
+            />
+          </View>
 
-          <TextInput
-            placeholder="Contraseña"
-            secureTextEntry
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            autoCapitalize="none"
-            editable={!loading}
-          />
+          <View className="mb-8">
+            <Text className="text-gray-700 font-semibold mb-2">Contraseña</Text>
+            <TextInput
+              className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+              placeholder="••••••••"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              autoCapitalize="none"
+              editable={!loading}
+            />
+          </View>
 
-          <Button
-            title="Iniciar sesión"
+          <TouchableOpacity
+            className="bg-red-600 py-4 rounded-xl shadow-md mb-4"
             onPress={handleLogin}
             disabled={loading}
-            color="#ff592c"
-          />
+          >
+            <Text className="text-white text-center font-bold text-lg">
+              Iniciar sesión
+            </Text>
+          </TouchableOpacity>
 
-          <Text style={styles.registerText} selectionColor="#ff592c">
-            ¿No tienes cuenta?{" "}
-            <Link href="/register" style={styles.registerButton}>
+          <View className="flex-row justify-center mt-4">
+            <Text className="text-gray-600">¿No tienes cuenta? </Text>
+            <Link href="/register" className="text-red-800 font-bold">
               Regístrate
             </Link>
-          </Text>
+          </View>
         </>
       )}
       <Toast />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: 20, flex: 1, justifyContent: "center" },
-  loaderContainer: { alignItems: "center" },
-  title: { fontSize: 24, marginBottom: 20, fontWeight: "bold" },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 15,
-    borderRadius: 5,
-  },
-  registerText: { marginTop: 20, textAlign: "center", color: "black" },
-  registerButton: { color: "#ff592c", fontWeight: "bold" },
-});
