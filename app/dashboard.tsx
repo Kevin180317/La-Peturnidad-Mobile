@@ -511,9 +511,9 @@ export default function DashboardScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#ff592c" />
-        <Text className="mt-4 text-gray-600 font-medium">
+      <View className="flex-1 justify-center items-center bg-[#faf5e0]">
+        <ActivityIndicator size="large" color="#ff7e70" />
+        <Text className="mt-4 text-[#211f1e] font-medium">
           Cargando dashboard...
         </Text>
       </View>
@@ -523,7 +523,7 @@ export default function DashboardScreen() {
   // ============== RENDERIZADO DE COMPONENTES ==============
 
   const renderTabBar = () => (
-    <View className="flex-row bg-white border-t border-gray-200 py-2 shadow-lg">
+    <View className="flex-row bg-white border-t border-[#211f1e]/20 py-2 shadow-lg">
       {[
         { key: "home", label: "Inicio", icon: "🏠" },
         { key: "profile", label: "Perfil", icon: "👤" },
@@ -540,7 +540,7 @@ export default function DashboardScreen() {
           <Text
             className={`text-xs mt-1 ${
               activeTab === tab.key
-                ? "text-red-600 font-bold"
+                ? "text-[#ff7e70] font-bold"
                 : "text-gray-400 font-medium"
             }`}
           >
@@ -618,7 +618,7 @@ export default function DashboardScreen() {
 
               <View className="flex-row gap-3 mt-4">
                 <TouchableOpacity
-                  className="flex-1 bg-red-500 py-3 rounded-lg"
+                  className="flex-1 bg-[#ff7e70] py-3 rounded-lg"
                   onPress={() => {
                     setModalVisible(false);
                     handleDeletePet(selectedPet.id);
@@ -629,7 +629,7 @@ export default function DashboardScreen() {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="flex-1 bg-gray-300 py-3 rounded-lg"
+                  className="flex-1 bg-[#211f1e] py-3 rounded-lg"
                   onPress={() => setModalVisible(false)}
                 >
                   <Text className="text-center font-semibold">Cerrar</Text>
@@ -653,7 +653,7 @@ export default function DashboardScreen() {
     >
       {/* Header de bienvenida */}
       <View className="mb-6">
-        <Text className="text-2xl font-bold text-gray-800">
+        <Text className="text-2xl font-bold text-[#211f1e]">
           ¡Hola, {profile?.first_name || "Usuario"}! 👋
         </Text>
         <Text className="text-gray-600 mt-1">
@@ -703,7 +703,7 @@ export default function DashboardScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 bg-blue-500 py-4 rounded-xl"
+          className="flex-1 bg-[#005e66] py-4 rounded-xl"
           onPress={async () => {
             await loadPets(user?.id);
             setShowPets(!showPets);
@@ -721,9 +721,9 @@ export default function DashboardScreen() {
         <View className="mb-6">
           <Text className="text-lg font-bold mb-3">Mis mascotas</Text>
           {loadingPets ? (
-            <ActivityIndicator size="large" color="#ff592c" />
+            <ActivityIndicator size="large" color="#ff7e70" />
           ) : pets.length === 0 ? (
-            <View className="bg-gray-50 p-8 rounded-xl items-center">
+            <View className="bg-[#faf5e0] p-8 rounded-xl items-center">
               <Text className="text-4xl mb-3">🐕</Text>
               <Text className="text-gray-500 text-center">
                 No tienes mascotas registradas. ¡Agrega tu primera mascota!
@@ -781,13 +781,13 @@ export default function DashboardScreen() {
                 key={type}
                 className={`flex-1 py-3 rounded-xl border-2 ${
                   petType === type
-                    ? "border-red-500 bg-red-50"
-                    : "border-gray-200"
+                    ? "border-red-500 bg-[#ff7e70]"
+                    : "border-[#211f1e]/20"
                 }`}
                 onPress={() => setPetType(type as "perro" | "gato")}
               >
                 <Text
-                  className={`text-center ${petType === type ? "text-red-500" : "text-gray-600"}`}
+                  className={`text-center ${petType === type ? "text-[#ff7e70]" : "text-gray-600"}`}
                 >
                   {type === "perro" ? "🐶 Perro" : "🐱 Gato"}
                 </Text>
@@ -798,7 +798,7 @@ export default function DashboardScreen() {
           {/* Nombre */}
           <Text className="font-semibold mb-2">Nombre *</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-50"
+            className="border border-gray-300 rounded-lg p-3 mb-4 bg-[#faf5e0]"
             placeholder="Nombre de la mascota"
             value={petName}
             onChangeText={setPetName}
@@ -807,7 +807,7 @@ export default function DashboardScreen() {
           {/* Color */}
           <Text className="font-semibold mb-2">Color *</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-50"
+            className="border border-gray-300 rounded-lg p-3 mb-4 bg-[#faf5e0]"
             placeholder="Color principal"
             value={petColor}
             onChangeText={setPetColor}
@@ -815,7 +815,7 @@ export default function DashboardScreen() {
 
           {/* Tamaño */}
           <Text className="font-semibold mb-2">Tamaño *</Text>
-          <View className="mb-4 border border-gray-300 rounded-lg overflow-hidden bg-gray-50">
+          <View className="mb-4 border border-gray-300 rounded-lg overflow-hidden bg-[#faf5e0]">
             <Picker
               selectedValue={petSize}
               onValueChange={(value) => setPetSize(value)}
@@ -831,7 +831,7 @@ export default function DashboardScreen() {
           {/* Características */}
           <Text className="font-semibold mb-2">Características especiales</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg p-3 mb-4 bg-gray-50"
+            className="border border-gray-300 rounded-lg p-3 mb-4 bg-[#faf5e0]"
             placeholder="Ej: manchas, cicatrices, comportamiento especial..."
             value={petFeatures}
             onChangeText={setPetFeatures}
@@ -844,7 +844,7 @@ export default function DashboardScreen() {
           <Text className="font-semibold mb-2">Foto *</Text>
           <View className="flex-row gap-3 mb-4">
             <TouchableOpacity
-              className="flex-1 bg-blue-500 py-3 rounded-lg"
+              className="flex-1 bg-[#005e66] py-3 rounded-lg"
               onPress={handleSelectPetImage}
             >
               <Text className="text-white text-center">📷 Seleccionar</Text>
@@ -880,7 +880,7 @@ export default function DashboardScreen() {
           {/* Botones */}
           <View className="flex-row gap-3">
             <TouchableOpacity
-              className="flex-1 bg-red-500 py-4 rounded-lg"
+              className="flex-1 bg-[#ff7e70] py-4 rounded-lg"
               onPress={handlePetRegister}
             >
               <Text className="text-white text-center font-bold">
@@ -888,7 +888,7 @@ export default function DashboardScreen() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="flex-1 bg-gray-300 py-4 rounded-lg"
+              className="flex-1 bg-[#211f1e] py-4 rounded-lg"
               onPress={() => {
                 setShowPetForm(false);
                 setPetName("");
@@ -932,7 +932,7 @@ export default function DashboardScreen() {
                 className="w-32 h-32 rounded-full border-4 border-red-200"
               />
               <TouchableOpacity
-                className="absolute bottom-0 right-0 bg-red-500 w-10 h-10 rounded-full items-center justify-center border-2 border-white"
+                className="absolute bottom-0 right-0 bg-[#ff7e70] w-10 h-10 rounded-full items-center justify-center border-2 border-white"
                 onPress={handleSelectProfileImage}
               >
                 <Text className="text-white text-lg">📷</Text>
@@ -1056,7 +1056,7 @@ export default function DashboardScreen() {
             No se encontró información de perfil. Completa tu registro.
           </Text>
           <TouchableOpacity
-            className="bg-red-500 py-3 px-6 rounded-lg mt-4"
+            className="bg-[#ff7e70] py-3 px-6 rounded-lg mt-4"
             onPress={() =>
               router.replace({
                 pathname: "/register-extended",
@@ -1071,7 +1071,7 @@ export default function DashboardScreen() {
 
       {/* Botón de cerrar sesión */}
       <TouchableOpacity
-        className="bg-red-500 py-4 rounded-xl mt-4"
+        className="bg-[#ff7e70] py-4 rounded-xl mt-4"
         onPress={handleLogout}
       >
         <Text className="text-white text-center font-bold">Cerrar Sesión</Text>
@@ -1086,7 +1086,7 @@ export default function DashboardScreen() {
       }
       contentContainerClassName="p-5 pb-10"
     >
-      <Text className="text-2xl font-bold mb-2 text-red-600">
+      <Text className="text-2xl font-bold mb-2 text-[#ff7e70]">
         Emergencia 🚨
       </Text>
       <Text className="text-gray-600 mb-6">
@@ -1096,7 +1096,7 @@ export default function DashboardScreen() {
       {/* Botones principales */}
       <View className="gap-4 mb-6">
         <TouchableOpacity
-          className="bg-red-500 py-4 rounded-xl flex-row items-center justify-center gap-2"
+          className="bg-[#ff7e70] py-4 rounded-xl flex-row items-center justify-center gap-2"
           onPress={async () => {
             await loadPets(user?.id);
             setSelectingPetForAlert(!selectingPetForAlert);
@@ -1128,7 +1128,7 @@ export default function DashboardScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="bg-blue-500 py-4 rounded-xl flex-row items-center justify-center gap-2"
+          className="bg-[#005e66] py-4 rounded-xl flex-row items-center justify-center gap-2"
           onPress={async () => {
             await loadMyAlerts(user?.id);
             setShowMyAlerts(!showMyAlerts);
@@ -1165,12 +1165,12 @@ export default function DashboardScreen() {
         <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
           <Text className="font-bold mb-3">Selecciona la mascota perdida:</Text>
           {pets.length === 0 ? (
-            <View className="bg-gray-50 p-6 rounded-lg items-center">
+            <View className="bg-[#faf5e0] p-6 rounded-lg items-center">
               <Text className="text-gray-500">
                 No tienes mascotas registradas
               </Text>
               <TouchableOpacity
-                className="bg-red-500 py-2 px-4 rounded-lg mt-3"
+                className="bg-[#ff7e70] py-2 px-4 rounded-lg mt-3"
                 onPress={() => setActiveTab("home")}
               >
                 <Text className="text-white">Registrar mascota</Text>
@@ -1202,7 +1202,7 @@ export default function DashboardScreen() {
                   </Text>
                 </View>
                 <View className="bg-red-100 px-3 py-1 rounded-full">
-                  <Text className="text-red-600 text-xs font-semibold">
+                  <Text className="text-[#ff7e70] text-xs font-semibold">
                     REPORTAR
                   </Text>
                 </View>
@@ -1219,7 +1219,7 @@ export default function DashboardScreen() {
             🐾 Mascotas perdidas en tu colonia
           </Text>
           {loadingAlerts ? (
-            <ActivityIndicator size="large" color="#ff592c" />
+            <ActivityIndicator size="large" color="#ff7e70" />
           ) : emergencyAlerts.length === 0 ? (
             <View className="bg-green-50 p-8 rounded-lg items-center">
               <Text className="text-4xl mb-3">🎉</Text>
@@ -1284,7 +1284,7 @@ export default function DashboardScreen() {
         <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
           <Text className="font-bold mb-3">📋 Mis alertas activas</Text>
           {myAlerts.length === 0 ? (
-            <View className="bg-gray-50 p-8 rounded-lg items-center">
+            <View className="bg-[#faf5e0] p-8 rounded-lg items-center">
               <Text className="text-gray-500 text-center">
                 No tienes alertas activas
               </Text>
@@ -1320,7 +1320,7 @@ export default function DashboardScreen() {
                       {formatDate(alert.disappearance_date)}
                     </Text>
                     <TouchableOpacity
-                      className="bg-red-500 py-2 px-4 rounded-lg self-start"
+                      className="bg-[#ff7e70] py-2 px-4 rounded-lg self-start"
                       onPress={() => handleDeleteAlert(alert.id)}
                     >
                       <Text className="text-white text-xs font-semibold">
@@ -1340,7 +1340,7 @@ export default function DashboardScreen() {
         <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
           <Text className="font-bold mb-3">✅ Mascotas que he encontrado</Text>
           {foundPets.length === 0 ? (
-            <View className="bg-gray-50 p-8 rounded-lg items-center">
+            <View className="bg-[#faf5e0] p-8 rounded-lg items-center">
               <Text className="text-gray-500 text-center">
                 No has reportado mascotas encontradas
               </Text>
@@ -1374,7 +1374,7 @@ export default function DashboardScreen() {
   );
 
   return (
-    <View className="flex-1 bg-gray-50">
+    <View className="flex-1 bg-[#faf5e0]">
       <View className="flex-1">
         {activeTab === "home" && renderHomeTab()}
         {activeTab === "profile" && renderProfileTab()}

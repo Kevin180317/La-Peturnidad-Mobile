@@ -100,10 +100,10 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center p-6 bg-white">
+    <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
       {loading ? (
         <View className="items-center">
-          <ActivityIndicator size="large" color="#ff592c" />
+          <ActivityIndicator size="large" color="#ff7e70" />
           <Text className="mt-4 text-gray-600 font-medium">
             Procesando registro...
           </Text>
@@ -111,20 +111,20 @@ export default function RegisterScreen() {
       ) : (
         <>
           <View className="mb-8">
-            <Text className="text-3xl font-bold text-red-800 mb-2">
+            <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
               Crear Cuenta
             </Text>
-            <Text className="text-gray-600 text-lg">
+            <Text className="text-[#211f1e] text-lg">
               Regístrate para comenzar
             </Text>
           </View>
 
           <View className="mb-4">
-            <Text className="text-gray-700 font-semibold mb-2">
+            <Text className="text-[#211f1e] font-semibold mb-2">
               Correo electrónico
             </Text>
             <TextInput
-              className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
               placeholder="ejemplo@correo.com"
               value={email}
               onChangeText={setEmail}
@@ -134,9 +134,9 @@ export default function RegisterScreen() {
           </View>
 
           <View className="mb-4">
-            <Text className="text-gray-700 font-semibold mb-2">Contraseña</Text>
+            <Text className="text-[#211f1e] font-semibold mb-2">Contraseña</Text>
             <TextInput
-              className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
               placeholder="••••••••"
               value={password}
               onChangeText={setPassword}
@@ -145,11 +145,11 @@ export default function RegisterScreen() {
           </View>
 
           <View className="mb-8">
-            <Text className="text-gray-700 font-semibold mb-2">
+            <Text className="text-[#211f1e] font-semibold mb-2">
               Confirmar contraseña
             </Text>
             <TextInput
-              className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
               placeholder="••••••••"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
@@ -158,7 +158,7 @@ export default function RegisterScreen() {
           </View>
 
           <TouchableOpacity
-            className="bg-red-600 py-4 rounded-xl shadow-md mb-4"
+            className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
             onPress={handleRegister}
             disabled={loading}
           >
@@ -168,8 +168,8 @@ export default function RegisterScreen() {
           </TouchableOpacity>
 
           <View className="flex-row justify-center mt-4">
-            <Text className="text-gray-600">¿Ya tienes cuenta? </Text>
-            <Link href="/" className="text-red-800 font-bold">
+            <Text className="text-[#211f1e]">¿Ya tienes cuenta? </Text>
+            <Link href="/" className="text-[#ff7e70] font-bold">
               Inicia sesión
             </Link>
           </View>

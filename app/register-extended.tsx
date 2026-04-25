@@ -195,32 +195,32 @@ export default function RegisterExtendedScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#ff592c" />
-        <Text className="mt-4 text-gray-600">Guardando información...</Text>
+      <View className="flex-1 justify-center items-center bg-[#faf5e0]">
+        <ActivityIndicator size="large" color="#ff7e70" />
+        <Text className="mt-4 text-[#211f1e]">Guardando información...</Text>
       </View>
     );
   }
 
   return (
     <ScrollView
-      className="flex-1 bg-white"
+      className="flex-1 bg-[#faf5e0]"
       contentContainerClassName="p-6 pb-10"
       keyboardShouldPersistTaps="handled"
     >
-      <Text className="text-2xl font-bold text-red-800 mb-2 text-center">
+      <Text className="text-2xl font-bold text-[#ff7e70] mb-2 text-center">
         Completa tu perfil
       </Text>
-      <Text className="text-base text-gray-600 text-center mb-8">
+      <Text className="text-base text-[#211f1e] text-center mb-8">
         Usuario: {email}
       </Text>
 
       <View className="mb-4">
-        <Text className="text-gray-700 font-semibold mb-2">
-          Nombre <Text className="text-red-500">*</Text>
+        <Text className="text-[#211f1e] font-semibold mb-2">
+          Nombre <Text className="text-[#ff7e70]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
           placeholder="Tu nombre"
           value={firstName}
           onChangeText={setFirstName}
@@ -229,11 +229,11 @@ export default function RegisterExtendedScreen() {
       </View>
 
       <View className="mb-4">
-        <Text className="text-gray-700 font-semibold mb-2">
-          Apellido <Text className="text-red-500">*</Text>
+        <Text className="text-[#211f1e] font-semibold mb-2">
+          Apellido <Text className="text-[#ff7e70]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
           placeholder="Tu apellido"
           value={lastName}
           onChangeText={setLastName}
@@ -242,11 +242,11 @@ export default function RegisterExtendedScreen() {
       </View>
 
       <View className="mb-4">
-        <Text className="text-gray-700 font-semibold mb-2">
-          Teléfono <Text className="text-red-500">*</Text>
+        <Text className="text-[#211f1e] font-semibold mb-2">
+          Teléfono <Text className="text-[#ff7e70]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
           placeholder="Número de teléfono"
           value={phone}
           onChangeText={setPhone}
@@ -255,11 +255,11 @@ export default function RegisterExtendedScreen() {
       </View>
 
       <View className="mb-4">
-        <Text className="text-gray-700 font-semibold mb-2">
+        <Text className="text-[#211f1e] font-semibold mb-2">
           Fecha de nacimiento
         </Text>
         <TextInput
-          className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
           placeholder="DD/MM/YYYY"
           value={birthDate}
           onChangeText={(text) => setBirthDate(formatDateInput(text))}
@@ -268,11 +268,11 @@ export default function RegisterExtendedScreen() {
       </View>
 
       <View className="mb-4">
-        <Text className="text-gray-700 font-semibold mb-2">
-          Código Postal <Text className="text-red-500">*</Text>
+        <Text className="text-[#211f1e] font-semibold mb-2">
+          Código Postal <Text className="text-[#ff7e70]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-50"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
           placeholder="Código postal"
           value={postalCode}
           onChangeText={handlePostalCodeChange}
@@ -282,7 +282,7 @@ export default function RegisterExtendedScreen() {
       </View>
 
       {filteredColonias.length > 0 && (
-        <View className="mb-4 border-2 border-gray-300 rounded-xl overflow-hidden bg-gray-50">
+        <View className="mb-4 border-2 border-[#211f1e]/20 rounded-xl overflow-hidden bg-white">
           <Picker
             selectedValue={selectedColonia}
             onValueChange={(itemValue) => setSelectedColonia(itemValue)}
@@ -301,16 +301,16 @@ export default function RegisterExtendedScreen() {
       )}
 
       <View className="mb-8">
-        <Text className="text-gray-700 font-semibold mb-2">Ciudad</Text>
+        <Text className="text-[#211f1e] font-semibold mb-2">Ciudad</Text>
         <TextInput
-          className="border-2 border-gray-300 rounded-xl p-4 text-base bg-gray-200 text-gray-500"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
           value={city}
           editable={false}
         />
       </View>
 
       <TouchableOpacity
-        className="bg-red-600 py-4 rounded-xl shadow-md mb-4"
+        className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
         onPress={handleCompleteProfile}
       >
         <Text className="text-white text-center font-bold text-lg">
@@ -319,7 +319,7 @@ export default function RegisterExtendedScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity className="py-4" onPress={handleSkip}>
-        <Text className="text-gray-500 text-center font-semibold">
+        <Text className="text-[#211f1e]/60 text-center font-semibold">
           Omitir por ahora
         </Text>
       </TouchableOpacity>
