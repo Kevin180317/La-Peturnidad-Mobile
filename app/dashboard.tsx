@@ -27,7 +27,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-type TabType = "home" | "profile" | "emergency" | "comunidad" | "feed";
+type TabType = "home" | "profile" | "emergency" | "comunidad" | "feed" | "myposts";
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -101,6 +101,10 @@ export default function DashboardScreen() {
   const [postContent, setPostContent] = useState("");
   const [posting, setPosting] = useState(false);
 
+  // Estados para mis publicaciones
+  const [myPosts, setMyPosts] = useState<any[]>([]);
+  const [loadingMyPosts, setLoadingMyPosts] = useState(false);
+
   // Estados para comentarios
   const [commentTarget, setCommentTarget] = useState<{ type: string; id: string } | null>(null);
   const [comments, setComments] = useState<any[]>([]);
@@ -142,6 +146,14 @@ export default function DashboardScreen() {
     setLoadingFeed(false);
   }, [user?.id]);
 
+  const loadMyPosts = useCallback(async () => {
+    if (!user?.id) return;
+    setLoadingMyPosts(true);
+    const result = await postsService.getMyPosts(user.id);
+    if (result.success) setMyPosts(result.data);
+    setLoadingMyPosts(false);
+  }, [user?.id]);
+
   const handleCreatePost = async () => {
     if (!postContent.trim() || !user?.id) return;
     setPosting(true);
@@ -150,6 +162,7 @@ export default function DashboardScreen() {
       setPostContent("");
       setShowPostForm(false);
       await loadFeed();
+      await loadMyPosts();
     } else {
       showToast("error", "Error", result.error);
     }
@@ -158,7 +171,7 @@ export default function DashboardScreen() {
 
   const handleDeletePost = async (postId: string) => {
     const result = await postsService.delete(postId);
-    if (result.success) await loadFeed();
+    if (result.success) { await loadFeed(); await loadMyPosts(); }
     else showToast("error", "Error", result.error);
   };
 
@@ -191,6 +204,7 @@ export default function DashboardScreen() {
   useEffect(() => {
     if (activeTab === "comunidad") loadComunidad();
     if (activeTab === "feed") loadFeed();
+    if (activeTab === "myposts") loadMyPosts();
   }, [activeTab]);
 
   const registerPushToken = async () => {
@@ -675,6 +689,7 @@ export default function DashboardScreen() {
     <View className="flex-row bg-white border-t border-[#211f1e]/20 py-2 shadow-lg">
       {[
         { key: "feed", label: "Feed", icon: "📱" },
+        { key: "myposts", label: "Mis posts", icon: "✍️" },
         { key: "home", label: "Inicio", icon: "🏠" },
         { key: "comunidad", label: "Comunidad", icon: "💬" },
         { key: "emergency", label: "Emergencia", icon: "🚨" },
@@ -1782,6 +1797,133 @@ export default function DashboardScreen() {
     </>
   );
 
+  const renderMyPostsTab = () => (
+    <>
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { loadMyPosts(); onRefresh(); }} />}
+        contentContainerClassName="p-5 pb-10"
+      >
+        <View className="flex-row items-center justify-between mb-6">
+          <Text className="text-2xl font-bold text-[#211f1e]">Mis publicaciones</Text>
+        </View>
+
+        {loadingMyPosts ? (
+          <ActivityIndicator size="large" color="#ff7e70" />
+        ) : myPosts.length === 0 ? (
+          <View className="bg-white p-10 rounded-xl items-center">
+            <Text className="text-4xl mb-3">✍️</Text>
+            <Text className="text-gray-500 text-center">
+              No has publicado nada aún
+            </Text>
+            <Text className="text-gray-400 text-sm text-center mt-2">
+              Ve al Feed para crear tu primera publicación
+            </Text>
+          </View>
+        ) : (
+          myPosts.map((post) => {
+            const postComments = comments.filter(
+              (c) => c.target_type === "post" && c.target_id === post.id,
+            );
+            return (
+              <TouchableOpacity
+                key={post.id}
+                activeOpacity={1}
+                className="bg-white p-4 rounded-xl mb-3 shadow-sm"
+                onPress={() => {
+                  if (commentTarget?.id === post.id && commentTarget?.type === "post") {
+                    setCommentTarget(null);
+                    setComments([]);
+                  } else {
+                    setCommentTarget({ type: "post", id: post.id });
+                    loadComments("post", post.id);
+                  }
+                }}
+              >
+                <View className="flex-row items-center gap-3 mb-3">
+                  {post.owner_profile_picture ? (
+                    <Image source={{ uri: post.owner_profile_picture }} className="w-10 h-10 rounded-full" />
+                  ) : (
+                    <View className="w-10 h-10 bg-[#ff7e70] rounded-full items-center justify-center">
+                      <Text className="text-white font-bold">{post.owner_name?.[0]?.toUpperCase() || "U"}</Text>
+                    </View>
+                  )}
+                  <View className="flex-1">
+                    <Text className="font-semibold text-[#211f1e]">{post.owner_name}</Text>
+                    <Text className="text-gray-400 text-xs">
+                      {new Date(post.created_at).toLocaleDateString("es-MX", {
+                        day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+                      })}
+                    </Text>
+                  </View>
+                  <TouchableOpacity onPress={() => handleDeletePost(post.id)}>
+                    <Text className="text-[#ff7e70]">🗑️</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text className="text-[#211f1e] leading-5 mb-2">{post.content}</Text>
+
+                <View className="flex-row items-center gap-2 pt-2 border-t border-gray-100">
+                  <Text className="text-gray-400 text-sm">💬 {post.comment_count}</Text>
+                  <Text className="text-[#ff7e70] text-xs ml-auto">
+                    {commentTarget?.id === post.id ? "Ocultar comentarios" : "Ver comentarios"}
+                  </Text>
+                </View>
+
+                {commentTarget?.id === post.id && commentTarget?.type === "post" && (
+                  <View className="mt-3 pt-3 border-t border-gray-100">
+                    {loadingComments ? (
+                      <ActivityIndicator size="small" color="#ff7e70" />
+                    ) : postComments.length === 0 ? (
+                      <Text className="text-gray-400 text-sm mb-2">Sin comentarios</Text>
+                    ) : (
+                      postComments.map((c) => (
+                        <View key={c.id} className="flex-row items-start gap-2 mb-3">
+                          {c.owner_profile_picture ? (
+                            <Image source={{ uri: c.owner_profile_picture }} className="w-7 h-7 rounded-full" />
+                          ) : (
+                            <View className="w-7 h-7 bg-[#ff7e70] rounded-full items-center justify-center">
+                              <Text className="text-white text-xs font-bold">{c.owner_name?.[0]?.toUpperCase() || "U"}</Text>
+                            </View>
+                          )}
+                          <View className="flex-1 bg-[#faf5e0] p-2 rounded-lg">
+                            <View className="flex-row items-center gap-2">
+                              <TouchableOpacity onPress={() => router.push(`/perfil/${c.user_id}`)}>
+                                <Text className="font-semibold text-xs text-[#ff7e70]">{c.owner_name}</Text>
+                              </TouchableOpacity>
+                              <Text className="text-gray-400 text-xs">
+                                {new Date(c.created_at).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
+                              </Text>
+                            </View>
+                            <Text className="text-[#211f1e] text-sm mt-1">{c.content}</Text>
+                          </View>
+                        </View>
+                      ))
+                    )}
+                    <View className="flex-row items-center gap-2 mt-2">
+                      <TextInput
+                        className="flex-1 bg-[#faf5e0] rounded-full px-4 py-2 text-sm border border-gray-200"
+                        placeholder="Escribe un comentario..."
+                        value={commentTarget?.id === post.id ? commentText : ""}
+                        onChangeText={setCommentText}
+                      />
+                      <TouchableOpacity
+                        className="bg-[#ff7e70] rounded-full w-8 h-8 items-center justify-center"
+                        onPress={handleAddComment}
+                        disabled={sendingComment || !commentText.trim()}
+                      >
+                        <Text className="text-white text-sm">{sendingComment ? "⏳" : "➤"}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </ScrollView>
+    </>
+  );
+
   const renderComunidadTab = () => (
     <>
       <ScrollView
@@ -1944,6 +2086,7 @@ export default function DashboardScreen() {
     <View className="flex-1 bg-[#faf5e0]">
       <View className="flex-1">
         {activeTab === "feed" && renderFeedTab()}
+        {activeTab === "myposts" && renderMyPostsTab()}
         {activeTab === "home" && renderHomeTab()}
         {activeTab === "comunidad" && renderComunidadTab()}
         {activeTab === "profile" && renderProfileTab()}
