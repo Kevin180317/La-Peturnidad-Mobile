@@ -5,7 +5,8 @@ import { Platform } from "react-native";
 
 // Configuración adaptada para diferentes plataformas
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "your-supabase-url";
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "your-anon-key";
+const supabaseAnonKey =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "your-anon-key";
 
 // Storage adaptado para web y móvil
 const getStorage = () => {
