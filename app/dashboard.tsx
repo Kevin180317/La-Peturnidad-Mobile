@@ -229,7 +229,17 @@ export default function DashboardScreen() {
 
       if (profileResult.success && profileResult.data) {
         console.log("Perfil cargado:", profileResult.data);
-        setProfile(profileResult.data);
+
+        const [followersRes, followingRes] = await Promise.all([
+          import("@/services/follows.service").then((m) => m.followsService.getFollowers(currentUser.id)),
+          import("@/services/follows.service").then((m) => m.followsService.getFollowing(currentUser.id)),
+        ]);
+
+        setProfile({
+          ...profileResult.data,
+          followers_count: followersRes.success ? followersRes.data.length : 0,
+          following_count: followingRes.success ? followingRes.data.length : 0,
+        });
 
         // Cargar mascotas automáticamente
         await loadPets(currentUser.id);
@@ -1159,24 +1169,32 @@ export default function DashboardScreen() {
                 </Text>
                 <Text className="text-gray-600">Mascotas</Text>
               </View>
-              <View className="items-center">
-                <Text className="text-2xl font-bold text-yellow-500">
-                  {myAlerts.length}
+              <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${user?.id}&tab=followers`)}>
+                <Text className="text-2xl font-bold text-[#ff7e70]">
+                  {profile?.followers_count || 0}
                 </Text>
-                <Text className="text-gray-600">Alertas</Text>
-              </View>
-              <View className="items-center">
-                <Text className="text-2xl font-bold text-green-500">
-                  {foundPets.length}
+                <Text className="text-gray-600">Seguidores</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${user?.id}&tab=following`)}>
+                <Text className="text-2xl font-bold text-[#007275]">
+                  {profile?.following_count || 0}
                 </Text>
-                <Text className="text-gray-600">Encontradas</Text>
-              </View>
+                <Text className="text-gray-600">Siguiendo</Text>
+              </TouchableOpacity>
             </View>
           </View>
 
           {/* Acciones */}
           <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
             <Text className="text-lg font-bold mb-4">Acciones</Text>
+            <TouchableOpacity
+              className="bg-[#007275] py-3 rounded-lg mb-3"
+              onPress={() => router.push("/editar-perfil")}
+            >
+              <Text className="text-white text-center font-semibold">
+                ✏️ Editar perfil
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity
               className="bg-[#007275] py-3 rounded-lg mb-3"
               onPress={() => router.push("/notificaciones")}
@@ -1186,7 +1204,7 @@ export default function DashboardScreen() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-[#005e66] py-3 rounded-lg"
+              className="bg-[#005e66] py-3 rounded-lg mb-3"
               onPress={() => setActiveTab("comunidad")}
             >
               <Text className="text-white text-center font-semibold">
@@ -1194,11 +1212,35 @@ export default function DashboardScreen() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-[#007275] py-3 rounded-lg mt-3"
+              className="bg-[#007275] py-3 rounded-lg mb-3"
               onPress={() => router.push("/mensajes")}
             >
               <Text className="text-white text-center font-semibold">
                 ✉️ Mensajes
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-[#005e66] py-3 rounded-lg mb-3"
+              onPress={() => router.push("/grupos")}
+            >
+              <Text className="text-white text-center font-semibold">
+                👥 Grupos
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-[#007275] py-3 rounded-lg mb-3"
+              onPress={() => router.push("/historias")}
+            >
+              <Text className="text-white text-center font-semibold">
+                🐾 Reuniones exitosas
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="bg-[#211f1e] py-3 rounded-lg"
+              onPress={() => router.push("/panel-moderacion")}
+            >
+              <Text className="text-white text-center font-semibold">
+                🛡️ Panel de moderación
               </Text>
             </TouchableOpacity>
           </View>

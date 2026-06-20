@@ -147,7 +147,9 @@ export default function LoginScreen() {
           </View>
 
           <View className="mb-8">
-            <Text className="text-[#211f1e] font-semibold mb-2">Contraseña</Text>
+            <Text className="text-[#211f1e] font-semibold mb-2">
+              Contraseña
+            </Text>
             <TextInput
               className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
               placeholder="••••••••"

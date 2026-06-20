@@ -66,6 +66,15 @@ export default function RegisterExtendedScreen() {
     return formatted;
   };
 
+  const toPostgresDate = (ddmmyyyy: string): string | null => {
+    if (!ddmmyyyy) return null;
+    const parts = ddmmyyyy.split("/");
+    if (parts.length !== 3) return null;
+    const [dd, mm, yyyy] = parts;
+    if (dd.length !== 2 || mm.length !== 2 || yyyy.length !== 4) return null;
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   const handleCompleteProfile = async () => {
     // Validaciones
     if (!firstName?.trim() || !lastName?.trim() || !phone?.trim()) {
@@ -101,79 +110,54 @@ export default function RegisterExtendedScreen() {
     setLoading(true);
 
     try {
-      // Verificar que tenemos el userId
-      let finalUserId = userId;
-      if (!finalUserId) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) {
-          throw new Error("No se encontró el usuario");
-        }
-        finalUserId = user.id;
+      // Obtener userId desde auth siempre (más confiable que params)
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("No se encontró el usuario autenticado");
       }
+      const finalUserId = user.id;
 
       console.log("Creando perfil para user_id:", finalUserId);
 
-      // Verificar si ya existe un perfil
-      const { data: existingProfile } = await supabase
+      const payload = {
+        user_id: finalUserId,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        phone: phone.trim(),
+        birth_date: toPostgresDate(birthDate),
+        postal_code: postalCode,
+        address: selectedColonia,
+        city: city,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase
         .from("user_profiles")
-        .select("id")
-        .eq("user_id", finalUserId)
-        .maybeSingle();
+        .upsert(payload, { onConflict: "user_id", ignoreDuplicates: false });
 
-      if (existingProfile) {
-        // Si ya existe, actualizar
-        const { error } = await supabase
-          .from("user_profiles")
-          .update({
-            first_name: firstName.trim(),
-            last_name: lastName.trim(),
-            phone: phone.trim(),
-            birth_date: birthDate || null,
-            postal_code: postalCode,
-            address: selectedColonia,
-            city: city,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("user_id", finalUserId);
-
-        if (error) throw error;
-      } else {
-        // Si no existe, insertar nuevo (SIN EL CAMPO EMAIL)
-        const { error } = await supabase.from("user_profiles").insert([
-          {
-            user_id: finalUserId,
-            first_name: firstName.trim(),
-            last_name: lastName.trim(),
-            phone: phone.trim(),
-            birth_date: birthDate || null,
-            postal_code: postalCode,
-            address: selectedColonia,
-            city: city,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ]);
-
-        if (error) throw error;
+      if (error) {
+        console.error("Upsert error details:", JSON.stringify(error));
+        throw error;
       }
+
+      console.log("Perfil guardado exitosamente");
 
       Toast.show({
         type: "success",
         text1: "¡Perfil completado!",
         text2: "Bienvenido a La Peturnidad",
-        visibilityTime: 2000,
-        onHide: () => {
-          router.replace({
-            pathname: "/dashboard",
-            params: {
-              email: email, // Pasamos el email solo para mostrarlo en el dashboard
-              userId: finalUserId,
-            },
-          });
-        },
+        visibilityTime: 1500,
       });
+
+      // Navegar después de un breve delay para que se vea el toast
+      setTimeout(() => {
+        router.replace({
+          pathname: "/dashboard",
+          params: { email: email ?? user.email ?? "" },
+        });
+      }, 1600);
     } catch (error: any) {
       console.error("Error al guardar perfil:", error);
       Toast.show({

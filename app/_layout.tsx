@@ -35,6 +35,26 @@ export default function RootLayout() {
         name="perfil/[id]"
         options={{ title: "Perfil" }}
       />
+      <Stack.Screen
+        name="seguidores"
+        options={{ title: "Seguidores" }}
+      />
+      <Stack.Screen
+        name="editar-perfil"
+        options={{ title: "Editar perfil" }}
+      />
+      <Stack.Screen
+        name="grupos"
+        options={{ title: "Grupos" }}
+      />
+      <Stack.Screen
+        name="historias"
+        options={{ title: "Reuniones exitosas" }}
+      />
+      <Stack.Screen
+        name="panel-moderacion"
+        options={{ title: "Moderación" }}
+      />
     </Stack>
   );
 }

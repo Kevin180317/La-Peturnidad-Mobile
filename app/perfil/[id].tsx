@@ -26,6 +26,7 @@ export default function PublicProfileScreen() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     init();
@@ -63,6 +64,10 @@ export default function PublicProfileScreen() {
 
     const followingRes = await followsService.getFollowing(id);
     if (followingRes.success) setFollowingCount(followingRes.data.length);
+
+    if (profileResult.data?.role) {
+      setUserRole(profileResult.data.role);
+    }
 
     setLoading(false);
   };
@@ -152,17 +157,26 @@ export default function PublicProfileScreen() {
           <Text className="text-xl font-bold text-[#ff7e70]">{pets.length}</Text>
           <Text className="text-gray-500 text-sm">Mascotas</Text>
         </View>
-        <View className="items-center">
+        <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${id}&tab=followers`)}>
           <Text className="text-xl font-bold text-[#ff7e70]">{followersCount}</Text>
           <Text className="text-gray-500 text-sm">Seguidores</Text>
-        </View>
-        <View className="items-center">
+        </TouchableOpacity>
+        <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${id}&tab=following`)}>
           <Text className="text-xl font-bold text-[#ff7e70]">{followingCount}</Text>
           <Text className="text-gray-500 text-sm">Siguiendo</Text>
-        </View>
+        </TouchableOpacity>
       </View>
 
-      {!isOwn && (
+      {isOwn ? (
+        <View className="flex-row gap-3 mb-6">
+          <TouchableOpacity
+            className="flex-1 bg-[#007275] py-3 rounded-lg"
+            onPress={() => router.push("/editar-perfil")}
+          >
+            <Text className="text-white text-center font-bold">✏️ Editar perfil</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
         <View className="flex-row gap-3 mb-6">
           <TouchableOpacity
             className={`flex-1 py-3 rounded-lg ${isFollowing ? "bg-gray-500" : "bg-[#ff7e70]"}`}
@@ -178,6 +192,14 @@ export default function PublicProfileScreen() {
           >
             <Text className="text-white text-center font-bold">Mensaje</Text>
           </TouchableOpacity>
+        </View>
+      )}
+
+      {userRole && (userRole === "moderator" || userRole === "admin") && (
+        <View className="bg-[#ff7e70]/10 p-3 rounded-xl mb-4">
+          <Text className="text-[#ff7e70] text-center font-semibold capitalize">
+            🛡️ {userRole === "admin" ? "Administrador" : "Moderador"}
+          </Text>
         </View>
       )}
 

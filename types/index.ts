@@ -16,6 +16,7 @@ export interface UserProfile {
   city: string;
   profile_picture_url: string | null;
   push_token: string | null;
+  role: "user" | "moderator" | "admin";
   created_at: string;
   updated_at: string;
 }
@@ -150,4 +151,40 @@ export interface Message {
   content: string;
   created_at: string;
   read_at: string | null;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  description: string | null;
+  created_by: string;
+  created_at: string;
+}
+
+export interface GroupMember {
+  id: string;
+  group_id: string;
+  user_id: string;
+  role: "member" | "admin";
+  created_at: string;
+}
+
+export interface SuccessStory {
+  id: string;
+  user_id: string;
+  pet_name: string;
+  story: string;
+  image_url: string | null;
+  created_at: string;
+}
+
+export interface Report {
+  id: string;
+  reporter_id: string;
+  target_user_id: string;
+  reason: string;
+  status: "pending" | "reviewed" | "dismissed";
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
 }
