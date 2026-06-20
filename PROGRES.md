@@ -62,15 +62,40 @@
 | Formato de fecha inválido para PostgreSQL | Helper `toPostgresDate()` que convierte `DD/MM/YYYY` → `YYYY-MM-DD` |
 | Storage 403 — anon key no tiene rol `authenticated` | Usar JWT del usuario (`session.access_token`) en vez de anon key |
 
-## 🔧 Deuda técnica
+## 🔧 Pendiente / Deuda técnica
 
-| Item | Prioridad |
+### 🟥 Alta prioridad
+
+| Item | Notas |
 |---|---|
-| `dashboard.tsx` monolítico (~1900 líneas) — refactorizar en hooks o screens separadas | 🔴 Alta |
-| `dashboard.service.ts` redefine interfaces (`UserProfile`, `Pet`, etc.) en vez de importar `@/types` | 🟡 Media |
-| Generar `database.types.ts` de Supabase (tipado automático) | 🟡 Media |
-| `register-extended.tsx` carga `colonias.json` (3786 líneas) en cliente — mejor servirlo desde API | 🟢 Baja |
-| Storage policies: hay múltiples políticas duplicadas para INSERT en los mismos buckets | 🟢 Baja |
+| **Tests** | No hay ningún test (unit, integration, e2e) |
+| **Refactor `dashboard.tsx`** | ~1900 líneas monolíticas — extraer a hooks y componentes separados |
+| **Subir foto de perfil** | La UI/subida desde el perfil no está integrada; solo está el fix de storage |
+| **Buscador** | No hay búsqueda de mascotas, grupos, usuarios, etc. |
+| **Recuperación de contraseña** | `forgot-password.tsx` existe pero el flujo completo (email + reset) necesita verificarse |
+| **Eliminar cuenta** | No hay opción para que un usuario elimine su cuenta |
+
+### 🟡 Media prioridad
+
+| Item | Notas |
+|---|---|
+| **Generated types** | `supabase gen types` no se ha corrido; `dashboard.service.ts` redefine interfaces manualmente |
+| **Onboarding** | No hay tutorial / walkthrough para nuevos usuarios |
+| **Verificación de email** | No hay verificación de email post-registro |
+| **CI/CD** | No hay GitHub Actions para lint/test/build |
+| **Soporte offline** | Sin caché ni persistencia offline |
+| **Dark mode** | No implementado (tema claro fijo) |
+
+### 🟢 Baja prioridad
+
+| Item | Notas |
+|---|---|
+| **Analytics / Crash reporting** | No hay Sentry, PostHog, etc. |
+| **i18n** | Todo en español duro (sin sistema de traducciones) |
+| **Limpiar storage policies** | Hay políticas duplicadas de INSERT en `storage.objects` (3 por bucket) |
+| **Servir colonias.json desde API** | 3786 líneas en cliente (`register-extended.tsx`) |
+| **Edge Function tests** | `send-emergency-notification` sin tests |
+| **`dashboard.service.ts` redefine interfaces** | `UserProfile`, `Pet`, etc. en vez de importar `@/types` | 🟡 Media |
 
 ---
 
