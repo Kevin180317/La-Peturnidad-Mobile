@@ -41,17 +41,26 @@
 | Mensajería directa | ✅ |
 | Tablas: `posts`, `comments`, `follows`, `conversations`, `conversation_participants`, `messages` | ✅ |
 
-## ❌ Fase 4 — Diferenciación (Pendiente)
+## ✅ Fase 4 — Diferenciación (Completada)
 
-| Item | Prioridad | Implica |
+| Item | Prioridad | Estado |
 |---|---|---|
-| **Ver seguidores/siguiendo** | 🟡 Media | Pantalla con lista de follows desde perfil |
-| **Editar perfil** | 🟡 Media | Poder modificar nombre, teléfono, dirección |
-| **Matching automático lost & found** | 🟢 Baja | Algoritmo que cruza atributos de mascotas perdidas vs encontradas |
-| **Grupos por colonia** | 🟢 Baja | Tablas `groups`, `group_members`, feed filtrado |
-| **Roles de usuario** | 🟢 Baja | Permisos (admin, moderador, usuario) |
-| **Muro de reuniones exitosas** | 🟢 Baja | Sección pública con historias |
-| **Moderación y reportes** | 🟢 Baja | Tabla `reports`, sistema de bloqueos |
+| **Ver seguidores/siguiendo** | 🟡 Media | ✅ Pantalla `/seguidores` con tabs followers/following |
+| **Editar perfil** | 🟡 Media | ✅ Formulario en `/editar-perfil` (nombre, teléfono, dirección) |
+| **Matching automático lost & found** | 🟢 Baja | ✅ Algoritmo en `services/matching.service.ts` |
+| **Grupos por colonia** | 🟢 Baja | ✅ Tablas `groups`, `group_members` + pantallas `/grupos`, `/grupos/[id]` |
+| **Roles de usuario** | 🟢 Baja | ✅ Columna `role` en `user_profiles` + RLS para moderadores |
+| **Muro de reuniones exitosas** | 🟢 Baja | ✅ Tabla `success_stories` + pantalla `/historias` |
+| **Moderación y reportes** | 🟢 Baja | ✅ Tablas `reports`, `blocks` + pantalla `/panel-moderacion` |
+
+### Bugs corregidos en Fase 4
+
+| Bug | Fix |
+|---|---|
+| `42P17` — RLS recursion en políticas de moderadores | Función `is_moderator_or_admin()` con `SECURITY DEFINER` |
+| `23505` — duplicate key al crear perfil | `upsert` con `onConflict: "user_id"` en vez de check-then-insert |
+| Formato de fecha inválido para PostgreSQL | Helper `toPostgresDate()` que convierte `DD/MM/YYYY` → `YYYY-MM-DD` |
+| Storage 403 — anon key no tiene rol `authenticated` | Usar JWT del usuario (`session.access_token`) en vez de anon key |
 
 ## 🔧 Deuda técnica
 
@@ -61,6 +70,7 @@
 | `dashboard.service.ts` redefine interfaces (`UserProfile`, `Pet`, etc.) en vez de importar `@/types` | 🟡 Media |
 | Generar `database.types.ts` de Supabase (tipado automático) | 🟡 Media |
 | `register-extended.tsx` carga `colonias.json` (3786 líneas) en cliente — mejor servirlo desde API | 🟢 Baja |
+| Storage policies: hay múltiples políticas duplicadas para INSERT en los mismos buckets | 🟢 Baja |
 
 ---
 
