@@ -1,6 +1,6 @@
 # PROGRES — La Peturnidad
 
-> Estado actual del proyecto. Última actualización: 20/06/2026
+> Estado actual del proyecto. Última actualización: 21/06/2026
 
 ---
 
@@ -52,8 +52,9 @@
 | **Roles de usuario** | 🟢 Baja | ✅ Columna `role` en `user_profiles` + RLS para moderadores |
 | **Muro de reuniones exitosas** | 🟢 Baja | ✅ Tabla `success_stories` + pantalla `/historias` |
 | **Moderación y reportes** | 🟢 Baja | ✅ Tablas `reports`, `blocks` + pantalla `/panel-moderacion` |
+| **Sub-tabs Feed/Comunidad** | 🟡 Media | ✅ Feed: "Feed" (otros) / "Mis posts". Comunidad: "Comunidad" (otros) / "Mis avisos" |
 
-### Bugs corregidos en Fase 4
+### Bugs corregidos
 
 | Bug | Fix |
 |---|---|
@@ -61,6 +62,7 @@
 | `23505` — duplicate key al crear perfil | `upsert` con `onConflict: "user_id"` en vez de check-then-insert |
 | Formato de fecha inválido para PostgreSQL | Helper `toPostgresDate()` que convierte `DD/MM/YYYY` → `YYYY-MM-DD` |
 | Storage 403 — anon key no tiene rol `authenticated` | Usar JWT del usuario (`session.access_token`) en vez de anon key |
+| RLS bloqueaba ver perfiles de otros usuarios en comunidad | Política `Anyone can view profiles` con `USING (true)` |
 
 ## 🔧 Pendiente / Deuda técnica
 
@@ -69,7 +71,7 @@
 | Item | Notas |
 |---|---|
 | **Tests** | No hay ningún test (unit, integration, e2e) |
-| **Refactor `dashboard.tsx`** | ~1900 líneas monolíticas — extraer a hooks y componentes separados |
+| **Refactor `dashboard.tsx`** | ~2000 líneas monolíticas — extraer a hooks y componentes separados |
 | **Subir foto de perfil** | La UI/subida desde el perfil no está integrada; solo está el fix de storage |
 | **Buscador** | No hay búsqueda de mascotas, grupos, usuarios, etc. |
 | **Recuperación de contraseña** | `forgot-password.tsx` existe pero el flujo completo (email + reset) necesita verificarse |
@@ -95,7 +97,7 @@
 | **Limpiar storage policies** | Hay políticas duplicadas de INSERT en `storage.objects` (3 por bucket) |
 | **Servir colonias.json desde API** | 3786 líneas en cliente (`register-extended.tsx`) |
 | **Edge Function tests** | `send-emergency-notification` sin tests |
-| **`dashboard.service.ts` redefine interfaces** | `UserProfile`, `Pet`, etc. en vez de importar `@/types` | 🟡 Media |
+| **`dashboard.service.ts` redefine interfaces** | `UserProfile`, `Pet`, etc. en vez de importar `@/types` |
 
 ---
 
