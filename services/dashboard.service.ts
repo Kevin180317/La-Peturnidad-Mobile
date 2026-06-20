@@ -463,13 +463,17 @@ class DashboardService {
 
       console.log(`⬆️ Subiendo a ${bucket}/${fileName}...`);
 
+      // Obtener token JWT del usuario autenticado en vez de usar la anon key
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || supabaseKey;
+
       // Hacer la petición directamente a la API de Storage
       const response = await fetch(
         `${supabaseUrl}/storage/v1/object/${bucket}/${fileName}`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${supabaseKey}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
             "x-upsert": "true",
           },
