@@ -16,7 +16,7 @@
 
 - **Frontend**: Expo Router (file-based routing in `app/`), React Native
 - **Styling**: Uniwind (Tailwind CSS for RN) - config in `metro.config.js`
-- **Backend**: Express server in `server/` folder (separate from Expo)
+- **Backend** (legacy): Express server moved to `legacy/server/` folder
 - **Auth/DB**: Supabase (`utils/supabase.ts`)
 
 ## Tech Stack
