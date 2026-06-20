@@ -27,7 +27,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-type TabType = "home" | "profile" | "emergency" | "comunidad" | "feed" | "myposts";
+type TabType = "home" | "profile" | "emergency" | "comunidad" | "feed";
 
 export default function DashboardScreen() {
   const router = useRouter();
@@ -105,6 +105,10 @@ export default function DashboardScreen() {
   const [myPosts, setMyPosts] = useState<any[]>([]);
   const [loadingMyPosts, setLoadingMyPosts] = useState(false);
 
+  // Sub-tabs para Feed y Comunidad
+  const [feedSubTab, setFeedSubTab] = useState<"all" | "mine">("all");
+  const [comSubTab, setComSubTab] = useState<"all" | "mine">("all");
+
   // Estados para comentarios
   const [commentTarget, setCommentTarget] = useState<{ type: string; id: string } | null>(null);
   const [comments, setComments] = useState<any[]>([]);
@@ -138,10 +142,21 @@ export default function DashboardScreen() {
     setLoadingComunidad(false);
   }, []);
 
+  const [myAnnouncements, setMyAnnouncements] = useState<any[]>([]);
+  const [loadingMyAnnouncements, setLoadingMyAnnouncements] = useState(false);
+
+  const loadMyAnnouncements = useCallback(async () => {
+    if (!user?.id) return;
+    setLoadingMyAnnouncements(true);
+    const result = await announcementsService.getMyAnnouncements(user.id);
+    if (result.success) setMyAnnouncements(result.data);
+    setLoadingMyAnnouncements(false);
+  }, [user?.id]);
+
   const loadFeed = useCallback(async () => {
     if (!user?.id) return;
     setLoadingFeed(true);
-    const result = await postsService.getFeed(user.id);
+    const result = await postsService.getAllPosts();
     if (result.success) setFeedPosts(result.data);
     setLoadingFeed(false);
   }, [user?.id]);
@@ -202,9 +217,8 @@ export default function DashboardScreen() {
   };
 
   useEffect(() => {
-    if (activeTab === "comunidad") loadComunidad();
-    if (activeTab === "feed") loadFeed();
-    if (activeTab === "myposts") loadMyPosts();
+    if (activeTab === "comunidad") { loadComunidad(); loadMyAnnouncements(); }
+    if (activeTab === "feed") { loadFeed(); loadMyPosts(); }
   }, [activeTab]);
 
   const registerPushToken = async () => {
@@ -689,7 +703,6 @@ export default function DashboardScreen() {
     <View className="flex-row bg-white border-t border-[#211f1e]/20 py-2 shadow-lg">
       {[
         { key: "feed", label: "Feed", icon: "📱" },
-        { key: "myposts", label: "Mis posts", icon: "✍️" },
         { key: "home", label: "Inicio", icon: "🏠" },
         { key: "comunidad", label: "Comunidad", icon: "💬" },
         { key: "emergency", label: "Emergencia", icon: "🚨" },
@@ -1628,309 +1641,208 @@ export default function DashboardScreen() {
     else showToast("error", "Error", r.error);
   };
 
-  const renderFeedTab = () => (
-    <>
-      <ScrollView
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { loadFeed(); onRefresh(); }} />}
-        contentContainerClassName="p-5 pb-10"
-      >
-        <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-2xl font-bold text-[#211f1e]">Feed</Text>
-          <TouchableOpacity
-            className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
-            onPress={() => setShowPostForm(true)}
-          >
-            <Text className="text-white text-lg mr-1">✏️</Text>
-            <Text className="text-white font-semibold">Publicar</Text>
-          </TouchableOpacity>
-        </View>
+  const renderFeedTab = () => {
+    const visiblePosts = feedSubTab === "all" ? feedPosts : myPosts;
+    const loading = feedSubTab === "all" ? loadingFeed : loadingMyPosts;
 
-        {showPostForm && (
-          <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
-            <TextInput
-              className="bg-[#faf5e0] p-3 rounded-lg mb-3 border border-gray-300"
-              placeholder="¿Qué quieres compartir?"
-              value={postContent}
-              onChangeText={setPostContent}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#ff7e70]"}`}
-                onPress={handleCreatePost}
-                disabled={posting}
-              >
-                <Text className="text-white text-center font-bold">{posting ? "Publicando..." : "Publicar"}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-[#211f1e] py-3 rounded-lg"
-                onPress={() => { setShowPostForm(false); setPostContent(""); }}
-              >
-                <Text className="text-white text-center font-bold">Cancelar</Text>
-              </TouchableOpacity>
-            </View>
+    return (
+      <>
+        <ScrollView
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { loadFeed(); loadMyPosts(); onRefresh(); }} />
+          }
+          contentContainerClassName="p-5 pb-10"
+        >
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-2xl font-bold text-[#211f1e]">Feed</Text>
+            <TouchableOpacity
+              className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
+              onPress={() => setShowPostForm(true)}
+            >
+              <Text className="text-white text-lg mr-1">✏️</Text>
+              <Text className="text-white font-semibold">Publicar</Text>
+            </TouchableOpacity>
           </View>
-        )}
 
-        {loadingFeed ? (
-          <ActivityIndicator size="large" color="#ff7e70" />
-        ) : feedPosts.length === 0 ? (
-          <View className="bg-white p-10 rounded-xl items-center">
-            <Text className="text-4xl mb-3">📱</Text>
-            <Text className="text-gray-500 text-center">
-              No hay publicaciones en tu feed aún
-            </Text>
-            <Text className="text-gray-400 text-sm text-center mt-2">
-              Sigue a otros usuarios y comparte tus propias publicaciones
-            </Text>
+          <View className="flex-row bg-white rounded-xl mb-4 shadow-sm">
+            <TouchableOpacity
+              className={`flex-1 py-3 rounded-l-xl ${feedSubTab === "all" ? "bg-[#ff7e70]" : "bg-white"}`}
+              onPress={() => setFeedSubTab("all")}
+            >
+              <Text className={`text-center font-semibold ${feedSubTab === "all" ? "text-white" : "text-gray-500"}`}>
+                Feed
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className={`flex-1 py-3 rounded-r-xl ${feedSubTab === "mine" ? "bg-[#ff7e70]" : "bg-white"}`}
+              onPress={() => setFeedSubTab("mine")}
+            >
+              <Text className={`text-center font-semibold ${feedSubTab === "mine" ? "text-white" : "text-gray-500"}`}>
+                Mis posts
+              </Text>
+            </TouchableOpacity>
           </View>
-        ) : (
-          feedPosts.map((post) => {
-            const isMine = post.user_id === user?.id;
-            const postComments = comments.filter(
-              (c) => c.target_type === "post" && c.target_id === post.id,
-            );
-            return (
-              <TouchableOpacity
-                key={post.id}
-                activeOpacity={1}
-                className="bg-white p-4 rounded-xl mb-3 shadow-sm"
-                onPress={() => {
-                  if (commentTarget?.id === post.id && commentTarget?.type === "post") {
-                    setCommentTarget(null);
-                    setComments([]);
-                  } else {
-                    setCommentTarget({ type: "post", id: post.id });
-                    loadComments("post", post.id);
-                  }
-                }}
-              >
+
+          {showPostForm && (
+            <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+              <TextInput
+                className="bg-[#faf5e0] p-3 rounded-lg mb-3 border border-gray-300"
+                placeholder="¿Qué quieres compartir?"
+                value={postContent}
+                onChangeText={setPostContent}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+              <View className="flex-row gap-3">
                 <TouchableOpacity
-                  className="flex-row items-center gap-3 mb-3"
-                  onPress={() => router.push(`/perfil/${post.user_id}`)}
+                  className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#ff7e70]"}`}
+                  onPress={handleCreatePost}
+                  disabled={posting}
                 >
-                  {post.owner_profile_picture ? (
-                    <Image source={{ uri: post.owner_profile_picture }} className="w-10 h-10 rounded-full" />
-                  ) : (
-                    <View className="w-10 h-10 bg-[#ff7e70] rounded-full items-center justify-center">
-                      <Text className="text-white font-bold">{post.owner_name?.[0]?.toUpperCase() || "U"}</Text>
+                  <Text className="text-white text-center font-bold">{posting ? "Publicando..." : "Publicar"}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 bg-[#211f1e] py-3 rounded-lg"
+                  onPress={() => { setShowPostForm(false); setPostContent(""); }}
+                >
+                  <Text className="text-white text-center font-bold">Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {loading ? (
+            <ActivityIndicator size="large" color="#ff7e70" />
+          ) : visiblePosts.length === 0 ? (
+            <View className="bg-white p-10 rounded-xl items-center">
+              <Text className="text-4xl mb-3">📱</Text>
+              <Text className="text-gray-500 text-center">
+                {feedSubTab === "all" ? "No hay publicaciones en el feed" : "No has publicado nada aún"}
+              </Text>
+            </View>
+          ) : (
+            visiblePosts.map((post) => {
+              const isMine = post.user_id === user?.id;
+              const postComments = comments.filter(
+                (c) => c.target_type === "post" && c.target_id === post.id,
+              );
+              return (
+                <TouchableOpacity
+                  key={post.id}
+                  activeOpacity={1}
+                  className="bg-white p-4 rounded-xl mb-3 shadow-sm"
+                  onPress={() => {
+                    if (commentTarget?.id === post.id && commentTarget?.type === "post") {
+                      setCommentTarget(null);
+                      setComments([]);
+                    } else {
+                      setCommentTarget({ type: "post", id: post.id });
+                      loadComments("post", post.id);
+                    }
+                  }}
+                >
+                  <TouchableOpacity
+                    className="flex-row items-center gap-3 mb-3"
+                    onPress={() => router.push(`/perfil/${post.user_id}`)}
+                  >
+                    {post.owner_profile_picture ? (
+                      <Image source={{ uri: post.owner_profile_picture }} className="w-10 h-10 rounded-full" />
+                    ) : (
+                      <View className="w-10 h-10 bg-[#ff7e70] rounded-full items-center justify-center">
+                        <Text className="text-white font-bold">{post.owner_name?.[0]?.toUpperCase() || "U"}</Text>
+                      </View>
+                    )}
+                    <View className="flex-1">
+                      <Text className="font-semibold text-[#211f1e]">{post.owner_name}</Text>
+                      <Text className="text-gray-400 text-xs">
+                        {new Date(post.created_at).toLocaleDateString("es-MX", {
+                          day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+                        })}
+                      </Text>
                     </View>
-                  )}
-                  <View className="flex-1">
-                    <Text className="font-semibold text-[#211f1e]">{post.owner_name}</Text>
-                    <Text className="text-gray-400 text-xs">
-                      {new Date(post.created_at).toLocaleDateString("es-MX", {
-                        day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-                      })}
+                    {isMine && (
+                      <TouchableOpacity onPress={() => handleDeletePost(post.id)}>
+                        <Text className="text-[#ff7e70]">🗑️</Text>
+                      </TouchableOpacity>
+                    )}
+                  </TouchableOpacity>
+
+                  <Text className="text-[#211f1e] leading-5 mb-2">{post.content}</Text>
+
+                  <View className="flex-row items-center gap-2 pt-2 border-t border-gray-100">
+                    <Text className="text-gray-400 text-sm">💬 {post.comment_count}</Text>
+                    <Text className="text-[#ff7e70] text-xs ml-auto">
+                      {commentTarget?.id === post.id ? "Ocultar comentarios" : "Ver comentarios"}
                     </Text>
                   </View>
-                  {isMine && (
-                    <TouchableOpacity onPress={() => handleDeletePost(post.id)}>
-                      <Text className="text-[#ff7e70]">🗑️</Text>
-                    </TouchableOpacity>
+
+                  {commentTarget?.id === post.id && commentTarget?.type === "post" && (
+                    <View className="mt-3 pt-3 border-t border-gray-100">
+                      {loadingComments ? (
+                        <ActivityIndicator size="small" color="#ff7e70" />
+                      ) : postComments.length === 0 ? (
+                        <Text className="text-gray-400 text-sm mb-2">Sin comentarios</Text>
+                      ) : (
+                        postComments.map((c) => (
+                          <View key={c.id} className="flex-row items-start gap-2 mb-3">
+                            {c.owner_profile_picture ? (
+                              <Image source={{ uri: c.owner_profile_picture }} className="w-7 h-7 rounded-full" />
+                            ) : (
+                              <View className="w-7 h-7 bg-[#ff7e70] rounded-full items-center justify-center">
+                                <Text className="text-white text-xs font-bold">{c.owner_name?.[0]?.toUpperCase() || "U"}</Text>
+                              </View>
+                            )}
+                            <View className="flex-1 bg-[#faf5e0] p-2 rounded-lg">
+                              <View className="flex-row items-center gap-2">
+                                <TouchableOpacity onPress={() => router.push(`/perfil/${c.user_id}`)}>
+                                  <Text className="font-semibold text-xs text-[#ff7e70]">{c.owner_name}</Text>
+                                </TouchableOpacity>
+                                <Text className="text-gray-400 text-xs">
+                                  {new Date(c.created_at).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
+                                </Text>
+                              </View>
+                              <Text className="text-[#211f1e] text-sm mt-1">{c.content}</Text>
+                            </View>
+                          </View>
+                        ))
+                      )}
+                      <View className="flex-row items-center gap-2 mt-2">
+                        <TextInput
+                          className="flex-1 bg-[#faf5e0] rounded-full px-4 py-2 text-sm border border-gray-200"
+                          placeholder="Escribe un comentario..."
+                          value={commentTarget?.id === post.id ? commentText : ""}
+                          onChangeText={setCommentText}
+                        />
+                        <TouchableOpacity
+                          className="bg-[#ff7e70] rounded-full w-8 h-8 items-center justify-center"
+                          onPress={handleAddComment}
+                          disabled={sendingComment || !commentText.trim()}
+                        >
+                          <Text className="text-white text-sm">{sendingComment ? "⏳" : "➤"}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
                   )}
                 </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+      </>
+    );
+  };
 
-                <Text className="text-[#211f1e] leading-5 mb-2">{post.content}</Text>
+  const renderComunidadTab = () => {
+    const visibleItems = comSubTab === "all" ? comunidadAnnouncements : myAnnouncements;
+    const loading = comSubTab === "all" ? loadingComunidad : loadingMyAnnouncements;
 
-                <View className="flex-row items-center gap-2 pt-2 border-t border-gray-100">
-                  <Text className="text-gray-400 text-sm">💬 {post.comment_count}</Text>
-                  <Text className="text-[#ff7e70] text-xs ml-auto">
-                    {commentTarget?.id === post.id ? "Ocultar comentarios" : "Ver comentarios"}
-                  </Text>
-                </View>
-
-                {commentTarget?.id === post.id && commentTarget?.type === "post" && (
-                  <View className="mt-3 pt-3 border-t border-gray-100">
-                    {loadingComments ? (
-                      <ActivityIndicator size="small" color="#ff7e70" />
-                    ) : postComments.length === 0 ? (
-                      <Text className="text-gray-400 text-sm mb-2">Sin comentarios</Text>
-                    ) : (
-                      postComments.map((c) => (
-                        <View key={c.id} className="flex-row items-start gap-2 mb-3">
-                          {c.owner_profile_picture ? (
-                            <Image source={{ uri: c.owner_profile_picture }} className="w-7 h-7 rounded-full" />
-                          ) : (
-                            <View className="w-7 h-7 bg-[#ff7e70] rounded-full items-center justify-center">
-                              <Text className="text-white text-xs font-bold">{c.owner_name?.[0]?.toUpperCase() || "U"}</Text>
-                            </View>
-                          )}
-                          <View className="flex-1 bg-[#faf5e0] p-2 rounded-lg">
-                            <View className="flex-row items-center gap-2">
-                              <TouchableOpacity onPress={() => router.push(`/perfil/${c.user_id}`)}>
-                                <Text className="font-semibold text-xs text-[#ff7e70]">{c.owner_name}</Text>
-                              </TouchableOpacity>
-                              <Text className="text-gray-400 text-xs">
-                                {new Date(c.created_at).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
-                              </Text>
-                            </View>
-                            <Text className="text-[#211f1e] text-sm mt-1">{c.content}</Text>
-                          </View>
-                        </View>
-                      ))
-                    )}
-                    <View className="flex-row items-center gap-2 mt-2">
-                      <TextInput
-                        className="flex-1 bg-[#faf5e0] rounded-full px-4 py-2 text-sm border border-gray-200"
-                        placeholder="Escribe un comentario..."
-                        value={commentTarget?.id === post.id ? commentText : ""}
-                        onChangeText={setCommentText}
-                      />
-                      <TouchableOpacity
-                        className="bg-[#ff7e70] rounded-full w-8 h-8 items-center justify-center"
-                        onPress={handleAddComment}
-                        disabled={sendingComment || !commentText.trim()}
-                      >
-                        <Text className="text-white text-sm">{sendingComment ? "⏳" : "➤"}</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })
-        )}
-      </ScrollView>
-    </>
-  );
-
-  const renderMyPostsTab = () => (
+    return (
     <>
       <ScrollView
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { loadMyPosts(); onRefresh(); }} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { loadComunidad(); loadMyAnnouncements(); onRefresh(); }} />}
         contentContainerClassName="p-5 pb-10"
       >
-        <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-2xl font-bold text-[#211f1e]">Mis publicaciones</Text>
-        </View>
-
-        {loadingMyPosts ? (
-          <ActivityIndicator size="large" color="#ff7e70" />
-        ) : myPosts.length === 0 ? (
-          <View className="bg-white p-10 rounded-xl items-center">
-            <Text className="text-4xl mb-3">✍️</Text>
-            <Text className="text-gray-500 text-center">
-              No has publicado nada aún
-            </Text>
-            <Text className="text-gray-400 text-sm text-center mt-2">
-              Ve al Feed para crear tu primera publicación
-            </Text>
-          </View>
-        ) : (
-          myPosts.map((post) => {
-            const postComments = comments.filter(
-              (c) => c.target_type === "post" && c.target_id === post.id,
-            );
-            return (
-              <TouchableOpacity
-                key={post.id}
-                activeOpacity={1}
-                className="bg-white p-4 rounded-xl mb-3 shadow-sm"
-                onPress={() => {
-                  if (commentTarget?.id === post.id && commentTarget?.type === "post") {
-                    setCommentTarget(null);
-                    setComments([]);
-                  } else {
-                    setCommentTarget({ type: "post", id: post.id });
-                    loadComments("post", post.id);
-                  }
-                }}
-              >
-                <View className="flex-row items-center gap-3 mb-3">
-                  {post.owner_profile_picture ? (
-                    <Image source={{ uri: post.owner_profile_picture }} className="w-10 h-10 rounded-full" />
-                  ) : (
-                    <View className="w-10 h-10 bg-[#ff7e70] rounded-full items-center justify-center">
-                      <Text className="text-white font-bold">{post.owner_name?.[0]?.toUpperCase() || "U"}</Text>
-                    </View>
-                  )}
-                  <View className="flex-1">
-                    <Text className="font-semibold text-[#211f1e]">{post.owner_name}</Text>
-                    <Text className="text-gray-400 text-xs">
-                      {new Date(post.created_at).toLocaleDateString("es-MX", {
-                        day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-                      })}
-                    </Text>
-                  </View>
-                  <TouchableOpacity onPress={() => handleDeletePost(post.id)}>
-                    <Text className="text-[#ff7e70]">🗑️</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <Text className="text-[#211f1e] leading-5 mb-2">{post.content}</Text>
-
-                <View className="flex-row items-center gap-2 pt-2 border-t border-gray-100">
-                  <Text className="text-gray-400 text-sm">💬 {post.comment_count}</Text>
-                  <Text className="text-[#ff7e70] text-xs ml-auto">
-                    {commentTarget?.id === post.id ? "Ocultar comentarios" : "Ver comentarios"}
-                  </Text>
-                </View>
-
-                {commentTarget?.id === post.id && commentTarget?.type === "post" && (
-                  <View className="mt-3 pt-3 border-t border-gray-100">
-                    {loadingComments ? (
-                      <ActivityIndicator size="small" color="#ff7e70" />
-                    ) : postComments.length === 0 ? (
-                      <Text className="text-gray-400 text-sm mb-2">Sin comentarios</Text>
-                    ) : (
-                      postComments.map((c) => (
-                        <View key={c.id} className="flex-row items-start gap-2 mb-3">
-                          {c.owner_profile_picture ? (
-                            <Image source={{ uri: c.owner_profile_picture }} className="w-7 h-7 rounded-full" />
-                          ) : (
-                            <View className="w-7 h-7 bg-[#ff7e70] rounded-full items-center justify-center">
-                              <Text className="text-white text-xs font-bold">{c.owner_name?.[0]?.toUpperCase() || "U"}</Text>
-                            </View>
-                          )}
-                          <View className="flex-1 bg-[#faf5e0] p-2 rounded-lg">
-                            <View className="flex-row items-center gap-2">
-                              <TouchableOpacity onPress={() => router.push(`/perfil/${c.user_id}`)}>
-                                <Text className="font-semibold text-xs text-[#ff7e70]">{c.owner_name}</Text>
-                              </TouchableOpacity>
-                              <Text className="text-gray-400 text-xs">
-                                {new Date(c.created_at).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
-                              </Text>
-                            </View>
-                            <Text className="text-[#211f1e] text-sm mt-1">{c.content}</Text>
-                          </View>
-                        </View>
-                      ))
-                    )}
-                    <View className="flex-row items-center gap-2 mt-2">
-                      <TextInput
-                        className="flex-1 bg-[#faf5e0] rounded-full px-4 py-2 text-sm border border-gray-200"
-                        placeholder="Escribe un comentario..."
-                        value={commentTarget?.id === post.id ? commentText : ""}
-                        onChangeText={setCommentText}
-                      />
-                      <TouchableOpacity
-                        className="bg-[#ff7e70] rounded-full w-8 h-8 items-center justify-center"
-                        onPress={handleAddComment}
-                        disabled={sendingComment || !commentText.trim()}
-                      >
-                        <Text className="text-white text-sm">{sendingComment ? "⏳" : "➤"}</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })
-        )}
-      </ScrollView>
-    </>
-  );
-
-  const renderComunidadTab = () => (
-    <>
-      <ScrollView
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { loadComunidad(); onRefresh(); }} />}
-        contentContainerClassName="p-5 pb-10"
-      >
-        <View className="flex-row items-center justify-between mb-6">
+        <View className="flex-row items-center justify-between mb-4">
           <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
           <TouchableOpacity
             className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
@@ -1941,15 +1853,36 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        {loadingComunidad ? (
+        <View className="flex-row bg-white rounded-xl mb-4 shadow-sm">
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-l-xl ${comSubTab === "all" ? "bg-[#ff7e70]" : "bg-white"}`}
+            onPress={() => setComSubTab("all")}
+          >
+            <Text className={`text-center font-semibold ${comSubTab === "all" ? "text-white" : "text-gray-500"}`}>
+              Comunidad
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-r-xl ${comSubTab === "mine" ? "bg-[#ff7e70]" : "bg-white"}`}
+            onPress={() => setComSubTab("mine")}
+          >
+            <Text className={`text-center font-semibold ${comSubTab === "mine" ? "text-white" : "text-gray-500"}`}>
+              Mis avisos
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {loading ? (
           <ActivityIndicator size="large" color="#ff7e70" />
-        ) : comunidadAnnouncements.length === 0 ? (
+        ) : visibleItems.length === 0 ? (
           <View className="bg-white p-10 rounded-xl items-center">
             <Text className="text-4xl mb-3">💬</Text>
-            <Text className="text-gray-500 text-center">No hay avisos todavía. ¡Sé el primero!</Text>
+            <Text className="text-gray-500 text-center">
+              {comSubTab === "all" ? "No hay avisos todavía. ¡Sé el primero!" : "No has creado avisos aún"}
+            </Text>
           </View>
         ) : (
-          comunidadAnnouncements.map((item: any) => {
+          visibleItems.map((item: any) => {
             const isMine = item.user_id === user?.id;
             const annComments = comments.filter(
               (c) => c.target_type === "announcement" && c.target_id === item.id,
@@ -2080,13 +2013,13 @@ export default function DashboardScreen() {
         </View>
       </Modal>
     </>
-  );
+    );
+  };
 
   return (
     <View className="flex-1 bg-[#faf5e0]">
       <View className="flex-1">
         {activeTab === "feed" && renderFeedTab()}
-        {activeTab === "myposts" && renderMyPostsTab()}
         {activeTab === "home" && renderHomeTab()}
         {activeTab === "comunidad" && renderComunidadTab()}
         {activeTab === "profile" && renderProfileTab()}

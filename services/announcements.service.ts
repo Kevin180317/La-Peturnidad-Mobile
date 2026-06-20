@@ -53,6 +53,45 @@ class AnnouncementsService {
     }
   }
 
+  async getMyAnnouncements(userId: string): Promise<ServiceResult<AnnouncementWithOwner[]>> {
+    try {
+      const { data: announcements, error } = await supabase
+        .from("announcements")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      if (!announcements || announcements.length === 0) {
+        return { success: true, data: [] };
+      }
+
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("first_name, last_name, profile_picture_url")
+        .eq("user_id", userId)
+        .single();
+
+      const transformedData = announcements.map((a) => ({
+        id: a.id,
+        user_id: a.user_id,
+        title: a.title,
+        content: a.content,
+        category: a.category as Announcement["category"],
+        created_at: a.created_at,
+        updated_at: a.updated_at,
+        owner_name:
+          `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Usuario",
+        owner_profile_picture: profile?.profile_picture_url || null,
+      }));
+
+      return { success: true, data: transformedData };
+    } catch (error: any) {
+      return { success: false, error: error.message, data: [] };
+    }
+  }
+
   async create(
     data: Omit<Announcement, "id" | "created_at" | "updated_at">,
   ): Promise<ServiceResult<Announcement>> {
