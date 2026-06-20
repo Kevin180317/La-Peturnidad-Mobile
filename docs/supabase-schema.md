@@ -51,8 +51,7 @@ CREATE TABLE user_profiles (
 
 | Policy | Command | Rule |
 |---|---|---|
-| Users can view their own profile | SELECT | `auth.uid() = user_id` |
-| Moderators can view all profiles | SELECT | `is_moderator_or_admin() OR auth.uid() = user_id` |
+| Anyone can view profiles | SELECT | `true` (perfiles públicos para la comunidad) |
 | Users can insert their own profile | INSERT | `auth.uid() = user_id` (with check) |
 | Users can update their own profile | UPDATE | `auth.uid() = user_id` (using) |
 | Users can delete their own profile | DELETE | `auth.uid() = user_id` (using) |
@@ -482,3 +481,4 @@ auth.users
 | 17 | 20260620193539 | create_success_stories |
 | 18 | 20260620193541 | create_reports_and_blocks |
 | 19 | 20260620195713 | fix_rls_recursion_moderators |
+| 20 | 20260621000001 | fix_profiles_select_for_community |
