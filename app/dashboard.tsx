@@ -1642,7 +1642,9 @@ export default function DashboardScreen() {
   };
 
   const renderFeedTab = () => {
-    const visiblePosts = feedSubTab === "all" ? feedPosts : myPosts;
+    const visiblePosts = feedSubTab === "all"
+      ? feedPosts.filter((p) => p.user_id !== user?.id)
+      : myPosts;
     const loading = feedSubTab === "all" ? loadingFeed : loadingMyPosts;
 
     return (
@@ -1833,7 +1835,9 @@ export default function DashboardScreen() {
   };
 
   const renderComunidadTab = () => {
-    const visibleItems = comSubTab === "all" ? comunidadAnnouncements : myAnnouncements;
+    const visibleItems = comSubTab === "all"
+      ? comunidadAnnouncements.filter((a) => a.user_id !== user?.id)
+      : myAnnouncements;
     const loading = comSubTab === "all" ? loadingComunidad : loadingMyAnnouncements;
 
     return (
