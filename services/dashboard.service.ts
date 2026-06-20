@@ -201,6 +201,26 @@ class DashboardService {
     }
   }
 
+  async updatePet(
+    petId: string,
+    petData: Partial<Pick<Pet, "name" | "type" | "color" | "size" | "features" | "image_url">>,
+  ) {
+    try {
+      const { data, error } = await supabase
+        .from("pets")
+        .update(petData)
+        .eq("id", petId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, data };
+    } catch (error: any) {
+      console.error("Error updating pet:", error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ============== ALERTAS DE EMERGENCIA ==============
 
   async createEmergencyAlert(

@@ -19,6 +19,22 @@ export default function RootLayout() {
         name="register-extended"
         options={{ title: "Registro de usuario" }}
       />
+      <Stack.Screen
+        name="notificaciones"
+        options={{ title: "Notificaciones" }}
+      />
+      <Stack.Screen
+        name="comunidad"
+        options={{ title: "Comunidad" }}
+      />
+      <Stack.Screen
+        name="mensajes"
+        options={{ title: "Mensajes" }}
+      />
+      <Stack.Screen
+        name="perfil/[id]"
+        options={{ title: "Perfil" }}
+      />
     </Stack>
   );
 }
