@@ -1,4 +1,5 @@
 import { followsService } from "@/services/follows.service";
+import { messagesService } from "@/services/messages.service";
 import { petsService } from "@/services/pets.service";
 import { profileService } from "@/services/profile.service";
 import { supabase } from "@/utils/supabase";
@@ -93,7 +94,6 @@ export default function PublicProfileScreen() {
 
   const handleMessage = async () => {
     if (!currentUserId) return;
-    const { messagesService } = await import("@/services/messages.service");
     const r = await messagesService.getOrCreateConversation(currentUserId, id);
     if (r.success) {
       router.push(`/mensajes/${r.data?.conversation_id}`);

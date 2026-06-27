@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Modal,
   RefreshControl,
   ScrollView,
@@ -33,16 +34,17 @@ export default function GruposScreen() {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
     setUserId(user.user.id);
-    await loadGroups();
+    await loadGroups(user.user.id);
   };
 
-  const loadGroups = async () => {
+  const loadGroups = async (uid?: string) => {
+    const uid_or_state = uid || userId;
     const result = await groupsService.getAll();
     if (result.success) {
       const enriched = await Promise.all(
         result.data.map(async (g) => {
           const members = await groupsService.getMembers(g.id);
-          const isMember = userId ? await groupsService.isMember(g.id, userId) : false;
+          const isMember = uid_or_state ? await groupsService.isMember(g.id, uid_or_state) : false;
           return { ...g, memberCount: members.success ? members.data.length : 0, isMember };
         }),
       );
@@ -124,6 +126,25 @@ export default function GruposScreen() {
               key={group.id}
               className="bg-white p-4 rounded-xl mb-3 shadow-sm"
               onPress={() => router.push(`/grupos/${group.id}`)}
+              onLongPress={() => {
+                if (group.created_by !== userId) return;
+                Alert.alert(
+                  "Eliminar grupo",
+                  `¿Eliminar "${group.name}" permanentemente?`,
+                  [
+                    { text: "Cancelar", style: "cancel" },
+                    {
+                      text: "Eliminar",
+                      style: "destructive",
+                      onPress: async () => {
+                        const r = await groupsService.delete(group.id);
+                        if (r.success) await loadGroups();
+                        else Alert.alert("Error", r.error || "No se pudo eliminar");
+                      },
+                    },
+                  ],
+                );
+              }}
             >
               <View className="flex-row items-center justify-between mb-2">
                 <Text className="font-bold text-lg text-[#211f1e]">{group.name}</Text>

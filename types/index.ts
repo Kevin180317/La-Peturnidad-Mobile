@@ -133,6 +133,7 @@ export interface Conversation {
   id: string;
   created_at: string;
   updated_at: string;
+  group_id: string | null;
 }
 
 export interface ConversationWithParticipant extends Conversation {
@@ -142,6 +143,8 @@ export interface ConversationWithParticipant extends Conversation {
   last_message: string | null;
   last_message_at: string | null;
   unread_count: number;
+  is_group: boolean;
+  group_name: string | null;
 }
 
 export interface Message {

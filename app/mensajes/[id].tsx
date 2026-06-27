@@ -22,6 +22,8 @@ export default function ConversationScreen() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isGroup, setIsGroup] = useState(false);
+  const [senderNames, setSenderNames] = useState<Record<string, string>>({});
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -38,6 +40,14 @@ export default function ConversationScreen() {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
     setUserId(user.user.id);
+    if (id) {
+      const { data: conv } = await supabase
+        .from("conversations")
+        .select("group_id")
+        .eq("id", id)
+        .single();
+      setIsGroup(!!conv?.group_id);
+    }
     await loadMessages();
     if (id) await messagesService.markAsRead(id, user.user.id);
   };
@@ -47,6 +57,20 @@ export default function ConversationScreen() {
     const result = await messagesService.getMessages(id);
     if (result.success) {
       setMessages(result.data);
+
+      const uniqueIds = [...new Set(result.data.map((m: any) => m.sender_id))];
+      if (uniqueIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("user_profiles")
+          .select("user_id, first_name, last_name")
+          .in("user_id", uniqueIds);
+
+        const map: Record<string, string> = {};
+        profiles?.forEach((p: any) => {
+          map[p.user_id] = `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Usuario";
+        });
+        setSenderNames(map);
+      }
     }
     setLoading(false);
   };
@@ -120,6 +144,11 @@ export default function ConversationScreen() {
                 </Text>
               )}
               <View className={`mb-3 max-w-[80%] ${isMine ? "self-end" : "self-start"}`}>
+                {isGroup && !isMine && (
+                  <Text className="text-xs font-semibold text-[#ff7e70] mb-0.5 ml-1">
+                    {senderNames[item.sender_id] || "Usuario"}
+                  </Text>
+                )}
                 <View
                   className={`p-3 rounded-2xl ${
                     isMine

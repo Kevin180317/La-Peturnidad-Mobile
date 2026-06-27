@@ -1,9 +1,11 @@
 import { groupsService } from "@/services/groups.service";
+import { messagesService } from "@/services/messages.service";
 import { supabase } from "@/utils/supabase";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   RefreshControl,
   ScrollView,
@@ -18,6 +20,7 @@ export default function GrupoDetailScreen() {
   const [group, setGroup] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     init();
@@ -26,8 +29,7 @@ export default function GrupoDetailScreen() {
   const init = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
-    setUserId(user.user.id);
-
+    setCurrentUserId(user.user.id);
     if (!id) return;
     const [groupRes, membersRes] = await Promise.all([
       groupsService.getById(id),
@@ -82,9 +84,55 @@ export default function GrupoDetailScreen() {
       {group.description && (
         <Text className="text-gray-600 mb-4">{group.description}</Text>
       )}
-      <Text className="text-gray-400 text-sm mb-6">👥 {members.length} miembros</Text>
+      <Text className="text-gray-400 text-sm mb-4">👥 {members.length} miembros</Text>
 
-      <Text className="text-lg font-bold text-[#211f1e] mb-3">Miembros</Text>
+      <TouchableOpacity
+        className="bg-[#007275] py-3 rounded-lg mb-6 flex-row items-center justify-center"
+        onPress={async () => {
+          if (!currentUserId || !id) return;
+          const userIds = members.map((m) => m.user_id);
+          const r = await messagesService.getOrCreateGroupConversation(id, userIds);
+          if (r.success) {
+            router.push(`/mensajes/${r.data?.conversation_id}`);
+          }
+        }}
+      >
+        <Text className="text-white font-semibold mr-2">💬</Text>
+        <Text className="text-white font-semibold">Chat grupal</Text>
+      </TouchableOpacity>
+
+        {group.created_by === currentUserId && (
+          <TouchableOpacity
+            className="bg-red-500 py-3 rounded-lg mb-6 flex-row items-center justify-center"
+            onPress={() => {
+              Alert.alert(
+                "Eliminar grupo",
+                "¿Estás seguro? Esto eliminará el grupo y el chat asociado para todos los miembros.",
+                [
+                  { text: "Cancelar", style: "cancel" },
+                  {
+                    text: "Eliminar",
+                    style: "destructive",
+                    onPress: async () => {
+                      if (!id) return;
+                      const r = await groupsService.delete(id);
+                      if (r.success) {
+                        router.replace("/grupos");
+                      } else {
+                        Alert.alert("Error", r.error || "No se pudo eliminar el grupo");
+                      }
+                    },
+                  },
+                ],
+              );
+            }}
+          >
+            <Text className="text-white font-semibold mr-2">🗑️</Text>
+            <Text className="text-white font-semibold">Eliminar grupo</Text>
+          </TouchableOpacity>
+        )}
+
+        <Text className="text-lg font-bold text-[#211f1e] mb-3">Miembros</Text>
       {members.map((m) => (
         <TouchableOpacity
           key={m.id}

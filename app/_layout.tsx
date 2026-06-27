@@ -32,6 +32,10 @@ export default function RootLayout() {
         options={{ title: "Mensajes" }}
       />
       <Stack.Screen
+        name="mensajes/[id]"
+        options={{ title: "Chat" }}
+      />
+      <Stack.Screen
         name="perfil/[id]"
         options={{ title: "Perfil" }}
       />
@@ -46,6 +50,10 @@ export default function RootLayout() {
       <Stack.Screen
         name="grupos"
         options={{ title: "Grupos" }}
+      />
+      <Stack.Screen
+        name="grupos/[id]"
+        options={{ title: "Grupo" }}
       />
       <Stack.Screen
         name="historias"

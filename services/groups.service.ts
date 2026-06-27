@@ -93,6 +93,16 @@ class GroupsService {
     }
   }
 
+  async delete(groupId: string): Promise<ServiceResult> {
+    try {
+      const { error } = await supabase.rpc("delete_group", { group_id_param: groupId });
+      if (error) throw error;
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
   async isMember(groupId: string, userId: string): Promise<boolean> {
     try {
       const { data } = await supabase

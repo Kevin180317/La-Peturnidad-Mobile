@@ -7,11 +7,12 @@ import {
 } from "@/services/dashboard.service";
 import { announcementsService } from "@/services/announcements.service";
 import { commentsService } from "@/services/comments.service";
+import { messagesService } from "@/services/messages.service";
 import { postsService } from "@/services/posts.service";
 import { supabase } from "@/utils/supabase";
 import { Picker } from "@react-native-picker/picker";
 import * as Notifications from "expo-notifications";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -41,6 +42,7 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("home");
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Estados para mascotas
   const [pets, setPets] = useState<Pet[]>([]);
@@ -134,6 +136,13 @@ export default function DashboardScreen() {
       registerPushToken();
     }
   }, [user]);
+
+  // Recargar mensajes no leídos al volver a la pantalla
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.id) loadUnreadCount(user.id);
+    }, [user?.id]),
+  );
 
   const loadComunidad = useCallback(async () => {
     setLoadingComunidad(true);
@@ -271,6 +280,9 @@ export default function DashboardScreen() {
 
         // Cargar mascotas automáticamente
         await loadPets(currentUser.id);
+
+        // Cargar mensajes no leídos
+        await loadUnreadCount(currentUser.id);
       } else {
         console.log("No se encontró perfil");
       }
@@ -279,6 +291,14 @@ export default function DashboardScreen() {
       showToast("error", "Error", "No se pudieron cargar los datos");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadUnreadCount = async (uid: string) => {
+    const result = await messagesService.getConversations(uid);
+    if (result.success) {
+      const totalUnread = result.data.reduce((sum, c) => sum + c.unread_count, 0);
+      setUnreadCount(totalUnread);
     }
   };
 
@@ -291,6 +311,7 @@ export default function DashboardScreen() {
     }
     if (showMyAlerts && user?.id) await loadMyAlerts(user.id);
     if (showFoundPets && user?.id) await loadFoundPets(user.id);
+    if (user?.id) await loadUnreadCount(user.id);
     setRefreshing(false);
   }, [showPets, showAlerts, showMyAlerts, showFoundPets, profile, user]);
 
@@ -1240,12 +1261,17 @@ export default function DashboardScreen() {
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-[#007275] py-3 rounded-lg mb-3"
+              className="bg-[#007275] py-3 rounded-lg mb-3 flex-row items-center justify-center"
               onPress={() => router.push("/mensajes")}
             >
               <Text className="text-white text-center font-semibold">
                 ✉️ Mensajes
               </Text>
+              {unreadCount > 0 && (
+                <View className="bg-[#ff7e70] rounded-full min-w-[22px] h-[22px] items-center justify-center ml-2 px-1">
+                  <Text className="text-white text-xs font-bold">{unreadCount}</Text>
+                </View>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               className="bg-[#005e66] py-3 rounded-lg mb-3"
@@ -1263,14 +1289,16 @@ export default function DashboardScreen() {
                 🐾 Reuniones exitosas
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#211f1e] py-3 rounded-lg"
-              onPress={() => router.push("/panel-moderacion")}
-            >
-              <Text className="text-white text-center font-semibold">
-                🛡️ Panel de moderación
-              </Text>
-            </TouchableOpacity>
+            {profile?.role === "admin" || profile?.role === "moderator" ? (
+              <TouchableOpacity
+                className="bg-[#211f1e] py-3 rounded-lg"
+                onPress={() => router.push("/panel-moderacion")}
+              >
+                <Text className="text-white text-center font-semibold">
+                  🛡️ Panel de moderación
+                </Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
 
           {/* Información de cuenta */}

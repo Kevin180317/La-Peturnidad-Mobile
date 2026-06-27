@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Image,
   RefreshControl,
   ScrollView,
@@ -17,6 +18,7 @@ export default function MensajesScreen() {
   const [conversations, setConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     init();
@@ -25,6 +27,7 @@ export default function MensajesScreen() {
   const init = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
+    setUserId(user.user.id);
     await loadConversations();
   };
 
@@ -37,6 +40,23 @@ export default function MensajesScreen() {
       setConversations(result.data);
     }
     setLoading(false);
+  };
+
+  const handleDelete = (convId: string) => {
+    Alert.alert("Eliminar chat", "¿Eliminar esta conversación?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: async () => {
+          if (!userId) return;
+          const r = await messagesService.deleteConversation(convId, userId);
+          if (r.success) {
+            setConversations((prev) => prev.filter((c) => c.id !== convId));
+          }
+        },
+      },
+    ]);
   };
 
   const onRefresh = useCallback(async () => {
@@ -85,8 +105,13 @@ export default function MensajesScreen() {
             key={conv.id}
             className="bg-white p-4 rounded-xl mb-3 shadow-sm flex-row items-center"
             onPress={() => router.push(`/mensajes/${conv.id}`)}
+            onLongPress={() => handleDelete(conv.id)}
           >
-            {conv.other_user_picture ? (
+            {conv.is_group ? (
+              <View className="w-14 h-14 rounded-full bg-[#005e66] items-center justify-center mr-3">
+                <Text className="text-2xl">👥</Text>
+              </View>
+            ) : conv.other_user_picture ? (
               <Image source={{ uri: conv.other_user_picture }} className="w-14 h-14 rounded-full mr-3" />
             ) : (
               <View className="w-14 h-14 rounded-full bg-[#ff7e70] items-center justify-center mr-3">

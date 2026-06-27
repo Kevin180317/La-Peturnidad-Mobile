@@ -1,6 +1,13 @@
 import { type ConversationWithParticipant, type Message, type ServiceResult } from "@/types";
 import { supabase } from "@/utils/supabase";
 
+function generateUUID(): string {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
 class MessagesService {
   async getConversations(userId: string): Promise<ServiceResult<ConversationWithParticipant[]>> {
     try {
@@ -55,7 +62,26 @@ class MessagesService {
       const transformedData: ConversationWithParticipant[] = [];
 
       for (const conv of conversations) {
-        const otherId = convOtherUser[conv.id];
+        const isGroup = !!conv.group_id;
+        let groupName: string | null = null;
+        let otherId = convOtherUser[conv.id];
+        let otherName = "Usuario";
+        let otherPicture: string | null = null;
+
+        if (isGroup) {
+          const { data: grp } = await supabase
+            .from("groups")
+            .select("name")
+            .eq("id", conv.group_id)
+            .single();
+
+          groupName = grp?.name || "Grupo";
+          otherName = `👥 ${groupName}`;
+        } else {
+          const profile = profileMap[otherId] || {};
+          otherName = `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Usuario";
+          otherPicture = profile.profile_picture_url || null;
+        }
 
         const { data: lastMsg } = await supabase
           .from("messages")
@@ -71,19 +97,19 @@ class MessagesService {
           .neq("sender_id", userId)
           .is("read_at", null);
 
-        const profile = profileMap[otherId] || {};
-
         transformedData.push({
           id: conv.id,
           created_at: conv.created_at,
           updated_at: conv.updated_at,
+          group_id: conv.group_id,
           other_user_id: otherId,
-          other_user_name:
-            `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Usuario",
-          other_user_picture: profile.profile_picture_url || null,
+          other_user_name: otherName,
+          other_user_picture: otherPicture,
           last_message: lastMsg?.[0]?.content || null,
           last_message_at: lastMsg?.[0]?.created_at || null,
           unread_count: unreadCount || 0,
+          is_group: isGroup,
+          group_name: groupName,
         });
       }
 
@@ -110,25 +136,37 @@ class MessagesService {
 
   async sendMessage(conversationId: string, senderId: string, content: string): Promise<ServiceResult<Message>> {
     try {
-      const { data: message, error } = await supabase
+      const messageId = generateUUID();
+      const createdAt = new Date().toISOString();
+
+      const { error } = await supabase
         .from("messages")
         .insert([{
+          id: messageId,
           conversation_id: conversationId,
           sender_id: senderId,
           content,
-          created_at: new Date().toISOString(),
-        }])
-        .select()
-        .single();
+          created_at: createdAt,
+        }]);
 
       if (error) throw error;
 
       await supabase
         .from("conversations")
-        .update({ updated_at: new Date().toISOString() })
+        .update({ updated_at: createdAt })
         .eq("id", conversationId);
 
-      return { success: true, data: message };
+      return {
+        success: true,
+        data: {
+          id: messageId,
+          conversation_id: conversationId,
+          sender_id: senderId,
+          content,
+          created_at: createdAt,
+          read_at: null,
+        },
+      };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -155,20 +193,14 @@ class MessagesService {
         }
       }
 
-      const { data: conv, error: convError } = await supabase
-        .from("conversations")
-        .insert([{}])
-        .select()
-        .single();
+      const { data: convId, error: rpcError } = await supabase.rpc("create_conversation", {
+        user1_id: userId1,
+        user2_id: userId2,
+      });
 
-      if (convError) throw convError;
+      if (rpcError) throw rpcError;
 
-      await supabase.from("conversation_participants").insert([
-        { conversation_id: conv.id, user_id: userId1 },
-        { conversation_id: conv.id, user_id: userId2 },
-      ]);
-
-      return { success: true, data: { conversation_id: conv.id } };
+      return { success: true, data: { conversation_id: convId } };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -181,6 +213,44 @@ class MessagesService {
       .eq("conversation_id", conversationId)
       .neq("sender_id", userId)
       .is("read_at", null);
+  }
+
+  async deleteConversation(conversationId: string, userId: string): Promise<ServiceResult> {
+    try {
+      const { error } = await supabase
+        .from("conversation_participants")
+        .delete()
+        .eq("conversation_id", conversationId)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getOrCreateGroupConversation(groupId: string, userIds: string[]): Promise<ServiceResult<{ conversation_id: string }>> {
+    try {
+      const { data: existingConvs } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("group_id", groupId);
+
+      if (existingConvs && existingConvs.length > 0) {
+        return { success: true, data: { conversation_id: existingConvs[0].id } };
+      }
+
+      const { data: convId, error: rpcError } = await supabase.rpc("create_group_conversation", {
+        group_id_param: groupId,
+        member_ids: userIds,
+      });
+
+      if (rpcError) throw rpcError;
+      return { success: true, data: { conversation_id: convId } };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
   }
 }
 
