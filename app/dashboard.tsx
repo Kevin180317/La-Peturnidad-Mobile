@@ -19,6 +19,7 @@ import {
   Alert,
   Image,
   Modal,
+  Platform,
   RefreshControl,
   ScrollView,
   Text,
@@ -130,11 +131,30 @@ export default function DashboardScreen() {
     loadUserData();
   }, []);
 
-  // Registrar token de notificaciones
+  // Configurar handler de notificaciones en foreground
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+
+  // Registrar token FCM nativo + listener de respuesta
   useEffect(() => {
     if (user?.id) {
-      registerPushToken();
+      registerFcmToken();
     }
+
+    const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
+      const url = response.notification.request.content.data?.url;
+      if (typeof url === "string") {
+        router.push(url);
+      }
+    });
+
+    return () => responseListener.remove();
   }, [user]);
 
   // Recargar mensajes no leídos al volver a la pantalla
@@ -230,15 +250,23 @@ export default function DashboardScreen() {
     if (activeTab === "feed") { loadFeed(); loadMyPosts(); }
   }, [activeTab]);
 
-  const registerPushToken = async () => {
+  const registerFcmToken = async () => {
     try {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") return;
-      const token = (await Notifications.getExpoPushTokenAsync()).data;
-      await dashboardService.savePushToken(user.id, token);
-      console.log("Push token guardado:", token);
+
+      if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "Notificaciones",
+          importance: Notifications.AndroidImportance.HIGH,
+        });
+      }
+
+      const token = (await Notifications.getDevicePushTokenAsync()).data;
+      await dashboardService.saveFcmToken(user.id, token);
+      console.log("FCM token guardado:", token);
     } catch (error) {
-      console.error("Error registering push token:", error);
+      console.error("Error registering FCM token:", error);
     }
   };
 

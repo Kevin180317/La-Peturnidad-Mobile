@@ -24,27 +24,48 @@ class AuthService {
     }
   }
 
-  async savePushToken(
-    userId: string,
-    token: string,
-  ): Promise<ServiceResult> {
-    try {
-      await supabase
-        .from("user_profiles")
-        .update({ push_token: token })
-        .eq("user_id", userId);
-      return { success: true };
-    } catch {
-      return { success: true };
-    }
-  }
-
   async signIn(email: string, password: string) {
     return supabase.auth.signInWithPassword({ email: email.trim(), password: password.trim() });
   }
 
   async signUp(email: string, password: string) {
     return supabase.auth.signUp({ email: email.trim(), password: password.trim() });
+  }
+
+  async isEmailConfirmed(): Promise<boolean> {
+    try {
+      const { data } = await supabase.auth.getUser();
+      return !!data.user?.email_confirmed_at;
+    } catch {
+      return false;
+    }
+  }
+
+  async resendConfirmation(email: string) {
+    return supabase.auth.signUp({
+      email: email.trim(),
+      password: "",
+      options: { emailRedirectTo: undefined },
+    });
+  }
+
+  async sendOtp(email: string) {
+    return supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: { shouldCreateUser: false },
+    });
+  }
+
+  async verifyOtp(email: string, token: string) {
+    return supabase.auth.verifyOtp({
+      email: email.trim(),
+      token,
+      type: "email",
+    });
+  }
+
+  async updatePassword(password: string) {
+    return supabase.auth.updateUser({ password });
   }
 
   async resetPassword(email: string) {

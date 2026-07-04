@@ -1,6 +1,6 @@
 # PROGRES — La Peturnidad
 
-> Estado actual del proyecto. Última actualización: 27/06/2026
+> Estado actual del proyecto. Última actualización: 28/06/2026
 
 ---
 
@@ -13,7 +13,7 @@
 | Tabla `emergency_alerts` + RLS | ✅ |
 | Tabla `found_pets` + RLS | ✅ |
 | Storage buckets (`pet-images`, `profile-pictures`) + RLS | ✅ |
-| Edge Function `send-emergency-notification` | ✅ |
+| Edge Function `send-push-notification` (FCM v1) | ✅ |
 | Keys de entorno unificadas (solo anon key) | ✅ |
 | `ServiceResult` type exportado | ✅ |
 | found_pets RLS corregido (dueño puede ver) | ✅ |
@@ -78,6 +78,15 @@
 | **Fix: creador veía "Unirse" en sus grupos** | Race condition: `setUserId` async no se había actualizado cuando `loadGroups` consultaba membresía. Se pasa `userId` como parámetro en vez de leer del state. |
 | **Fix: mensajes sin nombre del remitente** | En chats grupales se cargan los perfiles (`first_name`, `last_name`) de cada `sender_id` y se muestran arriba del bubble. |
 | **Eliminar grupo** | Long press en lista + botón en detalle (solo creador). RPC `delete_group()` SECURITY DEFINER que elimina grupo, miembros (cascade), chat asociado, mensajes y participantes. DELETE policy en `groups`. |
+| **Push notifications (Edge Function + FCM)** | Nueva Edge Function `send-push-notification` desplegada. Usa Firebase Admin SDK (service account) para llamar FCM v1 API. Reemplazó a `send-emergency-notification` (eliminada). |
+| **Cliente: getDevicePushTokenAsync** | `dashboard.tsx` ahora usa `getDevicePushTokenAsync()` en vez de `getExpoPushTokenAsync()`. Guarda en `user_profiles.fcm_token`. |
+| **app.json: plugin expo-notifications** | Agregado explícitamente (requerido en SDK 53). |
+| **google-services.json** | Colocado en `android/app/` para development builds Android. |
+| **notifications table** | Nueva tabla en BD para historial de pushes. |
+| **Emergency alerts push** | `alerts.service.ts` consulta `fcm_token` de vecinos y envía push via Edge Function al crear alerta. |
+| **savePushToken duplicado eliminado** | Eliminado método muerto en `auth.service.ts`. |
+| **Recuperación de contraseña con OTP** | Nuevo flujo de 3 pasos: (1) `forgot-password.tsx` reescrito — envía OTP via `signInWithOtp({ shouldCreateUser: false })` (2) `verify-otp.tsx` — input de 6 dígitos, verifica con `verifyOtp({ type: 'email' })` (3) `reset-password.tsx` — nueva contraseña con `updateUser({ password })`. Link "¿Olvidaste tu contraseña?" agregado al login. Registrados en `_layout.tsx`. |
+| **Confirmación de email post-registro** | Nueva pantalla `email-confirmacion.tsx` — pantalla intermedia que se muestra después de registrarse o al intentar login sin email confirmado. Solo tiene "Reenviar email" y "Volver al inicio". En login (`index.tsx`), se verifica `email_confirmed_at` y si es null se redirige a `email-confirmacion` en vez de dashboard/register-extended. Método `resendConfirmation(email)` en `auth.service.ts`. |
 
 ### 🔴 Implementación inmediata
 
@@ -102,7 +111,6 @@
 | **Tests** | No hay ningún test (unit, integration, e2e) |
 | **Refactor `dashboard.tsx`** | ~2000 líneas monolíticas — extraer a hooks y componentes separados |
 | **Buscador** | No hay búsqueda de mascotas, grupos, usuarios, etc. |
-| **Recuperación de contraseña** | `forgot-password.tsx` existe pero el flujo completo (email + reset) necesita verificarse |
 | **Eliminar cuenta** | No hay opción para que un usuario elimine su cuenta |
 
 ### 🟡 Media prioridad
@@ -124,8 +132,8 @@
 | **i18n** | Todo en español duro (sin sistema de traducciones) |
 | **Limpiar storage policies** | Hay políticas duplicadas de INSERT en `storage.objects` (3 por bucket) |
 | **Servir colonias.json desde API** | 3786 líneas en cliente (`register-extended.tsx`) |
-| **Edge Function tests** | `send-emergency-notification` sin tests |
 | **`dashboard.service.ts` redefine interfaces** | `UserProfile`, `Pet`, etc. en vez de importar `@/types` |
+| **Database Webhooks** | Configurar webhooks en Supabase Dashboard: `emergency_alerts` INSERT + `messages` INSERT → `send-push-notification` |
 
 ---
 

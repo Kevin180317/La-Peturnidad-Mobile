@@ -20,6 +20,10 @@ export default function RootLayout() {
         options={{ title: "Registro de usuario" }}
       />
       <Stack.Screen
+        name="email-confirmacion"
+        options={{ title: "Confirmar email" }}
+      />
+      <Stack.Screen
         name="notificaciones"
         options={{ title: "Notificaciones" }}
       />
@@ -62,6 +66,18 @@ export default function RootLayout() {
       <Stack.Screen
         name="panel-moderacion"
         options={{ title: "Moderación" }}
+      />
+      <Stack.Screen
+        name="forgot-password"
+        options={{ title: "Recuperar contraseña" }}
+      />
+      <Stack.Screen
+        name="verify-otp"
+        options={{ title: "Verificar código" }}
+      />
+      <Stack.Screen
+        name="reset-password"
+        options={{ title: "Nueva contraseña" }}
       />
     </Stack>
   );

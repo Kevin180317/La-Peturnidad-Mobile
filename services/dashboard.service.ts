@@ -556,20 +556,20 @@ class DashboardService {
 
   // ============== TOKENS Y AUTENTICACIÓN ==============
 
-  async savePushToken(userId: string, token: string) {
+  async saveFcmToken(userId: string, token: string) {
     try {
       const { error } = await supabase
         .from("user_profiles")
-        .update({ push_token: token })
+        .update({ fcm_token: token, push_token: token })
         .eq("user_id", userId);
 
       if (error) {
-        console.warn("⚠️ No se pudo guardar push token:", error.message);
+        console.warn("⚠️ No se pudo guardar FCM token:", error.message);
         return { success: true };
       }
       return { success: true };
     } catch (error: any) {
-      console.warn("⚠️ Error saving push token:", error);
+      console.warn("⚠️ Error saving FCM token:", error);
       return { success: true };
     }
   }

@@ -49,18 +49,20 @@ export default function LoginScreen() {
       }
 
       if (data.user) {
-        console.log("✅ Usuario autenticado:", data.user.id);
-        console.log("📧 Email:", data.user.email);
+        if (!data.user.email_confirmed_at) {
+          router.replace({
+            pathname: "/email-confirmacion",
+            params: { email: data.user.email ?? "" },
+          });
+          setLoading(false);
+          return;
+        }
 
-        // 2. Buscar perfil por user_id (más directo)
         const profileResult = await dashboardService.getProfileByUserId(
           data.user.id,
         );
 
         if (profileResult.success && profileResult.data) {
-          // ✅ Tiene perfil completo, vamos al dashboard
-          console.log("✅ Perfil encontrado:", profileResult.data);
-
           Toast.show({
             type: "success",
             text1: "¡Bienvenido!",
@@ -77,11 +79,6 @@ export default function LoginScreen() {
             },
           });
         } else {
-          // ❌ No tiene perfil, va a registro extendido
-          console.log(
-            "⚠️ No se encontró perfil, redirigiendo a registro extendido",
-          );
-
           Toast.show({
             type: "info",
             text1: "Completa tu perfil",
@@ -170,6 +167,13 @@ export default function LoginScreen() {
               Iniciar sesión
             </Text>
           </TouchableOpacity>
+
+          <Link
+            href="/forgot-password"
+            className="text-[#ff7e70] font-semibold text-center mb-4"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
 
           <View className="flex-row justify-center mt-4">
             <Text className="text-[#211f1e]">¿No tienes cuenta? </Text>

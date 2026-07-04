@@ -1,6 +1,6 @@
-import { supabase } from "@/utils/supabase";
-import { Link, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { authService } from "@/services/auth.service";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Text,
@@ -10,20 +10,18 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
-export default function RegisterScreen() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
+export default function ResetPasswordScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleRegister = async () => {
-    // Validaciones
-    if (!email || !password || !confirmPassword) {
+  const handleUpdate = async () => {
+    if (!password || !confirmPassword) {
       Toast.show({
         type: "error",
         text1: "Campos requeridos",
-        text2: "Todos los campos son obligatorios",
+        text2: "Completa todos los campos",
         visibilityTime: 3000,
       });
       return;
@@ -50,17 +48,13 @@ export default function RegisterScreen() {
     }
 
     setLoading(true);
-
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password: password.trim(),
-      });
+      const { error } = await authService.updatePassword(password);
 
       if (error) {
         Toast.show({
           type: "error",
-          text1: "Error al registrar",
+          text1: "Error",
           text2: error.message,
           visibilityTime: 3000,
         });
@@ -68,31 +62,20 @@ export default function RegisterScreen() {
         return;
       }
 
-      if (data.user) {
-        console.log("✅ Usuario registrado:", data.user.id);
-
-        Toast.show({
-          type: "success",
-          text1: "Registro exitoso",
-          text2: "Confirmá tu email para continuar",
-          visibilityTime: 2000,
-          onHide: () => {
-            router.replace({
-              pathname: "/email-confirmacion",
-              params: {
-                email: data.user?.email ?? "",
-                userId: data.user?.id ?? "",
-              },
-            });
-          },
-        });
-      }
+      Toast.show({
+        type: "success",
+        text1: "Contraseña actualizada",
+        text2: "Ya puedes iniciar sesión con tu nueva contraseña",
+        visibilityTime: 2000,
+        onHide: () => {
+          router.replace("/");
+        },
+      });
     } catch (error: any) {
-      console.error("❌ Error en registro:", error);
       Toast.show({
         type: "error",
-        text1: "Error de red",
-        text2: "No se pudo conectar al servidor",
+        text1: "Error inesperado",
+        text2: error.message || "Intenta de nuevo más tarde",
         visibilityTime: 3000,
       });
       setLoading(false);
@@ -104,43 +87,30 @@ export default function RegisterScreen() {
       {loading ? (
         <View className="items-center">
           <ActivityIndicator size="large" color="#ff7e70" />
-          <Text className="mt-4 text-gray-600 font-medium">
-            Procesando registro...
-          </Text>
+          <Text className="mt-4 text-[#211f1e]">Actualizando...</Text>
         </View>
       ) : (
         <>
           <View className="mb-8">
             <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
-              Crear Cuenta
+              Nueva contraseña
             </Text>
             <Text className="text-[#211f1e] text-lg">
-              Regístrate para comenzar
+              Ingresa tu nueva contraseña
             </Text>
           </View>
 
           <View className="mb-4">
             <Text className="text-[#211f1e] font-semibold mb-2">
-              Correo electrónico
+              Nueva contraseña
             </Text>
             <TextInput
               className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
-              placeholder="ejemplo@correo.com"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View className="mb-4">
-            <Text className="text-[#211f1e] font-semibold mb-2">Contraseña</Text>
-            <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
               placeholder="••••••••"
+              secureTextEntry
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
+              autoCapitalize="none"
             />
           </View>
 
@@ -151,28 +121,21 @@ export default function RegisterScreen() {
             <TextInput
               className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
               placeholder="••••••••"
+              secureTextEntry
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              secureTextEntry
+              autoCapitalize="none"
             />
           </View>
 
           <TouchableOpacity
             className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
-            onPress={handleRegister}
-            disabled={loading}
+            onPress={handleUpdate}
           >
             <Text className="text-white text-center font-bold text-lg">
-              Registrarse
+              Actualizar contraseña
             </Text>
           </TouchableOpacity>
-
-          <View className="flex-row justify-center mt-4">
-            <Text className="text-[#211f1e]">¿Ya tienes cuenta? </Text>
-            <Link href="/" className="text-[#ff7e70] font-bold">
-              Inicia sesión
-            </Link>
-          </View>
         </>
       )}
       <Toast />

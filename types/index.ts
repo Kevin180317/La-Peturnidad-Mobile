@@ -16,6 +16,7 @@ export interface UserProfile {
   city: string;
   profile_picture_url: string | null;
   push_token: string | null;
+  fcm_token: string | null;
   role: "user" | "moderator" | "admin";
   created_at: string;
   updated_at: string;

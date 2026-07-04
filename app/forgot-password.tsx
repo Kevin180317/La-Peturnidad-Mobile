@@ -1,5 +1,5 @@
 import { authService } from "@/services/auth.service";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -13,9 +13,9 @@ import Toast from "react-native-toast-message";
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
+  const router = useRouter();
 
-  const handleReset = async () => {
+  const handleSendOtp = async () => {
     if (!email) {
       Toast.show({
         type: "error",
@@ -28,7 +28,7 @@ export default function ForgotPasswordScreen() {
 
     setLoading(true);
     try {
-      const { error } = await authService.resetPassword(email);
+      const { error } = await authService.sendOtp(email);
 
       if (error) {
         Toast.show({
@@ -41,7 +41,15 @@ export default function ForgotPasswordScreen() {
         return;
       }
 
-      setSent(true);
+      Toast.show({
+        type: "success",
+        text1: "Código enviado",
+        text2: "Revisa tu bandeja de entrada",
+        visibilityTime: 2000,
+        onHide: () => {
+          router.push({ pathname: "/verify-otp", params: { email } });
+        },
+      });
     } catch (error: any) {
       Toast.show({
         type: "error",
@@ -54,65 +62,54 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#faf5e0] px-6">
-      <View className="flex-1 justify-center">
-        {loading ? (
-          <View className="items-center">
-            <ActivityIndicator size="large" color="#ff7e70" />
-            <Text className="mt-4 text-[#211f1e]">Enviando...</Text>
-          </View>
-        ) : sent ? (
-          <>
-            <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
-              Revisa tu email
-            </Text>
-            <Text className="text-base text-[#211f1e]/70 mb-8">
-              Te hemos enviado un enlace para restablecer tu contraseña a{" "}
-              <Text className="font-bold">{email}</Text>
-            </Text>
-            <Link href="/" className="text-[#ff7e70] font-bold text-center">
-              Volver al inicio de sesión
-            </Link>
-          </>
-        ) : (
-          <>
+    <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
+      {loading ? (
+        <View className="items-center">
+          <ActivityIndicator size="large" color="#ff7e70" />
+          <Text className="mt-4 text-[#211f1e]">Enviando código...</Text>
+        </View>
+      ) : (
+        <>
+          <View className="mb-8">
             <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
               Recuperar contraseña
             </Text>
-            <Text className="text-base text-[#211f1e]/70 mb-8">
-              Te enviaremos un enlace para restablecer tu contraseña
+            <Text className="text-[#211f1e] text-lg">
+              Te enviaremos un código OTP a tu email
             </Text>
+          </View>
 
-            <Text className="text-sm font-semibold text-[#211f1e] mb-2">
-              Email
+          <View className="mb-6">
+            <Text className="text-[#211f1e] font-semibold mb-2">
+              Correo electrónico
             </Text>
             <TextInput
-              className="bg-white p-4 rounded-xl mb-6 text-[#211f1e]"
-              placeholder="tu@email.com"
+              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+              placeholder="ejemplo@correo.com"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
             />
+          </View>
 
-            <TouchableOpacity
-              className="bg-[#ff7e70] py-4 rounded-xl"
-              onPress={handleReset}
-            >
-              <Text className="text-white text-center font-bold text-lg">
-                Enviar enlace
-              </Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
+            onPress={handleSendOtp}
+          >
+            <Text className="text-white text-center font-bold text-lg">
+              Enviar código
+            </Text>
+          </TouchableOpacity>
 
-            <View className="flex-row justify-center mt-8">
-              <Text className="text-[#211f1e]/70">¿Recordaste? </Text>
-              <Link href="/" className="text-[#ff7e70] font-bold">
-                Inicia sesión
-              </Link>
-            </View>
-          </>
-        )}
-      </View>
+          <View className="flex-row justify-center mt-4">
+            <Text className="text-[#211f1e]">¿Recordaste? </Text>
+            <Link href="/" className="text-[#ff7e70] font-bold">
+              Inicia sesión
+            </Link>
+          </View>
+        </>
+      )}
       <Toast />
     </View>
   );
