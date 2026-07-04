@@ -17,11 +17,11 @@ export default function VerifyOtpScreen() {
   const router = useRouter();
 
   const handleVerify = async () => {
-    if (!otp || otp.length < 6) {
+    if (!otp || otp.length < 8) {
       Toast.show({
         type: "error",
         text1: "Código inválido",
-        text2: "Ingresa el código de 6 dígitos",
+        text2: "Ingresa el código de 8 dígitos",
         visibilityTime: 3000,
       });
       return;
@@ -76,7 +76,7 @@ export default function VerifyOtpScreen() {
               Verifica tu código
             </Text>
             <Text className="text-[#211f1e] text-lg">
-              Ingresa el código de 6 dígitos que enviamos a{" "}
+              Ingresa el código de 8 dígitos que enviamos a{" "}
               <Text className="font-bold">{email}</Text>
             </Text>
           </View>
@@ -87,11 +87,11 @@ export default function VerifyOtpScreen() {
             </Text>
             <TextInput
               className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0] text-center tracking-[8px]"
-              placeholder="------"
+              placeholder="--------"
               value={otp}
               onChangeText={setOtp}
               keyboardType="number-pad"
-              maxLength={6}
+              maxLength={8}
               autoFocus
             />
           </View>
