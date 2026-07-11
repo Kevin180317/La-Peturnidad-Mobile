@@ -75,6 +75,11 @@
 | **Chat grupal por grupo** | Botón "💬 Chat grupal" en la pantalla de detalle del grupo. Crea una conversación con `group_id` y todos los miembros como participantes. Se muestra con ícono 👥 en la lista de mensajes. |
 | **Columna `group_id` en conversations** | Nueva columna FK → `groups(id)` para identificar chats grupales. |
 | **RPC `create_group_conversation`** | Función SECURITY DEFINER que crea conversación con `group_id` + inserts todos los miembros. |
+| **Onboarding 3 pasos** | Pantalla de bienvenida con carrusel horizontal (Reporta · Conecta · Actúa), isotipo, dots indicadores, botón Siguiente/Comenzar. `index.tsx` es el onboarding directo. |
+| **Routing refactor** | Login movido a `app/login.tsx`. Ruta `/login` registrada en `_layout.tsx`. 16 pantallas actualizadas: `router.replace("/")` → `router.replace("/login")`. |
+| **Fix expo-notifications en Expo Go** | Static import reemplazado por `await import("expo-notifications")` dinámico + try-catch. No crashea en Expo Go SDK 53+. En dev build funciona con FCM + Edge Function. |
+| **uniwind-types.d.ts movido** | Sacado de `app/` a raíz para evitar warning de Expo Router "Route missing default export". |
+| **EAS Build: android/ fuera de git** | `android/` agregado a `.gitignore`, removido de tracking. `googleServicesFile` configurado en `app.json`. `google-services.json` movido a raíz. EAS regenera `android/` automáticamente con prebuild. |
 | **Fix: creador veía "Unirse" en sus grupos** | Race condition: `setUserId` async no se había actualizado cuando `loadGroups` consultaba membresía. Se pasa `userId` como parámetro en vez de leer del state. |
 | **Fix: mensajes sin nombre del remitente** | En chats grupales se cargan los perfiles (`first_name`, `last_name`) de cada `sender_id` y se muestran arriba del bubble. |
 | **Eliminar grupo** | Long press en lista + botón en detalle (solo creador). RPC `delete_group()` SECURITY DEFINER que elimina grupo, miembros (cascade), chat asociado, mensajes y participantes. DELETE policy en `groups`. |
@@ -118,7 +123,7 @@
 | Item | Notas |
 |---|---|
 | **Generated types** | `supabase gen types` no se ha corrido; `dashboard.service.ts` redefine interfaces manualmente |
-| **Onboarding** | No hay tutorial / walkthrough para nuevos usuarios |
+| ~~**Onboarding**~~ | ~~No hay tutorial / walkthrough para nuevos usuarios~~ |
 | **Verificación de email** | No hay verificación de email post-registro |
 | **CI/CD** | No hay GitHub Actions para lint/test/build |
 | **Soporte offline** | Sin caché ni persistencia offline |
