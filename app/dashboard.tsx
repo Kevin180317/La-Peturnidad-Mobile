@@ -11,7 +11,6 @@ import { messagesService } from "@/services/messages.service";
 import { postsService } from "@/services/posts.service";
 import { supabase } from "@/utils/supabase";
 import { Picker } from "@react-native-picker/picker";
-import * as Notifications from "expo-notifications";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -131,30 +130,43 @@ export default function DashboardScreen() {
     loadUserData();
   }, []);
 
-  // Configurar handler de notificaciones en foreground
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
-  });
-
   // Registrar token FCM nativo + listener de respuesta
   useEffect(() => {
-    if (user?.id) {
-      registerFcmToken();
-    }
+    let responseListener: { remove: () => void } | null = null;
 
-    const responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
-      const url = response.notification.request.content.data?.url;
-      if (typeof url === "string") {
-        router.push(url);
+    const initNotifications = async () => {
+      try {
+        const Notifications = await import("expo-notifications");
+
+        Notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowBanner: true,
+            shouldShowList: true,
+            shouldPlaySound: true,
+            shouldSetBadge: false,
+          }),
+        });
+
+        if (user?.id) {
+          registerFcmToken(Notifications);
+        }
+
+        responseListener = Notifications.addNotificationResponseReceivedListener((response: any) => {
+          const url = response.notification.request.content.data?.url;
+          if (typeof url === "string") {
+            router.push(url);
+          }
+        });
+      } catch (error) {
+        console.warn("Notificaciones no disponibles en este entorno:", error);
       }
-    });
+    };
 
-    return () => responseListener.remove();
+    initNotifications();
+
+    return () => {
+      responseListener?.remove();
+    };
   }, [user]);
 
   // Recargar mensajes no leídos al volver a la pantalla
@@ -250,7 +262,7 @@ export default function DashboardScreen() {
     if (activeTab === "feed") { loadFeed(); loadMyPosts(); }
   }, [activeTab]);
 
-  const registerFcmToken = async () => {
+  const registerFcmToken = async (Notifications: any) => {
     try {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") return;
