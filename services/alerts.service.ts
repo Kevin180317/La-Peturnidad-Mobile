@@ -22,31 +22,46 @@ class AlertsService {
 
       if (error) throw error;
 
-      // Notify neighbors via Edge Function (fire-and-forget)
-      supabase
-        .from("user_profiles")
-        .select("fcm_token")
-        .eq("address", alertData.last_seen_location)
-        .neq("user_id", alertData.user_id)
-        .not("fcm_token", "is", null)
-        .then(({ data: neighbors }) => {
-          const tokens = neighbors?.map((n) => n.fcm_token).filter(Boolean) as string[];
-          if (tokens.length > 0) {
-            fetch(EDGE_FUNCTION_URL, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
-              },
-              body: JSON.stringify({
-                tokens,
-                title: `⚠️ Mascota perdida: ${alertData.pet_name}`,
-                body: `Un vecino de tu colonia reportó a su mascota perdido en ${alertData.last_seen_location}.`,
-                data: { type: "emergency", url: "/dashboard" },
-              }),
-            }).catch(() => {});
+      // Notify neighbors via Edge Function
+      try {
+        const { data: neighbors } = await supabase
+          .from("user_profiles")
+          .select("fcm_token")
+          .eq("address", alertData.last_seen_location)
+          .neq("user_id", alertData.user_id)
+          .not("fcm_token", "is", null)
+          .not("fcm_token", "eq", "");
+
+        const tokens = neighbors
+          ?.map((n) => n.fcm_token)
+          .filter((t): t is string => !!t) ?? [];
+
+        if (tokens.length > 0) {
+          const notifyRes = await fetch(EDGE_FUNCTION_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({
+              tokens,
+              title: `⚠️ Mascota perdida: ${alertData.pet_name}`,
+              body: `Un vecino de tu colonia reportó a su mascota perdido en ${alertData.last_seen_location}.`,
+              data: { type: "emergency", url: "/dashboard" },
+            }),
+          });
+
+          if (!notifyRes.ok) {
+            const errText = await notifyRes.text();
+            console.warn("Error al enviar notificaciones push:", errText);
+          } else {
+            const pushResult = await notifyRes.json();
+            console.log("Notificaciones enviadas:", pushResult);
           }
-        });
+        }
+      } catch (notifyErr) {
+        console.warn("Error en notificaciones push:", notifyErr);
+      }
 
       return { success: true, data };
     } catch (error: any) {

@@ -7,9 +7,17 @@ interface NotificationPayload {
   data?: Record<string, string>;
 }
 
-interface FcmResponse {
-  name?: string;
-  error?: { code: number; message: string; status: string };
+function pemToBinary(pem: string): Uint8Array {
+  const base64 = pem
+    .replace("-----BEGIN PRIVATE KEY-----", "")
+    .replace("-----END PRIVATE KEY-----", "")
+    .replace(/\s/g, "");
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
 }
 
 async function getAccessToken(
@@ -36,7 +44,7 @@ async function getAccessToken(
 
   const key = await crypto.subtle.importKey(
     "pkcs8",
-    new TextEncoder().encode(privateKey).buffer as ArrayBuffer,
+    pemToBinary(privateKey),
     { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
     false,
     ["sign"],
@@ -62,8 +70,19 @@ async function getAccessToken(
     }),
   });
 
+  if (!res.ok) {
+    const errBody = await res.text();
+    throw new Error(`OAuth2 token error ${res.status}: ${errBody}`);
+  }
+
   const data = await res.json();
   return data.access_token;
+}
+
+interface FcmResult {
+  token: string;
+  success: boolean;
+  error?: string;
 }
 
 async function sendFcmMessage(
@@ -73,7 +92,7 @@ async function sendFcmMessage(
   data: Record<string, string> | undefined,
   accessToken: string,
   projectId: string,
-): Promise<FcmResponse> {
+): Promise<FcmResult> {
   const message: Record<string, unknown> = {
     token,
     notification: { title, body },
@@ -92,7 +111,13 @@ async function sendFcmMessage(
     },
   );
 
-  return res.json();
+  const bodyRes = await res.json();
+
+  if (bodyRes.error) {
+    return { token, success: false, error: bodyRes.error.message || bodyRes.error.status };
+  }
+
+  return { token, success: true };
 }
 
 Deno.serve(async (req) => {
@@ -115,19 +140,30 @@ Deno.serve(async (req) => {
     }
 
     const sa = JSON.parse(serviceAccountRaw);
+    if (!sa.client_email || !sa.private_key || !sa.project_id) {
+      return new Response(
+        JSON.stringify({ error: "FCM_SERVICE_ACCOUNT missing required fields (client_email, private_key, project_id)" }),
+        { status: 500, headers: { "Content-Type": "application/json" } },
+      );
+    }
+
     const accessToken = await getAccessToken(sa.client_email, sa.private_key);
 
-    const results = await Promise.allSettled(
+    const results = await Promise.all(
       payload.tokens.map((token) =>
         sendFcmMessage(token, payload.title, payload.body, payload.data, accessToken, sa.project_id)
       ),
     );
 
-    const succeeded = results.filter((r) => r.status === "fulfilled").length;
-    const failed = results.filter((r) => r.status === "rejected").length;
+    const succeeded = results.filter((r) => r.success).length;
+    const failed = results.filter((r) => !r.success).length;
+    const details = results.filter((r) => !r.success).map((r) => ({
+      token: r.token.slice(0, 8) + "...",
+      error: r.error,
+    }));
 
     return new Response(
-      JSON.stringify({ succeeded, failed }),
+      JSON.stringify({ succeeded, failed, details }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (error) {

@@ -1,6 +1,8 @@
 import { supabase } from "@/utils/supabase";
 import * as ImagePicker from "expo-image-picker";
 
+const EDGE_FUNCTION_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notification`;
+
 export interface UserProfile {
   id: string;
   user_id: string;
@@ -239,6 +241,48 @@ class DashboardService {
         .single();
 
       if (error) throw error;
+
+      // Notify neighbors via Edge Function
+      try {
+        const { data: neighbors } = await supabase
+          .from("user_profiles")
+          .select("fcm_token")
+          .eq("address", alertData.last_seen_location)
+          .neq("user_id", alertData.user_id)
+          .not("fcm_token", "is", null)
+          .not("fcm_token", "eq", "");
+
+        const tokens = neighbors
+          ?.map((n) => n.fcm_token)
+          .filter((t): t is string => !!t) ?? [];
+
+        if (tokens.length > 0) {
+          const notifyRes = await fetch(EDGE_FUNCTION_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({
+              tokens,
+              title: `⚠️ Mascota perdida: ${alertData.pet_name}`,
+              body: `Un vecino reportó a su mascota perdida en ${alertData.last_seen_location}.`,
+              data: { type: "emergency", url: "/dashboard" },
+            }),
+          });
+
+          if (!notifyRes.ok) {
+            const errText = await notifyRes.text();
+            console.warn("Error push:", errText);
+          } else {
+            const pushResult = await notifyRes.json();
+            console.log("Notificaciones enviadas:", pushResult);
+          }
+        }
+      } catch (notifyErr) {
+        console.warn("Error en notificación:", notifyErr);
+      }
+
       return { success: true, data };
     } catch (error: any) {
       console.error("Error creating emergency alert:", error);

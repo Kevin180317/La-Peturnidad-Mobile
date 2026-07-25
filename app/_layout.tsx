@@ -1,10 +1,13 @@
 // app/_layout.tsx
 import { Stack } from "expo-router";
+import Toast from "react-native-toast-message";
+import { toastConfig } from "../components/ToastConfig";
 import "./global.css";
 
 export default function RootLayout() {
   return (
-    <Stack>
+    <>
+      <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: "Iniciar Sesión" }} />
       <Stack.Screen name="register" options={{ title: "Registro" }} />
@@ -81,5 +84,7 @@ export default function RootLayout() {
         options={{ title: "Nueva contraseña" }}
       />
     </Stack>
+      <Toast config={toastConfig} />
+    </>
   );
 }
