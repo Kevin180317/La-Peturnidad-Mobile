@@ -1,10 +1,68 @@
-// app/_layout.tsx
-import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { Platform } from "react-native";
+import { Stack, router } from "expo-router";
 import Toast from "react-native-toast-message";
 import { toastConfig } from "../components/ToastConfig";
 import "./global.css";
 
 export default function RootLayout() {
+  useEffect(() => {
+    let responseListener: { remove: () => void } | null = null;
+
+    (async () => {
+      try {
+        const Notifications = await import("expo-notifications");
+
+        Notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowBanner: true,
+            shouldShowList: true,
+            shouldPlaySound: true,
+            shouldSetBadge: true,
+          }),
+        });
+
+        if (Platform.OS === "android") {
+          await Notifications.setNotificationChannelAsync("default", {
+            name: "Notificaciones",
+            importance: Notifications.AndroidImportance.HIGH,
+          });
+          await Notifications.setNotificationChannelAsync("emergency_alerts", {
+            name: "Alertas de emergencia",
+            importance: Notifications.AndroidImportance.HIGH,
+            sound: "default",
+            vibrationPattern: [0, 300, 100, 300],
+          });
+        }
+
+        const lastResponse =
+          await Notifications.getLastNotificationResponseAsync();
+        if (lastResponse) {
+          const url = lastResponse.notification.request.content.data?.url;
+          if (typeof url === "string") {
+            setTimeout(() => router.push(url), 500);
+          }
+        }
+
+        responseListener =
+          Notifications.addNotificationResponseReceivedListener(
+            (response: any) => {
+              const url = response.notification.request.content.data?.url;
+              if (typeof url === "string") {
+                router.push(url);
+              }
+            },
+          );
+      } catch {
+        // Notifications not available (web, etc.)
+      }
+    })();
+
+    return () => {
+      responseListener?.remove();
+    };
+  }, []);
+
   return (
     <>
       <Stack>

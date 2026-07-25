@@ -227,6 +227,7 @@ class DashboardService {
 
   async createEmergencyAlert(
     alertData: Omit<EmergencyAlert, "id" | "created_at">,
+    ownerName?: string,
   ) {
     try {
       const { data, error } = await supabase
@@ -241,6 +242,20 @@ class DashboardService {
         .single();
 
       if (error) throw error;
+
+      if (!ownerName) {
+        const { data: ownerProfile } = await supabase
+          .from("user_profiles")
+          .select("first_name, last_name")
+          .eq("user_id", alertData.user_id)
+          .single();
+
+        if (ownerProfile) {
+          ownerName = `${ownerProfile.first_name} ${ownerProfile.last_name}`;
+        } else {
+          ownerName = "Un vecino";
+        }
+      }
 
       // Notify neighbors via Edge Function
       try {
@@ -265,9 +280,17 @@ class DashboardService {
             },
             body: JSON.stringify({
               tokens,
-              title: `⚠️ Mascota perdida: ${alertData.pet_name}`,
-              body: `Un vecino reportó a su mascota perdida en ${alertData.last_seen_location}.`,
-              data: { type: "emergency", url: "/dashboard" },
+              title: `⚠️ ${ownerName} reportó a ${alertData.pet_name} perdida`,
+              body: `Vista por última vez en ${alertData.last_seen_location}.`,
+              image: data?.image_url || null,
+              channelId: "emergency_alerts",
+              data: {
+                type: "emergency",
+                url: `/dashboard?alertId=${data?.id || ""}`,
+                alertId: data?.id || "",
+                petName: alertData.pet_name,
+                ownerName,
+              },
             }),
           });
 

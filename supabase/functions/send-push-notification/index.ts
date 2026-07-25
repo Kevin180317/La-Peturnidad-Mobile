@@ -4,6 +4,8 @@ interface NotificationPayload {
   tokens: string[];
   title: string;
   body: string;
+  image?: string | null;
+  channelId?: string;
   data?: Record<string, string>;
 }
 
@@ -89,13 +91,33 @@ async function sendFcmMessage(
   token: string,
   title: string,
   body: string,
+  image: string | null | undefined,
+  channelId: string | undefined,
   data: Record<string, string> | undefined,
   accessToken: string,
   projectId: string,
 ): Promise<FcmResult> {
+  const notification: Record<string, string> = { title, body };
+  if (image) notification.image = image;
+
   const message: Record<string, unknown> = {
     token,
-    notification: { title, body },
+    notification,
+    android: {
+      priority: "high",
+      notification: {
+        channel_id: channelId || "emergency_alerts",
+        sound: "default",
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: "default",
+          badge: 1,
+        },
+      },
+    },
   };
   if (data) message.data = data;
 
@@ -151,7 +173,16 @@ Deno.serve(async (req) => {
 
     const results = await Promise.all(
       payload.tokens.map((token) =>
-        sendFcmMessage(token, payload.title, payload.body, payload.data, accessToken, sa.project_id)
+        sendFcmMessage(
+          token,
+          payload.title,
+          payload.body,
+          payload.image,
+          payload.channelId,
+          payload.data,
+          accessToken,
+          sa.project_id,
+        )
       ),
     );
 

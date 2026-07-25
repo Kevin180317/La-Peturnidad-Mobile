@@ -18,7 +18,6 @@ import {
   Alert,
   Image,
   Modal,
-  Platform,
   RefreshControl,
   ScrollView,
   Text,
@@ -130,43 +129,21 @@ export default function DashboardScreen() {
     loadUserData();
   }, []);
 
-  // Registrar token FCM nativo + listener de respuesta
+  // Registrar token FCM nativo
   useEffect(() => {
-    let responseListener: { remove: () => void } | null = null;
-
     const initNotifications = async () => {
       try {
         const Notifications = await import("expo-notifications");
 
-        Notifications.setNotificationHandler({
-          handleNotification: async () => ({
-            shouldShowBanner: true,
-            shouldShowList: true,
-            shouldPlaySound: true,
-            shouldSetBadge: false,
-          }),
-        });
-
         if (user?.id) {
           registerFcmToken(Notifications);
         }
-
-        responseListener = Notifications.addNotificationResponseReceivedListener((response: any) => {
-          const url = response.notification.request.content.data?.url;
-          if (typeof url === "string") {
-            router.push(url);
-          }
-        });
       } catch (error) {
         console.warn("Notificaciones no disponibles en este entorno:", error);
       }
     };
 
     initNotifications();
-
-    return () => {
-      responseListener?.remove();
-    };
   }, [user]);
 
   // Recargar mensajes no leídos al volver a la pantalla
@@ -266,13 +243,6 @@ export default function DashboardScreen() {
     try {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") return;
-
-      if (Platform.OS === "android") {
-        await Notifications.setNotificationChannelAsync("default", {
-          name: "Notificaciones",
-          importance: Notifications.AndroidImportance.HIGH,
-        });
-      }
 
       const token = (await Notifications.getDevicePushTokenAsync()).data;
       await dashboardService.saveFcmToken(user.id, token);
@@ -606,7 +576,7 @@ export default function DashboardScreen() {
               last_seen_location: profile.address,
               disappearance_date: new Date().toISOString().split("T")[0],
               image_url: pet.image_url,
-            });
+            }, `${profile.first_name} ${profile.last_name}`);
 
             if (result.success) {
               showToast(

@@ -12,6 +12,7 @@ const EDGE_FUNCTION_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/
 class AlertsService {
   async create(
     alertData: Omit<EmergencyAlert, "id" | "created_at">,
+    ownerName?: string,
   ): Promise<ServiceResult<EmergencyAlert>> {
     try {
       const { data, error } = await supabase
@@ -21,6 +22,20 @@ class AlertsService {
         .single();
 
       if (error) throw error;
+
+      if (!ownerName) {
+        const { data: ownerProfile } = await supabase
+          .from("user_profiles")
+          .select("first_name, last_name")
+          .eq("user_id", alertData.user_id)
+          .single();
+
+        if (ownerProfile) {
+          ownerName = `${ownerProfile.first_name} ${ownerProfile.last_name}`;
+        } else {
+          ownerName = "Un vecino";
+        }
+      }
 
       // Notify neighbors via Edge Function
       try {
@@ -45,19 +60,37 @@ class AlertsService {
             },
             body: JSON.stringify({
               tokens,
-              title: `⚠️ Mascota perdida: ${alertData.pet_name}`,
-              body: `Un vecino de tu colonia reportó a su mascota perdido en ${alertData.last_seen_location}.`,
-              data: { type: "emergency", url: "/dashboard" },
+              title: `⚠️ ${ownerName} reportó a ${alertData.pet_name} perdida`,
+              body: `Vista por última vez en ${alertData.last_seen_location}.`,
+              image: data?.image_url || null,
+              channelId: "emergency_alerts",
+              data: {
+                type: "emergency",
+                url: `/dashboard?alertId=${data?.id || ""}`,
+                alertId: data?.id || "",
+                petName: alertData.pet_name,
+                ownerName,
+              },
             }),
           });
 
           if (!notifyRes.ok) {
             const errText = await notifyRes.text();
-            console.warn("Error al enviar notificaciones push:", errText);
+            console.warn("Error push via alertsService:", errText);
           } else {
             const pushResult = await notifyRes.json();
-            console.log("Notificaciones enviadas:", pushResult);
+            console.log("Notificaciones enviadas desde alertsService:", pushResult);
           }
+        }
+      } catch (notifyErr) {
+        console.warn("Error en notificación desde alertsService:", notifyErr);
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
         }
       } catch (notifyErr) {
         console.warn("Error en notificaciones push:", notifyErr);
