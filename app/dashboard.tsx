@@ -7,6 +7,7 @@ import { HomeTab } from "@/components/dashboard/HomeTab";
 import type { PetFormData } from "@/components/dashboard/PetForm";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { TabBar, type TabType } from "@/components/dashboard/TabBar";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { announcementsService } from "@/services/announcements.service";
 import { commentsService } from "@/services/comments.service";
 import {
@@ -37,6 +38,8 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const [unreadCount, setUnreadCount] = useState(0);
+  const [logoutVisible, setLogoutVisible] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   // Estados para mascotas
   const [pets, setPets] = useState<Pet[]>([]);
@@ -573,35 +576,30 @@ export default function DashboardScreen() {
 
   // ============== FUNCIONES DE CUENTA ==============
 
-  const handleLogout = async () => {
-    Alert.alert(
-      "Cerrar sesión",
-      "¿Estás seguro de que quieres cerrar sesión?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Cerrar sesión",
-          onPress: async () => {
-            const result = await dashboardService.signOut();
-            if (result.success) {
-              try {
-                await AsyncStorage.removeItem("hasSeenOnboarding");
-              } catch (error) {
-                console.warn("Error borrando onboarding:", error);
-              }
-              router.replace("/");
-              showToast(
-                "success",
-                "¡Hasta luego!",
-                "Has cerrado sesión correctamente",
-              );
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+  const handleLogout = () => {
+    setLogoutVisible(true);
+  };
+
+  const handleLogoutConfirm = async () => {
+    setSigningOut(true);
+    const result = await dashboardService.signOut();
+    setSigningOut(false);
+    if (result.success) {
+      setLogoutVisible(false);
+      try {
+        await AsyncStorage.removeItem("hasSeenOnboarding");
+      } catch (error) {
+        console.warn("Error borrando onboarding:", error);
+      }
+      router.replace("/");
+      showToast(
+        "success",
+        "¡Hasta luego!",
+        "Has cerrado sesión correctamente",
+      );
+    } else {
+      showToast("error", "Error", result.error);
+    }
   };
 
   // ============== HANDLERS DE TABS ==============
@@ -753,6 +751,15 @@ export default function DashboardScreen() {
         )}
       </View>
       <TabBar activeTab={activeTab} onSelect={setActiveTab} />
+      <ConfirmModal
+        visible={logoutVisible}
+        title="Cerrar sesión"
+        message="¿Estás seguro de que quieres cerrar sesión?"
+        confirmLabel="Cerrar sesión"
+        loading={signingOut}
+        onConfirm={handleLogoutConfirm}
+        onCancel={() => setLogoutVisible(false)}
+      />
       <Toast />
     </View>
   );

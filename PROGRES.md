@@ -141,6 +141,7 @@
 | **Jerarquía invertida** | Teal pasa de 16 → ~124 usos (antes casi inexistente); coral baja de 147 → ~95 (ya no domina). Todos los CTAs (Publicar, Guardar, Enviar, Crear, Unirse, Seguir, login/register, Comenzar, subir foto, "Lo encontré", Revisado) ahora son teal. |
 | **Detalles de consistencia** | TabBar activo, subtabs Feed/Mis posts, chips de categoría seleccionados, dots del onboarding y switches → teal; ActivityIndicators de carga → teal; menú del ProfileTab alterna teal/coral/dark con opacidades `/10`. |
 | **Verificación** | `npm run lint` (0 errores/0 warnings) + `tsc --noEmit` (0 errores). Auditoría: restan solo red (funcional) + `#2dd4bf` (tint teal). |
+| **Modal branded para cerrar sesión** | Reemplazado el `Alert.alert` nativo por `components/ConfirmModal.tsx` (reutilizable): backdrop oscuro, card blanca `rounded-3xl`, icono en círculo teal, Cancelar gris neutro + Confirmar teal con `ActivityIndicator` mientras firma out. `dashboard.tsx`: `handleLogout` solo abre el modal; `handleLogoutConfirm` ejecuta signOut + borra `hasSeenOnboarding` + navega + toast. |
 
 
 ## 🔧 Pendiente / Deuda técnica
