@@ -1,6 +1,12 @@
-import type { EmergencyAlert, EmergencyAlertWithOwner, FoundPetWithDetails, Pet } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
+import type {
+  EmergencyAlert,
+  EmergencyAlertWithOwner,
+  FoundPetWithDetails,
+  Pet,
+} from "@/services/dashboard.service";
+import { formatDate } from "@/utils/format";
 import {
+  ActivityIndicator,
   Image,
   RefreshControl,
   ScrollView,
@@ -14,196 +20,338 @@ interface EmergencyTabProps {
   emergencyAlerts: EmergencyAlertWithOwner[];
   myAlerts: EmergencyAlert[];
   foundPets: FoundPetWithDetails[];
+  loadingAlerts: boolean;
+  refreshing: boolean;
   selectingPetForAlert: boolean;
   showAlerts: boolean;
   showMyAlerts: boolean;
   showFoundPets: boolean;
-  refreshing: boolean;
-  profileAddress?: string;
   onRefresh: () => void;
-  onReportPet: () => void;
+  onLoadPets: () => void;
+  onToggleSelectingPet: () => void;
+  onLoadEmergencyAlerts: () => void;
   onToggleAlerts: () => void;
+  onLoadMyAlerts: () => void;
   onToggleMyAlerts: () => void;
+  onLoadFoundPets: () => void;
   onToggleFoundPets: () => void;
-  onSelectPetForAlert: (pet: Pet) => void;
+  onCreateAlert: (pet: Pet) => void;
   onFoundPet: (alert: EmergencyAlertWithOwner) => void;
   onDeleteAlert: (alertId: string) => void;
+  onGoHome: () => void;
 }
 
 export function EmergencyTab({
-  pets, emergencyAlerts, myAlerts, foundPets,
-  selectingPetForAlert, showAlerts, showMyAlerts, showFoundPets,
-  refreshing, profileAddress, onRefresh,
-  onReportPet, onToggleAlerts, onToggleMyAlerts, onToggleFoundPets,
-  onSelectPetForAlert, onFoundPet, onDeleteAlert,
+  pets,
+  emergencyAlerts,
+  myAlerts,
+  foundPets,
+  loadingAlerts,
+  refreshing,
+  selectingPetForAlert,
+  showAlerts,
+  showMyAlerts,
+  showFoundPets,
+  onRefresh,
+  onLoadPets,
+  onToggleSelectingPet,
+  onLoadEmergencyAlerts,
+  onToggleAlerts,
+  onLoadMyAlerts,
+  onToggleMyAlerts,
+  onLoadFoundPets,
+  onToggleFoundPets,
+  onCreateAlert,
+  onFoundPet,
+  onDeleteAlert,
+  onGoHome,
 }: EmergencyTabProps) {
   return (
     <ScrollView
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      contentContainerClassName="p-5"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      contentContainerClassName="p-5 pb-10"
     >
-      <View className="flex-row items-center gap-3 mb-6">
-        <View className="w-12 h-12 rounded-full bg-[#ff7e70] items-center justify-center">
-          <Ionicons name="alert-circle" size={24} color="white" />
+      <Text className="text-2xl font-bold mb-2 text-[#ff7e70]">
+        Emergencia 🚨
+      </Text>
+      <Text className="text-gray-600 mb-6">
+        Sistema de alertas para mascotas perdidas en tu comunidad
+      </Text>
+
+      {/* Botones principales - cuadrícula 2x2 */}
+      <View className="mb-6">
+        <View className="flex-row gap-4 mb-4">
+          <TouchableOpacity
+            className="flex-1 bg-[#ff7e70] rounded-2xl p-4 items-center shadow-sm"
+            onPress={() => {
+              onLoadPets();
+              onToggleSelectingPet();
+            }}
+          >
+            <Text className="text-3xl mb-2">📢</Text>
+            <Text className="text-white font-bold text-center text-sm leading-5">
+              Reportar mascota perdida
+            </Text>
+            <Text className="text-white/90 text-[11px] text-center mt-1">
+              Crea una alerta
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-yellow-500"}`}
+            onPress={onToggleAlerts}
+          >
+            <Text className="text-3xl mb-2">👁️</Text>
+            <Text className="text-white font-bold text-center text-sm leading-5">
+              {showAlerts ? "Ocultar" : "Ver"} mascotas perdidas
+            </Text>
+            <Text className={`text-[11px] text-center mt-1 ${showAlerts ? "text-green-400" : "text-white/90"}`}>
+              {showAlerts ? "✓ Visible" : "En tu zona"}
+            </Text>
+          </TouchableOpacity>
         </View>
-        <View>
-          <Text className="text-xl font-bold text-[#ff7e70]">Urgencia</Text>
-          <Text className="text-sm text-[#ff7e70]/70">Reporta mascotas perdidas</Text>
+
+        <View className="flex-row gap-4">
+          <TouchableOpacity
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showMyAlerts ? "bg-[#211f1e]" : "bg-[#007275]"}`}
+            onPress={onToggleMyAlerts}
+          >
+            <Text className="text-3xl mb-2">📋</Text>
+            <Text className="text-white font-bold text-center text-sm leading-5">
+              {showMyAlerts ? "Ocultar" : "Ver"} mis alertas
+            </Text>
+            <Text className={`text-[11px] text-center mt-1 ${showMyAlerts ? "text-green-400" : "text-white/90"}`}>
+              {showMyAlerts ? "✓ Visible" : "Historial propio"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showFoundPets ? "bg-[#211f1e]" : "bg-green-500"}`}
+            onPress={onToggleFoundPets}
+          >
+            <Text className="text-3xl mb-2">✅</Text>
+            <Text className="text-white font-bold text-center text-sm leading-5">
+              {showFoundPets ? "Ocultar" : "Ver"} mascotas encontradas
+            </Text>
+            <Text className={`text-[11px] text-center mt-1 ${showFoundPets ? "text-green-400" : "text-white/90"}`}>
+              {showFoundPets ? "✓ Visible" : "Rescatadas"}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
 
-      <View className="flex-row flex-wrap gap-2 mb-6">
-        <GridButton icon="megaphone" label="Reportar" color="bg-[#ff7e70]" onPress={onReportPet} />
-        <GridButton
-          icon={showAlerts ? "eye-off" : "eye"}
-          label={showAlerts ? "Ocultar" : "Ver perdidas"}
-          color="bg-[#005e66]"
-          onPress={onToggleAlerts}
-        />
-        <GridButton
-          icon="document-text"
-          label={showMyAlerts ? "Ocultar" : "Mis alertas"}
-          color="bg-[#007275]"
-          onPress={onToggleMyAlerts}
-        />
-        <GridButton
-          icon="checkmark-done"
-          label={showFoundPets ? "Ocultar" : "Encontradas"}
-          color="bg-[#211f1e]"
-          onPress={onToggleFoundPets}
-        />
-      </View>
-
+      {/* Selección de mascota para alerta */}
       {selectingPetForAlert && (
-        <View className="bg-white rounded-xl p-4 mb-4 border border-gray-200">
-          <Text className="font-bold text-[#ff7e70] mb-3">Selecciona mascota</Text>
+        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+          <Text className="font-bold mb-3">Selecciona la mascota perdida:</Text>
           {pets.length === 0 ? (
-            <Text className="text-[#ff7e70] text-center py-4">Sin mascotas registradas</Text>
+            <View className="bg-[#faf5e0] p-6 rounded-lg items-center">
+              <Text className="text-gray-500">
+                No tienes mascotas registradas
+              </Text>
+              <TouchableOpacity
+                className="bg-[#ff7e70] py-2 px-4 rounded-lg mt-3"
+                onPress={onGoHome}
+              >
+                <Text className="text-white">Registrar mascota</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             pets.map((pet) => (
               <TouchableOpacity
                 key={pet.id}
-                className="flex-row items-center p-3 bg-[#faf5e0] rounded-lg mb-2"
-                onPress={() => onSelectPetForAlert(pet)}
+                className="flex-row items-center p-3 border-b border-gray-100"
+                onPress={() => onCreateAlert(pet)}
               >
                 {pet.image_url ? (
-                  <Image source={{ uri: pet.image_url }} className="w-10 h-10 rounded-full" />
+                  <Image
+                    source={{ uri: pet.image_url }}
+                    className="w-12 h-12 rounded-full mr-3"
+                  />
                 ) : (
-                  <View className="w-10 h-10 rounded-full bg-[#ff7e70]/20 items-center justify-center">
-                    <Ionicons name="paw" size={18} color="#ff7e70" />
+                  <View className="w-12 h-12 bg-gray-200 rounded-full mr-3 items-center justify-center">
+                    <Text className="text-xl">
+                      {pet.type === "perro" ? "🐶" : "🐱"}
+                    </Text>
                   </View>
                 )}
-                <View className="flex-1 ml-3">
-                  <Text className="font-bold text-[#211f1e]">{pet.name}</Text>
-                  <Text className="text-xs text-[#ff7e70]">{pet.type}</Text>
+                <View className="flex-1">
+                  <Text className="font-semibold">{pet.name}</Text>
+                  <Text className="text-gray-500 text-sm capitalize">
+                    {pet.type}
+                  </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color="#ff7e70" />
+                <View className="bg-red-100 px-3 py-1 rounded-full">
+                  <Text className="text-[#ff7e70] text-xs font-semibold">
+                    REPORTAR
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))
           )}
         </View>
       )}
 
+      {/* Alertas de mascotas perdidas */}
       {showAlerts && (
-        <SectionCard title="En tu zona" count={emergencyAlerts.length}>
-          {emergencyAlerts.length === 0 ? (
-            <View className="py-6 items-center">
-              <Ionicons name="checkmark-circle" size={40} color="#007275" />
-              <Text className="text-[#007275] mt-2">Todo bien aquí</Text>
+        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+          <Text className="font-bold mb-3">
+            🐾 Mascotas perdidas en tu colonia
+          </Text>
+          {loadingAlerts ? (
+            <ActivityIndicator size="large" color="#ff7e70" />
+          ) : emergencyAlerts.length === 0 ? (
+            <View className="bg-green-50 p-8 rounded-lg items-center">
+              <Text className="text-4xl mb-3">🎉</Text>
+              <Text className="text-gray-600 text-center">
+                No hay mascotas perdidas reportadas en tu colonia
+              </Text>
             </View>
           ) : (
             emergencyAlerts.map((alert) => (
-              <View key={alert.id} className="flex-row items-center p-3 border-b border-gray-100">
-                {alert.image_url ? (
-                  <Image source={{ uri: alert.image_url }} className="w-12 h-12 rounded-lg" />
-                ) : (
-                  <View className="w-12 h-12 rounded-lg bg-[#faf5e0] items-center justify-center">
-                    <Ionicons name="paw" size={20} color="#ff7e70" />
+              <View
+                key={alert.id}
+                className="border-b border-gray-100 py-4 last:border-b-0"
+              >
+                <View className="flex-row">
+                  {alert.image_url ? (
+                    <Image
+                      source={{ uri: alert.image_url }}
+                      className="w-20 h-20 rounded-lg mr-3"
+                    />
+                  ) : (
+                    <View className="w-20 h-20 bg-gray-200 rounded-lg mr-3 items-center justify-center">
+                      <Text className="text-2xl">
+                        {alert.type === "perro" ? "🐶" : "🐱"}
+                      </Text>
+                    </View>
+                  )}
+                  <View className="flex-1">
+                    <Text className="font-bold text-lg">{alert.pet_name}</Text>
+                    <Text className="text-gray-600 capitalize text-sm mb-1">
+                      {alert.type}
+                    </Text>
+                    <Text className="text-gray-500 text-xs mb-1">
+                      {alert.description}
+                    </Text>
+                    <Text className="text-gray-500 text-xs">
+                      Perdido en: {alert.last_seen_location}
+                    </Text>
+                    <Text className="text-gray-500 text-xs mb-2">
+                      Fecha: {formatDate(alert.disappearance_date)}
+                    </Text>
+                    <Text className="text-gray-500 text-xs">
+                      Dueño: {alert.owner_name} - {alert.owner_phone}
+                    </Text>
+                    <TouchableOpacity
+                      className="bg-green-500 py-2 px-4 rounded-lg mt-2 self-start"
+                      onPress={() => onFoundPet(alert)}
+                    >
+                      <Text className="text-white text-xs font-semibold">
+                        ✅ Lo encontré
+                      </Text>
+                    </TouchableOpacity>
                   </View>
-                )}
-                <View className="flex-1 ml-3">
-                  <Text className="font-bold">{alert.pet_name}</Text>
-                  <Text className="text-xs text-gray-500">{alert.last_seen_location}</Text>
                 </View>
-                <TouchableOpacity
-                  className="bg-[#007275] py-2 px-4 rounded-lg"
-                  onPress={() => onFoundPet(alert)}
-                >
-                  <Text className="text-white text-xs font-medium">Encontré</Text>
-                </TouchableOpacity>
               </View>
             ))
           )}
-        </SectionCard>
+        </View>
       )}
 
+      {/* Mis alertas */}
       {showMyAlerts && (
-        <SectionCard title="Mis alertas">
+        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+          <Text className="font-bold mb-3">📋 Mis alertas activas</Text>
           {myAlerts.length === 0 ? (
-            <Text className="text-[#ff7e70] text-center py-4">Sin alertas activas</Text>
+            <View className="bg-[#faf5e0] p-8 rounded-lg items-center">
+              <Text className="text-gray-500 text-center">
+                No tienes alertas activas
+              </Text>
+            </View>
           ) : (
             myAlerts.map((alert) => (
-              <View key={alert.id} className="flex-row items-center justify-between p-3 border-b border-gray-100">
-                <View>
-                  <Text className="font-bold">{alert.pet_name}</Text>
-                  <Text className="text-xs text-gray-500">{alert.disappearance_date}</Text>
+              <View
+                key={alert.id}
+                className="border-b border-gray-100 py-4 last:border-b-0"
+              >
+                <View className="flex-row">
+                  {alert.image_url ? (
+                    <Image
+                      source={{ uri: alert.image_url }}
+                      className="w-16 h-16 rounded-lg mr-3"
+                    />
+                  ) : (
+                    <View className="w-16 h-16 bg-gray-200 rounded-lg mr-3 items-center justify-center">
+                      <Text className="text-2xl">
+                        {alert.type === "perro" ? "🐶" : "🐱"}
+                      </Text>
+                    </View>
+                  )}
+                  <View className="flex-1">
+                    <Text className="font-bold">{alert.pet_name}</Text>
+                    <Text className="text-gray-600 text-sm capitalize mb-1">
+                      {alert.type}
+                    </Text>
+                    <Text className="text-gray-500 text-xs">
+                      Perdido en: {alert.last_seen_location}
+                    </Text>
+                    <Text className="text-gray-500 text-xs mb-2">
+                      {formatDate(alert.disappearance_date)}
+                    </Text>
+                    <TouchableOpacity
+                      className="bg-[#ff7e70] py-2 px-4 rounded-lg self-start"
+                      onPress={() => onDeleteAlert(alert.id)}
+                    >
+                      <Text className="text-white text-xs font-semibold">
+                        🗑️ Eliminar alerta
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-                <TouchableOpacity
-                  className="bg-red-100 py-2 px-4 rounded-lg"
-                  onPress={() => onDeleteAlert(alert.id)}
-                >
-                  <Text className="text-red-500 text-xs">Eliminar</Text>
-                </TouchableOpacity>
               </View>
             ))
           )}
-        </SectionCard>
+        </View>
       )}
 
+      {/* Mascotas encontradas */}
       {showFoundPets && (
-        <SectionCard title="Encontradas">
+        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+          <Text className="font-bold mb-3">✅ Mascotas que he encontrado</Text>
           {foundPets.length === 0 ? (
-            <Text className="text-[#ff7e70] text-center py-4">Sin mascotas encontradas</Text>
+            <View className="bg-[#faf5e0] p-8 rounded-lg items-center">
+              <Text className="text-gray-500 text-center">
+                No has reportado mascotas encontradas
+              </Text>
+            </View>
           ) : (
             foundPets.map((found) => (
-              <View key={found.id} className="flex-row items-center p-3 border-b border-gray-100">
-                <Ionicons name="checkmark-circle" size={20} color="#007275" />
-                <Text className="flex-1 ml-3 font-medium">{found.pet_name}</Text>
-                <Text className="text-xs text-gray-400">
-                  {found.created_at?.split("T")[0]}
-                </Text>
+              <View
+                key={found.id}
+                className="border-b border-gray-100 py-3 last:border-b-0"
+              >
+                <View className="flex-row items-center">
+                  {found.image_url && (
+                    <Image
+                      source={{ uri: found.image_url }}
+                      className="w-12 h-12 rounded-full mr-3"
+                    />
+                  )}
+                  <View>
+                    <Text className="font-semibold">{found.pet_name}</Text>
+                    <Text className="text-gray-500 text-xs">
+                      Encontrada el: {formatDate(found.created_at)}
+                    </Text>
+                  </View>
+                </View>
               </View>
             ))
           )}
-        </SectionCard>
+        </View>
       )}
     </ScrollView>
-  );
-}
-
-function GridButton({
-  icon, label, color, onPress,
-}: {
-  icon: string; label: string; color: string; onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity className={`w-[48%] ${color} py-4 rounded-xl`} onPress={onPress}>
-      <View className="items-center">
-        <Ionicons name={icon as any} size={22} color="white" />
-        <Text className="text-white text-sm mt-1 font-medium">{label}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-}
-
-function SectionCard({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
-  return (
-    <View className="bg-white rounded-xl p-4 mb-4 border border-gray-200">
-      <View className="flex-row items-center justify-between mb-3">
-        <Text className="font-bold text-[#ff7e70]">{title}</Text>
-        {count !== undefined && <Text className="text-xs text-[#ff7e70]">{count}</Text>}
-      </View>
-      {children}
-    </View>
   );
 }

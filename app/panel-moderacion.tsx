@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/EmptyState";
 import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
@@ -16,11 +17,14 @@ export default function PanelModeracionScreen() {
   const router = useRouter();
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
+  // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const init = async () => {
@@ -45,7 +49,7 @@ export default function PanelModeracionScreen() {
     const result = await reportsService.getAll();
     if (result.success) {
       const enriched = await Promise.all(
-        result.data.map(async (r) => {
+        (result.data ?? []).map(async (r) => {
           const { data: target } = await supabase
             .from("user_profiles")
             .select("first_name, last_name")
@@ -68,6 +72,12 @@ export default function PanelModeracionScreen() {
       setReports(enriched);
     }
     setLoading(false);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await init();
+    setRefreshing(false);
   };
 
   const handleReview = async (reportId: string, status: string) => {
@@ -108,7 +118,7 @@ export default function PanelModeracionScreen() {
 
   return (
     <ScrollView
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={init} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
       contentContainerClassName="p-5 bg-[#faf5e0] flex-1"
     >
       <View className="flex-row items-center justify-between mb-6">
@@ -117,10 +127,11 @@ export default function PanelModeracionScreen() {
       </View>
 
       {reports.length === 0 ? (
-        <View className="bg-white p-10 rounded-xl items-center">
-          <Text className="text-4xl mb-3">🛡️</Text>
-          <Text className="text-gray-500 text-center">No hay reportes</Text>
-        </View>
+        <EmptyState
+          icon="🛡️"
+          title="No hay reportes"
+          subtitle="Los reportes de la comunidad aparecerán aquí"
+        />
       ) : (
         reports.map((report) => (
           <View key={report.id} className="bg-white p-4 rounded-xl mb-3 shadow-sm">
@@ -134,7 +145,7 @@ export default function PanelModeracionScreen() {
               Reportado por: {report.reporter_name}
             </Text>
             <Text className="text-gray-500 text-sm mb-1">Razón: {report.reason}</Text>
-            <Text className="text-gray-400 text-xs mb-3">
+            <Text className="text-gray-500 text-xs mb-3">
               {new Date(report.created_at).toLocaleDateString("es-MX", {
                 day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
               })}

@@ -26,8 +26,10 @@ export default function ConversationScreen() {
   const [senderNames, setSenderNames] = useState<Record<string, string>>({});
   const flatListRef = useRef<FlatList>(null);
 
+  // init corre al montar o cambiar id (recarga intencional)
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -56,9 +58,9 @@ export default function ConversationScreen() {
     if (!id) return;
     const result = await messagesService.getMessages(id);
     if (result.success) {
-      setMessages(result.data);
+      setMessages(result.data ?? []);
 
-      const uniqueIds = [...new Set(result.data.map((m: any) => m.sender_id))];
+      const uniqueIds = [...new Set((result.data ?? []).map((m: any) => m.sender_id))];
       if (uniqueIds.length > 0) {
         const { data: profiles } = await supabase
           .from("user_profiles")
@@ -126,8 +128,8 @@ export default function ConversationScreen() {
         contentContainerClassName="p-4"
         ListEmptyComponent={
           <View className="flex-1 justify-center items-center py-20">
-            <Text className="text-gray-400">No hay mensajes aún</Text>
-            <Text className="text-gray-400 text-sm mt-1">Envía el primer mensaje</Text>
+            <Text className="text-gray-500">No hay mensajes aún</Text>
+            <Text className="text-gray-500 text-sm mt-1">Envía el primer mensaje</Text>
           </View>
         }
         renderItem={({ item, index }) => {
@@ -139,7 +141,7 @@ export default function ConversationScreen() {
           return (
             <>
               {showDate && (
-                <Text className="text-center text-gray-400 text-xs my-3">
+                <Text className="text-center text-gray-500 text-xs my-3">
                   {formatDate(item.created_at)}
                 </Text>
               )}
@@ -160,7 +162,7 @@ export default function ConversationScreen() {
                     {item.content}
                   </Text>
                 </View>
-                <Text className={`text-xs mt-1 text-gray-400 ${isMine ? "text-right" : "text-left"}`}>
+                <Text className={`text-xs mt-1 text-gray-500 ${isMine ? "text-right" : "text-left"}`}>
                   {formatTime(item.created_at)}
                   {isMine && item.read_at && " ✓✓"}
                 </Text>
@@ -172,8 +174,9 @@ export default function ConversationScreen() {
 
       <View className="flex-row items-center gap-2 p-3 bg-white border-t border-gray-200">
         <TextInput
-          className="flex-1 bg-[#faf5e0] rounded-full px-4 py-3 border border-gray-200"
+          className="flex-1 bg-white rounded-full px-4 py-3 border border-gray-200 text-[#211f1e]"
           placeholder="Escribe un mensaje..."
+          placeholderTextColor="#9BA1A6"
           value={input}
           onChangeText={setInput}
           multiline
@@ -183,7 +186,7 @@ export default function ConversationScreen() {
           onPress={handleSend}
           disabled={sending || !input.trim()}
         >
-          <Text className="text-white text-xl">{sending ? "⏳" : "➤"}</Text>
+          <Text className={`text-xl ${sending || !input.trim() ? "text-gray-500" : "text-white"}`}>{sending ? "⏳" : "➤"}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

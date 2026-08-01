@@ -1,6 +1,6 @@
-# PROGRES — La Peturnidad
+# PROGRES — Lucky Tracker
 
-> Estado actual del proyecto. Última actualización: 28/06/2026
+> Estado actual del proyecto. Última actualización: 01/08/2026
 
 ---
 
@@ -64,6 +64,63 @@
 | Storage 403 — anon key no tiene rol `authenticated` | Usar JWT del usuario (`session.access_token`) en vez de anon key |
 | RLS bloqueaba ver perfiles de otros usuarios en comunidad | Política `Anyone can view profiles` con `USING (true)` |
 
+## ✅ Fase 5 — UI/UX: legibilidad y estandarización (Completada)
+
+| Item | Notas |
+|---|---|
+| **Bugs críticos de contraste (texto invisible)** | Selector tipo de mascota en dashboard (coral sobre coral) → `text-white`. Botones "Cerrar"/"Cancelar" con `bg-[#211f1e]` sin color de texto → `text-white`. |
+| **Todos los TextInput estandarizados (40)** | Fondo blanco + texto `#211f1e` explícito + `placeholderTextColor="#9BA1A6"` en todas las pantallas: login, register, register-extended, forgot-password, reset-password, verify-otp, editar-perfil, dashboard, mensajes/[id], grupos, historias, comunidad. |
+| **Contraste subido en metadata** | ~30 textos `text-gray-400` → `text-gray-500` (timestamps, fechas, contadores, estados vacíos) en 9 pantallas. |
+| **Botones disabled/saving legibles** | "Guardando/Publicando/Subiendo" con `bg-gray-400` + texto blanco (ilegible) → texto `text-gray-700` condicional. Botón enviar del chat (`bg-gray-300`) → `text-gray-500`. Botón "Salir" de grupos → `text-gray-700`. |
+| **Fix raíz: tema oscuro nativo** | `app.json`: `userInterfaceStyle: "automatic"` → `"light"`. Componentes nativos (Picker, diálogos, teclado) ya no siguen el dark mode del teléfono. |
+| **Pickers estilizados** | Picker "Tamaño" (dashboard) y "Colonias" (register-extended): contenedor blanco + `style={{ color: "#211f1e", backgroundColor: "#ffffff" }}` + `color` en cada `Picker.Item`. |
+| **Componente `PasswordInput`** | `components/PasswordInput.tsx` — toggle ojo (Ionicons `eye`/`eye-off`) al extremo derecho vía `flex-row`. Reemplaza los 5 inputs de contraseña: login, register (x2), reset-password (x2). |
+| **Onboarding con AsyncStorage** | Flag `hasSeenOnboarding`: se guarda al completar los 3 steps o tocar "Saltar" (`index.tsx`); se redirige a `/login` si ya se vio (con spinner anti-parpadeo); se borra al hacer logout (`dashboard.tsx`). |
+| **Marca unificada "Lucky Tracker"** | "La Peturnidad" → "Lucky Tracker" en login, header del dashboard, toast de bienvenida y display name de `app.json`. (Slug/scheme/package sin cambios.) |
+| **Tonos teal unificados** | `#005e66` → `#007275` (dashboard, mensajes, perfil/[id]). |
+| **Paleta centralizada** | Creado `utils/theme.ts` con colores de marca y clases base (`inputBase`, `buttonPrimary`, etc.). |
+
+### Bugs corregidos (Fase 5)
+
+| Bug | Fix |
+|---|---|
+| Texto invisible: coral sobre coral (selector tipo mascota) | `text-[#ff7e70]` → `text-white` cuando está seleccionado |
+| Botones oscuros sin color de texto ("Cerrar"/"Cancelar") | Agregado `text-white` |
+| Picker "Tamaño"/"Colonias" con fondo oscuro y texto blanco (dark mode del SO) | `userInterfaceStyle: "light"` + estilos explícitos de color/fondo en Picker e items |
+| Inputs de contraseña sin toggle mostrar/ocultar | Nuevo `PasswordInput` con ojito |
+| Onboarding se mostraba en cada apertura | Flag `hasSeenOnboarding` en AsyncStorage |
+
+## ✅ Fase 6 — Limpieza y estabilidad (Completada)
+
+| Item | Notas |
+|---|---|
+| **Fix `services/alerts.service.ts` (typecheck roto)** | Eliminado bloque huérfano de merge (catch/return duplicado fuera de cualquier método, L94-103 del original). **La lógica de notificaciones push está intacta** (inserción de alerta, búsqueda de vecinos por FCM, llamada a edge function): `services/alerts.service.ts:40-87`. El bloque era un error de sintaxis que impedía parsear/cargar el módulo entero. |
+| **Typecheck en 0 errores** | ~35 errores preexistentes corregidos: `result.data ?? []` en setState de ~12 pantallas (dashboard, comunidad, historias, mensajes, mensajes/[id], perfil/[id], grupos, grupos/[id], panel-moderacion, seguidores), `followersRes.data?.length ?? 0`, import `Opacity` inexistente en `Button.tsx` (+ Omit de `onBlur`/`onFocus`), cast `url as Href` en `_layout.tsx`, `tsconfig.json` ahora excluye `supabase/` (código Deno, no se typecheckea con RN). Verificación: `tsc --noEmit` limpio. |
+| **Fix pull-to-refresh (spinner real)** | `historias.tsx`, `panel-moderacion.tsx`, `grupos/[id].tsx` usaban `refreshing={loading}` → el spinner nunca aparecía al refrescar. Ahora estado `refreshing` + handler `handleRefresh`. |
+| **Código muerto eliminado** | Borrados `components/dashboard/*` (HomeTab, EmergencyTab, ProfileTab, PetForm, PetDetailModal, TabBar) y `components/SkeletonLoader.tsx` — verificados sin imports. |
+| **Flujo de edición de mascota restaurado** | El `PetDetailModal` local de dashboard recibía `onEdit={handleStartEdit}` pero lo ignoraba (componente sin props) → el botón "Editar" no existía en el modal. Ahora acepta `onEdit` y renderiza el botón "Editar" (teal) en el detalle de la mascota. |
+| **Teclado ya no tapa inputs en auth** | `KeyboardAvoidingView` (behavior="padding", offset 100 en iOS) en login, register, register-extended y reset-password. |
+| **Auto-login con sesión activa** | `index.tsx` y `login.tsx` verifican `supabase.auth.getSession()` al montar: sesión activa → dashboard directo (o email-confirmacion si no confirmado, o register-extended si perfil incompleto). Onboarding solo se muestra si no hay sesión. |
+| **Lint: 20 → 16 warnings** | Eliminados 4 warnings: import `Opacity` (Button), `userId`/`setCity` sin usar (register-extended), `handleStartEdit` sin usar (restaurado). Quedan 16 preexistentes de `react-hooks/exhaustive-deps` (ver deuda media). |
+
+
+## ✅ Fase 7 — Mejoras UX y calidad de código (Completada)
+
+| Item | Notas |
+|---|---|
+| **Header teal sólido** | `_layout.tsx`: `screenOptions` con `headerStyle: { backgroundColor: "#007275" }`, `headerTintColor: "#ffffff"`, `headerTitleStyle: { fontWeight: "700" }`. |
+| **ErrorBoundary global** | `<ErrorBoundary>` envolviendo el `<Stack>` en `_layout.tsx` — fallback con branding (🐾 + botón coral) si una pantalla crashea. |
+| **Skeletons de carga** | Nuevo `components/Skeleton.tsx` (Skeleton, ListSkeleton, CardSkeleton con pulsación Animated). Reemplazaron ActivityIndicators full-screen en dashboard (skeleton personalizado), mensajes (ListSkeleton), grupos (ListSkeleton sin avatar) e historias (CardSkeleton). |
+| **verify-otp UX** | Auto-verificación al llegar a 8 dígitos (`handleOtpChange` filtra no-dígitos y llama `handleVerify()`), `textContentType="oneTimeCode"` para autocompletado de códigos. Fix TS2322: `onPress={() => handleVerify()}`. |
+| **EmptyStates con acción** | Nuevo `components/EmptyState.tsx` (ícono/título/subtítulo/botón). Aplicado en grupos ("Crear grupo"), historias ("Publicar historia"), comunidad ("Publicar aviso"), panel-moderacion y mensajes. |
+| **Recarga al enfocar pantalla** | `useFocusEffect` + ref `firstFocus` (omite la carga inicial) en grupos, mensajes y comunidad — el contenido se refresca al volver de otra pantalla. |
+| **Lint en 0 warnings** | Los 16 warnings de `react-hooks/exhaustive-deps` se suprimieron con `eslint-disable-next-line` colocado justo antes de la línea de cierre del hook (donde reporta la regla) + comentario de justificación ("deps estables intencionales"). `npm run lint`: 0 errores, 0 warnings. |
+| **CI/CD GitHub Actions** | Nuevo `.github/workflows/ci.yml`: push a main + pull requests → `bun install --frozen-lockfile` + `bun run lint` + `bun run typecheck`. Script `typecheck` agregado en `package.json`. |
+| **Generated types (B7)** | Nuevo `types/database.ts` (18 tablas + 5 funciones + helpers `Tables`/`TablesInsert`/`TablesUpdate`). `services/dashboard.service.ts` migrado: `UserProfile`, `Pet`, `EmergencyAlert`, `FoundPet` son ahora alias de `Row` del tipo `Database` (se eliminó el campo `email` inexistente en BD; campos opcionales ahora `string | null` como el esquema real). `dashboard.tsx` ajustado: `formatDate` acepta `string \| null \| undefined`, `handleStartEdit` con coerción (`pet.type === "gato" ? "gato" : "perro"`, `?? ""`). `FoundPetWithDetails`/`EmergencyAlertWithOwner` (tipos calculados de joins) se mantienen manuales. Verificación: `tsc --noEmit` limpio. |
+| **Buscador (B10)** | Nueva pantalla `/buscar` (tabs Mascotas/Grupos/Usuarios) + `services/search.service.ts` (búsqueda `ilike` con debounce 300ms, límite 20 resultados). Mascotas muestran dueño, grupos miembros, usuarios ciudad; tap navega a perfil/grupo. Botón 🔍 en el header del dashboard. Nueva política RLS `Authenticated users can view all pets` (la RLS anterior solo permitía ver las propias — el buscador de mascotas de la comunidad fallaba). Registrada en `_layout.tsx`. |
+| **Refactor dashboard.tsx (B11)** | `app/dashboard.tsx`: **2125 → 759 líneas**. UI extraída a `components/dashboard/*` (8 archivos, ~1760 líneas): `TabBar`, `DashboardSkeleton`, `PetDetailModal`, `PetForm` (encapsula todo el estado del formulario de mascota + subida de imagen), `HomeTab`, `ProfileTab` (encapsula foto de perfil), `EmergencyTab`, `FeedTab`, `ComunidadTab`. Los tabs y formularios manejan su estado local; el dashboard conserva solo datos + handlers (~40 estados → ~24). `formatDate` movido a `utils/format.ts`. Nota: subtabs/posts/avisos no persisten al cambiar de tab (antes sí, eran estados globales). Verificación: `tsc` + `lint` limpios. |
+
+
 ## 🔧 Pendiente / Deuda técnica
 
 ### ✅ Implementado hoy
@@ -114,20 +171,18 @@
 | Item | Notas |
 |---|---|
 | **Tests** | No hay ningún test (unit, integration, e2e) |
-| **Refactor `dashboard.tsx`** | ~2000 líneas monolíticas — extraer a hooks y componentes separados |
-| **Buscador** | No hay búsqueda de mascotas, grupos, usuarios, etc. |
 | **Eliminar cuenta** | No hay opción para que un usuario elimine su cuenta |
 
 ### 🟡 Media prioridad
 
 | Item | Notas |
 |---|---|
-| **Generated types** | `supabase gen types` no se ha corrido; `dashboard.service.ts` redefine interfaces manualmente |
-| ~~**Onboarding**~~ | ~~No hay tutorial / walkthrough para nuevos usuarios~~ |
-| **Verificación de email** | No hay verificación de email post-registro |
-| **CI/CD** | No hay GitHub Actions para lint/test/build |
+| **Generated types** | ✅ Nuevo `types/database.ts` + `dashboard.service.ts` migrado (Fase 7) |
+| **Onboarding** | ✅ Ya existe (3 pasos) + flag `hasSeenOnboarding` en AsyncStorage (se borra en logout) |
+| **CI/CD** | ✅ GitHub Actions: lint + typecheck (Fase 7) |
 | **Soporte offline** | Sin caché ni persistencia offline |
-| **Dark mode** | No implementado (tema claro fijo) |
+| **Dark mode** | No implementado — `userInterfaceStyle: "light"` forzado (decisión: solo tema claro) |
+| **Warnings de lint (`exhaustive-deps`)** | ✅ 0 warnings (Fase 7) — suprimidos con disables comentados justificados |
 
 ### 🟢 Baja prioridad
 
@@ -137,9 +192,8 @@
 | **i18n** | Todo en español duro (sin sistema de traducciones) |
 | **Limpiar storage policies** | Hay políticas duplicadas de INSERT en `storage.objects` (3 por bucket) |
 | **Servir colonias.json desde API** | 3786 líneas en cliente (`register-extended.tsx`) |
-| **`dashboard.service.ts` redefine interfaces** | `UserProfile`, `Pet`, etc. en vez de importar `@/types` |
 | **Database Webhooks** | Configurar webhooks en Supabase Dashboard: `emergency_alerts` INSERT + `messages` INSERT → `send-push-notification` |
 
 ---
 
-*Documento de progreso del proyecto La Peturnidad.*
+*Documento de progreso del proyecto Lucky Tracker.*

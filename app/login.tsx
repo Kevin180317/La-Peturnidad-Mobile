@@ -1,9 +1,12 @@
 import { dashboardService } from "@/services/dashboard.service";
 import { supabase } from "@/utils/supabase";
+import { PasswordInput } from "@/components/PasswordInput";
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Text,
   TextInput,
   TouchableOpacity,
@@ -16,6 +19,37 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      const sessionUser = data.session?.user;
+      if (!sessionUser) return;
+
+      if (!sessionUser.email_confirmed_at) {
+        router.replace({
+          pathname: "/email-confirmacion",
+          params: { email: sessionUser.email ?? "" },
+        });
+        return;
+      }
+
+      const profileResult = await dashboardService.getProfileByUserId(
+        sessionUser.id,
+      );
+      if (profileResult.success && profileResult.data) {
+        router.replace({
+          pathname: "/dashboard",
+          params: { email: sessionUser.email, userId: sessionUser.id },
+        });
+      } else {
+        router.replace({
+          pathname: "/register-extended",
+          params: { email: sessionUser.email ?? "", userId: sessionUser.id },
+        });
+      }
+    })();
+  }, [router]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -108,7 +142,12 @@ export default function LoginScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
+    <KeyboardAvoidingView
+      className="flex-1 bg-[#faf5e0]"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
+      <View className="flex-1 justify-center p-6">
       {loading ? (
         <View className="items-center">
           <ActivityIndicator size="large" color="#ff7e70" />
@@ -120,7 +159,7 @@ export default function LoginScreen() {
         <>
           <View className="mb-8">
             <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
-              La Peturnidad
+              Lucky Tracker
             </Text>
             <Text className="text-[#211f1e] text-lg">
               Inicia sesión para continuar
@@ -132,8 +171,9 @@ export default function LoginScreen() {
               Correo electrónico
             </Text>
             <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
               placeholder="ejemplo@correo.com"
+              placeholderTextColor="#9BA1A6"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -146,10 +186,8 @@ export default function LoginScreen() {
             <Text className="text-[#211f1e] font-semibold mb-2">
               Contraseña
             </Text>
-            <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+            <PasswordInput
               placeholder="••••••••"
-              secureTextEntry
               value={password}
               onChangeText={setPassword}
               editable={!loading}
@@ -182,6 +220,7 @@ export default function LoginScreen() {
         </>
       )}
       <Toast />
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

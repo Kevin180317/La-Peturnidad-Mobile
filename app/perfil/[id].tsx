@@ -29,8 +29,10 @@ export default function PublicProfileScreen() {
   const [followingCount, setFollowingCount] = useState(0);
   const [userRole, setUserRole] = useState<string | null>(null);
 
+  // init corre al montar o cambiar id (recarga intencional)
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const init = async () => {
@@ -51,7 +53,7 @@ export default function PublicProfileScreen() {
 
     const petsResult = await petsService.getAll(id);
     if (petsResult.success) {
-      setPets(petsResult.data);
+      setPets(petsResult.data ?? []);
     }
 
     const { data: user } = await supabase.auth.getUser();
@@ -61,10 +63,10 @@ export default function PublicProfileScreen() {
     }
 
     const followersRes = await followsService.getFollowers(id);
-    if (followersRes.success) setFollowersCount(followersRes.data.length);
+    if (followersRes.success) setFollowersCount(followersRes.data?.length ?? 0);
 
     const followingRes = await followsService.getFollowing(id);
-    if (followingRes.success) setFollowingCount(followingRes.data.length);
+    if (followingRes.success) setFollowingCount(followingRes.data?.length ?? 0);
 
     if (profileResult.data?.role) {
       setUserRole(profileResult.data.role);
@@ -77,6 +79,7 @@ export default function PublicProfileScreen() {
     setRefreshing(true);
     await loadProfile();
     setRefreshing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleFollow = async () => {
@@ -187,7 +190,7 @@ export default function PublicProfileScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="flex-1 bg-[#005e66] py-3 rounded-lg"
+            className="flex-1 bg-[#007275] py-3 rounded-lg"
             onPress={handleMessage}
           >
             <Text className="text-white text-center font-bold">Mensaje</Text>

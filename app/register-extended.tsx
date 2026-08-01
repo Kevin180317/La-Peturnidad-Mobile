@@ -4,6 +4,8 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -15,7 +17,7 @@ import colonias from "../assets/colonias.json";
 
 export default function RegisterExtendedScreen() {
   const router = useRouter();
-  const { email, userId } = useLocalSearchParams<{
+  const { email } = useLocalSearchParams<{
     email: string;
     userId: string;
   }>();
@@ -27,7 +29,7 @@ export default function RegisterExtendedScreen() {
   const [postalCode, setPostalCode] = useState("");
   const [filteredColonias, setFilteredColonias] = useState<typeof colonias>([]);
   const [selectedColonia, setSelectedColonia] = useState("");
-  const [city, setCity] = useState("Tijuana");
+  const [city] = useState("Tijuana");
   const [loading, setLoading] = useState(false);
 
   const handlePostalCodeChange = (text: string) => {
@@ -147,7 +149,7 @@ export default function RegisterExtendedScreen() {
       Toast.show({
         type: "success",
         text1: "¡Perfil completado!",
-        text2: "Bienvenido a La Peturnidad",
+        text2: "Bienvenido a Lucky Tracker",
         visibilityTime: 1500,
       });
 
@@ -187,6 +189,11 @@ export default function RegisterExtendedScreen() {
   }
 
   return (
+    <KeyboardAvoidingView
+      className="flex-1 bg-[#faf5e0]"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
     <ScrollView
       className="flex-1 bg-[#faf5e0]"
       contentContainerClassName="p-6 pb-10"
@@ -204,8 +211,9 @@ export default function RegisterExtendedScreen() {
           Nombre <Text className="text-[#ff7e70]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
           placeholder="Tu nombre"
+          placeholderTextColor="#9BA1A6"
           value={firstName}
           onChangeText={setFirstName}
           autoCapitalize="words"
@@ -217,8 +225,9 @@ export default function RegisterExtendedScreen() {
           Apellido <Text className="text-[#ff7e70]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
           placeholder="Tu apellido"
+          placeholderTextColor="#9BA1A6"
           value={lastName}
           onChangeText={setLastName}
           autoCapitalize="words"
@@ -230,8 +239,9 @@ export default function RegisterExtendedScreen() {
           Teléfono <Text className="text-[#ff7e70]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
           placeholder="Número de teléfono"
+          placeholderTextColor="#9BA1A6"
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
@@ -243,8 +253,9 @@ export default function RegisterExtendedScreen() {
           Fecha de nacimiento
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
           placeholder="DD/MM/YYYY"
+          placeholderTextColor="#9BA1A6"
           value={birthDate}
           onChangeText={(text) => setBirthDate(formatDateInput(text))}
           keyboardType="numeric"
@@ -256,8 +267,9 @@ export default function RegisterExtendedScreen() {
           Código Postal <Text className="text-[#ff7e70]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white"
+          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
           placeholder="Código postal"
+          placeholderTextColor="#9BA1A6"
           value={postalCode}
           onChangeText={handlePostalCodeChange}
           keyboardType="numeric"
@@ -270,14 +282,15 @@ export default function RegisterExtendedScreen() {
           <Picker
             selectedValue={selectedColonia}
             onValueChange={(itemValue) => setSelectedColonia(itemValue)}
-            style={{ height: 50 }}
+            style={{ height: 50, color: "#211f1e", backgroundColor: "#ffffff" }}
           >
-            <Picker.Item label="Selecciona una colonia *" value="" />
+            <Picker.Item label="Selecciona una colonia *" value="" color="#211f1e" />
             {filteredColonias.map((item, idx) => (
               <Picker.Item
                 key={idx}
                 label={item["Asentamiento"]}
                 value={item["Asentamiento"]}
+                color="#211f1e"
               />
             ))}
           </Picker>
@@ -310,5 +323,6 @@ export default function RegisterExtendedScreen() {
 
       <Toast />
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

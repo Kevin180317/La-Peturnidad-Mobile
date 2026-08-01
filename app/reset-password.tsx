@@ -1,10 +1,12 @@
 import { authService } from "@/services/auth.service";
+import { PasswordInput } from "@/components/PasswordInput";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -83,7 +85,12 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
+    <KeyboardAvoidingView
+      className="flex-1 bg-[#faf5e0]"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
+      <View className="flex-1 justify-center p-6">
       {loading ? (
         <View className="items-center">
           <ActivityIndicator size="large" color="#ff7e70" />
@@ -104,10 +111,8 @@ export default function ResetPasswordScreen() {
             <Text className="text-[#211f1e] font-semibold mb-2">
               Nueva contraseña
             </Text>
-            <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+            <PasswordInput
               placeholder="••••••••"
-              secureTextEntry
               value={password}
               onChangeText={setPassword}
               autoCapitalize="none"
@@ -118,10 +123,8 @@ export default function ResetPasswordScreen() {
             <Text className="text-[#211f1e] font-semibold mb-2">
               Confirmar contraseña
             </Text>
-            <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+            <PasswordInput
               placeholder="••••••••"
-              secureTextEntry
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               autoCapitalize="none"
@@ -139,6 +142,7 @@ export default function ResetPasswordScreen() {
         </>
       )}
       <Toast />
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

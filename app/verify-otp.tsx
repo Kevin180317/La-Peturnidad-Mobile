@@ -16,8 +16,9 @@ export default function VerifyOtpScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleVerify = async () => {
-    if (!otp || otp.length < 8) {
+  const handleVerify = async (code?: string) => {
+    const finalOtp = code ?? otp;
+    if (!finalOtp || finalOtp.length < 8) {
       Toast.show({
         type: "error",
         text1: "Código inválido",
@@ -29,7 +30,7 @@ export default function VerifyOtpScreen() {
 
     setLoading(true);
     try {
-      const { error } = await authService.verifyOtp(email, otp);
+      const { error } = await authService.verifyOtp(email, finalOtp);
 
       if (error) {
         Toast.show({
@@ -62,6 +63,14 @@ export default function VerifyOtpScreen() {
     }
   };
 
+  const handleOtpChange = (text: string) => {
+    const cleaned = text.replace(/\D/g, "").slice(0, 8);
+    setOtp(cleaned);
+    if (cleaned.length === 8 && !loading) {
+      handleVerify(cleaned);
+    }
+  };
+
   return (
     <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
       {loading ? (
@@ -86,19 +95,21 @@ export default function VerifyOtpScreen() {
               Código OTP
             </Text>
             <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0] text-center tracking-[8px]"
+              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e] text-center tracking-[8px]"
               placeholder="--------"
+              placeholderTextColor="#9BA1A6"
               value={otp}
-              onChangeText={setOtp}
+              onChangeText={handleOtpChange}
               keyboardType="number-pad"
               maxLength={8}
               autoFocus
+              textContentType="oneTimeCode"
             />
           </View>
 
           <TouchableOpacity
             className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
-            onPress={handleVerify}
+            onPress={() => handleVerify()}
           >
             <Text className="text-white text-center font-bold text-lg">
               Verificar código

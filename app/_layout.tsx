@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { Platform } from "react-native";
-import { Stack, router } from "expo-router";
+import { Stack, router, type Href } from "expo-router";
 import Toast from "react-native-toast-message";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 import { toastConfig } from "../components/ToastConfig";
 import "./global.css";
 
@@ -40,7 +41,7 @@ export default function RootLayout() {
         if (lastResponse) {
           const url = lastResponse.notification.request.content.data?.url;
           if (typeof url === "string") {
-            setTimeout(() => router.push(url), 500);
+            setTimeout(() => router.push(url as Href), 500);
           }
         }
 
@@ -49,7 +50,7 @@ export default function RootLayout() {
             (response: any) => {
               const url = response.notification.request.content.data?.url;
               if (typeof url === "string") {
-                router.push(url);
+                router.push(url as Href);
               }
             },
           );
@@ -65,14 +66,21 @@ export default function RootLayout() {
 
   return (
     <>
-      <Stack>
+      <ErrorBoundary>
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: "#007275" },
+          headerTintColor: "#ffffff",
+          headerTitleStyle: { fontWeight: "700" },
+        }}
+      >
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ title: "Iniciar Sesión" }} />
       <Stack.Screen name="register" options={{ title: "Registro" }} />
       <Stack.Screen
         name="dashboard"
         options={{
-          title: "La Peturnidad",
+          title: "Lucky Tracker",
           headerLeft: () => null,
           gestureEnabled: false,
         }}
@@ -118,6 +126,10 @@ export default function RootLayout() {
         options={{ title: "Grupos" }}
       />
       <Stack.Screen
+        name="buscar"
+        options={{ title: "Buscar" }}
+      />
+      <Stack.Screen
         name="grupos/[id]"
         options={{ title: "Grupo" }}
       />
@@ -141,7 +153,8 @@ export default function RootLayout() {
         name="reset-password"
         options={{ title: "Nueva contraseña" }}
       />
-    </Stack>
+      </Stack>
+      </ErrorBoundary>
       <Toast config={toastConfig} />
     </>
   );

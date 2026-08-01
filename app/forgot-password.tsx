@@ -84,8 +84,9 @@ export default function ForgotPasswordScreen() {
               Correo electrónico
             </Text>
             <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
               placeholder="ejemplo@correo.com"
+              placeholderTextColor="#9BA1A6"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"

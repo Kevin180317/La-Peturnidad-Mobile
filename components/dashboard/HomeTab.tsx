@@ -1,6 +1,11 @@
-import type { Pet } from "@/types";
-import { Ionicons } from "@expo/vector-icons";
+import type {
+  EmergencyAlert,
+  FoundPetWithDetails,
+  Pet,
+} from "@/services/dashboard.service";
+import { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   RefreshControl,
   ScrollView,
@@ -9,165 +14,208 @@ import {
   View,
 } from "react-native";
 import { PetDetailModal } from "./PetDetailModal";
-import { PetForm } from "./PetForm";
-
-interface PetFormState {
-  name: string;
-  color: string;
-  size: string;
-  features: string;
-  type: "perro" | "gato";
-  imageUrl: string | null;
-  selectedImage: { uri: string } | null;
-  uploading: boolean;
-  visible: boolean;
-}
+import { PetForm, type PetFormData } from "./PetForm";
 
 interface HomeTabProps {
-  profile: any;
+  profileName: string | null;
   pets: Pet[];
-  showPets: boolean;
-  petForm: PetFormState;
-  onRefresh: () => void;
+  loadingPets: boolean;
+  myAlerts: EmergencyAlert[];
+  foundPets: FoundPetWithDetails[];
   refreshing: boolean;
-  onTogglePets: () => void;
-  onShowForm: () => void;
-  onSelectPet: (pet: Pet) => void;
-  onFormChange: (field: keyof PetFormState, value: any) => void;
-  onPetSizeChange: (v: string) => void;
-  onSelectPetImage: () => void;
-  onUploadPetImage: () => void;
-  onSavePet: () => void;
-  onCancelForm: () => void;
-  selectedPet: Pet | null;
-  modalVisible: boolean;
-  onCloseModal: () => void;
+  onRefresh: () => void;
+  onLoadPets: () => void;
+  onOpenSearch: () => void;
+  onRegisterPet: (data: PetFormData) => Promise<boolean>;
+  onUpdatePet: (petId: string, data: PetFormData) => Promise<boolean>;
   onDeletePet: (petId: string) => void;
 }
 
 export function HomeTab({
-  profile, pets, showPets, petForm,
-  onRefresh, refreshing, onTogglePets, onShowForm,
-  onSelectPet, onFormChange, onPetSizeChange, onSelectPetImage,
-  onUploadPetImage, onSavePet, onCancelForm,
-  selectedPet, modalVisible, onCloseModal, onDeletePet,
+  profileName,
+  pets,
+  loadingPets,
+  myAlerts,
+  foundPets,
+  refreshing,
+  onRefresh,
+  onLoadPets,
+  onOpenSearch,
+  onRegisterPet,
+  onUpdatePet,
+  onDeletePet,
 }: HomeTabProps) {
-  const initial = profile?.first_name?.[0]?.toUpperCase() || "P";
+  const [showPets, setShowPets] = useState(false);
+  const [showPetForm, setShowPetForm] = useState(false);
+  const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingPet, setEditingPet] = useState<Pet | null>(null);
+
+  const handleSubmit = async (data: PetFormData) => {
+    const ok = editingPet
+      ? await onUpdatePet(editingPet.id, data)
+      : await onRegisterPet(data);
+    if (ok) {
+      setShowPetForm(false);
+      setEditingPet(null);
+    }
+  };
+
+  const handleStartEdit = (pet: Pet) => {
+    setEditingPet(pet);
+    setShowPetForm(true);
+  };
 
   return (
     <ScrollView
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      contentContainerClassName="p-5"
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      contentContainerClassName="p-5 pb-10"
     >
-      <View className="flex-row items-center gap-4 mb-6">
-        {profile?.profile_picture_url ? (
-          <Image
-            source={{ uri: profile.profile_picture_url }}
-            className="w-14 h-14 rounded-full border-2 border-[#ff7e70]"
-          />
-        ) : (
-          <View className="w-14 h-14 rounded-full bg-[#ff7e70] items-center justify-center">
-            <Text className="text-2xl text-white font-bold">{initial}</Text>
+      {/* Header de bienvenida */}
+      <View className="mb-6">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="text-2xl font-bold text-[#211f1e]">
+              ¡Hola, {profileName || "Usuario"}! 👋
+            </Text>
+            <Text className="text-gray-600 mt-1">
+              {new Date().toLocaleDateString("es-MX", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </Text>
           </View>
-        )}
-        <View>
-          <Text className="text-xl font-bold text-[#ff7e70]">
-            ¡Hola, {profile?.first_name || "Usuario"}!
-          </Text>
-          <Text className="text-sm text-[#ff7e70]">
-            {new Date().toLocaleDateString("es-MX", {
-              weekday: "long", day: "numeric", month: "long",
-            })}
-          </Text>
+          <TouchableOpacity
+            onPress={onOpenSearch}
+            className="bg-[#007275] p-3 rounded-2xl"
+            activeOpacity={0.8}
+          >
+            <Text className="text-white text-xl">🔍</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
+      {/* Tarjetas de resumen */}
+      <View className="flex-row gap-3 mb-6">
+        <View className="flex-1 bg-blue-50 p-4 rounded-xl">
+          <Text className="text-2xl mb-1">🐾</Text>
+          <Text className="text-xl font-bold text-blue-600">{pets.length}</Text>
+          <Text className="text-gray-600 text-sm">Mascotas</Text>
+        </View>
+        <View className="flex-1 bg-yellow-50 p-4 rounded-xl">
+          <Text className="text-2xl mb-1">🚨</Text>
+          <Text className="text-xl font-bold text-yellow-600">
+            {myAlerts.length}
+          </Text>
+          <Text className="text-gray-600 text-sm">Alertas</Text>
+        </View>
+        <View className="flex-1 bg-green-50 p-4 rounded-xl">
+          <Text className="text-2xl mb-1">✅</Text>
+          <Text className="text-xl font-bold text-green-600">
+            {foundPets.length}
+          </Text>
+          <Text className="text-gray-600 text-sm">Encontradas</Text>
+        </View>
+      </View>
+
+      {/* Botones de acción rápida */}
       <View className="flex-row gap-3 mb-6">
         <TouchableOpacity
-          className="flex-1 bg-[#ff7e70] py-4 rounded-xl border-2 border-[#ff7e70]/30"
-          onPress={onShowForm}
+          className="flex-1 bg-green-500 py-4 rounded-xl"
+          onPress={() => {
+            setShowPetForm(true);
+            setShowPets(false);
+          }}
         >
-          <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name="add-circle" size={18} color="white" />
-            <Text className="text-white text-center font-bold">Registrar</Text>
-          </View>
+          <Text className="text-white text-center font-semibold">
+            ➕ Registrar mascota
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 bg-[#ff7e70] py-4 rounded-xl border-2 border-[#ff7e70]/30"
-          onPress={onTogglePets}
+          className="flex-1 bg-[#007275] py-4 rounded-xl"
+          onPress={() => {
+            onLoadPets();
+            setShowPets(!showPets);
+            setShowPetForm(false);
+          }}
         >
-          <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name="paw" size={18} color="white" />
-            <Text className="text-white text-center font-bold">
-              {showPets ? "Ocultar" : "Mis mascotas"}
-            </Text>
-          </View>
+          <Text className="text-white text-center font-semibold">
+            {showPets ? "👁️ Ocultar" : "👁️ Ver"} mascotas
+          </Text>
         </TouchableOpacity>
       </View>
 
+      {/* Lista de mascotas */}
       {showPets && (
         <View className="mb-6">
-          <View className="flex-row items-center gap-2 mb-3">
-            <Ionicons name="paw" size={18} color="#ff7e70" />
-            <Text className="font-bold text-[#ff7e70]">
-              Mis mascotas ({pets.length})
-            </Text>
-          </View>
-          {pets.length === 0 ? (
-            <View className="bg-white p-6 rounded-xl items-center">
-              <Ionicons name="paw" size={40} color="#ff7e70" />
-              <Text className="text-[#ff7e70] mt-2">Sin mascotas registradas</Text>
+          <Text className="text-lg font-bold mb-3">Mis mascotas</Text>
+          {loadingPets ? (
+            <ActivityIndicator size="large" color="#ff7e70" />
+          ) : pets.length === 0 ? (
+            <View className="bg-[#faf5e0] p-8 rounded-xl items-center">
+              <Text className="text-4xl mb-3">🐕</Text>
+              <Text className="text-gray-500 text-center">
+                No tienes mascotas registradas. ¡Agrega tu primera mascota!
+              </Text>
             </View>
           ) : (
             pets.map((pet) => (
               <TouchableOpacity
                 key={pet.id}
-                className="flex-row items-center p-3 bg-[#faf5e0] rounded-xl mb-2"
-                onPress={() => onSelectPet(pet)}
+                className="bg-white p-4 rounded-xl mb-3 shadow-sm flex-row"
+                onPress={() => {
+                  setSelectedPet(pet);
+                  setModalVisible(true);
+                }}
               >
                 {pet.image_url ? (
-                  <Image source={{ uri: pet.image_url }} className="w-12 h-12 rounded-lg" />
+                  <Image
+                    source={{ uri: pet.image_url }}
+                    className="w-16 h-16 rounded-lg mr-3"
+                  />
                 ) : (
-                  <View className="w-12 h-12 bg-white rounded-lg items-center justify-center">
-                    <Ionicons
-                      name={pet.type === "perro" ? "paw" : "help-circle"}
-                      size={20} color="#ff7e70"
-                    />
+                  <View className="w-16 h-16 bg-gray-200 rounded-lg mr-3 items-center justify-center">
+                    <Text className="text-2xl">
+                      {pet.type === "perro" ? "🐶" : "🐱"}
+                    </Text>
                   </View>
                 )}
-                <Text className="flex-1 ml-3 font-bold text-[#ff7e70]">{pet.name}</Text>
-                <Ionicons name="chevron-forward" size={20} color="#ff7e70" />
+                <View className="flex-1">
+                  <Text className="font-bold text-lg">{pet.name}</Text>
+                  <Text className="text-gray-600 capitalize">
+                    {pet.type} • {pet.color}
+                  </Text>
+                  <Text className="text-gray-500 text-sm">
+                    Tamaño: {pet.size}
+                  </Text>
+                </View>
               </TouchableOpacity>
             ))
           )}
         </View>
       )}
 
-      {petForm.visible && (
+      {/* Formulario de registro de mascota */}
+      {showPetForm && (
         <PetForm
-          petName={petForm.name}
-          petColor={petForm.color}
-          petSize={petForm.size}
-          petFeatures={petForm.features}
-          petType={petForm.type}
-          selectedPetImage={petForm.selectedImage}
-          petImageUrl={petForm.imageUrl}
-          uploadingPetImage={petForm.uploading}
-          onNameChange={(v) => onFormChange("name", v)}
-          onColorChange={(v) => onFormChange("color", v)}
-          onSizeChange={onPetSizeChange}
-          onFeaturesChange={(v) => onFormChange("features", v)}
-          onSelectImage={onSelectPetImage}
-          onUploadImage={onUploadPetImage}
-          onSave={onSavePet}
-          onCancel={onCancelForm}
+          editingPet={editingPet}
+          onSubmit={handleSubmit}
+          onCancel={() => {
+            setShowPetForm(false);
+            setEditingPet(null);
+          }}
         />
       )}
 
       <PetDetailModal
-        visible={modalVisible}
         pet={selectedPet}
-        onClose={onCloseModal}
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onEdit={handleStartEdit}
         onDelete={onDeletePet}
       />
     </ScrollView>

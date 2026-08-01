@@ -91,16 +91,6 @@ class AlertsService {
       return { success: false, error: error.message };
     }
   }
-        }
-      } catch (notifyErr) {
-        console.warn("Error en notificaciones push:", notifyErr);
-      }
-
-      return { success: true, data };
-    } catch (error: any) {
-      return { success: false, error: error.message };
-    }
-  }
 
   async getByLocation(
     location: string,

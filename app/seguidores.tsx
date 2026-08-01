@@ -21,8 +21,10 @@ export default function SeguidoresScreen() {
   const [following, setFollowing] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // loadData corre al montar o cambiar id (recarga intencional)
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadData = async () => {
@@ -33,8 +35,8 @@ export default function SeguidoresScreen() {
       followsService.getFollowing(id),
     ]);
 
-    const followerIds = followersRes.success ? followersRes.data.map((f) => f.follower_id) : [];
-    const followingIds = followingRes.success ? followingRes.data.map((f) => f.following_id) : [];
+    const followerIds = followersRes.data?.map((f) => f.follower_id) ?? [];
+    const followingIds = followingRes.data?.map((f) => f.following_id) ?? [];
 
     const allIds = [...new Set([...followerIds, ...followingIds])];
 
@@ -79,9 +81,9 @@ export default function SeguidoresScreen() {
         <Text className="font-semibold text-[#211f1e]">
           {user.first_name} {user.last_name}
         </Text>
-        {user.city && <Text className="text-gray-400 text-sm">{user.city}</Text>}
+        {user.city && <Text className="text-gray-500 text-sm">{user.city}</Text>}
       </View>
-      <Text className="text-gray-400">›</Text>
+      <Text className="text-gray-500">›</Text>
     </TouchableOpacity>
   );
 

@@ -21,8 +21,10 @@ export default function NotificacionesScreen() {
   const [foundPetAlerts, setFoundPetAlerts] = useState(true);
   const [communityAnnouncements, setCommunityAnnouncements] = useState(true);
 
+  // loadPreferences corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
     loadPreferences();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadPreferences = async () => {
@@ -142,7 +144,7 @@ export default function NotificacionesScreen() {
         onPress={handleSave}
         disabled={saving}
       >
-        <Text className="text-white text-center font-bold">
+        <Text className={`text-center font-bold ${saving ? "text-gray-700" : "text-white"}`}>
           {saving ? "Guardando..." : "Guardar preferencias"}
         </Text>
       </TouchableOpacity>

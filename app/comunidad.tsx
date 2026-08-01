@@ -1,8 +1,9 @@
+import { EmptyState } from "@/components/EmptyState";
 import { announcementsService } from "@/services/announcements.service";
 import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -36,8 +37,10 @@ export default function ComunidadScreen() {
   const [formCategory, setFormCategory] = useState<string>("general");
   const [posting, setPosting] = useState(false);
 
+  // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const init = async () => {
@@ -50,15 +53,26 @@ export default function ComunidadScreen() {
     await loadAnnouncements();
   };
 
-  const loadAnnouncements = async () => {
+  const loadAnnouncements = useCallback(async () => {
     const result = await announcementsService.getAll();
     if (result.success) {
-      setAnnouncements(result.data);
+      setAnnouncements(result.data ?? []);
     } else {
       Toast.show({ type: "error", text1: "Error", text2: result.error, position: "top", visibilityTime: 3000 });
     }
     setLoading(false);
-  };
+  }, []);
+
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      loadAnnouncements();
+    }, [loadAnnouncements]),
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -153,12 +167,13 @@ export default function ComunidadScreen() {
         </View>
 
         {announcements.length === 0 ? (
-          <View className="bg-white p-10 rounded-xl items-center">
-            <Text className="text-4xl mb-3">💬</Text>
-            <Text className="text-gray-500 text-center">
-              No hay avisos en la comunidad todavía. ¡Sé el primero en publicar!
-            </Text>
-          </View>
+          <EmptyState
+            icon="💬"
+            title="No hay avisos en la comunidad todavía"
+            subtitle="¡Sé el primero en publicar!"
+            actionLabel="Publicar aviso"
+            onAction={() => setShowForm(true)}
+          />
         ) : (
           announcements.map((item) => {
             const isOwner = item.user_id === userId;
@@ -176,7 +191,7 @@ export default function ComunidadScreen() {
                   )}
                   <View className="flex-1">
                     <Text className="font-semibold text-[#211f1e]">{item.owner_name}</Text>
-                    <Text className="text-gray-400 text-xs">
+                    <Text className="text-gray-500 text-xs">
                       {new Date(item.created_at).toLocaleDateString("es-MX", {
                         day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
                       })}
@@ -233,14 +248,16 @@ export default function ComunidadScreen() {
             </View>
 
             <TextInput
-              className="bg-[#faf5e0] p-3 rounded-lg mb-3 border border-gray-300"
+              className="bg-white p-3 rounded-lg mb-3 border border-gray-300 text-[#211f1e]"
               placeholder="Título *"
+              placeholderTextColor="#9BA1A6"
               value={formTitle}
               onChangeText={setFormTitle}
             />
             <TextInput
-              className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+              className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
               placeholder="Escribe tu mensaje... *"
+              placeholderTextColor="#9BA1A6"
               value={formContent}
               onChangeText={setFormContent}
               multiline
@@ -254,7 +271,7 @@ export default function ComunidadScreen() {
                 onPress={handlePost}
                 disabled={posting}
               >
-                <Text className="text-white text-center font-bold">
+                <Text className={`text-center font-bold ${posting ? "text-gray-700" : "text-white"}`}>
                   {posting ? "Publicando..." : "Publicar"}
                 </Text>
               </TouchableOpacity>

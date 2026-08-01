@@ -1,9 +1,10 @@
 import { messagesService } from "@/services/messages.service";
 import { supabase } from "@/utils/supabase";
-import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { EmptyState } from "@/components/EmptyState";
+import { ListSkeleton } from "@/components/Skeleton";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
   RefreshControl,
@@ -20,8 +21,10 @@ export default function MensajesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
+  // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const init = async () => {
@@ -31,16 +34,27 @@ export default function MensajesScreen() {
     await loadConversations();
   };
 
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) return;
 
     const result = await messagesService.getConversations(user.user.id);
     if (result.success) {
-      setConversations(result.data);
+      setConversations(result.data ?? []);
     }
     setLoading(false);
-  };
+  }, []);
+
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      loadConversations();
+    }, [loadConversations]),
+  );
 
   const handleDelete = (convId: string) => {
     Alert.alert("Eliminar chat", "¿Eliminar esta conversación?", [
@@ -63,6 +77,7 @@ export default function MensajesScreen() {
     setRefreshing(true);
     await loadConversations();
     setRefreshing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatTime = (dateStr: string) => {
@@ -78,8 +93,8 @@ export default function MensajesScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+      <View className="flex-1 bg-[#faf5e0]">
+        <ListSkeleton />
       </View>
     );
   }
@@ -92,12 +107,12 @@ export default function MensajesScreen() {
       <Text className="text-2xl font-bold text-[#211f1e] mb-6">Mensajes</Text>
 
       {conversations.length === 0 ? (
-        <View className="bg-white p-10 rounded-xl items-center">
-          <Text className="text-4xl mb-3">💬</Text>
-          <Text className="text-gray-500 text-center">No tienes conversaciones aún</Text>
-          <Text className="text-gray-400 text-sm text-center mt-2">
-            Visita un perfil público y envía un mensaje para iniciar una conversación
-          </Text>
+        <View className="flex-1 justify-center">
+          <EmptyState
+            icon="💬"
+            title="No tienes conversaciones aún"
+            subtitle="Visita un perfil público y envía un mensaje para iniciar una conversación"
+          />
         </View>
       ) : (
         conversations.map((conv) => (
@@ -108,7 +123,7 @@ export default function MensajesScreen() {
             onLongPress={() => handleDelete(conv.id)}
           >
             {conv.is_group ? (
-              <View className="w-14 h-14 rounded-full bg-[#005e66] items-center justify-center mr-3">
+              <View className="w-14 h-14 rounded-full bg-[#007275] items-center justify-center mr-3">
                 <Text className="text-2xl">👥</Text>
               </View>
             ) : conv.other_user_picture ? (
@@ -124,7 +139,7 @@ export default function MensajesScreen() {
               <View className="flex-row items-center justify-between">
                 <Text className="font-bold text-[#211f1e]">{conv.other_user_name}</Text>
                 {conv.last_message_at && (
-                  <Text className="text-gray-400 text-xs">{formatTime(conv.last_message_at)}</Text>
+                  <Text className="text-gray-500 text-xs">{formatTime(conv.last_message_at)}</Text>
                 )}
               </View>
               <Text className="text-gray-500 text-sm mt-1" numberOfLines={1}>

@@ -1,8 +1,11 @@
 import { supabase } from "@/utils/supabase";
+import { PasswordInput } from "@/components/PasswordInput";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Text,
   TextInput,
   TouchableOpacity,
@@ -100,7 +103,12 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
+    <KeyboardAvoidingView
+      className="flex-1 bg-[#faf5e0]"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+    >
+      <View className="flex-1 justify-center p-6">
       {loading ? (
         <View className="items-center">
           <ActivityIndicator size="large" color="#ff7e70" />
@@ -124,8 +132,9 @@ export default function RegisterScreen() {
               Correo electrónico
             </Text>
             <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
               placeholder="ejemplo@correo.com"
+              placeholderTextColor="#9BA1A6"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -135,12 +144,10 @@ export default function RegisterScreen() {
 
           <View className="mb-4">
             <Text className="text-[#211f1e] font-semibold mb-2">Contraseña</Text>
-            <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+            <PasswordInput
               placeholder="••••••••"
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
             />
           </View>
 
@@ -148,12 +155,10 @@ export default function RegisterScreen() {
             <Text className="text-[#211f1e] font-semibold mb-2">
               Confirmar contraseña
             </Text>
-            <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-[#faf5e0]"
+            <PasswordInput
               placeholder="••••••••"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              secureTextEntry
             />
           </View>
 
@@ -176,6 +181,7 @@ export default function RegisterScreen() {
         </>
       )}
       <Toast />
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

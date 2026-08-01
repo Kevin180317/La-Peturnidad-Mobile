@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "La-Peturnidad",
+    "name": "Lucky Tracker",
     "slug": "la-peturnidad",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "lapeturnidad",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.idarko.lapeturnidad",

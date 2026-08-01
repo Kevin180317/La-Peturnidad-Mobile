@@ -23,8 +23,10 @@ export default function EditarPerfilScreen() {
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
 
+  // loadProfile corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
     loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadProfile = async () => {
@@ -86,24 +88,27 @@ export default function EditarPerfilScreen() {
       <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
         <Text className="font-semibold mb-2 text-gray-600">Nombre *</Text>
         <TextInput
-          className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
           placeholder="Nombre"
+          placeholderTextColor="#9BA1A6"
           value={firstName}
           onChangeText={setFirstName}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Apellido *</Text>
         <TextInput
-          className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
           placeholder="Apellido"
+          placeholderTextColor="#9BA1A6"
           value={lastName}
           onChangeText={setLastName}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Teléfono</Text>
         <TextInput
-          className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
           placeholder="Teléfono"
+          placeholderTextColor="#9BA1A6"
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
@@ -111,24 +116,27 @@ export default function EditarPerfilScreen() {
 
         <Text className="font-semibold mb-2 text-gray-600">Dirección / Colonia</Text>
         <TextInput
-          className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
           placeholder="Calle y colonia"
+          placeholderTextColor="#9BA1A6"
           value={address}
           onChangeText={setAddress}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Ciudad</Text>
         <TextInput
-          className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
           placeholder="Ciudad"
+          placeholderTextColor="#9BA1A6"
           value={city}
           onChangeText={setCity}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Código Postal</Text>
         <TextInput
-          className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
           placeholder="C.P."
+          placeholderTextColor="#9BA1A6"
           value={postalCode}
           onChangeText={setPostalCode}
           keyboardType="numeric"
@@ -140,7 +148,7 @@ export default function EditarPerfilScreen() {
         onPress={handleSave}
         disabled={saving}
       >
-        <Text className="text-white text-center font-bold">
+        <Text className={`text-center font-bold ${saving ? "text-gray-700" : "text-white"}`}>
           {saving ? "Guardando..." : "Guardar cambios"}
         </Text>
       </TouchableOpacity>

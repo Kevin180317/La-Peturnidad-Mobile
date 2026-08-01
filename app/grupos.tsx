@@ -1,9 +1,10 @@
+import { EmptyState } from "@/components/EmptyState";
+import { ListSkeleton } from "@/components/Skeleton";
 import { groupsService } from "@/services/groups.service";
 import { supabase } from "@/utils/supabase";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Modal,
   RefreshControl,
@@ -26,8 +27,10 @@ export default function GruposScreen() {
   const [formDesc, setFormDesc] = useState("");
   const [creating, setCreating] = useState(false);
 
+  // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const init = async () => {
@@ -37,21 +40,32 @@ export default function GruposScreen() {
     await loadGroups(user.user.id);
   };
 
-  const loadGroups = async (uid?: string) => {
+  const loadGroups = useCallback(async (uid?: string) => {
     const uid_or_state = uid || userId;
     const result = await groupsService.getAll();
     if (result.success) {
       const enriched = await Promise.all(
-        result.data.map(async (g) => {
+        (result.data ?? []).map(async (g) => {
           const members = await groupsService.getMembers(g.id);
           const isMember = uid_or_state ? await groupsService.isMember(g.id, uid_or_state) : false;
-          return { ...g, memberCount: members.success ? members.data.length : 0, isMember };
+          return { ...g, memberCount: members.data?.length ?? 0, isMember };
         }),
       );
       setGroups(enriched);
     }
     setLoading(false);
-  };
+  }, [userId]);
+
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      if (userId) loadGroups(userId);
+    }, [userId, loadGroups]),
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -92,8 +106,8 @@ export default function GruposScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+      <View className="flex-1 bg-[#faf5e0]">
+        <ListSkeleton withAvatar={false} />
       </View>
     );
   }
@@ -116,10 +130,13 @@ export default function GruposScreen() {
         </View>
 
         {groups.length === 0 ? (
-          <View className="bg-white p-10 rounded-xl items-center">
-            <Text className="text-4xl mb-3">👥</Text>
-            <Text className="text-gray-500 text-center">No hay grupos aún. ¡Crea el primero!</Text>
-          </View>
+          <EmptyState
+            icon="👥"
+            title="No hay grupos aún"
+            subtitle="¡Crea el primero y reúne a tu colonia!"
+            actionLabel="Crear grupo"
+            onAction={() => setShowForm(true)}
+          />
         ) : (
           groups.map((group) => (
             <TouchableOpacity
@@ -152,7 +169,7 @@ export default function GruposScreen() {
                   className={`px-4 py-2 rounded-lg ${group.isMember ? "bg-gray-300" : "bg-[#ff7e70]"}`}
                   onPress={() => handleJoinLeave(group.id, group.isMember)}
                 >
-                  <Text className={`font-semibold text-sm ${group.isMember ? "text-gray-600" : "text-white"}`}>
+                  <Text className={`font-semibold text-sm ${group.isMember ? "text-gray-700" : "text-white"}`}>
                     {group.isMember ? "Salir" : "Unirse"}
                   </Text>
                 </TouchableOpacity>
@@ -160,7 +177,7 @@ export default function GruposScreen() {
               {group.description && (
                 <Text className="text-gray-600 text-sm mb-2">{group.description}</Text>
               )}
-              <Text className="text-gray-400 text-xs">👥 {group.memberCount} miembros</Text>
+              <Text className="text-gray-500 text-xs">👥 {group.memberCount} miembros</Text>
             </TouchableOpacity>
           ))
         )}
@@ -176,14 +193,16 @@ export default function GruposScreen() {
               </TouchableOpacity>
             </View>
             <TextInput
-              className="bg-[#faf5e0] p-3 rounded-lg mb-3 border border-gray-300"
+              className="bg-white p-3 rounded-lg mb-3 border border-gray-300 text-[#211f1e]"
               placeholder="Nombre del grupo *"
+              placeholderTextColor="#9BA1A6"
               value={formName}
               onChangeText={setFormName}
             />
             <TextInput
-              className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+              className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
               placeholder="Descripción (opcional)"
+              placeholderTextColor="#9BA1A6"
               value={formDesc}
               onChangeText={setFormDesc}
               multiline
@@ -196,7 +215,7 @@ export default function GruposScreen() {
                 disabled={creating}
                 onPress={handleCreate}
               >
-                <Text className="text-white text-center font-bold">{creating ? "Creando..." : "Crear"}</Text>
+                <Text className={`text-center font-bold ${creating ? "text-gray-700" : "text-white"}`}>{creating ? "Creando..." : "Crear"}</Text>
               </TouchableOpacity>
               <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-lg" onPress={() => setShowForm(false)}>
                 <Text className="text-white text-center font-bold">Cancelar</Text>

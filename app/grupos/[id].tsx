@@ -20,10 +20,13 @@ export default function GrupoDetailScreen() {
   const [group, setGroup] = useState<any>(null);
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+  // init corre al montar o cambiar id (recarga intencional)
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const init = async () => {
@@ -39,7 +42,7 @@ export default function GrupoDetailScreen() {
     if (groupRes.success) setGroup(groupRes.data);
 
     if (membersRes.success) {
-      const userIds = membersRes.data.map((m) => m.user_id);
+      const userIds = (membersRes.data ?? []).map((m) => m.user_id);
       const { data: profiles } = await supabase
         .from("user_profiles")
         .select("user_id, first_name, last_name, profile_picture_url")
@@ -49,7 +52,7 @@ export default function GrupoDetailScreen() {
       profiles?.forEach((p) => { profileMap[p.user_id] = p; });
 
       setMembers(
-        membersRes.data.map((m) => ({
+        (membersRes.data ?? []).map((m) => ({
           ...m,
           ...profileMap[m.user_id],
         })),
@@ -57,6 +60,12 @@ export default function GrupoDetailScreen() {
     }
 
     setLoading(false);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await init();
+    setRefreshing(false);
   };
 
   if (loading) {
@@ -77,14 +86,14 @@ export default function GrupoDetailScreen() {
 
   return (
     <ScrollView
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={init} />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
       contentContainerClassName="p-5 bg-[#faf5e0] flex-1"
     >
       <Text className="text-2xl font-bold text-[#211f1e] mb-2">{group.name}</Text>
       {group.description && (
         <Text className="text-gray-600 mb-4">{group.description}</Text>
       )}
-      <Text className="text-gray-400 text-sm mb-4">👥 {members.length} miembros</Text>
+      <Text className="text-gray-500 text-sm mb-4">👥 {members.length} miembros</Text>
 
       <TouchableOpacity
         className="bg-[#007275] py-3 rounded-lg mb-6 flex-row items-center justify-center"

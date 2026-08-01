@@ -3,53 +3,18 @@ import * as ImagePicker from "expo-image-picker";
 
 const EDGE_FUNCTION_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notification`;
 
-export interface UserProfile {
-  id: string;
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  birth_date: string;
-  address: string;
-  city: string;
-  postal_code: string;
-  profile_picture_url: string | null;
-  push_token: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import type { Database } from "@/types/database";
 
-export interface Pet {
-  id: string;
-  user_id: string;
-  type: "perro" | "gato";
-  name: string;
-  color: string;
-  size: string;
-  features: string | null;
-  image_url: string | null;
-  created_at: string;
-}
+type UserProfileRow = Database["public"]["Tables"]["user_profiles"]["Row"];
+type PetRow = Database["public"]["Tables"]["pets"]["Row"];
+type EmergencyAlertRow =
+  Database["public"]["Tables"]["emergency_alerts"]["Row"];
+type FoundPetRow = Database["public"]["Tables"]["found_pets"]["Row"];
 
-export interface EmergencyAlert {
-  id: string;
-  user_id: string;
-  pet_name: string;
-  type: string;
-  description: string;
-  last_seen_location: string;
-  disappearance_date: string;
-  image_url: string | null;
-  created_at: string;
-}
-
-export interface FoundPet {
-  id: string;
-  user_id: string;
-  pet_id: string;
-  created_at: string;
-}
+export type UserProfile = UserProfileRow;
+export type Pet = PetRow;
+export type EmergencyAlert = EmergencyAlertRow;
+export type FoundPet = FoundPetRow;
 
 export interface EmergencyAlertWithOwner extends EmergencyAlert {
   owner_name: string;
@@ -62,7 +27,7 @@ export interface FoundPetWithDetails {
   pet_id: string;
   pet_name: string;
   image_url: string | null;
-  created_at: string;
+  created_at: string | null;
 }
 
 class DashboardService {

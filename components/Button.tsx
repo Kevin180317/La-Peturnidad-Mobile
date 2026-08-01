@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   GestureResponderEvent,
   Image,
-  Opacity,
   Text,
   TextInput,
   TouchableOpacity,
@@ -11,7 +10,7 @@ import {
   ViewProps,
 } from "react-native";
 
-interface ButtonProps extends ViewProps {
+interface ButtonProps extends Omit<ViewProps, "onBlur" | "onFocus"> {
   title: string;
   onPress?: (event: GestureResponderEvent) => void;
   variant?: "primary" | "secondary" | "outline" | "ghost";

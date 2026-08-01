@@ -1,9 +1,10 @@
+import { EmptyState } from "@/components/EmptyState";
+import { CardSkeleton } from "@/components/Skeleton";
 import { successStoriesService } from "@/services/success-stories.service";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Image,
   Modal,
@@ -20,14 +21,17 @@ export default function HistoriasScreen() {
   const router = useRouter();
   const [stories, setStories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [petName, setPetName] = useState("");
   const [story, setStory] = useState("");
   const [posting, setPosting] = useState(false);
 
+  // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const init = async () => {
@@ -39,8 +43,14 @@ export default function HistoriasScreen() {
 
   const loadStories = async () => {
     const result = await successStoriesService.getAll();
-    if (result.success) setStories(result.data);
+    if (result.success) setStories(result.data ?? []);
     setLoading(false);
+    setRefreshing(false);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadStories();
   };
 
   const handleCreate = async () => {
@@ -80,8 +90,8 @@ export default function HistoriasScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+      <View className="flex-1 bg-[#faf5e0]">
+        <CardSkeleton />
       </View>
     );
   }
@@ -89,7 +99,7 @@ export default function HistoriasScreen() {
   return (
     <View className="flex-1 bg-[#faf5e0]">
       <ScrollView
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={loadStories} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
         contentContainerClassName="p-5 pb-10"
       >
         <View className="flex-row items-center justify-between mb-6">
@@ -104,13 +114,13 @@ export default function HistoriasScreen() {
         </View>
 
         {stories.length === 0 ? (
-          <View className="bg-white p-10 rounded-xl items-center">
-            <Text className="text-4xl mb-3">🐕</Text>
-            <Text className="text-gray-500 text-center">No hay historias de éxito aún</Text>
-            <Text className="text-gray-400 text-sm text-center mt-2">
-              ¿Encontraste a tu mascota? ¡Comparte tu historia!
-            </Text>
-          </View>
+          <EmptyState
+            icon="🐕"
+            title="No hay historias de éxito aún"
+            subtitle="¿Encontraste a tu mascota? ¡Comparte tu historia!"
+            actionLabel="Publicar historia"
+            onAction={() => setShowForm(true)}
+          />
         ) : (
           stories.map((s) => {
             const isMine = s.user_id === userId;
@@ -131,7 +141,7 @@ export default function HistoriasScreen() {
                   <Image source={{ uri: s.image_url }} className="w-full h-48 rounded-xl mb-3" resizeMode="cover" />
                 )}
                 <Text className="text-gray-600 leading-6">{s.story}</Text>
-                <Text className="text-gray-400 text-xs mt-3">
+                <Text className="text-gray-500 text-xs mt-3">
                   {new Date(s.created_at).toLocaleDateString("es-MX", {
                     day: "numeric", month: "long", year: "numeric",
                   })}
@@ -152,14 +162,16 @@ export default function HistoriasScreen() {
               </TouchableOpacity>
             </View>
             <TextInput
-              className="bg-[#faf5e0] p-3 rounded-lg mb-3 border border-gray-300"
+              className="bg-white p-3 rounded-lg mb-3 border border-gray-300 text-[#211f1e]"
               placeholder="Nombre de tu mascota *"
+              placeholderTextColor="#9BA1A6"
               value={petName}
               onChangeText={setPetName}
             />
             <TextInput
-              className="bg-[#faf5e0] p-3 rounded-lg mb-4 border border-gray-300"
+              className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
               placeholder="Cuenta tu historia de reencuentro... *"
+              placeholderTextColor="#9BA1A6"
               value={story}
               onChangeText={setStory}
               multiline
@@ -172,7 +184,7 @@ export default function HistoriasScreen() {
                 disabled={posting}
                 onPress={handleCreate}
               >
-                <Text className="text-white text-center font-bold">{posting ? "Publicando..." : "Publicar"}</Text>
+                <Text className={`text-center font-bold ${posting ? "text-gray-700" : "text-white"}`}>{posting ? "Publicando..." : "Publicar"}</Text>
               </TouchableOpacity>
               <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-lg" onPress={() => setShowForm(false)}>
                 <Text className="text-white text-center font-bold">Cancelar</Text>

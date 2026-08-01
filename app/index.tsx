@@ -1,7 +1,9 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   NativeScrollEvent,
@@ -10,8 +12,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { dashboardService } from "@/services/dashboard.service";
+import { supabase } from "@/utils/supabase";
 
 const { width } = Dimensions.get("window");
+
+const ONBOARDING_KEY = "hasSeenOnboarding";
 
 const STEPS = [
   {
@@ -33,16 +39,76 @@ const STEPS = [
 
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [checking, setChecking] = useState(true);
   const flatListRef = useRef<FlatList>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const sessionUser = data.session?.user;
+        if (sessionUser) {
+          if (!sessionUser.email_confirmed_at) {
+            router.replace({
+              pathname: "/email-confirmacion",
+              params: { email: sessionUser.email ?? "" },
+            });
+            return;
+          }
+          const profileResult = await dashboardService.getProfileByUserId(
+            sessionUser.id,
+          );
+          if (profileResult.success && profileResult.data) {
+            router.replace({
+              pathname: "/dashboard",
+              params: { email: sessionUser.email, userId: sessionUser.id },
+            });
+          } else {
+            router.replace({
+              pathname: "/register-extended",
+              params: { email: sessionUser.email ?? "", userId: sessionUser.id },
+            });
+          }
+          return;
+        }
+
+        const seen = await AsyncStorage.getItem(ONBOARDING_KEY);
+        if (seen === "true") {
+          router.replace("/login");
+          return;
+        }
+      } catch (error) {
+        console.warn("Error leyendo onboarding:", error);
+      }
+      setChecking(false);
+    })();
+  }, [router]);
+
+  const finishOnboarding = async () => {
+    try {
+      await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    } catch (error) {
+      console.warn("Error guardando onboarding:", error);
+    }
+    router.replace("/login");
+  };
 
   const handleNext = () => {
     if (currentIndex < STEPS.length - 1) {
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1 });
     } else {
-      router.replace("/login");
+      finishOnboarding();
     }
   };
+
+  if (checking) {
+    return (
+      <View className="flex-1 justify-center items-center bg-[#faf5e0]">
+        <ActivityIndicator size="large" color="#ff7e70" />
+      </View>
+    );
+  }
 
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -72,7 +138,7 @@ export default function OnboardingScreen() {
   return (
     <View className="flex-1 bg-[#faf5e0]">
       <TouchableOpacity
-        onPress={() => router.replace("/login")}
+        onPress={finishOnboarding}
         className="absolute top-16 right-6 z-10"
       >
         <Text className="text-[#ff7e70] font-semibold text-base">Saltar</Text>

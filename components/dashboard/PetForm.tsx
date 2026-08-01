@@ -1,121 +1,208 @@
-import { Ionicons } from "@expo/vector-icons";
+import type { Pet } from "@/services/dashboard.service";
+import { dashboardService } from "@/services/dashboard.service";
 import { Picker } from "@react-native-picker/picker";
+import { useState } from "react";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
+
+export interface PetFormData {
+  type: "perro" | "gato";
+  name: string;
+  color: string;
+  size: string;
+  features: string | null;
+  image_url: string | null;
+}
 
 interface PetFormProps {
-  petName: string;
-  petColor: string;
-  petSize: string;
-  petFeatures: string;
-  petType: "perro" | "gato";
-  selectedPetImage: { uri: string } | null;
-  petImageUrl: string | null;
-  uploadingPetImage: boolean;
-  onNameChange: (v: string) => void;
-  onColorChange: (v: string) => void;
-  onSizeChange: (v: string) => void;
-  onFeaturesChange: (v: string) => void;
-  onSelectImage: () => void;
-  onUploadImage: () => void;
-  onSave: () => void;
+  editingPet?: Pet | null;
+  onSubmit: (data: PetFormData) => void;
   onCancel: () => void;
 }
 
-export function PetForm({
-  petName, petColor, petSize, petFeatures, petType: _petType,
-  selectedPetImage, petImageUrl, uploadingPetImage,
-  onNameChange, onColorChange, onSizeChange, onFeaturesChange,
-  onSelectImage, onUploadImage, onSave, onCancel,
-}: PetFormProps) {
+export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
+  const [petType, setPetType] = useState<"perro" | "gato">(
+    editingPet?.type === "gato" ? "gato" : "perro",
+  );
+  const [petName, setPetName] = useState(editingPet?.name ?? "");
+  const [petColor, setPetColor] = useState(editingPet?.color ?? "");
+  const [petSize, setPetSize] = useState(editingPet?.size ?? "");
+  const [petFeatures, setPetFeatures] = useState(editingPet?.features ?? "");
+  const [petImageUrl, setPetImageUrl] = useState<string | null>(
+    editingPet?.image_url ?? null,
+  );
+  const [selectedPetImage, setSelectedPetImage] = useState<{
+    uri: string;
+  } | null>(null);
+  const [uploadingPetImage, setUploadingPetImage] = useState(false);
+
+  const handleSelectImage = async () => {
+    const result = await dashboardService.selectImage();
+    if (result.success) {
+      setSelectedPetImage(result.image || null);
+    }
+  };
+
+  const handleUploadImage = async () => {
+    if (!selectedPetImage) return;
+
+    setUploadingPetImage(true);
+    const result = await dashboardService.uploadImage(
+      selectedPetImage.uri,
+      "pet-images",
+    );
+
+    if (result.success) {
+      setPetImageUrl(result.url || null);
+      setSelectedPetImage(null);
+      Toast.show({
+        type: "success",
+        text1: "Éxito",
+        text2: "Imagen subida correctamente",
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: result.error,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    }
+
+    setUploadingPetImage(false);
+  };
+
   return (
-    <View className="bg-white p-5 rounded-xl mb-5 border-2 border-[#ff7e70]/30">
-      <View className="flex-row items-center gap-2 mb-4">
-        <Ionicons name="paw" size={20} color="#ff7e70" />
-        <Text className="font-bold text-[#ff7e70] text-lg">Nueva mascota</Text>
+    <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
+      <Text className="text-xl font-bold mb-4">
+        {editingPet ? "Editar mascota" : "Registrar nueva mascota"}
+      </Text>
+
+      {/* Tipo */}
+      <Text className="font-semibold mb-2">Tipo *</Text>
+      <View className="flex-row gap-3 mb-4">
+        {["perro", "gato"].map((type) => (
+          <TouchableOpacity
+            key={type}
+            className={`flex-1 py-3 rounded-xl border-2 ${
+              petType === type
+                ? "border-red-500 bg-[#ff7e70]"
+                : "border-[#211f1e]/20"
+            }`}
+            onPress={() => setPetType(type as "perro" | "gato")}
+          >
+            <Text
+              className={`text-center ${petType === type ? "text-white" : "text-gray-600"}`}
+            >
+              {type === "perro" ? "🐶 Perro" : "🐱 Gato"}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
+      {/* Nombre */}
+      <Text className="font-semibold mb-2">Nombre *</Text>
       <TextInput
-        className="bg-[#faf5e0] p-3 rounded-lg mb-2 border border-gray-300"
-        placeholder="Nombre *"
+        className="border border-gray-300 rounded-lg p-3 mb-4 bg-white text-[#211f1e]"
+        placeholder="Nombre de la mascota"
+        placeholderTextColor="#9BA1A6"
         value={petName}
-        onChangeText={onNameChange}
+        onChangeText={setPetName}
       />
+
+      {/* Color */}
+      <Text className="font-semibold mb-2">Color *</Text>
       <TextInput
-        className="bg-[#faf5e0] p-3 rounded-lg mb-2 border border-gray-300"
-        placeholder="Color *"
+        className="border border-gray-300 rounded-lg p-3 mb-4 bg-white text-[#211f1e]"
+        placeholder="Color principal"
+        placeholderTextColor="#9BA1A6"
         value={petColor}
-        onChangeText={onColorChange}
+        onChangeText={setPetColor}
       />
-      <View className="mb-2 border border-gray-200 rounded-lg overflow-hidden bg-[#faf5e0]">
+
+      {/* Tamaño */}
+      <Text className="font-semibold mb-2">Tamaño *</Text>
+      <View className="mb-4 border border-gray-300 rounded-lg overflow-hidden bg-white">
         <Picker
           selectedValue={petSize}
-          onValueChange={onSizeChange}
-          style={{ height: 50 }}
+          onValueChange={(value) => setPetSize(value)}
+          style={{ height: 50, color: "#211f1e", backgroundColor: "#ffffff" }}
         >
-          <Picker.Item label="Tamaño *" value="" />
-          <Picker.Item label="Pequeño" value="pequeño" />
-          <Picker.Item label="Mediano" value="mediano" />
-          <Picker.Item label="Grande" value="grande" />
+          <Picker.Item label="Selecciona un tamaño" value="" color="#211f1e" />
+          <Picker.Item label="Pequeño" value="pequeño" color="#211f1e" />
+          <Picker.Item label="Mediano" value="mediano" color="#211f1e" />
+          <Picker.Item label="Grande" value="grande" color="#211f1e" />
         </Picker>
       </View>
+
+      {/* Características */}
+      <Text className="font-semibold mb-2">Características especiales</Text>
       <TextInput
-        className="bg-[#faf5e0] p-3 rounded-lg mb-2 border border-gray-300"
-        placeholder="Características"
+        className="border border-gray-300 rounded-lg p-3 mb-4 bg-white text-[#211f1e]"
+        placeholder="Ej: manchas, cicatrices, comportamiento especial..."
+        placeholderTextColor="#9BA1A6"
         value={petFeatures}
-        onChangeText={onFeaturesChange}
+        onChangeText={setPetFeatures}
         multiline
+        numberOfLines={3}
+        textAlignVertical="top"
       />
 
-      <View className="flex-row gap-2 mb-3">
+      {/* Foto */}
+      <Text className="font-semibold mb-2">Foto *</Text>
+      <View className="flex-row gap-3 mb-4">
         <TouchableOpacity
-          className="flex-1 bg-[#005e66] py-3 rounded-lg border border-[#005e66]/30"
-          onPress={onSelectImage}
+          className="flex-1 bg-[#007275] py-3 rounded-lg"
+          onPress={handleSelectImage}
         >
-          <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name="camera" size={18} color="white" />
-            <Text className="text-white">Foto</Text>
-          </View>
+          <Text className="text-white text-center">📷 Seleccionar</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          className={`flex-1 py-3 rounded-lg border ${uploadingPetImage ? "bg-gray-400 border-gray-400" : "bg-[#007275] border-[#007275]/30"}`}
-          onPress={onUploadImage}
-          disabled={uploadingPetImage}
-        >
-          <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name={uploadingPetImage ? "hourglass" : "cloud-upload"} size={18} color="white" />
-            <Text className="text-white">{uploadingPetImage ? "Subiendo" : "Subir"}</Text>
-          </View>
-        </TouchableOpacity>
+        {selectedPetImage && (
+          <TouchableOpacity
+            className={`flex-1 py-3 rounded-lg ${uploadingPetImage ? "bg-gray-400" : "bg-green-500"}`}
+            onPress={handleUploadImage}
+            disabled={uploadingPetImage}
+          >
+            <Text className={`text-center ${uploadingPetImage ? "text-gray-700" : "text-white"}`}>
+              {uploadingPetImage ? "⏳ Subiendo..." : "☁️ Subir"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {selectedPetImage && (
-        <Image source={{ uri: selectedPetImage.uri }} className="w-16 h-16 rounded-lg mb-3 self-center" />
+        <Image
+          source={{ uri: selectedPetImage.uri }}
+          className="w-24 h-24 rounded-lg mb-4 self-center"
+        />
       )}
+
       {petImageUrl && (
-        <View className="flex-row items-center justify-center gap-2 mb-3">
-          <Ionicons name="checkmark-circle" size={18} color="green" />
-          <Text className="text-green-600">Foto lista</Text>
+        <View className="bg-green-50 p-3 rounded-lg mb-4">
+          <Text className="text-green-600 text-center">
+            ✅ Foto lista para usar
+          </Text>
         </View>
       )}
 
-      <View className="flex-row gap-2">
+      {/* Botones */}
+      <View className="flex-row gap-3">
         <TouchableOpacity
-          className="flex-1 bg-[#ff7e70] py-3 rounded-lg border-2 border-[#ff7e70]/30"
-          onPress={onSave}
+          className="flex-1 bg-[#ff7e70] py-4 rounded-lg"
+          onPress={() => onSubmit({ type: petType, name: petName, color: petColor, size: petSize, features: petFeatures || null, image_url: petImageUrl })}
         >
-          <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name="checkmark" size={18} color="white" />
-            <Text className="text-white text-center font-bold">Guardar</Text>
-          </View>
+          <Text className="text-white text-center font-bold">
+            {editingPet ? "Actualizar" : "Registrar"}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 bg-gray-500 py-3 rounded-lg border-2 border-gray-500/30"
+          className="flex-1 bg-[#211f1e] py-4 rounded-lg"
           onPress={onCancel}
         >
-          <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name="close" size={18} color="white" />
-            <Text className="text-center text-white">Cancelar</Text>
-          </View>
+          <Text className="text-white text-center font-bold">Cancelar</Text>
         </TouchableOpacity>
       </View>
     </View>
