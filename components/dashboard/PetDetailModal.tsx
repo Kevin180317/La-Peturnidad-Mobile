@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { Pet } from "@/services/dashboard.service";
 import { formatDate } from "@/utils/format";
 import { Image, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -41,9 +42,11 @@ export function PetDetailModal({
                   />
                 ) : (
                   <View className="w-full h-64 bg-gray-200 rounded-xl mb-4 items-center justify-center">
-                    <Text className="text-6xl">
-                      {pet.type === "perro" ? "🐶" : "🐱"}
-                    </Text>
+                    <MaterialCommunityIcons
+                      name={pet.type === "perro" ? "dog" : "cat"}
+                      size={80}
+                      color="#9CA3AF"
+                    />
                   </View>
                 )}
 

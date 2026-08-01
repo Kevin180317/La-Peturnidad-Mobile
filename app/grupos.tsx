@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { EmptyState } from "@/components/EmptyState";
 import { ListSkeleton } from "@/components/Skeleton";
 import { groupsService } from "@/services/groups.service";
@@ -124,14 +125,14 @@ export default function GruposScreen() {
             className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
             onPress={() => setShowForm(true)}
           >
-            <Text className="text-white text-lg mr-1">➕</Text>
+            <Ionicons name="add" size={20} color="white" style={{ marginRight: 6 }} />
             <Text className="text-white font-semibold">Crear</Text>
           </TouchableOpacity>
         </View>
 
         {groups.length === 0 ? (
           <EmptyState
-            icon="👥"
+            icon="people"
             title="No hay grupos aún"
             subtitle="¡Crea el primero y reúne a tu colonia!"
             actionLabel="Crear grupo"
@@ -177,7 +178,10 @@ export default function GruposScreen() {
               {group.description && (
                 <Text className="text-gray-600 text-sm mb-2">{group.description}</Text>
               )}
-              <Text className="text-gray-500 text-xs">👥 {group.memberCount} miembros</Text>
+              <Text className="text-gray-500 text-xs flex-row items-center">
+                <Ionicons name="people" size={13} color="#6B7280" style={{ marginRight: 3 }} />
+                {group.memberCount} miembros
+              </Text>
             </TouchableOpacity>
           ))
         )}
@@ -189,7 +193,7 @@ export default function GruposScreen() {
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-xl font-bold text-[#211f1e]">Crear grupo</Text>
               <TouchableOpacity onPress={() => setShowForm(false)}>
-                <Text className="text-[#211f1e] text-2xl">✕</Text>
+                <Ionicons name="close" size={24} color="#211f1e" />
               </TouchableOpacity>
             </View>
             <TextInput

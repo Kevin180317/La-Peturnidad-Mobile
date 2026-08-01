@@ -4,6 +4,17 @@
 
 ---
 
+## ✅ Fase 8 — Fix Uniwind + Rediseño de iconos (Completada)
+
+| Item | Notas |
+|---|---|
+| **Fix crítico: scanner Uniwind solo cubría `app/`** | El scanner de Tailwind v4 vía uniwind usa `base = dirname(global.css)` → solo compilaba clases usadas en `app/`. Tras el refactor B11, las clases exclusivas de `components/` no generaban estilo: botón "Ver mascotas perdidas" invisible (`bg-yellow-500`), sin gaps (`gap-4`), imágenes 0×0 (`w-32 h-32`). Fix: `@source "../components";` en `app/global.css` (verificado: las 209 clases de `components/` compilan; lint + tsc limpios). |
+| **Rediseño EmergencyTab** | De columna de 4 botones a **grid 2×2 de cards**: círculo `bg-white/25` con Ionicons (megaphone, eye/eye-off, clipboard, checkmark-circle), título + subtítulo, estado activo `bg-[#211f1e]` con "✓ Visible" en verde. |
+| **Overhaul de iconos: emojis → Ionicons (toda la app)** | Compartidos: `EmptyState` (prop `icon` ahora `keyof typeof Ionicons.glyphMap`, círculo coral), `Button` (fallback avatar con paw), `ToastConfig` (checkmark-circle/close-circle/information-circle), `ErrorBoundary` (paw). Dashboard: `TabBar` (filled/outline, color activo `#ff7e70`), `HomeTab` (cards resumen blancas con círculos de color), `ProfileTab` (menú lista con chevrons, badge mensajes, panel moderación condicional), `FeedTab`, `ComunidadTab` (chips con iconos), `PetForm`/`PetDetailModal` (dog/cat via MaterialCommunityIcons). Pantallas: buscar, comunidad, seguidores, perfil/[id], panel-moderacion, mensajes, mensajes/[id] (checkmark-done, send con ActivityIndicator), historias, grupos, grupos/[id], email-confirmacion (mail en círculo coral). Únicos emojis restantes: `console.log` de register.tsx (logs, no UI) y "✓" de texto en EmergencyTab. |
+| **Verificación** | `npm run lint` (0 errores/0 warnings) + `tsc --noEmit` (0 errores). |
+
+---
+
 ## ✅ Fase 1 — Base sólida (Completada)
 
 | Item | Estado |

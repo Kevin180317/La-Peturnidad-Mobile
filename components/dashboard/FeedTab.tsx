@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -102,7 +103,7 @@ export function FeedTab({
           className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
           onPress={() => setShowPostForm(true)}
         >
-          <Text className="text-white text-lg mr-1">✏️</Text>
+          <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 4 }} />
           <Text className="text-white font-semibold">Publicar</Text>
         </TouchableOpacity>
       </View>
@@ -163,7 +164,9 @@ export function FeedTab({
         <ActivityIndicator size="large" color="#ff7e70" />
       ) : visiblePosts.length === 0 ? (
         <View className="bg-white p-10 rounded-xl items-center">
-          <Text className="text-4xl mb-3">📱</Text>
+          <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
+            <Ionicons name="phone-portrait-outline" size={32} color="#ff7e70" />
+          </View>
           <Text className="text-gray-500 text-center">
             {feedSubTab === "all" ? "No hay publicaciones en el feed" : "No has publicado nada aún"}
           </Text>
@@ -202,7 +205,7 @@ export function FeedTab({
                 </View>
                 {isMine && (
                   <TouchableOpacity onPress={() => onDeletePost(post.id)}>
-                    <Text className="text-[#ff7e70]">🗑️</Text>
+                    <Ionicons name="trash-outline" size={20} color="#ff7e70" />
                   </TouchableOpacity>
                 )}
               </TouchableOpacity>
@@ -210,7 +213,8 @@ export function FeedTab({
               <Text className="text-[#211f1e] leading-5 mb-2">{post.content}</Text>
 
               <View className="flex-row items-center gap-2 pt-2 border-t border-gray-100">
-                <Text className="text-gray-500 text-sm">💬 {post.comment_count}</Text>
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color="#6B7280" />
+                <Text className="text-gray-500 text-sm">{post.comment_count}</Text>
                 <Text className="text-[#ff7e70] text-xs ml-auto">
                   {commentTarget?.id === post.id ? "Ocultar comentarios" : "Ver comentarios"}
                 </Text>
@@ -259,7 +263,11 @@ export function FeedTab({
                       onPress={onAddComment}
                       disabled={sendingComment || !commentText.trim()}
                     >
-                      <Text className="text-white text-sm">{sendingComment ? "⏳" : "➤"}</Text>
+                      {sendingComment ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Ionicons name="send" size={14} color="#fff" />
+                      )}
                     </TouchableOpacity>
                   </View>
                 </View>

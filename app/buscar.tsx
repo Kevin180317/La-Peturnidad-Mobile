@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/EmptyState";
 import { ListSkeleton } from "@/components/Skeleton";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   searchService,
   type GroupSearchResult,
@@ -20,10 +21,14 @@ import {
 
 type SearchTab = "pets" | "groups" | "users";
 
-const TABS: { key: SearchTab; label: string; icon: string }[] = [
-  { key: "pets", label: "Mascotas", icon: "🐶" },
-  { key: "groups", label: "Grupos", icon: "👥" },
-  { key: "users", label: "Usuarios", icon: "🧑" },
+const TABS: {
+  key: SearchTab;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { key: "pets", label: "Mascotas", icon: "paw" },
+  { key: "groups", label: "Grupos", icon: "people" },
+  { key: "users", label: "Usuarios", icon: "person" },
 ];
 
 export default function BuscarScreen() {
@@ -99,7 +104,11 @@ export default function BuscarScreen() {
         />
       ) : (
         <View className="w-12 h-12 rounded-xl bg-[#faf5e0] items-center justify-center">
-          <Text className="text-2xl">{pet.type === "gato" ? "🐱" : "🐶"}</Text>
+          <MaterialCommunityIcons
+            name={pet.type === "gato" ? "cat" : "dog"}
+            size={24}
+            color="#6B7280"
+          />
         </View>
       )}
       <View className="flex-1 ml-3">
@@ -122,7 +131,7 @@ export default function BuscarScreen() {
       activeOpacity={0.8}
     >
       <View className="w-12 h-12 rounded-xl bg-[#faf5e0] items-center justify-center">
-        <Text className="text-2xl">👥</Text>
+        <Ionicons name="people-outline" size={24} color="#6B7280" />
       </View>
       <View className="flex-1 ml-3">
         <Text className="text-[#211f1e] font-bold">{group.name}</Text>
@@ -177,7 +186,7 @@ export default function BuscarScreen() {
     <View className="flex-1 bg-[#faf5e0] p-4">
       {/* Input de búsqueda */}
       <View className="flex-row items-center bg-white rounded-2xl border border-[#211f1e]/10 px-4">
-        <Text className="text-lg mr-2">🔍</Text>
+        <Ionicons name="search" size={18} color="#6B7280" style={{ marginRight: 8 }} />
         <TextInput
           className="flex-1 py-3 text-[#211f1e]"
           placeholder="Buscar mascotas, grupos, usuarios..."
@@ -190,7 +199,7 @@ export default function BuscarScreen() {
         />
         {query.length > 0 && (
           <TouchableOpacity onPress={() => setQuery("")} activeOpacity={0.7}>
-            <Text className="text-gray-400 text-xl px-1">✕</Text>
+            <Ionicons name="close-circle" size={20} color="#9CA3AF" />
           </TouchableOpacity>
         )}
       </View>
@@ -203,13 +212,14 @@ export default function BuscarScreen() {
             <TouchableOpacity
               key={tab.key}
               onPress={() => setActiveTab(tab.key)}
-              className={`flex-1 py-2.5 rounded-xl items-center ${
+              className={`flex-1 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 ${
                 isActive ? "bg-[#007275]" : "bg-white"
               }`}
               activeOpacity={0.8}
             >
+              <Ionicons name={tab.icon} size={16} color={isActive ? "#fff" : "#4B5563"} />
               <Text className={`font-semibold ${isActive ? "text-white" : "text-gray-600"}`}>
-                {tab.icon} {tab.label}
+                {tab.label}
               </Text>
             </TouchableOpacity>
           );
@@ -221,7 +231,7 @@ export default function BuscarScreen() {
         <ListSkeleton count={4} />
       ) : isEmpty ? (
         <EmptyState
-          icon="🔎"
+          icon="search"
           title="Sin resultados"
           subtitle={`No encontramos ${activeTab === "pets" ? "mascotas" : activeTab === "groups" ? "grupos" : "usuarios"} con "${query.trim()}"`}
         />

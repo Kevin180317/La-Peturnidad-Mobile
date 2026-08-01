@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { EmptyState } from "@/components/EmptyState";
 import { CardSkeleton } from "@/components/Skeleton";
 import { successStoriesService } from "@/services/success-stories.service";
@@ -103,19 +104,22 @@ export default function HistoriasScreen() {
         contentContainerClassName="p-5 pb-10"
       >
         <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-2xl font-bold text-[#211f1e]">🐾 Reuniones exitosas</Text>
+          <View className="flex-row items-center gap-1.5">
+            <Ionicons name="paw" size={20} color="#211f1e" />
+            <Text className="text-2xl font-bold text-[#211f1e]">Reuniones exitosas</Text>
+          </View>
           <TouchableOpacity
             className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
             onPress={() => setShowForm(true)}
           >
-            <Text className="text-white text-lg mr-1">✨</Text>
+            <Ionicons name="sparkles" size={18} color="white" style={{ marginRight: 6 }} />
             <Text className="text-white font-semibold">Nueva</Text>
           </TouchableOpacity>
         </View>
 
         {stories.length === 0 ? (
           <EmptyState
-            icon="🐕"
+            icon="paw"
             title="No hay historias de éxito aún"
             subtitle="¿Encontraste a tu mascota? ¡Comparte tu historia!"
             actionLabel="Publicar historia"
@@ -128,12 +132,12 @@ export default function HistoriasScreen() {
               <View key={s.id} className="bg-white p-5 rounded-xl mb-4 shadow-sm">
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center gap-2">
-                    <Text className="text-2xl">🐾</Text>
+                    <Ionicons name="paw" size={20} color="#ff7e70" />
                     <Text className="font-bold text-lg text-[#211f1e]">{s.pet_name}</Text>
                   </View>
                   {isMine && (
                     <TouchableOpacity onPress={() => handleDelete(s.id)}>
-                      <Text className="text-[#ff7e70]">🗑️</Text>
+                      <Ionicons name="trash-outline" size={20} color="#ff7e70" />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -158,7 +162,7 @@ export default function HistoriasScreen() {
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-xl font-bold text-[#211f1e]">Nueva historia</Text>
               <TouchableOpacity onPress={() => setShowForm(false)}>
-                <Text className="text-[#211f1e] text-2xl">✕</Text>
+                <Ionicons name="close" size={24} color="#211f1e" />
               </TouchableOpacity>
             </View>
             <TextInput

@@ -77,6 +77,8 @@
 - Buscador: `app/buscar.tsx` (tabs Mascotas/Grupos/Usuarios, debounce 300ms) + `services/search.service.ts` (`ilike`, límite 20, muestra dueño/miembros/ciudad); botón 🔍 en header del dashboard; política RLS `Authenticated users can view all pets` agregada
 - Refactor dashboard: `app/dashboard.tsx` (759 líneas) — UI en `components/dashboard/*` (TabBar, DashboardSkeleton, PetDetailModal, PetForm con estado local + subida de imagen, HomeTab, ProfileTab con foto de perfil, EmergencyTab, FeedTab, ComunidadTab); `utils/format.ts` para `formatDate`
 - Fix crítico Uniwind: el scanner solo cubría `app/`; agregado `@source "../components"` en `app/global.css` (restauraba botones invisibles, gaps faltantes e imágenes 0x0 en el dashboard refactorizado)
+- Rediseño EmergencyTab: grid 2×2 de cards con Ionicons (megaphone/eye/clipboard/checkmark-circle), estado activo `bg-[#211f1e]`
+- Overhaul de iconos: emojis → Ionicons en toda la app (dashboard completo + 12 pantallas: buscar, comunidad, seguidores, perfil/[id], panel-moderacion, mensajes, mensajes/[id], historias, grupos, grupos/[id], email-confirmacion); `EmptyState.icon` ahora es `keyof typeof Ionicons.glyphMap`; dog/cat via MaterialCommunityIcons; ProfileTab como menú con chevrons
 
 ### Edge Functions
 - `send-push-notification` (v5) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS

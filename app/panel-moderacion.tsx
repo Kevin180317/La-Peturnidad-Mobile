@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { EmptyState } from "@/components/EmptyState";
 import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
@@ -128,7 +129,7 @@ export default function PanelModeracionScreen() {
 
       {reports.length === 0 ? (
         <EmptyState
-          icon="🛡️"
+          icon="shield-checkmark"
           title="No hay reportes"
           subtitle="Los reportes de la comunidad aparecerán aquí"
         />
@@ -154,10 +155,11 @@ export default function PanelModeracionScreen() {
             {report.status === "pending" && (
               <View className="flex-row gap-3">
                 <TouchableOpacity
-                  className="flex-1 bg-green-500 py-2 rounded-lg"
+                  className="flex-1 bg-green-500 py-2 rounded-lg flex-row items-center justify-center"
                   onPress={() => handleReview(report.id, "reviewed")}
                 >
-                  <Text className="text-white text-center text-sm font-semibold">✅ Revisado</Text>
+                  <Ionicons name="checkmark-circle" size={16} color="white" style={{ marginRight: 4 }} />
+                  <Text className="text-white text-center text-sm font-semibold">Revisado</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   className="flex-1 bg-gray-500 py-2 rounded-lg"

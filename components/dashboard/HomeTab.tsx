@@ -1,3 +1,4 @@
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import type {
   EmergencyAlert,
   FoundPetWithDetails,
@@ -78,7 +79,7 @@ export function HomeTab({
         <View className="flex-row items-center justify-between">
           <View className="flex-1">
             <Text className="text-2xl font-bold text-[#211f1e]">
-              ¡Hola, {profileName || "Usuario"}! 👋
+              ¡Hola, {profileName || "Usuario"}!
             </Text>
             <Text className="text-gray-600 mt-1">
               {new Date().toLocaleDateString("es-MX", {
@@ -94,27 +95,33 @@ export function HomeTab({
             className="bg-[#007275] p-3 rounded-2xl"
             activeOpacity={0.8}
           >
-            <Text className="text-white text-xl">🔍</Text>
+            <Ionicons name="search" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Tarjetas de resumen */}
       <View className="flex-row gap-3 mb-6">
-        <View className="flex-1 bg-blue-50 p-4 rounded-xl">
-          <Text className="text-2xl mb-1">🐾</Text>
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
+          <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mb-2">
+            <Ionicons name="paw" size={20} color="#2563eb" />
+          </View>
           <Text className="text-xl font-bold text-blue-600">{pets.length}</Text>
           <Text className="text-gray-600 text-sm">Mascotas</Text>
         </View>
-        <View className="flex-1 bg-yellow-50 p-4 rounded-xl">
-          <Text className="text-2xl mb-1">🚨</Text>
-          <Text className="text-xl font-bold text-yellow-600">
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
+          <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mb-2">
+            <Ionicons name="warning" size={20} color="#d97706" />
+          </View>
+          <Text className="text-xl font-bold text-amber-600">
             {myAlerts.length}
           </Text>
           <Text className="text-gray-600 text-sm">Alertas</Text>
         </View>
-        <View className="flex-1 bg-green-50 p-4 rounded-xl">
-          <Text className="text-2xl mb-1">✅</Text>
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
+          <View className="w-10 h-10 rounded-full bg-green-100 items-center justify-center mb-2">
+            <Ionicons name="checkmark-circle" size={20} color="#16a34a" />
+          </View>
           <Text className="text-xl font-bold text-green-600">
             {foundPets.length}
           </Text>
@@ -125,26 +132,28 @@ export function HomeTab({
       {/* Botones de acción rápida */}
       <View className="flex-row gap-3 mb-6">
         <TouchableOpacity
-          className="flex-1 bg-green-500 py-4 rounded-xl"
+          className="flex-1 bg-green-500 py-4 rounded-xl flex-row items-center justify-center gap-2 shadow-sm"
           onPress={() => {
             setShowPetForm(true);
             setShowPets(false);
           }}
         >
+          <Ionicons name="add-circle" size={20} color="#fff" />
           <Text className="text-white text-center font-semibold">
-            ➕ Registrar mascota
+            Registrar mascota
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-xl"
+          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2 shadow-sm"
           onPress={() => {
             onLoadPets();
             setShowPets(!showPets);
             setShowPetForm(false);
           }}
         >
+          <Ionicons name={showPets ? "eye-off" : "eye"} size={20} color="#fff" />
           <Text className="text-white text-center font-semibold">
-            {showPets ? "👁️ Ocultar" : "👁️ Ver"} mascotas
+            {showPets ? "Ocultar" : "Ver"} mascotas
           </Text>
         </TouchableOpacity>
       </View>
@@ -157,7 +166,9 @@ export function HomeTab({
             <ActivityIndicator size="large" color="#ff7e70" />
           ) : pets.length === 0 ? (
             <View className="bg-[#faf5e0] p-8 rounded-xl items-center">
-              <Text className="text-4xl mb-3">🐕</Text>
+              <View className="w-14 h-14 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
+                <Ionicons name="paw" size={28} color="#ff7e70" />
+              </View>
               <Text className="text-gray-500 text-center">
                 No tienes mascotas registradas. ¡Agrega tu primera mascota!
               </Text>
@@ -179,9 +190,11 @@ export function HomeTab({
                   />
                 ) : (
                   <View className="w-16 h-16 bg-gray-200 rounded-lg mr-3 items-center justify-center">
-                    <Text className="text-2xl">
-                      {pet.type === "perro" ? "🐶" : "🐱"}
-                    </Text>
+                    <MaterialCommunityIcons
+                      name={pet.type === "perro" ? "dog" : "cat"}
+                      size={28}
+                      color="#6B7280"
+                    />
                   </View>
                 )}
                 <View className="flex-1">

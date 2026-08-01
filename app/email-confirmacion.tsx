@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { authService } from "@/services/auth.service";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -46,7 +47,9 @@ export default function EmailConfirmacionScreen() {
       ) : (
         <>
           <View className="items-center mb-8">
-            <Text className="text-4xl mb-4">✉️</Text>
+            <View className="w-20 h-20 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-4">
+              <Ionicons name="mail-outline" size={40} color="#ff7e70" />
+            </View>
             <Text className="text-3xl font-bold text-[#ff7e70] mb-2 text-center">
               Revisá tu email
             </Text>

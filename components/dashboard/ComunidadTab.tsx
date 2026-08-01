@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -16,9 +17,9 @@ import type { CommentTarget } from "./FeedTab";
 const comCatColor = (cat: string) => {
   switch (cat) { case "aviso": return "bg-red-100 text-red-600"; case "evento": return "bg-blue-100 text-blue-600"; case "pregunta": return "bg-yellow-100 text-yellow-600"; default: return "bg-gray-100 text-gray-600"; }
 };
-const comCatIcon = (cat: string) => {
-  const m: Record<string, string> = { general: "💬", aviso: "📢", evento: "📅", pregunta: "❓" };
-  return m[cat] || "💬";
+const comCatIcon = (cat: string): keyof typeof Ionicons.glyphMap => {
+  const m: Record<string, keyof typeof Ionicons.glyphMap> = { general: "chatbubbles", aviso: "megaphone", evento: "calendar", pregunta: "help-circle" };
+  return m[cat] || "chatbubbles";
 };
 const comCatLabel = (cat: string) => {
   const m: Record<string, string> = { general: "General", aviso: "Aviso", evento: "Evento", pregunta: "Pregunta" };
@@ -125,7 +126,7 @@ export function ComunidadTab({
             className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
             onPress={() => setComShowForm(true)}
           >
-            <Text className="text-white text-lg mr-1">➕</Text>
+            <Ionicons name="add" size={18} color="#fff" style={{ marginRight: 2 }} />
             <Text className="text-white font-semibold">Nuevo</Text>
           </TouchableOpacity>
         </View>
@@ -153,7 +154,9 @@ export function ComunidadTab({
           <ActivityIndicator size="large" color="#ff7e70" />
         ) : visibleItems.length === 0 ? (
           <View className="bg-white p-10 rounded-xl items-center">
-            <Text className="text-4xl mb-3">💬</Text>
+            <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
+              <Ionicons name="chatbubbles-outline" size={32} color="#ff7e70" />
+            </View>
             <Text className="text-gray-500 text-center">
               {comSubTab === "all" ? "No hay avisos todavía. ¡Sé el primero!" : "No has creado avisos aún"}
             </Text>
@@ -185,21 +188,23 @@ export function ComunidadTab({
                   </View>
                   {isMine && (
                     <TouchableOpacity onPress={() => onDeleteAnnouncement(item.id)}>
-                      <Text className="text-[#ff7e70] text-lg">🗑️</Text>
+                      <Ionicons name="trash-outline" size={20} color="#ff7e70" />
                     </TouchableOpacity>
                   )}
                 </TouchableOpacity>
-                <View className={`self-start px-2 py-0.5 rounded-full mb-1 ${comCatColor(item.category)}`}>
-                  <Text className="text-xs font-medium">{comCatIcon(item.category)} {comCatLabel(item.category)}</Text>
+                <View className={`self-start px-2.5 py-1 rounded-full mb-1 flex-row items-center gap-1 ${comCatColor(item.category)}`}>
+                  <Ionicons name={comCatIcon(item.category)} size={12} />
+                  <Text className="text-xs font-medium">{comCatLabel(item.category)}</Text>
                 </View>
                 <Text className="font-bold text-lg text-[#211f1e]">{item.title}</Text>
                 <Text className="text-gray-600 leading-5 mt-1">{item.content}</Text>
 
                 <TouchableOpacity
-                  className="mt-3 pt-2 border-t border-gray-100"
+                  className="mt-3 pt-2 border-t border-gray-100 flex-row items-center gap-1.5"
                   onPress={() => onToggleComments("announcement", item.id)}
                 >
-                  <Text className="text-gray-500 text-sm">💬 {annComments.length} {isCommenting ? "Ocultar" : "Comentar"}</Text>
+                  <Ionicons name="chatbubble-ellipses-outline" size={16} color="#6B7280" />
+                  <Text className="text-gray-500 text-sm">{annComments.length} {isCommenting ? "Ocultar" : "Comentar"}</Text>
                 </TouchableOpacity>
 
                 {isCommenting && (
@@ -244,7 +249,11 @@ export function ComunidadTab({
                         onPress={onAddComment}
                         disabled={sendingComment || !commentText.trim()}
                       >
-                        <Text className="text-white text-sm">{sendingComment ? "⏳" : "➤"}</Text>
+                        {sendingComment ? (
+                          <ActivityIndicator size="small" color="#fff" />
+                        ) : (
+                          <Ionicons name="send" size={14} color="#fff" />
+                        )}
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -260,12 +269,15 @@ export function ComunidadTab({
           <View className="bg-white rounded-t-2xl p-5">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-xl font-bold text-[#211f1e]">Nuevo aviso</Text>
-              <TouchableOpacity onPress={() => setComShowForm(false)}><Text className="text-[#211f1e] text-2xl">✕</Text></TouchableOpacity>
+              <TouchableOpacity onPress={() => setComShowForm(false)}>
+                <Ionicons name="close" size={26} color="#211f1e" />
+              </TouchableOpacity>
             </View>
             <View className="flex-row gap-2 mb-4 flex-wrap">
               {["general", "aviso", "evento", "pregunta"].map((cat) => (
-                <TouchableOpacity key={cat} className={`py-2 px-4 rounded-full border-2 ${comFormCategory === cat ? "border-[#ff7e70] bg-[#ff7e70]" : "border-gray-200 bg-[#faf5e0]"}`} onPress={() => setComFormCategory(cat)}>
-                  <Text className={`font-medium ${comFormCategory === cat ? "text-white" : "text-gray-600"}`}>{comCatIcon(cat)} {comCatLabel(cat)}</Text>
+                <TouchableOpacity key={cat} className={`py-2 px-4 rounded-full border-2 flex-row items-center gap-1.5 ${comFormCategory === cat ? "border-[#ff7e70] bg-[#ff7e70]" : "border-gray-200 bg-[#faf5e0]"}`} onPress={() => setComFormCategory(cat)}>
+                  <Ionicons name={comCatIcon(cat)} size={14} color={comFormCategory === cat ? "#fff" : "#4B5563"} />
+                  <Text className={`font-medium ${comFormCategory === cat ? "text-white" : "text-gray-600"}`}>{comCatLabel(cat)}</Text>
                 </TouchableOpacity>
               ))}
             </View>

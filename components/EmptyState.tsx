@@ -1,7 +1,8 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
 
 interface EmptyStateProps {
-  icon?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
   title: string;
   subtitle?: string;
   actionLabel?: string;
@@ -9,7 +10,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon = "🐾",
+  icon = "paw",
   title,
   subtitle,
   actionLabel,
@@ -17,7 +18,9 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <View className="bg-white p-10 rounded-2xl items-center border border-[#211f1e]/10">
-      <Text className="text-4xl mb-3">{icon}</Text>
+      <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
+        <Ionicons name={icon} size={32} color="#ff7e70" />
+      </View>
       <Text className="text-[#211f1e] font-semibold text-center">{title}</Text>
       {subtitle && (
         <Text className="text-gray-500 text-sm text-center mt-2">{subtitle}</Text>

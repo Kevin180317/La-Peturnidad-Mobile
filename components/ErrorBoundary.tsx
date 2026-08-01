@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Component, type ReactNode } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -28,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <View className="flex-1 bg-[#faf5e0] items-center justify-center px-6">
-          <Text className="text-6xl mb-4">🐾</Text>
+          <Ionicons name="paw" size={64} color="#ff7e70" style={{ marginBottom: 16 }} />
           <Text className="text-xl font-bold text-[#ff7e70] mb-2">
             Algo salió mal
           </Text>

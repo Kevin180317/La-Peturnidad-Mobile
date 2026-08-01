@@ -1,3 +1,4 @@
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { followsService } from "@/services/follows.service";
 import { messagesService } from "@/services/messages.service";
 import { petsService } from "@/services/pets.service";
@@ -122,7 +123,9 @@ export default function PublicProfileScreen() {
   if (!profile) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0] p-5">
-        <Text className="text-4xl mb-3">😕</Text>
+        <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
+          <Ionicons name="person-remove-outline" size={32} color="#ff7e70" />
+        </View>
         <Text className="text-gray-500 text-center">Perfil no encontrado</Text>
         <TouchableOpacity className="bg-[#211f1e] py-3 px-6 rounded-lg mt-4" onPress={() => router.back()}>
           <Text className="text-white font-semibold">Volver</Text>
@@ -173,10 +176,11 @@ export default function PublicProfileScreen() {
       {isOwn ? (
         <View className="flex-row gap-3 mb-6">
           <TouchableOpacity
-            className="flex-1 bg-[#007275] py-3 rounded-lg"
+            className="flex-1 bg-[#007275] py-3 rounded-lg flex-row items-center justify-center"
             onPress={() => router.push("/editar-perfil")}
           >
-            <Text className="text-white text-center font-bold">✏️ Editar perfil</Text>
+            <Ionicons name="pencil" size={16} color="white" style={{ marginRight: 6 }} />
+            <Text className="text-white text-center font-bold">Editar perfil</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -199,14 +203,18 @@ export default function PublicProfileScreen() {
       )}
 
       {userRole && (userRole === "moderator" || userRole === "admin") && (
-        <View className="bg-[#ff7e70]/10 p-3 rounded-xl mb-4">
+        <View className="bg-[#ff7e70]/10 p-3 rounded-xl mb-4 flex-row items-center justify-center gap-1.5">
+          <Ionicons name="shield-checkmark" size={18} color="#ff7e70" />
           <Text className="text-[#ff7e70] text-center font-semibold capitalize">
-            🛡️ {userRole === "admin" ? "Administrador" : "Moderador"}
+            {userRole === "admin" ? "Administrador" : "Moderador"}
           </Text>
         </View>
       )}
 
-      <Text className="text-lg font-bold mb-3 text-[#211f1e]">🐾 Mascotas</Text>
+      <View className="flex-row items-center gap-1.5 mb-3">
+        <Ionicons name="paw" size={18} color="#211f1e" />
+        <Text className="text-lg font-bold text-[#211f1e]">Mascotas</Text>
+      </View>
       {pets.length === 0 ? (
         <View className="bg-white p-6 rounded-xl items-center mb-6">
           <Text className="text-gray-500">Sin mascotas registradas</Text>
@@ -218,7 +226,11 @@ export default function PublicProfileScreen() {
               <Image source={{ uri: pet.image_url }} className="w-16 h-16 rounded-lg mr-3" />
             ) : (
               <View className="w-16 h-16 bg-gray-200 rounded-lg mr-3 items-center justify-center">
-                <Text className="text-2xl">{pet.type === "perro" ? "🐶" : "🐱"}</Text>
+                <MaterialCommunityIcons
+                  name={pet.type === "perro" ? "dog" : "cat"}
+                  size={28}
+                  color="#6B7280"
+                />
               </View>
             )}
             <View className="flex-1">

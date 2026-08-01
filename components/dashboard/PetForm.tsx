@@ -1,8 +1,16 @@
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import type { Pet } from "@/services/dashboard.service";
 import { dashboardService } from "@/services/dashboard.service";
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 export interface PetFormData {
@@ -87,17 +95,22 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
         {["perro", "gato"].map((type) => (
           <TouchableOpacity
             key={type}
-            className={`flex-1 py-3 rounded-xl border-2 ${
+            className={`flex-1 py-3 rounded-xl border-2 flex-row items-center justify-center gap-2 ${
               petType === type
                 ? "border-red-500 bg-[#ff7e70]"
                 : "border-[#211f1e]/20"
             }`}
             onPress={() => setPetType(type as "perro" | "gato")}
           >
+            <MaterialCommunityIcons
+              name={type === "perro" ? "dog" : "cat"}
+              size={22}
+              color={petType === type ? "#fff" : "#6B7280"}
+            />
             <Text
               className={`text-center ${petType === type ? "text-white" : "text-gray-600"}`}
             >
-              {type === "perro" ? "🐶 Perro" : "🐱 Gato"}
+              {type === "perro" ? "Perro" : "Gato"}
             </Text>
           </TouchableOpacity>
         ))}
@@ -155,19 +168,25 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       <Text className="font-semibold mb-2">Foto *</Text>
       <View className="flex-row gap-3 mb-4">
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-3 rounded-lg"
+          className="flex-1 bg-[#007275] py-3 rounded-lg flex-row items-center justify-center gap-2"
           onPress={handleSelectImage}
         >
-          <Text className="text-white text-center">📷 Seleccionar</Text>
+          <Ionicons name="camera" size={18} color="#fff" />
+          <Text className="text-white text-center">Seleccionar</Text>
         </TouchableOpacity>
         {selectedPetImage && (
           <TouchableOpacity
-            className={`flex-1 py-3 rounded-lg ${uploadingPetImage ? "bg-gray-400" : "bg-green-500"}`}
+            className={`flex-1 py-3 rounded-lg flex-row items-center justify-center gap-2 ${uploadingPetImage ? "bg-gray-400" : "bg-green-500"}`}
             onPress={handleUploadImage}
             disabled={uploadingPetImage}
           >
+            {uploadingPetImage ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="cloud-upload" size={18} color="#fff" />
+            )}
             <Text className={`text-center ${uploadingPetImage ? "text-gray-700" : "text-white"}`}>
-              {uploadingPetImage ? "⏳ Subiendo..." : "☁️ Subir"}
+              {uploadingPetImage ? "Subiendo..." : "Subir"}
             </Text>
           </TouchableOpacity>
         )}
@@ -181,9 +200,10 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       )}
 
       {petImageUrl && (
-        <View className="bg-green-50 p-3 rounded-lg mb-4">
+        <View className="bg-green-50 p-3 rounded-lg mb-4 flex-row items-center justify-center gap-1.5">
+          <Ionicons name="checkmark-circle" size={18} color="#16a34a" />
           <Text className="text-green-600 text-center">
-            ✅ Foto lista para usar
+            Foto lista para usar
           </Text>
         </View>
       )}

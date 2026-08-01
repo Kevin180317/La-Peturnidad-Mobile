@@ -19,11 +19,11 @@ import {
 import Toast from "react-native-toast-message";
 
 const categories = [
-  { key: "general", label: "General", icon: "💬" },
-  { key: "aviso", label: "Aviso", icon: "📢" },
-  { key: "evento", label: "Evento", icon: "📅" },
-  { key: "pregunta", label: "Pregunta", icon: "❓" },
-] as const;
+  { key: "general", label: "General", icon: "chatbubbles" as const },
+  { key: "aviso", label: "Aviso", icon: "megaphone" as const },
+  { key: "evento", label: "Evento", icon: "calendar" as const },
+  { key: "pregunta", label: "Pregunta", icon: "help-circle" as const },
+];
 
 export default function ComunidadScreen() {
   const router = useRouter();
@@ -127,9 +127,9 @@ export default function ComunidadScreen() {
     ]);
   };
 
-  const categoryIcon = (cat: string) => {
+  const categoryIcon = (cat: string): keyof typeof Ionicons.glyphMap => {
     const found = categories.find((c) => c.key === cat);
-    return found?.icon || "💬";
+    return (found?.icon as keyof typeof Ionicons.glyphMap) || "chatbubbles";
   };
 
   const categoryColor = (cat: string) => {
@@ -168,7 +168,7 @@ export default function ComunidadScreen() {
 
         {announcements.length === 0 ? (
           <EmptyState
-            icon="💬"
+            icon="chatbubbles-outline"
             title="No hay avisos en la comunidad todavía"
             subtitle="¡Sé el primero en publicar!"
             actionLabel="Publicar aviso"
@@ -205,9 +205,10 @@ export default function ComunidadScreen() {
                 </View>
 
                 <View className="mb-2">
-                  <View className={`self-start px-2 py-0.5 rounded-full mb-1 ${categoryColor(item.category)}`}>
+                  <View className={`self-start px-2.5 py-1 rounded-full mb-1 flex-row items-center gap-1 ${categoryColor(item.category)}`}>
+                    <Ionicons name={categoryIcon(item.category)} size={12} />
                     <Text className="text-xs font-medium">
-                      {categoryIcon(item.category)} {categories.find((c) => c.key === item.category)?.label || item.category}
+                      {categories.find((c) => c.key === item.category)?.label || item.category}
                     </Text>
                   </View>
                   <Text className="font-bold text-lg text-[#211f1e]">{item.title}</Text>

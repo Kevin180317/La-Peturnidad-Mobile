@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { followsService } from "@/services/follows.service";
 import { supabase } from "@/utils/supabase";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -120,7 +121,9 @@ export default function SeguidoresScreen() {
         {activeTab === "followers" ? (
           followers.length === 0 ? (
             <View className="bg-white p-10 rounded-xl items-center mt-10">
-              <Text className="text-4xl mb-3">👥</Text>
+              <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
+                <Ionicons name="people-outline" size={32} color="#ff7e70" />
+              </View>
               <Text className="text-gray-500 text-center">Sin seguidores aún</Text>
             </View>
           ) : (
@@ -128,7 +131,9 @@ export default function SeguidoresScreen() {
           )
         ) : following.length === 0 ? (
           <View className="bg-white p-10 rounded-xl items-center mt-10">
-            <Text className="text-4xl mb-3">👤</Text>
+            <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
+              <Ionicons name="person-outline" size={32} color="#ff7e70" />
+            </View>
             <Text className="text-gray-500 text-center">No sigues a nadie aún</Text>
           </View>
         ) : (

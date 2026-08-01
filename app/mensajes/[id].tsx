@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { messagesService } from "@/services/messages.service";
 import { supabase } from "@/utils/supabase";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -164,7 +165,9 @@ export default function ConversationScreen() {
                 </View>
                 <Text className={`text-xs mt-1 text-gray-500 ${isMine ? "text-right" : "text-left"}`}>
                   {formatTime(item.created_at)}
-                  {isMine && item.read_at && " ✓✓"}
+                  {isMine && item.read_at && (
+                    <Ionicons name="checkmark-done" size={14} color="#9CA3AF" />
+                  )}
                 </Text>
               </View>
             </>
@@ -186,7 +189,15 @@ export default function ConversationScreen() {
           onPress={handleSend}
           disabled={sending || !input.trim()}
         >
-          <Text className={`text-xl ${sending || !input.trim() ? "text-gray-500" : "text-white"}`}>{sending ? "⏳" : "➤"}</Text>
+          {sending ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Ionicons
+              name="send"
+              size={18}
+              color={!input.trim() ? "#9CA3AF" : "white"}
+            />
+          )}
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

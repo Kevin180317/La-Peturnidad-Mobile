@@ -1,13 +1,19 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export type TabType = "home" | "profile" | "emergency" | "comunidad" | "feed";
 
-const TABS: { key: TabType; label: string; icon: string }[] = [
-  { key: "feed", label: "Feed", icon: "📱" },
-  { key: "home", label: "Inicio", icon: "🏠" },
-  { key: "comunidad", label: "Comunidad", icon: "💬" },
-  { key: "emergency", label: "Emergencia", icon: "🚨" },
-  { key: "profile", label: "Perfil", icon: "👤" },
+const TABS: {
+  key: TabType;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  iconActive: keyof typeof Ionicons.glyphMap;
+}[] = [
+  { key: "feed", label: "Feed", icon: "newspaper-outline", iconActive: "newspaper" },
+  { key: "home", label: "Inicio", icon: "home-outline", iconActive: "home" },
+  { key: "comunidad", label: "Comunidad", icon: "chatbubbles-outline", iconActive: "chatbubbles" },
+  { key: "emergency", label: "Emergencia", icon: "warning-outline", iconActive: "warning" },
+  { key: "profile", label: "Perfil", icon: "person-outline", iconActive: "person" },
 ];
 
 interface TabBarProps {
@@ -18,26 +24,31 @@ interface TabBarProps {
 export function TabBar({ activeTab, onSelect }: TabBarProps) {
   return (
     <View className="flex-row bg-white border-t border-[#211f1e]/20 py-2 shadow-lg">
-      {TABS.map((tab) => (
-        <TouchableOpacity
-          key={tab.key}
-          className={`flex-1 py-3 items-center border-t-2 ${
-            activeTab === tab.key ? "border-t-red-500" : "border-t-transparent"
-          }`}
-          onPress={() => onSelect(tab.key)}
-        >
-          <Text className="text-lg">{tab.icon}</Text>
-          <Text
-            className={`text-xs mt-1 ${
-              activeTab === tab.key
-                ? "text-[#ff7e70] font-bold"
-                : "text-gray-500 font-medium"
+      {TABS.map((tab) => {
+        const active = activeTab === tab.key;
+        return (
+          <TouchableOpacity
+            key={tab.key}
+            className={`flex-1 py-3 items-center border-t-2 ${
+              active ? "border-t-red-500" : "border-t-transparent"
             }`}
+            onPress={() => onSelect(tab.key)}
           >
-            {tab.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
+            <Ionicons
+              name={active ? tab.iconActive : tab.icon}
+              size={22}
+              color={active ? "#ff7e70" : "#9CA3AF"}
+            />
+            <Text
+              className={`text-xs mt-1 ${
+                active ? "text-[#ff7e70] font-bold" : "text-gray-500 font-medium"
+              }`}
+            >
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }

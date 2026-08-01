@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { View, Text, StyleSheet } from "react-native";
 import { BaseToastProps } from "react-native-toast-message";
 
@@ -29,9 +30,6 @@ const styles = StyleSheet.create({
   info: {
     backgroundColor: dark,
   },
-  icon: {
-    fontSize: 22,
-  },
   textContainer: {
     flex: 1,
   },
@@ -52,7 +50,7 @@ const styles = StyleSheet.create({
 export const toastConfig = {
   success: (props: BaseToastProps) => (
     <View style={[styles.base, styles.success]}>
-      <Text style={styles.icon}>✓</Text>
+      <Ionicons name="checkmark-circle" size={22} color="#fff" />
       <View style={styles.textContainer}>
         <Text style={styles.text1} numberOfLines={1}>{props.text1}</Text>
         {props.text2 && <Text style={styles.text2} numberOfLines={2}>{props.text2}</Text>}
@@ -61,7 +59,7 @@ export const toastConfig = {
   ),
   error: (props: BaseToastProps) => (
     <View style={[styles.base, styles.error]}>
-      <Text style={styles.icon}>✕</Text>
+      <Ionicons name="close-circle" size={22} color="#fff" />
       <View style={styles.textContainer}>
         <Text style={styles.text1} numberOfLines={1}>{props.text1}</Text>
         {props.text2 && <Text style={styles.text2} numberOfLines={2}>{props.text2}</Text>}
@@ -70,7 +68,7 @@ export const toastConfig = {
   ),
   info: (props: BaseToastProps) => (
     <View style={[styles.base, styles.info]}>
-      <Text style={styles.icon}>ℹ</Text>
+      <Ionicons name="information-circle" size={22} color="#fff" />
       <View style={styles.textContainer}>
         <Text style={styles.text1} numberOfLines={1}>{props.text1}</Text>
         {props.text2 && <Text style={styles.text2} numberOfLines={2}>{props.text2}</Text>}

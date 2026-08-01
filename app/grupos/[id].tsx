@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { groupsService } from "@/services/groups.service";
 import { messagesService } from "@/services/messages.service";
 import { supabase } from "@/utils/supabase";
@@ -93,7 +94,10 @@ export default function GrupoDetailScreen() {
       {group.description && (
         <Text className="text-gray-600 mb-4">{group.description}</Text>
       )}
-      <Text className="text-gray-500 text-sm mb-4">👥 {members.length} miembros</Text>
+      <Text className="text-gray-500 text-sm mb-4 flex-row items-center">
+        <Ionicons name="people" size={15} color="#6B7280" style={{ marginRight: 4 }} />
+        {members.length} miembros
+      </Text>
 
       <TouchableOpacity
         className="bg-[#007275] py-3 rounded-lg mb-6 flex-row items-center justify-center"
@@ -106,7 +110,7 @@ export default function GrupoDetailScreen() {
           }
         }}
       >
-        <Text className="text-white font-semibold mr-2">💬</Text>
+        <Ionicons name="chatbubbles" size={18} color="white" style={{ marginRight: 8 }} />
         <Text className="text-white font-semibold">Chat grupal</Text>
       </TouchableOpacity>
 
@@ -136,7 +140,7 @@ export default function GrupoDetailScreen() {
               );
             }}
           >
-            <Text className="text-white font-semibold mr-2">🗑️</Text>
+            <Ionicons name="trash" size={18} color="white" style={{ marginRight: 8 }} />
             <Text className="text-white font-semibold">Eliminar grupo</Text>
           </TouchableOpacity>
         )}

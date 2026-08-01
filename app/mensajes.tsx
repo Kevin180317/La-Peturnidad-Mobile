@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { messagesService } from "@/services/messages.service";
 import { supabase } from "@/utils/supabase";
 import { EmptyState } from "@/components/EmptyState";
@@ -109,7 +110,7 @@ export default function MensajesScreen() {
       {conversations.length === 0 ? (
         <View className="flex-1 justify-center">
           <EmptyState
-            icon="💬"
+            icon="chatbubbles"
             title="No tienes conversaciones aún"
             subtitle="Visita un perfil público y envía un mensaje para iniciar una conversación"
           />
@@ -124,7 +125,7 @@ export default function MensajesScreen() {
           >
             {conv.is_group ? (
               <View className="w-14 h-14 rounded-full bg-[#007275] items-center justify-center mr-3">
-                <Text className="text-2xl">👥</Text>
+                <Ionicons name="people" size={26} color="white" />
               </View>
             ) : conv.other_user_picture ? (
               <Image source={{ uri: conv.other_user_picture }} className="w-14 h-14 rounded-full mr-3" />

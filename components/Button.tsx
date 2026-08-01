@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { ReactNode } from "react";
 import {
   ActivityIndicator,
@@ -221,7 +222,13 @@ export function Avatar({
     <View
       className={`${sizeStyles[size]} rounded-full bg-[#faf5e0] items-center justify-center border-2 border-[#ff7e70] ${borderSizes[size]}`}
     >
-      <Text className="text-[#ff7e70] font-bold">{fallback?.[0]?.toUpperCase() || "🐾"}</Text>
+      {fallback ? (
+        <Text className="text-[#ff7e70] font-bold">
+          {fallback[0].toUpperCase()}
+        </Text>
+      ) : (
+        <Ionicons name="paw" size={size === "sm" ? 14 : size === "xl" ? 36 : 22} color="#ff7e70" />
+      )}
     </View>
   );
 }

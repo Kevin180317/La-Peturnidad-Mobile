@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { dashboardService } from "@/services/dashboard.service";
 import { formatDate } from "@/utils/format";
 import { useRouter } from "expo-router";
@@ -106,6 +107,69 @@ export function ProfileTab({
     setUploadingProfileImage(false);
   };
 
+  const menuItems: {
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+    bg: string;
+    label: string;
+    onPress: () => void;
+    badge?: number;
+  }[] = [
+    {
+      icon: "create-outline",
+      color: "#007275",
+      bg: "bg-teal-50",
+      label: "Editar perfil",
+      onPress: () => router.push("/editar-perfil"),
+    },
+    {
+      icon: "notifications-outline",
+      color: "#d97706",
+      bg: "bg-amber-50",
+      label: "Configurar notificaciones",
+      onPress: () => router.push("/notificaciones"),
+    },
+    {
+      icon: "chatbubbles-outline",
+      color: "#ff7e70",
+      bg: "bg-red-50",
+      label: "Ir a la comunidad",
+      onPress: onGoComunidad,
+    },
+    {
+      icon: "chatbox-ellipses-outline",
+      color: "#2563eb",
+      bg: "bg-blue-50",
+      label: "Mensajes",
+      onPress: () => router.push("/mensajes"),
+      badge: unreadCount,
+    },
+    {
+      icon: "people-outline",
+      color: "#7c3aed",
+      bg: "bg-violet-50",
+      label: "Grupos",
+      onPress: () => router.push("/grupos"),
+    },
+    {
+      icon: "paw-outline",
+      color: "#16a34a",
+      bg: "bg-green-50",
+      label: "Reuniones exitosas",
+      onPress: () => router.push("/historias"),
+    },
+  ];
+
+  if (profile?.role === "admin" || profile?.role === "moderator") {
+    menuItems.push({
+      icon: "shield-checkmark-outline",
+      color: "#211f1e",
+      bg: "bg-gray-100",
+      label: "Panel de moderación",
+      onPress: () => router.push("/panel-moderacion"),
+    });
+  }
+
   return (
     <ScrollView
       refreshControl={
@@ -126,13 +190,13 @@ export function ProfileTab({
                     profile.profile_picture_url ||
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ168Mp9N1EPzK86wWBf_Ipl7gqELKUyhryNg&s",
                 }}
-                className="w-32 h-32 rounded-full border-4 border-red-200"
+                className="w-32 h-32 rounded-full border-4 border-[#ff7e70]/30"
               />
               <TouchableOpacity
                 className="absolute bottom-0 right-0 bg-[#ff7e70] w-10 h-10 rounded-full items-center justify-center border-2 border-white"
                 onPress={handleSelectProfileImage}
               >
-                <Text className="text-white text-lg">📷</Text>
+                <Ionicons name="camera" size={18} color="#fff" />
               </TouchableOpacity>
             </View>
 
@@ -209,19 +273,28 @@ export function ProfileTab({
 
             <View className="flex-row justify-around">
               <View className="items-center">
-                <Text className="text-2xl font-bold text-blue-500">
+                <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mb-1">
+                  <Ionicons name="paw" size={18} color="#2563eb" />
+                </View>
+                <Text className="text-xl font-bold text-blue-500">
                   {petsCount}
                 </Text>
                 <Text className="text-gray-600">Mascotas</Text>
               </View>
               <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=followers`)}>
-                <Text className="text-2xl font-bold text-[#ff7e70]">
+                <View className="w-10 h-10 rounded-full bg-red-50 items-center justify-center mb-1">
+                  <Ionicons name="people" size={18} color="#ff7e70" />
+                </View>
+                <Text className="text-xl font-bold text-[#ff7e70]">
                   {profile?.followers_count || 0}
                 </Text>
                 <Text className="text-gray-600">Seguidores</Text>
               </TouchableOpacity>
               <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=following`)}>
-                <Text className="text-2xl font-bold text-[#007275]">
+                <View className="w-10 h-10 rounded-full bg-teal-50 items-center justify-center mb-1">
+                  <Ionicons name="person-add" size={18} color="#007275" />
+                </View>
+                <Text className="text-xl font-bold text-[#007275]">
                   {profile?.following_count || 0}
                 </Text>
                 <Text className="text-gray-600">Siguiendo</Text>
@@ -229,72 +302,32 @@ export function ProfileTab({
             </View>
           </View>
 
-          {/* Acciones */}
-          <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
-            <Text className="text-lg font-bold mb-4">Acciones</Text>
-            <TouchableOpacity
-              className="bg-[#007275] py-3 rounded-lg mb-3"
-              onPress={() => router.push("/editar-perfil")}
-            >
-              <Text className="text-white text-center font-semibold">
-                ✏️ Editar perfil
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#007275] py-3 rounded-lg mb-3"
-              onPress={() => router.push("/notificaciones")}
-            >
-              <Text className="text-white text-center font-semibold">
-                🔔 Configurar notificaciones
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#007275] py-3 rounded-lg mb-3"
-              onPress={onGoComunidad}
-            >
-              <Text className="text-white text-center font-semibold">
-                💬 Ir a la comunidad
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#007275] py-3 rounded-lg mb-3 flex-row items-center justify-center"
-              onPress={() => router.push("/mensajes")}
-            >
-              <Text className="text-white text-center font-semibold">
-                ✉️ Mensajes
-              </Text>
-              {unreadCount > 0 && (
-                <View className="bg-[#ff7e70] rounded-full min-w-[22px] h-[22px] items-center justify-center ml-2 px-1">
-                  <Text className="text-white text-xs font-bold">{unreadCount}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#007275] py-3 rounded-lg mb-3"
-              onPress={() => router.push("/grupos")}
-            >
-              <Text className="text-white text-center font-semibold">
-                👥 Grupos
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="bg-[#007275] py-3 rounded-lg mb-3"
-              onPress={() => router.push("/historias")}
-            >
-              <Text className="text-white text-center font-semibold">
-                🐾 Reuniones exitosas
-              </Text>
-            </TouchableOpacity>
-            {profile?.role === "admin" || profile?.role === "moderator" ? (
+          {/* Acciones - lista de menú */}
+          <View className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+            <Text className="text-lg font-bold p-5 pb-3">Acciones</Text>
+            {menuItems.map((item, index) => (
               <TouchableOpacity
-                className="bg-[#211f1e] py-3 rounded-lg"
-                onPress={() => router.push("/panel-moderacion")}
+                key={item.label}
+                className={`flex-row items-center px-5 py-4 ${
+                  index < menuItems.length - 1 ? "border-b border-gray-100" : ""
+                }`}
+                onPress={item.onPress}
+                activeOpacity={0.7}
               >
-                <Text className="text-white text-center font-semibold">
-                  🛡️ Panel de moderación
+                <View className={`w-10 h-10 rounded-full ${item.bg} items-center justify-center mr-3`}>
+                  <Ionicons name={item.icon} size={20} color={item.color} />
+                </View>
+                <Text className="flex-1 font-medium text-[#211f1e]">
+                  {item.label}
                 </Text>
+                {item.badge && item.badge > 0 ? (
+                  <View className="bg-[#ff7e70] rounded-full min-w-[22px] h-[22px] items-center justify-center px-1 mr-1">
+                    <Text className="text-white text-xs font-bold">{item.badge}</Text>
+                  </View>
+                ) : null}
+                <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
               </TouchableOpacity>
-            ) : null}
+            ))}
           </View>
 
           {/* Información de cuenta */}
@@ -316,8 +349,8 @@ export function ProfileTab({
         </>
       ) : (
         <View className="bg-yellow-50 p-8 rounded-xl items-center">
-          <Text className="text-4xl mb-3">⚠️</Text>
-          <Text className="text-gray-600 text-center">
+          <Ionicons name="alert-circle-outline" size={44} color="#d97706" />
+          <Text className="text-gray-600 text-center mt-3">
             No se encontró información de perfil. Completa tu registro.
           </Text>
           <TouchableOpacity
@@ -336,9 +369,10 @@ export function ProfileTab({
 
       {/* Botón de cerrar sesión */}
       <TouchableOpacity
-        className="bg-[#ff7e70] py-4 rounded-xl mt-4"
+        className="bg-[#ff7e70] py-4 rounded-xl mt-4 flex-row items-center justify-center gap-2"
         onPress={onLogout}
       >
+        <Ionicons name="log-out-outline" size={20} color="#fff" />
         <Text className="text-white text-center font-bold">Cerrar Sesión</Text>
       </TouchableOpacity>
     </ScrollView>
