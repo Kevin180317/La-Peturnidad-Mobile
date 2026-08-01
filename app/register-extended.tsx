@@ -182,7 +182,7 @@ export default function RegisterExtendedScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+        <ActivityIndicator size="large" color="#007275" />
         <Text className="mt-4 text-[#211f1e]">Guardando información...</Text>
       </View>
     );
@@ -307,7 +307,7 @@ export default function RegisterExtendedScreen() {
       </View>
 
       <TouchableOpacity
-        className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
+        className="bg-[#007275] py-4 rounded-xl shadow-md mb-4"
         onPress={handleCompleteProfile}
       >
         <Text className="text-white text-center font-bold text-lg">

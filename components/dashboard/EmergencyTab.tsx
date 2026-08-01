@@ -104,7 +104,7 @@ export function EmergencyTab({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-yellow-500"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-[#ff7e70]"}`}
             onPress={onToggleAlerts}
           >
             <View
@@ -115,7 +115,7 @@ export function EmergencyTab({
             <Text className="text-white font-bold text-center text-sm leading-5">
               {showAlerts ? "Ocultar" : "Ver"} mascotas perdidas
             </Text>
-            <Text className={`text-[11px] text-center mt-1 ${showAlerts ? "text-green-400" : "text-white/90"}`}>
+            <Text className={`text-[11px] text-center mt-1 ${showAlerts ? "text-[#2dd4bf]" : "text-white/90"}`}>
               {showAlerts ? "✓ Visible" : "En tu zona"}
             </Text>
           </TouchableOpacity>
@@ -134,13 +134,13 @@ export function EmergencyTab({
             <Text className="text-white font-bold text-center text-sm leading-5">
               {showMyAlerts ? "Ocultar" : "Ver"} mis alertas
             </Text>
-            <Text className={`text-[11px] text-center mt-1 ${showMyAlerts ? "text-green-400" : "text-white/90"}`}>
+            <Text className={`text-[11px] text-center mt-1 ${showMyAlerts ? "text-[#2dd4bf]" : "text-white/90"}`}>
               {showMyAlerts ? "✓ Visible" : "Historial propio"}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showFoundPets ? "bg-[#211f1e]" : "bg-green-500"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showFoundPets ? "bg-[#211f1e]" : "bg-[#007275]"}`}
             onPress={onToggleFoundPets}
           >
             <View
@@ -151,7 +151,7 @@ export function EmergencyTab({
             <Text className="text-white font-bold text-center text-sm leading-5">
               {showFoundPets ? "Ocultar" : "Ver"} mascotas encontradas
             </Text>
-            <Text className={`text-[11px] text-center mt-1 ${showFoundPets ? "text-green-400" : "text-white/90"}`}>
+            <Text className={`text-[11px] text-center mt-1 ${showFoundPets ? "text-[#2dd4bf]" : "text-white/90"}`}>
               {showFoundPets ? "✓ Visible" : "Rescatadas"}
             </Text>
           </TouchableOpacity>
@@ -168,7 +168,7 @@ export function EmergencyTab({
                 No tienes mascotas registradas
               </Text>
               <TouchableOpacity
-                className="bg-[#ff7e70] py-2 px-4 rounded-lg mt-3"
+                className="bg-[#007275] py-2 px-4 rounded-lg mt-3"
                 onPress={onGoHome}
               >
                 <Text className="text-white">Registrar mascota</Text>
@@ -201,7 +201,7 @@ export function EmergencyTab({
                     {pet.type}
                   </Text>
                 </View>
-                <View className="bg-red-100 px-3 py-1 rounded-full">
+                    <View className="bg-[#ff7e70]/10 px-3 py-1 rounded-full">
                   <Text className="text-[#ff7e70] text-xs font-semibold">
                     REPORTAR
                   </Text>
@@ -220,10 +220,10 @@ export function EmergencyTab({
             <Text className="font-bold">Mascotas perdidas en tu colonia</Text>
           </View>
           {loadingAlerts ? (
-            <ActivityIndicator size="large" color="#ff7e70" />
+            <ActivityIndicator size="large" color="#007275" />
           ) : emergencyAlerts.length === 0 ? (
-            <View className="bg-green-50 p-8 rounded-lg items-center">
-              <Ionicons name="happy-outline" size={40} color="#16a34a" />
+            <View className="bg-[#007275]/10 p-8 rounded-lg items-center">
+              <Ionicons name="happy-outline" size={40} color="#007275" />
               <Text className="text-gray-600 text-center mt-2">
                 No hay mascotas perdidas reportadas en tu colonia
               </Text>
@@ -266,13 +266,13 @@ export function EmergencyTab({
                     <Text className="text-gray-500 text-xs">
                       Dueño: {alert.owner_name} - {alert.owner_phone}
                     </Text>
-                    <TouchableOpacity
-                      className="bg-green-500 py-2 px-4 rounded-lg mt-2 self-start flex-row items-center gap-1.5"
-                      onPress={() => onFoundPet(alert)}
-                    >
-                      <Ionicons name="checkmark-circle" size={16} color="#fff" />
-                      <Text className="text-white text-xs font-semibold">
-                        Lo encontré
+                      <TouchableOpacity
+                        className="bg-[#007275] py-2 px-4 rounded-lg mt-2 self-start flex-row items-center gap-1.5"
+                        onPress={() => onFoundPet(alert)}
+                      >
+                        <Ionicons name="checkmark-circle" size={16} color="#fff" />
+                        <Text className="text-white text-xs font-semibold">
+                          Lo encontré
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -329,7 +329,7 @@ export function EmergencyTab({
                       {formatDate(alert.disappearance_date)}
                     </Text>
                     <TouchableOpacity
-                      className="bg-[#ff7e70] py-2 px-4 rounded-lg self-start flex-row items-center gap-1.5"
+                      className="bg-red-500 py-2 px-4 rounded-lg self-start flex-row items-center gap-1.5"
                       onPress={() => onDeleteAlert(alert.id)}
                     >
                       <Ionicons name="trash" size={14} color="#fff" />
@@ -349,7 +349,7 @@ export function EmergencyTab({
       {showFoundPets && (
         <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
           <View className="flex-row items-center gap-2 mb-3">
-            <Ionicons name="checkmark-circle" size={18} color="#16a34a" />
+            <Ionicons name="checkmark-circle" size={18} color="#007275" />
             <Text className="font-bold">Mascotas que he encontrado</Text>
           </View>
           {foundPets.length === 0 ? (

@@ -93,7 +93,7 @@ export default function ResetPasswordScreen() {
       <View className="flex-1 justify-center p-6">
       {loading ? (
         <View className="items-center">
-          <ActivityIndicator size="large" color="#ff7e70" />
+          <ActivityIndicator size="large" color="#007275" />
           <Text className="mt-4 text-[#211f1e]">Actualizando...</Text>
         </View>
       ) : (
@@ -132,7 +132,7 @@ export default function ResetPasswordScreen() {
           </View>
 
           <TouchableOpacity
-            className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
+            className="bg-[#007275] py-4 rounded-xl shadow-md mb-4"
             onPress={handleUpdate}
           >
             <Text className="text-white text-center font-bold text-lg">

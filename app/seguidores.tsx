@@ -91,7 +91,7 @@ export default function SeguidoresScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
@@ -103,15 +103,15 @@ export default function SeguidoresScreen() {
           className={`flex-1 py-4 items-center border-b-2 ${activeTab === "followers" ? "border-[#ff7e70]" : "border-transparent"}`}
           onPress={() => setActiveTab("followers")}
         >
-          <Text className={`font-semibold ${activeTab === "followers" ? "text-[#ff7e70]" : "text-gray-500"}`}>
+          <Text className={`font-semibold ${activeTab === "followers" ? "text-[#007275]" : "text-gray-500"}`}>
             Seguidores ({followers.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "following" ? "border-[#ff7e70]" : "border-transparent"}`}
+          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "following" ? "border-[#007275]" : "border-transparent"}`}
           onPress={() => setActiveTab("following")}
         >
-          <Text className={`font-semibold ${activeTab === "following" ? "text-[#ff7e70]" : "text-gray-500"}`}>
+          <Text className={`font-semibold ${activeTab === "following" ? "text-[#007275]" : "text-gray-500"}`}>
             Siguiendo ({following.length})
           </Text>
         </TouchableOpacity>

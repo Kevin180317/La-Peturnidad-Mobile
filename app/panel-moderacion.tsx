@@ -94,8 +94,8 @@ export default function PanelModeracionScreen() {
 
   const statusColor = (s: string) => {
     switch (s) {
-      case "pending": return "bg-yellow-100 text-yellow-700";
-      case "reviewed": return "bg-green-100 text-green-700";
+      case "pending": return "bg-[#ff7e70]/10 text-[#ff7e70]";
+      case "reviewed": return "bg-[#007275]/10 text-[#007275]";
       case "dismissed": return "bg-gray-100 text-gray-500";
       default: return "bg-gray-100 text-gray-500";
     }
@@ -112,7 +112,7 @@ export default function PanelModeracionScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
@@ -155,7 +155,7 @@ export default function PanelModeracionScreen() {
             {report.status === "pending" && (
               <View className="flex-row gap-3">
                 <TouchableOpacity
-                  className="flex-1 bg-green-500 py-2 rounded-lg flex-row items-center justify-center"
+                  className="flex-1 bg-[#007275] py-2 rounded-lg flex-row items-center justify-center"
                   onPress={() => handleReview(report.id, "reviewed")}
                 >
                   <Ionicons name="checkmark-circle" size={16} color="white" style={{ marginRight: 4 }} />

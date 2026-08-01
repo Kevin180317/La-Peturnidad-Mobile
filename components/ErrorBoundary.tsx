@@ -37,7 +37,7 @@ export class ErrorBoundary extends Component<Props, State> {
             {this.state.error?.message || "Error inesperado"}
           </Text>
           <TouchableOpacity
-            className="bg-[#ff7e70] py-3 px-8 rounded-xl"
+            className="bg-[#007275] py-3 px-8 rounded-xl"
             onPress={this.handleRetry}
           >
             <Text className="text-white font-bold">Intentar de nuevo</Text>

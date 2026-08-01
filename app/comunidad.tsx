@@ -134,9 +134,9 @@ export default function ComunidadScreen() {
 
   const categoryColor = (cat: string) => {
     switch (cat) {
-      case "aviso": return "bg-red-100 text-red-600";
-      case "evento": return "bg-blue-100 text-blue-600";
-      case "pregunta": return "bg-yellow-100 text-yellow-600";
+      case "aviso": return "bg-[#ff7e70]/10 text-[#ff7e70]";
+      case "evento": return "bg-[#007275]/10 text-[#007275]";
+      case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]";
       default: return "bg-gray-100 text-gray-600";
     }
   };
@@ -144,7 +144,7 @@ export default function ComunidadScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
@@ -158,7 +158,7 @@ export default function ComunidadScreen() {
         <View className="flex-row items-center justify-between mb-6">
           <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
           <TouchableOpacity
-            className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center gap-1"
+            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center gap-1"
             onPress={() => setShowForm(true)}
           >
             <Ionicons name="add" size={18} color="white" />
@@ -237,7 +237,7 @@ export default function ComunidadScreen() {
                 <TouchableOpacity
                   key={cat.key}
                   className={`py-2 px-4 rounded-full border-2 ${
-                    formCategory === cat.key ? "border-[#ff7e70] bg-[#ff7e70]" : "border-gray-200 bg-[#faf5e0]"
+                    formCategory === cat.key ? "border-[#007275] bg-[#007275]" : "border-gray-200 bg-[#faf5e0]"
                   }`}
                   onPress={() => setFormCategory(cat.key)}
                 >
@@ -268,7 +268,7 @@ export default function ComunidadScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#ff7e70]"}`}
+                className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
                 onPress={handlePost}
                 disabled={posting}
               >

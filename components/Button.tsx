@@ -40,9 +40,9 @@ export function Button({
   ];
 
   const variantStyles = {
-    primary: "bg-[#ff7e70] shadow-md active:opacity-80",
+    primary: "bg-[#007275] shadow-md active:opacity-80",
     secondary: "bg-[#211f1e] shadow-md active:opacity-80",
-    outline: "border-2 border-[#ff7e70] bg-transparent active:bg-[#ff7e70]/10",
+    outline: "border-2 border-[#007275] bg-transparent active:bg-[#007275]/10",
     ghost: "bg-transparent active:bg-[#211f1e]/10",
   };
 
@@ -55,7 +55,7 @@ export function Button({
   const textColors = {
     primary: "text-white",
     secondary: "text-white",
-    outline: "text-[#ff7e70]",
+    outline: "text-[#007275]",
     ghost: "text-[#211f1e]",
   };
 
@@ -169,11 +169,11 @@ interface BadgeProps extends ViewProps {
 
 export function Badge({ label, variant = "primary", style, ...props }: BadgeProps) {
   const variantStyles = {
-    primary: "bg-[#ff7e70]/10 text-[#ff7e70]",
-    success: "bg-green-100 text-green-600",
-    warning: "bg-yellow-100 text-yellow-600",
+    primary: "bg-[#007275]/10 text-[#007275]",
+    success: "bg-[#007275]/10 text-[#007275]",
+    warning: "bg-[#ff7e70]/10 text-[#ff7e70]",
     error: "bg-red-100 text-red-600",
-    info: "bg-blue-100 text-blue-600",
+    info: "bg-[#007275]/10 text-[#007275]",
   };
 
   return (

@@ -27,7 +27,7 @@ export function EmptyState({
       )}
       {actionLabel && onAction && (
         <TouchableOpacity
-          className="bg-[#ff7e70] py-3 px-6 rounded-xl mt-5"
+            className="bg-[#007275] py-3 px-6 rounded-xl mt-5"
           onPress={onAction}
           activeOpacity={0.8}
         >

@@ -111,7 +111,7 @@ export default function RegisterScreen() {
       <View className="flex-1 justify-center p-6">
       {loading ? (
         <View className="items-center">
-          <ActivityIndicator size="large" color="#ff7e70" />
+          <ActivityIndicator size="large" color="#007275" />
           <Text className="mt-4 text-gray-600 font-medium">
             Procesando registro...
           </Text>
@@ -163,7 +163,7 @@ export default function RegisterScreen() {
           </View>
 
           <TouchableOpacity
-            className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
+            className="bg-[#007275] py-4 rounded-xl shadow-md mb-4"
             onPress={handleRegister}
             disabled={loading}
           >

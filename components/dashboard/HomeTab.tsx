@@ -103,26 +103,26 @@ export function HomeTab({
       {/* Tarjetas de resumen */}
       <View className="flex-row gap-3 mb-6">
         <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
-          <View className="w-10 h-10 rounded-full bg-blue-100 items-center justify-center mb-2">
-            <Ionicons name="paw" size={20} color="#2563eb" />
+          <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
+            <Ionicons name="paw" size={20} color="#007275" />
           </View>
-          <Text className="text-xl font-bold text-blue-600">{pets.length}</Text>
+          <Text className="text-xl font-bold text-[#007275]">{pets.length}</Text>
           <Text className="text-gray-600 text-sm">Mascotas</Text>
         </View>
         <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
-          <View className="w-10 h-10 rounded-full bg-amber-100 items-center justify-center mb-2">
-            <Ionicons name="warning" size={20} color="#d97706" />
+          <View className="w-10 h-10 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-2">
+            <Ionicons name="warning" size={20} color="#ff7e70" />
           </View>
-          <Text className="text-xl font-bold text-amber-600">
+          <Text className="text-xl font-bold text-[#ff7e70]">
             {myAlerts.length}
           </Text>
           <Text className="text-gray-600 text-sm">Alertas</Text>
         </View>
         <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
-          <View className="w-10 h-10 rounded-full bg-green-100 items-center justify-center mb-2">
-            <Ionicons name="checkmark-circle" size={20} color="#16a34a" />
+          <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
+            <Ionicons name="checkmark-circle" size={20} color="#007275" />
           </View>
-          <Text className="text-xl font-bold text-green-600">
+          <Text className="text-xl font-bold text-[#007275]">
             {foundPets.length}
           </Text>
           <Text className="text-gray-600 text-sm">Encontradas</Text>
@@ -132,7 +132,7 @@ export function HomeTab({
       {/* Botones de acción rápida */}
       <View className="flex-row gap-3 mb-6">
         <TouchableOpacity
-          className="flex-1 bg-green-500 py-4 rounded-xl flex-row items-center justify-center gap-2 shadow-sm"
+          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2 shadow-sm"
           onPress={() => {
             setShowPetForm(true);
             setShowPets(false);
@@ -163,7 +163,7 @@ export function HomeTab({
         <View className="mb-6">
           <Text className="text-lg font-bold mb-3">Mis mascotas</Text>
           {loadingPets ? (
-            <ActivityIndicator size="large" color="#ff7e70" />
+            <ActivityIndicator size="large" color="#007275" />
           ) : pets.length === 0 ? (
             <View className="bg-[#faf5e0] p-8 rounded-xl items-center">
               <View className="w-14 h-14 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">

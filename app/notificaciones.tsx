@@ -67,7 +67,7 @@ export default function NotificacionesScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
@@ -90,7 +90,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={pushEnabled}
               onValueChange={setPushEnabled}
-              trackColor={{ false: "#ccc", true: "#ff7e70" }}
+              trackColor={{ false: "#ccc", true: "#007275" }}
               thumbColor={pushEnabled ? "#fff" : "#f4f3f4"}
             />
           </View>
@@ -103,7 +103,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={lostPetAlerts}
               onValueChange={setLostPetAlerts}
-              trackColor={{ false: "#ccc", true: "#ff7e70" }}
+              trackColor={{ false: "#ccc", true: "#007275" }}
               thumbColor={lostPetAlerts ? "#fff" : "#f4f3f4"}
               disabled={!pushEnabled}
             />
@@ -117,7 +117,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={foundPetAlerts}
               onValueChange={setFoundPetAlerts}
-              trackColor={{ false: "#ccc", true: "#ff7e70" }}
+              trackColor={{ false: "#ccc", true: "#007275" }}
               thumbColor={foundPetAlerts ? "#fff" : "#f4f3f4"}
               disabled={!pushEnabled}
             />
@@ -131,7 +131,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={communityAnnouncements}
               onValueChange={setCommunityAnnouncements}
-              trackColor={{ false: "#ccc", true: "#ff7e70" }}
+              trackColor={{ false: "#ccc", true: "#007275" }}
               thumbColor={communityAnnouncements ? "#fff" : "#f4f3f4"}
               disabled={!pushEnabled}
             />
@@ -140,7 +140,7 @@ export default function NotificacionesScreen() {
       </View>
 
       <TouchableOpacity
-        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#ff7e70]"}`}
+        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#007275]"}`}
         onPress={handleSave}
         disabled={saving}
       >

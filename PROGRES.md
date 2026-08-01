@@ -131,6 +131,17 @@
 | **Buscador (B10)** | Nueva pantalla `/buscar` (tabs Mascotas/Grupos/Usuarios) + `services/search.service.ts` (búsqueda `ilike` con debounce 300ms, límite 20 resultados). Mascotas muestran dueño, grupos miembros, usuarios ciudad; tap navega a perfil/grupo. Botón 🔍 en el header del dashboard. Nueva política RLS `Authenticated users can view all pets` (la RLS anterior solo permitía ver las propias — el buscador de mascotas de la comunidad fallaba). Registrada en `_layout.tsx`. |
 | **Refactor dashboard.tsx (B11)** | `app/dashboard.tsx`: **2125 → 759 líneas**. UI extraída a `components/dashboard/*` (8 archivos, ~1760 líneas): `TabBar`, `DashboardSkeleton`, `PetDetailModal`, `PetForm` (encapsula todo el estado del formulario de mascota + subida de imagen), `HomeTab`, `ProfileTab` (encapsula foto de perfil), `EmergencyTab`, `FeedTab`, `ComunidadTab`. Los tabs y formularios manejan su estado local; el dashboard conserva solo datos + handlers (~40 estados → ~24). `formatDate` movido a `utils/format.ts`. Nota: subtabs/posts/avisos no persisten al cambiar de tab (antes sí, eran estados globales). Verificación: `tsc` + `lint` limpios. |
 
+## ✅ Fase 9 — Sistema de 3 colores (Completada)
+
+| Item | Notas |
+|---|---|
+| **Paleta unificada (3 colores + neutros)** | Teal `#007275` (primario: header, CTAs, subtabs/selecciones activas, toggles ON, éxito), Coral `#ff7e70` (acento: emergencias/perdidas, badges aviso/pregunta/pending, empty states, avatares fallback, trash), Dark `#211f1e` (texto, superficies, botones secundarios). Neutros: cream `#faf5e0` fondo, blanco cards, grises texto/bordes. Tint teal-400 `#2dd4bf` solo para "✓ Visible" sobre fondo oscuro. |
+| **Colores eliminados (~11 tonos → 3)** | Verde (éxito/encontradas/revisado/subir foto) → teal; amarillo/ámbar (perdidas/pending/pregunta) → coral o dark; azul (mascotas/eventos/toast info) → teal; violeta `#7c3aed` (menú ProfileTab) → dark. Restos muertos: `#005e66` (theme.ts), `#0a7ea4` (ThemedText) → eliminado/teal. |
+| **Rojo = solo destructivo** | Eliminar mascota (PetDetailModal) y Eliminar alerta (EmergencyTab) → `bg-red-500`; errores de formulario y toast error conservan red. |
+| **Jerarquía invertida** | Teal pasa de 16 → ~124 usos (antes casi inexistente); coral baja de 147 → ~95 (ya no domina). Todos los CTAs (Publicar, Guardar, Enviar, Crear, Unirse, Seguir, login/register, Comenzar, subir foto, "Lo encontré", Revisado) ahora son teal. |
+| **Detalles de consistencia** | TabBar activo, subtabs Feed/Mis posts, chips de categoría seleccionados, dots del onboarding y switches → teal; ActivityIndicators de carga → teal; menú del ProfileTab alterna teal/coral/dark con opacidades `/10`. |
+| **Verificación** | `npm run lint` (0 errores/0 warnings) + `tsc --noEmit` (0 errores). Auditoría: restan solo red (funcional) + `#2dd4bf` (tint teal). |
+
 
 ## 🔧 Pendiente / Deuda técnica
 

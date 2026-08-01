@@ -109,7 +109,7 @@ export default function HistoriasScreen() {
             <Text className="text-2xl font-bold text-[#211f1e]">Reuniones exitosas</Text>
           </View>
           <TouchableOpacity
-            className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
+            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center"
             onPress={() => setShowForm(true)}
           >
             <Ionicons name="sparkles" size={18} color="white" style={{ marginRight: 6 }} />
@@ -184,7 +184,7 @@ export default function HistoriasScreen() {
             />
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#ff7e70]"}`}
+                className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
                 disabled={posting}
                 onPress={handleCreate}
               >

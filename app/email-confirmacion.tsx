@@ -41,7 +41,7 @@ export default function EmailConfirmacionScreen() {
     <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
       {loading ? (
         <View className="items-center">
-          <ActivityIndicator size="large" color="#ff7e70" />
+          <ActivityIndicator size="large" color="#007275" />
           <Text className="mt-4 text-[#211f1e]">Reenviando...</Text>
         </View>
       ) : (

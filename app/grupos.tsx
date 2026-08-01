@@ -122,7 +122,7 @@ export default function GruposScreen() {
         <View className="flex-row items-center justify-between mb-6">
           <Text className="text-2xl font-bold text-[#211f1e]">Grupos</Text>
           <TouchableOpacity
-            className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
+            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center"
             onPress={() => setShowForm(true)}
           >
             <Ionicons name="add" size={20} color="white" style={{ marginRight: 6 }} />
@@ -167,7 +167,7 @@ export default function GruposScreen() {
               <View className="flex-row items-center justify-between mb-2">
                 <Text className="font-bold text-lg text-[#211f1e]">{group.name}</Text>
                 <TouchableOpacity
-                  className={`px-4 py-2 rounded-lg ${group.isMember ? "bg-gray-300" : "bg-[#ff7e70]"}`}
+                  className={`px-4 py-2 rounded-lg ${group.isMember ? "bg-gray-300" : "bg-[#007275]"}`}
                   onPress={() => handleJoinLeave(group.id, group.isMember)}
                 >
                   <Text className={`font-semibold text-sm ${group.isMember ? "text-gray-700" : "text-white"}`}>
@@ -215,7 +215,7 @@ export default function GruposScreen() {
             />
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-lg ${creating ? "bg-gray-400" : "bg-[#ff7e70]"}`}
+                className={`flex-1 py-3 rounded-lg ${creating ? "bg-gray-400" : "bg-[#007275]"}`}
                 disabled={creating}
                 onPress={handleCreate}
               >

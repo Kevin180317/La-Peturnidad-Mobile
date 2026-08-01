@@ -97,7 +97,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
             key={type}
             className={`flex-1 py-3 rounded-xl border-2 flex-row items-center justify-center gap-2 ${
               petType === type
-                ? "border-red-500 bg-[#ff7e70]"
+                ? "border-[#007275] bg-[#007275]"
                 : "border-[#211f1e]/20"
             }`}
             onPress={() => setPetType(type as "perro" | "gato")}
@@ -176,7 +176,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
         </TouchableOpacity>
         {selectedPetImage && (
           <TouchableOpacity
-            className={`flex-1 py-3 rounded-lg flex-row items-center justify-center gap-2 ${uploadingPetImage ? "bg-gray-400" : "bg-green-500"}`}
+            className={`flex-1 py-3 rounded-lg flex-row items-center justify-center gap-2 ${uploadingPetImage ? "bg-gray-400" : "bg-[#007275]"}`}
             onPress={handleUploadImage}
             disabled={uploadingPetImage}
           >
@@ -200,9 +200,9 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       )}
 
       {petImageUrl && (
-        <View className="bg-green-50 p-3 rounded-lg mb-4 flex-row items-center justify-center gap-1.5">
-          <Ionicons name="checkmark-circle" size={18} color="#16a34a" />
-          <Text className="text-green-600 text-center">
+        <View className="bg-[#007275]/10 p-3 rounded-lg mb-4 flex-row items-center justify-center gap-1.5">
+          <Ionicons name="checkmark-circle" size={18} color="#007275" />
+          <Text className="text-[#007275] text-center">
             Foto lista para usar
           </Text>
         </View>
@@ -211,7 +211,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Botones */}
       <View className="flex-row gap-3">
         <TouchableOpacity
-          className="flex-1 bg-[#ff7e70] py-4 rounded-lg"
+          className="flex-1 bg-[#007275] py-4 rounded-lg"
           onPress={() => onSubmit({ type: petType, name: petName, color: petColor, size: petSize, features: petFeatures || null, image_url: petImageUrl })}
         >
           <Text className="text-white text-center font-bold">

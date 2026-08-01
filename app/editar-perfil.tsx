@@ -76,7 +76,7 @@ export default function EditarPerfilScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
@@ -144,7 +144,7 @@ export default function EditarPerfilScreen() {
       </View>
 
       <TouchableOpacity
-        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#ff7e70]"}`}
+        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#007275]"}`}
         onPress={handleSave}
         disabled={saving}
       >

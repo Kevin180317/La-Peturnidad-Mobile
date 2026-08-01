@@ -100,7 +100,7 @@ export function FeedTab({
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-2xl font-bold text-[#211f1e]">Feed</Text>
         <TouchableOpacity
-          className="bg-[#ff7e70] py-2 px-4 rounded-lg flex-row items-center"
+            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center"
           onPress={() => setShowPostForm(true)}
         >
           <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 4 }} />
@@ -110,7 +110,7 @@ export function FeedTab({
 
       <View className="flex-row bg-white rounded-xl mb-4 shadow-sm">
         <TouchableOpacity
-          className={`flex-1 py-3 rounded-l-xl ${feedSubTab === "all" ? "bg-[#ff7e70]" : "bg-white"}`}
+          className={`flex-1 py-3 rounded-l-xl ${feedSubTab === "all" ? "bg-[#007275]" : "bg-white"}`}
           onPress={() => setFeedSubTab("all")}
         >
           <Text className={`text-center font-semibold ${feedSubTab === "all" ? "text-white" : "text-gray-500"}`}>
@@ -118,7 +118,7 @@ export function FeedTab({
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`flex-1 py-3 rounded-r-xl ${feedSubTab === "mine" ? "bg-[#ff7e70]" : "bg-white"}`}
+          className={`flex-1 py-3 rounded-r-xl ${feedSubTab === "mine" ? "bg-[#007275]" : "bg-white"}`}
           onPress={() => setFeedSubTab("mine")}
         >
           <Text className={`text-center font-semibold ${feedSubTab === "mine" ? "text-white" : "text-gray-500"}`}>
@@ -141,7 +141,7 @@ export function FeedTab({
           />
           <View className="flex-row gap-3">
             <TouchableOpacity
-              className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#ff7e70]"}`}
+              className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
               onPress={handleCreatePost}
               disabled={posting}
             >
@@ -161,7 +161,7 @@ export function FeedTab({
       )}
 
       {loading ? (
-        <ActivityIndicator size="large" color="#ff7e70" />
+        <ActivityIndicator size="large" color="#007275" />
       ) : visiblePosts.length === 0 ? (
         <View className="bg-white p-10 rounded-xl items-center">
           <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
@@ -223,7 +223,7 @@ export function FeedTab({
               {commentTarget?.id === post.id && commentTarget?.type === "post" && (
                 <View className="mt-3 pt-3 border-t border-gray-100">
                   {loadingComments ? (
-                    <ActivityIndicator size="small" color="#ff7e70" />
+                    <ActivityIndicator size="small" color="#007275" />
                   ) : postComments.length === 0 ? (
                     <Text className="text-gray-500 text-sm mb-2">Sin comentarios</Text>
                   ) : (

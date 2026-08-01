@@ -105,7 +105,7 @@ export default function OnboardingScreen() {
   if (checking) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#ff7e70" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
@@ -162,7 +162,7 @@ export default function OnboardingScreen() {
             <View
               key={index}
               className={`w-3 h-3 rounded-full ${
-                index === currentIndex ? "bg-[#ff7e70]" : "bg-[#ff7e70]/30"
+                index === currentIndex ? "bg-[#007275]" : "bg-[#007275]/30"
               }`}
             />
           ))}
@@ -170,7 +170,7 @@ export default function OnboardingScreen() {
 
         <TouchableOpacity
           onPress={handleNext}
-          className="bg-[#ff7e70] py-4 px-16 rounded-xl shadow-md"
+          className="bg-[#007275] py-4 px-16 rounded-xl shadow-md"
           activeOpacity={0.8}
         >
           <Text className="text-white font-bold text-lg">

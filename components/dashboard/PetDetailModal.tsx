@@ -93,7 +93,7 @@ export function PetDetailModal({
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
-                  className="flex-1 bg-[#ff7e70] py-3 rounded-lg"
+                  className="flex-1 bg-red-500 py-3 rounded-lg"
                   onPress={() => {
                     onClose();
                     onDelete(pet.id);

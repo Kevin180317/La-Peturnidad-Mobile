@@ -79,6 +79,7 @@
 - Fix crítico Uniwind: el scanner solo cubría `app/`; agregado `@source "../components"` en `app/global.css` (restauraba botones invisibles, gaps faltantes e imágenes 0x0 en el dashboard refactorizado)
 - Rediseño EmergencyTab: grid 2×2 de cards con Ionicons (megaphone/eye/clipboard/checkmark-circle), estado activo `bg-[#211f1e]`
 - Overhaul de iconos: emojis → Ionicons en toda la app (dashboard completo + 12 pantallas: buscar, comunidad, seguidores, perfil/[id], panel-moderacion, mensajes, mensajes/[id], historias, grupos, grupos/[id], email-confirmacion); `EmptyState.icon` ahora es `keyof typeof Ionicons.glyphMap`; dog/cat via MaterialCommunityIcons; ProfileTab como menú con chevrons
+- Sistema de 3 colores: teal `#007275` (primario: CTAs, selecciones, éxito), coral `#ff7e70` (acento: emergencias, badges, empty states), dark `#211f1e` (texto/superficies) + neutros cream/gris; ~11 tonos sueltos eliminados; rojo SOLO destructivo/errores; tokens actualizados en `utils/theme.ts`
 
 ### Edge Functions
 - `send-push-notification` (v5) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS

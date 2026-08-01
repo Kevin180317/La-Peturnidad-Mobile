@@ -41,7 +41,7 @@ export function TabBar({ activeTab, onSelect }: TabBarProps) {
             />
             <Text
               className={`text-xs mt-1 ${
-                active ? "text-[#ff7e70] font-bold" : "text-gray-500 font-medium"
+                active ? "text-[#007275] font-bold" : "text-gray-500 font-medium"
               }`}
             >
               {tab.label}

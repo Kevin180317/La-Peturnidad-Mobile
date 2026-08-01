@@ -118,43 +118,43 @@ export function ProfileTab({
     {
       icon: "create-outline",
       color: "#007275",
-      bg: "bg-teal-50",
+      bg: "bg-[#007275]/10",
       label: "Editar perfil",
       onPress: () => router.push("/editar-perfil"),
     },
     {
       icon: "notifications-outline",
-      color: "#d97706",
-      bg: "bg-amber-50",
+      color: "#ff7e70",
+      bg: "bg-[#ff7e70]/10",
       label: "Configurar notificaciones",
       onPress: () => router.push("/notificaciones"),
     },
     {
       icon: "chatbubbles-outline",
-      color: "#ff7e70",
-      bg: "bg-red-50",
+      color: "#007275",
+      bg: "bg-[#007275]/10",
       label: "Ir a la comunidad",
       onPress: onGoComunidad,
     },
     {
       icon: "chatbox-ellipses-outline",
-      color: "#2563eb",
-      bg: "bg-blue-50",
+      color: "#ff7e70",
+      bg: "bg-[#ff7e70]/10",
       label: "Mensajes",
       onPress: () => router.push("/mensajes"),
       badge: unreadCount,
     },
     {
       icon: "people-outline",
-      color: "#7c3aed",
-      bg: "bg-violet-50",
+      color: "#211f1e",
+      bg: "bg-[#211f1e]/10",
       label: "Grupos",
       onPress: () => router.push("/grupos"),
     },
     {
       icon: "paw-outline",
-      color: "#16a34a",
-      bg: "bg-green-50",
+      color: "#007275",
+      bg: "bg-[#007275]/10",
       label: "Reuniones exitosas",
       onPress: () => router.push("/historias"),
     },
@@ -164,7 +164,7 @@ export function ProfileTab({
     menuItems.push({
       icon: "shield-checkmark-outline",
       color: "#211f1e",
-      bg: "bg-gray-100",
+      bg: "bg-[#211f1e]/10",
       label: "Panel de moderación",
       onPress: () => router.push("/panel-moderacion"),
     });
@@ -207,7 +207,7 @@ export function ProfileTab({
                   className="w-24 h-24 rounded-lg self-center mb-2"
                 />
                 <TouchableOpacity
-                  className={`py-2 rounded-lg ${uploadingProfileImage ? "bg-gray-400" : "bg-green-500"}`}
+                  className={`py-2 rounded-lg ${uploadingProfileImage ? "bg-gray-400" : "bg-[#007275]"}`}
                   onPress={handleUploadProfileImage}
                   disabled={uploadingProfileImage}
                 >
@@ -273,16 +273,16 @@ export function ProfileTab({
 
             <View className="flex-row justify-around">
               <View className="items-center">
-                <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center mb-1">
-                  <Ionicons name="paw" size={18} color="#2563eb" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-1">
+                  <Ionicons name="paw" size={18} color="#007275" />
                 </View>
-                <Text className="text-xl font-bold text-blue-500">
+                <Text className="text-xl font-bold text-[#007275]">
                   {petsCount}
                 </Text>
                 <Text className="text-gray-600">Mascotas</Text>
               </View>
               <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=followers`)}>
-                <View className="w-10 h-10 rounded-full bg-red-50 items-center justify-center mb-1">
+                <View className="w-10 h-10 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-1">
                   <Ionicons name="people" size={18} color="#ff7e70" />
                 </View>
                 <Text className="text-xl font-bold text-[#ff7e70]">
@@ -291,7 +291,7 @@ export function ProfileTab({
                 <Text className="text-gray-600">Seguidores</Text>
               </TouchableOpacity>
               <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=following`)}>
-                <View className="w-10 h-10 rounded-full bg-teal-50 items-center justify-center mb-1">
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-1">
                   <Ionicons name="person-add" size={18} color="#007275" />
                 </View>
                 <Text className="text-xl font-bold text-[#007275]">
@@ -348,13 +348,13 @@ export function ProfileTab({
           </View>
         </>
       ) : (
-        <View className="bg-yellow-50 p-8 rounded-xl items-center">
-          <Ionicons name="alert-circle-outline" size={44} color="#d97706" />
+        <View className="bg-[#ff7e70]/10 p-8 rounded-xl items-center">
+          <Ionicons name="alert-circle-outline" size={44} color="#ff7e70" />
           <Text className="text-gray-600 text-center mt-3">
             No se encontró información de perfil. Completa tu registro.
           </Text>
           <TouchableOpacity
-            className="bg-[#ff7e70] py-3 px-6 rounded-lg mt-4"
+            className="bg-[#007275] py-3 px-6 rounded-lg mt-4"
             onPress={() =>
               router.replace({
                 pathname: "/register-extended",

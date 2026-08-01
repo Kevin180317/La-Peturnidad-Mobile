@@ -75,7 +75,7 @@ export default function VerifyOtpScreen() {
     <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
       {loading ? (
         <View className="items-center">
-          <ActivityIndicator size="large" color="#ff7e70" />
+          <ActivityIndicator size="large" color="#007275" />
           <Text className="mt-4 text-[#211f1e]">Verificando código...</Text>
         </View>
       ) : (
@@ -108,7 +108,7 @@ export default function VerifyOtpScreen() {
           </View>
 
           <TouchableOpacity
-            className="bg-[#ff7e70] py-4 rounded-xl shadow-md mb-4"
+            className="bg-[#007275] py-4 rounded-xl shadow-md mb-4"
             onPress={() => handleVerify()}
           >
             <Text className="text-white text-center font-bold text-lg">
