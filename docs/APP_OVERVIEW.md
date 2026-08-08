@@ -33,7 +33,8 @@ Community app for finding lost pets. Users register pets, publish emergency aler
 |---|---|
 | [`SCREENS.md`](SCREENS.md) | Full screen-by-screen catalog: route, purpose, every user event and what it triggers |
 | [`SUPABASE_SCHEMA.md`](SUPABASE_SCHEMA.md) | Current DB schema: tables, RLS policies, storage buckets, migration history |
-| [`SUPABASE_PENDING_CODE.md`](SUPABASE_PENDING_CODE.md) | Gaps between code and Supabase, feature backlog, architecture issues, implementation checklist |
+| [`SUPABASE_PENDING_CODE.md`](SUPABASE_PENDING_CODE.md) | Gaps between code and Supabase, feature backlog, architecture issues, implementation checklist — **note: largely superseded, see [`MILESTONES.md`](MILESTONES.md#known-discrepancy-to-reconcile)** |
+| [`MILESTONES.md`](MILESTONES.md) | History of what's shipped by phase (from `PROGRES.md` + this doc pass) and the actual open next steps |
 | `images/AUTH/`, `images/Dashboard/` | Screenshots backing the area docs above |
 | `old/` | Original Spanish versions of the 3 reference docs |
 | [`FLOW_DIAGRAM.html`](FLOW_DIAGRAM.html) | Interactive navigation graph (AUTH + Dashboard), click a node for its route/purpose/events |

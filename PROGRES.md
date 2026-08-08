@@ -1,6 +1,6 @@
 # PROGRES — Lucky Tracker
 
-> Estado actual del proyecto. Última actualización: 01/08/2026
+> Estado actual del proyecto. Última actualización: 01/08/2026. Log vivo, detalle línea por línea — fuente de verdad. Para un resumen condensado en inglés por fase (más el origen del diseño y próximos pasos), ver [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
 ---
 
