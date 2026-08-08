@@ -1,50 +1,43 @@
-# Welcome to your Expo app 👋
+# Lucky Tracker (formerly "La Peturnidad")
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Community app for finding lost pets. Users register their pets, publish emergency alerts when a pet goes missing, and the community (neighbors, groups, followers) helps spot and reunite them. Built as a lightweight social network layered on top of a lost & found core: profiles, posts, community notices, groups, direct/group messaging, and a moderation panel.
 
-## Get started
+## Tech stack
 
-1. Install dependencies
+- **Client**: [Expo](https://expo.dev) (React Native) + [Expo Router](https://docs.expo.dev/router/introduction) (file-based routing) — `app/` directory
+- **Backend**: [Supabase](https://supabase.com) — Auth, Postgres (with RLS), Storage, Edge Functions
+- **Navigation**: React Navigation (bottom tabs, native stack, drawer)
+- Legacy: an older Express/MySQL backend exists in the codebase but is **not used** — Supabase is the current and only backend.
 
-   ```bash
-   npm install
-   ```
+## Project status
 
-2. Start the app
+Actively evolving. Not all planned tables/Edge Functions exist yet in Supabase — see [`docs/SUPABASE_PENDING_CODE.md`](docs/SUPABASE_PENDING_CODE.md) for the gap list and implementation checklist.
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Getting started
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+From the Expo CLI output you can open the app in a development build, Android emulator, iOS simulator, or Expo Go.
 
-## Learn more
+## Documentation
 
-To learn more about developing your project with Expo, look at the following resources:
+| Doc | Purpose |
+| --- | --- |
+| [`docs/APP_OVERVIEW.md`](docs/APP_OVERVIEW.md) | Entry point: general flow, functionality, area docs, known issues, scope notes |
+| [`docs/SCREENS.md`](docs/SCREENS.md) | Every screen in the app: route, purpose, and what each user interaction triggers |
+| [`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md) | Current Supabase schema: tables, RLS policies, storage buckets, migration history |
+| [`docs/SUPABASE_PENDING_CODE.md`](docs/SUPABASE_PENDING_CODE.md) | Gaps between code and Supabase (missing tables/Edge Functions), feature backlog, architecture issues |
+| [`docs/images/`](docs/images/) | Screenshots per app area (`AUTH`, `Dashboard`), used as reference for the docs above |
+| `docs/old/` | Original Spanish versions of the docs above, kept for reference |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Core flow
 
-## Join the community
+1. **Onboarding → Auth**: welcome carousel, then login/register, email confirmation, and profile completion (name, phone, birth date, neighborhood in Tijuana).
+2. **Dashboard**: 5 sections — Home (pets), Emergency (lost/found alerts), Feed (posts), Community (notices), Profile.
+3. **Social layer**: follow users, direct/group messaging, neighborhood groups, public profiles, successful-reunion stories.
+4. **Moderation**: reports handled by admin/moderator roles via a dedicated panel.
 
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+See [`docs/SCREENS.md`](docs/SCREENS.md) for the full screen-by-screen breakdown and event map.

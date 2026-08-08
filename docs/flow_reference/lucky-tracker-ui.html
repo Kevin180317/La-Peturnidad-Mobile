@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Tracker – UI Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --salmon: #ff7e70;
+  --salmon-light: #ffb3aa;
+  --salmon-pale: #fff0ee;
+  --dark: #211f1e;
+  --teal: #007275;
+  --teal-dark: #005e66;
+  --teal-light: #e0f4f4;
+  --cream: #faf5e0;
+  --cream-dark: #f0e9c8;
+  --white: #ffffff;
+  --gray-1: #f5f5f5;
+  --gray-2: #e8e8e8;
+  --gray-3: #aaa;
+  --green: #34c782;
+  --green-pale: #e6f9f0;
+  --red: #ff5c5c;
+  --red-pale: #fff0f0;
+  --yellow: #ffc94a;
+  --yellow-pale: #fff8e6;
+  --blue: #4a90e2;
+  --blue-pale: #eaf3ff;
+  --font: 'Nunito', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--font);
+  background: #1a1a2e;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 16px 60px;
+  min-height: 100vh;
+}
+
+/* ─── HEADER ─── */
+.page-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px; width: 100%; max-width: 960px;
+}
+.logo-hex {
+  width: 46px; height: 46px;
+  background: var(--salmon);
+  clip-path: polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.page-header h1 {
+  font-family: var(--font); font-weight: 900; font-size: 22px; color: #fff;
+}
+.page-header p { font-size: 12px; color: rgba(255,255,255,.5); margin-top:2px; }
+.badge {
+  margin-left: auto; background: var(--salmon);
+  color: white; font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 20px;
+}
+
+/* ─── SCREENS GRID ─── */
+.screens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  width: 100%; max-width: 960px;
+}
+
+/* ─── PHONE FRAME ─── */
+.phone-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.screen-label {
+  font-family: var(--font); font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,.5); letter-spacing: 2px; text-transform: uppercase;
+}
+.phone {
+  width: 280px;
+  background: #0d0d0d;
+  border-radius: 40px;
+  padding: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.08);
+  position: relative;
+}
+.phone-notch {
+  width: 80px; height: 24px;
+  background: #0d0d0d;
+  border-radius: 0 0 16px 16px;
+  margin: 0 auto 10px;
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.notch-cam {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #1a1a1a; border: 1px solid #333;
+}
+.notch-pill {
+  width: 40px; height: 5px; border-radius: 4px; background: #1a1a1a;
+}
+.screen {
+  background: var(--cream);
+  border-radius: 28px;
+  overflow: hidden;
+  min-height: 560px;
+  position: relative;
+  display: flex; flex-direction: column;
+}
+
+/* ─── STATUS BAR ─── */
+.status-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px 4px;
+  font-size: 10px; font-weight: 800; color: var(--dark);
+}
+.status-icons { display: flex; gap: 4px; align-items: center; font-size: 10px; }
+
+/* ─── BOTTOM NAV ─── */
+.bottom-nav {
+  display: flex;
+  background: var(--dark);
+  padding: 8px 8px 12px;
+  border-radius: 0 0 28px 28px;
+  margin-top: auto;
+}
+.nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; padding: 6px 4px;
+  border-radius: 14px; cursor: pointer;
+  transition: background .2s;
+}
+.nav-tab.active { background: var(--salmon); }
+.nav-tab .ni { font-size: 18px; }
+.nav-tab .nl {
+  font-size: 8.5px; font-weight: 700;
+  color: rgba(255,255,255,.5);
+  font-family: var(--font);
+}
+.nav-tab.active .nl { color: white; }
+
+/* ─── COMMON COMPONENTS ─── */
+.top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 8px;
+}
+.top-bar .greeting { font-size: 13px; color: #888; font-weight: 600; }
+.top-bar .username { font-size: 18px; font-weight: 900; color: var(--dark); }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--salmon), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; color: white; flex-shrink: 0;
+}
+.avatar.sm { width: 32px; height: 32px; font-size: 14px; }
+
+.section-title {
+  font-size: 15px; font-weight: 900; color: var(--dark);
+  padding: 0 16px 8px;
+}
+.section-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px 8px;
+}
+.see-all { font-size: 11px; font-weight: 700; color: var(--salmon); }
+
+/* Cards */
+.card {
+  background: white; border-radius: 18px;
+  padding: 14px; margin: 0 16px 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+.card.salmon-bg { background: var(--salmon); }
+.card.teal-bg { background: var(--teal); }
+.card.cream-bg { background: var(--cream-dark); }
+
+/* Alert card */
+.alert-card {
+  background: white; border-radius: 16px;
+  margin: 0 16px 10px; overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,.07);
+  display: flex;
+}
+.alert-card .ac-img {
+  width: 80px; background: var(--salmon-pale);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; flex-shrink: 0;
+}
+.alert-card .ac-body { padding: 10px 12px; flex: 1; }
+.alert-card .ac-name { font-size: 14px; font-weight: 900; color: var(--dark); }
+.alert-card .ac-breed { font-size: 11px; color: #888; margin: 2px 0; }
+.alert-card .ac-dist {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 700;
+  background: var(--red-pale); color: var(--red);
+  padding: 2px 8px; border-radius: 20px; margin-top: 4px;
+}
+.alert-card .ac-time { font-size: 10px; color: #aaa; margin-top:3px; }
+
+/* Pet card horizontal scroll */
+.pets-scroll {
+  display: flex; gap: 10px; padding: 0 16px 4px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.pets-scroll::-webkit-scrollbar { display: none; }
+.pet-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  flex-shrink: 0;
+}
+.pet-chip .pet-avatar {
+  width: 56px; height: 56px; border-radius: 18px;
+  background: var(--salmon-pale);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  border: 3px solid transparent;
+}
+.pet-chip.active .pet-avatar { border-color: var(--salmon); }
+.pet-chip .pet-name { font-size: 10px; font-weight: 700; color: var(--dark); }
+
+/* Tags */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10.5px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px;
+}
+.tag.lost { background: var(--red-pale); color: var(--red); }
+.tag.found { background: var(--green-pale); color: var(--teal-dark); }
+.tag.normal { background: var(--blue-pale); color: var(--blue); }
+.tag.warning { background: var(--yellow-pale); color: #b8860b; }
+
+/* Search bar */
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: white; border-radius: 14px; padding: 10px 14px;
+  margin: 8px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.search-bar span { font-size: 15px; }
+.search-bar input, .search-bar .fake-input {
+  flex: 1; border: none; outline: none; background: transparent;
+  font-size: 13px; color: #aaa; font-family: var(--font);
+}
+
+/* Stat chip */
+.stats-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px; padding: 0 16px 12px;
+}
+.stat-chip {
+  background: white; border-radius: 14px; padding: 10px 8px;
+  text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.stat-chip .sn { font-size: 18px; font-weight: 900; color: var(--dark); }
+.stat-chip .sl { font-size: 9px; font-weight: 700; color: #888; margin-top: 2px; }
+
+/* Map mockup */
+.map-mock {
+  height: 200px; background: #d4e8d4;
+  border-radius: 18px; margin: 0 16px 10px;
+  position: relative; overflow: hidden;
+}
+.map-mock .map-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #c8dfc8 0%, #b8d4b8 40%, #cce0cc 100%);
+}
+.map-road-h {
+  position: absolute; left: 0; right: 0;
+  height: 8px; background: rgba(255,255,255,.7);
+}
+.map-road-v {
+  position: absolute; top: 0; bottom: 0;
+  width: 8px; background: rgba(255,255,255,.7);
+}
+.map-pin {
+  position: absolute;
+  display: flex; flex-direction: column; align-items: center;
+  transform: translateX(-50%);
+}
+.map-pin .pin-dot {
+  width: 28px; height: 28px; border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.map-pin .pin-dot span { transform: rotate(45deg); font-size: 13px; }
+.map-pin .pin-label {
+  font-size: 9px; font-weight: 800; background: white;
+  padding: 2px 6px; border-radius: 8px; margin-top: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.15); white-space: nowrap;
+}
+.map-my-loc {
+  position: absolute; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--blue);
+  border: 3px solid white; box-shadow: 0 0 0 6px rgba(74,144,226,.2);
+}
+
+/* Form */
+.form-field {
+  background: white; border-radius: 14px; padding: 12px 14px;
+  margin: 0 16px 8px;
+}
+.form-field .fl { font-size: 10px; font-weight: 700; color: #888; margin-bottom: 4px; }
+.form-field .fv {
+  font-size: 13px; font-weight: 600; color: var(--dark);
+}
+.form-field .fv.placeholder { color: #ccc; }
+
+/* Big CTA button */
+.btn-cta {
+  margin: 8px 16px;
+  background: var(--salmon); color: white;
+  border: none; border-radius: 16px; padding: 14px;
+  font-size: 15px; font-weight: 900; font-family: var(--font);
+  width: calc(100% - 32px); cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255,126,112,.35);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-secondary {
+  margin: 4px 16px;
+  background: white; color: var(--dark);
+  border: 2px solid var(--gray-2); border-radius: 16px; padding: 12px;
+  font-size: 14px; font-weight: 700; font-family: var(--font);
+  width: calc(100% - 32px); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* Profile */
+.profile-hero {
+  background: linear-gradient(160deg, var(--teal-dark) 0%, var(--teal) 100%);
+  padding: 20px 16px 28px; text-align: center; border-radius: 0 0 28px 28px;
+}
+.profile-hero .av {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--salmon); margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; border: 4px solid rgba(255,255,255,.3);
+}
+.profile-hero .pname { font-size: 20px; font-weight: 900; color: white; }
+.profile-hero .pemail { font-size: 12px; color: rgba(255,255,255,.7); margin-top: 4px; }
+
+/* Toggle */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: white; border-radius: 14px; padding: 12px 14px;
+  margin: 0 16px 8px; box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.toggle-row .tl { font-size: 13px; font-weight: 700; color: var(--dark); }
+.toggle-row .ts { font-size: 10px; color: #aaa; }
+.toggle {
+  width: 40px; height: 22px; border-radius: 11px;
+  display: flex; align-items: center; padding: 2px;
+  cursor: pointer;
+}
+.toggle.on { background: var(--salmon); justify-content: flex-end; }
+.toggle.off { background: #ddd; justify-content: flex-start; }
+.toggle .knob {
+  width: 18px; height: 18px; border-radius: 50%; background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+
+/* Splash */
+.splash-screen {
+  background: linear-gradient(160deg, var(--dark) 0%, #3a2520 100%);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 560px; gap: 0;
+  border-radius: 28px; padding: 30px 20px;
+}
+.splash-hex {
+  width: 90px; height: 90px;
+  background: var(--salmon);
+  clip-path: polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+.splash-title { font-size: 32px; font-weight: 900; color: white; margin-bottom: 6px; }
+.splash-sub { font-size: 14px; color: rgba(255,255,255,.5); margin-bottom: 40px; text-align:center; }
+.splash-dots { display: flex; gap: 8px; margin-bottom: 40px; }
+.splash-dots span {
+  width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.2);
+}
+.splash-dots span.active { background: var(--salmon); width: 24px; border-radius: 4px; }
+.splash-cta {
+  width: 100%; background: var(--salmon); color: white;
+  border: none; border-radius: 16px; padding: 16px;
+  font-size: 16px; font-weight: 900; font-family: var(--font);
+  cursor: pointer; box-shadow: 0 4px 20px rgba(255,126,112,.4);
+}
+.splash-login {
+  margin-top: 12px; font-size: 13px; color: rgba(255,255,255,.5);
+  font-weight: 600;
+}
+.splash-login span { color: var(--salmon-light); font-weight: 700; }
+
+/* Pet detail */
+.pet-detail-hero {
+  background: linear-gradient(160deg, var(--salmon) 0%, #ffb3aa 100%);
+  padding: 16px 16px 28px; border-radius: 0 0 28px 28px; text-align: center;
+}
+.pet-big-avatar {
+  width: 80px; height: 80px; border-radius: 24px;
+  background: white; margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 40px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12);
+}
+.pet-detail-hero .pn { font-size: 22px; font-weight: 900; color: white; }
+.pet-detail-hero .pb { font-size: 12px; color: rgba(255,255,255,.8); }
+
+.detail-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; padding: 0 16px 10px;
+}
+.detail-cell {
+  background: white; border-radius: 14px; padding: 10px 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.05);
+}
+.detail-cell .dl { font-size: 9.5px; font-weight: 700; color: #aaa; text-transform: uppercase; }
+.detail-cell .dv { font-size: 13px; font-weight: 800; color: var(--dark); margin-top: 2px; }
+
+/* Notification dot */
+.notif-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--red); position: absolute; top: 2px; right: 2px;
+  border: 1.5px solid var(--dark);
+}
+
+/* Scroll container inside screen */
+.screen-scroll {
+  flex: 1; overflow-y: auto; scrollbar-width: none;
+}
+.screen-scroll::-webkit-scrollbar { display: none; }
+
+/* Onboarding pet selection */
+.pet-type-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; padding: 0 16px 12px;
+}
+.pet-type-card {
+  background: white; border-radius: 18px; padding: 16px;
+  text-align: center; border: 2.5px solid transparent;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06); cursor: pointer;
+}
+.pet-type-card.selected { border-color: var(--salmon); background: var(--salmon-pale); }
+.pet-type-card .eti { font-size: 32px; display: block; margin-bottom: 6px; }
+.pet-type-card .etn { font-size: 12px; font-weight: 800; color: var(--dark); }
+
+/* Step indicator */
+.steps {
+  display: flex; gap: 6px; padding: 0 16px 12px; align-items: center;
+}
+.step-dot {
+  height: 6px; border-radius: 3px; background: var(--gray-2);
+  flex: 1;
+}
+.step-dot.done { background: var(--salmon); }
+.step-dot.active { background: var(--salmon); flex: 2; }
+
+/* Action buttons row */
+.action-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; padding: 0 16px 10px;
+}
+.action-btn {
+  background: white; border-radius: 16px; padding: 14px 10px;
+  text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  cursor: pointer;
+}
+.action-btn .ab-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+.action-btn .ab-label { font-size: 11px; font-weight: 800; color: var(--dark); }
+.action-btn.highlight { background: var(--salmon); }
+.action-btn.highlight .ab-label { color: white; }
+
+/* Banner card */
+.banner-card {
+  margin: 0 16px 10px;
+  background: linear-gradient(135deg, var(--teal-dark), var(--teal));
+  border-radius: 18px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.banner-card .bc-icon { font-size: 32px; flex-shrink: 0; }
+.banner-card .bc-text .bt { font-size: 13px; font-weight: 900; color: white; }
+.banner-card .bc-text .bs { font-size: 11px; color: rgba(255,255,255,.7); margin-top: 2px; }
+.banner-card .bc-btn {
+  margin-left: auto; background: white; color: var(--teal-dark);
+  border: none; border-radius: 10px; padding: 6px 12px;
+  font-size: 11px; font-weight: 800; font-family: var(--font);
+  flex-shrink: 0; cursor: pointer;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 30px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.empty-state .es-icon { font-size: 48px; }
+.empty-state .es-title { font-size: 16px; font-weight: 900; color: var(--dark); }
+.empty-state .es-sub { font-size: 12px; color: #aaa; }
+
+/* Back button */
+.back-btn {
+  width: 34px; height: 34px; border-radius: 12px;
+  background: white; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  flex-shrink: 0;
+}
+
+/* Section divider */
+.divider { height: 1px; background: var(--gray-2); margin: 4px 16px 12px; }
+
+/* Small description label */
+.screen-note {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,.4);
+  letter-spacing: 1px; text-transform: uppercase; text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="logo-hex">🐾</div>
+  <div>
+    <h1>Lucky Tracker</h1>
+    <p>Propuesta de UI / Pantallas principales · 2026</p>
+  </div>
+  <span class="badge">8 Pantallas</span>
+</div>
+
+<div class="screens-grid">
+
+  <!-- ══ 1. SPLASH / ONBOARDING ══ -->
+  <div class="phone-wrap">
+    <div class="screen-label">01 · Bienvenida</div>
+    <div class="phone">
+      <div class="phone-notch"><div class="notch-pill"></div><div class="notch-cam"></div></div>
+      <div class="splash-screen">
+        <div class="splash-hex">🐾</div>
+        <div class="splash-title">Lucky Tracker</div>
+        <div class="splash-sub">Encuentra a tu mascota<br>con la ayuda de tu comunidad</div>
+        <div class="splash-dots">
+          <span class="active"></span><span></span><span></span>
+        </div>
+        <button class="splash-cta">Comenzar 🐾</button>
+        <div class="splash-login">¿Ya tienes cuenta? <span>Iniciar sesión</span></div>
+      </div>
+    </div>
+    <div class="screen-note">Flujo 0 · Auth</div>
+  </div>
+
+  <!-- ══ 2. HOME / MAIN SCREEN ══ -->
+  <div class="phone-wrap">
+    <div class="screen-label">02 · Pantalla Principal</div>
+    <div class="phone">
+      <div class="phone-notch"><div class="notch-pill"></div><div class="notch-cam"></div></div>
+      <div class="screen">
+        <div style="background: var(--cream);">
+          <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">📶 🔋</div>
+          </div>
+          <!-- Top bar -->
+          <div class="top-bar">
+            <div>
+              <div class="greeting">¡Hola de nuevo! 👋</div>
+              <div class="username">María García</div>
+            </div>
+            <div style="position:relative;">
+              <div class="avatar">M</div>
+            </div>
+          </div>
+          <!-- Search -->
+          <div class="search-bar">
+            <span>🔍</span>
+            <div class="fake-input">Buscar animal perdido…</div>
+          </div>
+          <!-- Stats -->
+          <div class="stats-row">
+            <div class="stat-chip">
+              <div class="sn" style="color:var(--red);">12</div>
+              <div class="sl">Perdidos cerca</div>
+            </div>
+            <div class="stat-chip">
+              <div class="sn" style="color:var(--green);">4</div>
+              <div class="sl">Encontrados hoy</div>
+            </div>
+            <div class="stat-chip">
+              <div class="sn" style="color:var(--teal);">3</div>
+              <div class="sl">Mis mascotas</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen-scroll" style="background:var(--gray-1);">
+          <!-- Action buttons -->
+          <div style="padding:12px 16px 8px;">
+            <div class="section-title" style="padding:0 0 8px;">Acciones rápidas</div>
+          </div>
+          <div class="action-row">
+            <div class="action-btn highlight">
+              <span class="ab-icon">🚨</span>
+              <div class="ab-label">Reportar perdido</div>
+            </div>
+            <div class="action-btn">
+              <span class="ab-icon">👀</span>
+              <div class="ab-label">Vi un animal</div>
+            </div>
+            <div class="action-btn">
+              <span class="ab-icon">🗺️</span>
+              <div class="ab-label">Mapa de zona</div>
+            </div>
+            <div class="action-btn">
+              <span class="ab-icon">➕</span>
+              <div class="ab-label">Agregar mascota</div>
+            </div>
+          </div>
+          <!-- Alert banner -->
+          <div class="banner-card">
+            <div class="bc-icon">🔔</div>
+            <div class="bc-text">
+              <div class="bt">Alerta activa cerca</div>
+              <div class="bs">Ronbo fue reportado perdido a 300m</div>
+            </div>
+            <button class="bc-btn">Ver</button>
+          </div>
+          <!-- Recent alerts -->
+          <div class="section-row" style="padding-top:4px;">
+            <div class="section-title" style="padding:0;">Alertas recientes</div>
+            <div class="see-all">Ver todas</div>
+          </div>
+          <div class="alert-card">
+            <div class="ac-img">🐕</div>
+            <div class="ac-body">
+              <div class="ac-name">Ronbo</div>
+              <div class="ac-breed">Labrador · Macho</div>
+              <div class="ac-dist">📍 300m de distancia</div>
+              <div class="ac-time">Hace 2 horas</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <div class="ac-img">🐈</div>
+            <div class="ac-body">
+              <div class="ac-name">Luna</div>
+              <div class="ac-breed">Gata atigrada · Hembra</div>
+              <div class="ac-dist" style="background:var(--yellow-pale);color:#b8860b;">📍 1.2km</div>
+              <div class="ac-time">Hace 5 horas</div>
+            </div>
+          </div>
+          <div style="height:16px;"></div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-tab active"><div class="ni">🏠</div><div class="nl">Inicio</div></div>
+          <div class="nav-tab" style="position:relative;"><div class="ni">🔔</div><div class="nl">Alertas</div><div class="notif-dot"></div></div>
+          <div class="nav-tab"><div class="ni">🐾</div><div class="nl">Mascotas</div></div>
+          <div class="nav-tab"><div class="ni">👤</div><div class="nl">Perfil</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-note">Flujo 1 · Home</div>
+  </div>
+
+  <!-- ══ 3. ALERTAS ══ -->
+  <div class="phone-wrap">
+    <div class="screen-label">03 · Alertas</div>
+    <div class="phone">
+      <div class="phone-notch"><div class="notch-pill"></div><div class="notch-cam"></div></div>
+      <div class="screen">
+        <div style="background:var(--cream);">
+          <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="top-bar">
+            <div>
+              <div class="username">Alertas 🔔</div>
+              <div class="greeting">12 activas en tu zona</div>
+            </div>
+            <div class="avatar sm" style="background:var(--salmon);">M</div>
+          </div>
+          <!-- Filters -->
+          <div style="display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;">
+            <div style="background:var(--salmon);color:white;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;">🔴 Todos</div>
+            <div style="background:white;color:#888;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;border:1.5px solid var(--gray-2);">Perros</div>
+            <div style="background:white;color:#888;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;border:1.5px solid var(--gray-2);">Gatos</div>
+            <div style="background:white;color:#888;border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;border:1.5px solid var(--gray-2);">< 500m</div>
+          </div>
+        </div>
+
+        <div class="screen-scroll" style="background:var(--gray-1);padding-top:8px;">
+          <div class="alert-card">
+            <div class="ac-img">🐕</div>
+            <div class="ac-body">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="ac-name">Ronbo</div>
+                <span class="tag lost">⚠️ Perdido</span>
+              </div>
+              <div class="ac-breed">Labrador · Macho · Café</div>
+              <div class="ac-dist">📍 300m · Col. Del Valle</div>
+              <div class="ac-time">Hoy · 07:30 am</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <div class="ac-img">🐈</div>
+            <div class="ac-body">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="ac-name">Luna</div>
+                <span class="tag lost">⚠️ Perdida</span>
+              </div>
+              <div class="ac-breed">Mestiza · Hembra · Gris</div>
+              <div class="ac-dist" style="background:var(--yellow-pale);color:#b8860b;">📍 1.2km · Col. Narvarte</div>
+              <div class="ac-time">Hoy · 05:15 am</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <div class="ac-img">🐕</div>
+            <div class="ac-body">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="ac-name">Max</div>
+                <span class="tag found" style="background:var(--green-pale);color:var(--teal-dark);">✅ Encontrado</span>
+              </div>
+              <div class="ac-breed">Bulldog · Macho · Blanco</div>
+              <div class="ac-dist" style="background:var(--green-pale);color:var(--teal-dark);">📍 800m · Col. Roma</div>
+              <div class="ac-time">Ayer · 18:40</div>
+            </div>
+          </div>
+          <div class="alert-card">
+            <div class="ac-img">🐈</div>
+            <div class="ac-body">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div class="ac-name">Mochi</div>
+                <span class="tag lost">⚠️ Perdida</span>
+              </div>
+              <div class="ac-breed">Siamés · Hembra · Crema</div>
+              <div class="ac-dist">📍 600m · Col. Condesa</div>
+              <div class="ac-time">Ayer · 14:00</div>
+            </div>
+          </div>
+          <div style="height:16px;"></div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-tab"><div class="ni">🏠</div><div class="nl">Inicio</div></div>
+          <div class="nav-tab active"><div class="ni">🔔</div><div class="nl">Alertas</div></div>
+          <div class="nav-tab"><div class="ni">🐾</div><div class="nl">Mascotas</div></div>
+          <div class="nav-tab"><div class="ni">👤</div><div class="nl">Perfil</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-note">Flujo A · Alertas</div>
+  </div>
+
+  <!-- ══ 4. DETALLE ALERTA ══ -->
+  <div class="phone-wrap">
+    <div class="screen-label">04 · Detalle Animal Perdido</div>
+    <div class="phone">
+      <div class="phone-notch"><div class="notch-pill"></div><div class="notch-cam"></div></div>
+      <div class="screen">
+        <div class="status-bar" style="background:var(--salmon);color:white;border-radius:28px 28px 0 0;padding-top:10px;"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <!-- Hero -->
+        <div style="background:linear-gradient(160deg,var(--salmon),#ffb3aa);padding:12px 16px 24px;border-radius:0 0 28px 28px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <div class="back-btn" style="background:rgba(255,255,255,.3);">←</div>
+            <div style="font-size:14px;font-weight:900;color:white;">Animal perdido</div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-end;">
+            <div style="width:80px;height:80px;border-radius:22px;background:white;display:flex;align-items:center;justify-content:center;font-size:40px;box-shadow:0 4px 16px rgba(0,0,0,.15);flex-shrink:0;">🐕</div>
+            <div>
+              <div style="font-size:24px;font-weight:900;color:white;">Ronbo</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.85);">Labrador Retriever · Macho</div>
+              <span class="tag lost" style="margin-top:6px;display:inline-flex;">⚠️ Perdido hace 2h</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen-scroll" style="background:var(--gray-1);padding-top:12px;">
+          <!-- Details grid -->
+          <div class="detail-grid">
+            <div class="detail-cell"><div class="dl">Raza</div><div class="dv">Labrador</div></div>
+            <div class="detail-cell"><div class="dl">Color</div><div class="dv">Café claro</div></div>
+            <div class="detail-cell"><div class="dl">Tamaño</div><div class="dv">Grande</div></div>
+            <div class="detail-cell"><div class="dl">Sexo</div><div class="dv">Macho</div></div>
+            <div class="detail-cell" style="grid-column:1/-1;"><div class="dl">Zona</div><div class="dv">Col. Del Valle, CDMX · CP 03100</div></div>
+          </div>
+          <!-- Description -->
+          <div class="card" style="margin-bottom:10px;">
+            <div style="font-size:11px;font-weight:700;color:#aaa;margin-bottom:6px;">DESCRIPCIÓN</div>
+            <div style="font-size:12.5px;color:#555;line-height:1.6;">Lleva collar rojo con placa. Es muy amigable, responde al nombre Ronbo. Fue visto por última vez cerca del parque.</div>
+          </div>
+          <!-- Map mini -->
+          <div style="padding:0 16px 8px;font-size:13px;font-weight:900;color:var(--dark);">Última ubicación</div>
+          <div class="map-mock">
+            <div class="map-bg"></div>
+            <div class="map-road-h" style="top:45%;"></div>
+            <div class="map-road-v" style="left:40%;"></div>
+            <div class="map-pin" style="left:40%;top:22%;">
+              <div class="pin-dot" style="background:var(--red);"><span>🐕</span></div>
+              <div class="pin-label" style="color:var(--red);">Ronbo</div>
+            </div>
+          </div>
+          <!-- Actions -->
+          <div class="btn-cta" style="margin-top:8px;">📍 Reportar que lo vi</div>
+          <div class="btn-secondary">📞 Contactar al dueño</div>
+          <div style="height:12px;"></div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-tab"><div class="ni">🏠</div><div class="nl">Inicio</div></div>
+          <div class="nav-tab active"><div class="ni">🔔</div><div class="nl">Alertas</div></div>
+          <div class="nav-tab"><div class="ni">🐾</div><div class="nl">Mascotas</div></div>
+          <div class="nav-tab"><div class="ni">👤</div><div class="nl">Perfil</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-note">Flujo A · Detalle</div>
+  </div>
+
+  <!-- ══ 5. MIS MASCOTAS ══ -->
+  <div class="phone-wrap">
+    <div class="screen-label">05 · Mis Mascotas</div>
+    <div class="phone">
+      <div class="phone-notch"><div class="notch-pill"></div><div class="notch-cam"></div></div>
+      <div class="screen">
+        <div style="background:var(--cream);">
+          <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="top-bar">
+            <div>
+              <div class="username">Mis Mascotas 🐾</div>
+              <div class="greeting">3 registradas</div>
+            </div>
+            <div style="width:36px;height:36px;border-radius:12px;background:var(--salmon);display:flex;align-items:center;justify-content:center;font-size:18px;color:white;">+</div>
+          </div>
+        </div>
+
+        <div class="screen-scroll" style="background:var(--gray-1);padding-top:8px;">
+          <!-- Pet 1 -->
+          <div class="card" style="display:flex;gap:12px;align-items:center;">
+            <div style="width:60px;height:60px;border-radius:18px;background:var(--salmon-pale);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;">🐕</div>
+            <div style="flex:1;">
+              <div style="font-size:16px;font-weight:900;color:var(--dark);">Ronbo</div>
+              <div style="font-size:11px;color:#888;">Labrador · Macho · 3 años</div>
+              <span class="tag normal" style="margin-top:5px;">✓ En casa</span>
+            </div>
+            <div style="font-size:20px;color:#ccc;">›</div>
+          </div>
+          <!-- Pet 2 -->
+          <div class="card" style="display:flex;gap:12px;align-items:center;">
+            <div style="width:60px;height:60px;border-radius:18px;background:var(--teal-light);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;">🐈</div>
+            <div style="flex:1;">
+              <div style="font-size:16px;font-weight:900;color:var(--dark);">Tsuku</div>
+              <div style="font-size:11px;color:#888;">Siamés · Hembra · 5 años</div>
+              <span class="tag normal">✓ En casa</span>
+            </div>
+            <div style="font-size:20px;color:#ccc;">›</div>
+          </div>
+          <!-- Pet 3 -->
+          <div class="card" style="display:flex;gap:12px;align-items:center;">
+            <div style="width:60px;height:60px;border-radius:18px;background:var(--yellow-pale);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;">🐕</div>
+            <div style="flex:1;">
+              <div style="font-size:16px;font-weight:900;color:var(--dark);">Sky</div>
+              <div style="font-size:11px;color:#888;">Poodle · Macho · 1 año</div>
+              <span class="tag lost">⚠️ Perdido</span>
+            </div>
+            <div style="font-size:20px;color:#ccc;">›</div>
+          </div>
+          <!-- Add new -->
+          <div style="margin:0 16px 10px;background:white;border-radius:18px;padding:16px;border:2.5px dashed var(--gray-2);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;">
+            <div style="width:40px;height:40px;border-radius:12px;background:var(--salmon-pale);display:flex;align-items:center;justify-content:center;font-size:22px;">+</div>
+            <div style="font-size:13px;font-weight:800;color:var(--salmon);">Registrar nueva mascota</div>
+          </div>
+          <div style="height:16px;"></div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-tab"><div class="ni">🏠</div><div class="nl">Inicio</div></div>
+          <div class="nav-tab"><div class="ni">🔔</div><div class="nl">Alertas</div></div>
+          <div class="nav-tab active"><div class="ni">🐾</div><div class="nl">Mascotas</div></div>
+          <div class="nav-tab"><div class="ni">👤</div><div class="nl">Perfil</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-note">Flujo C · Mascotas</div>
+  </div>
+
+  <!-- ══ 6. REGISTRO MASCOTA ══ -->
+  <div class="phone-wrap">
+    <div class="screen-label">06 · Registrar Mascota</div>
+    <div class="phone">
+      <div class="phone-notch"><div class="notch-pill"></div><div class="notch-cam"></div></div>
+      <div class="screen">
+        <div style="background:var(--cream);">
+          <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="top-bar">
+            <div class="back-btn">←</div>
+            <div style="font-size:15px;font-weight:900;color:var(--dark);">Nueva mascota</div>
+            <div style="width:34px;"></div>
+          </div>
+          <!-- Steps -->
+          <div class="steps">
+            <div class="step-dot done"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+          </div>
+          <div style="padding:0 16px 12px;font-size:13px;font-weight:900;color:var(--dark);">¿Qué tipo de animal es?</div>
+        </div>
+
+        <div class="screen-scroll" style="background:var(--gray-1);padding-top:8px;">
+          <div class="pet-type-grid">
+            <div class="pet-type-card selected">
+              <span class="eti">🐕</span>
+              <div class="etn">Perro</div>
+            </div>
+            <div class="pet-type-card">
+              <span class="eti">🐈</span>
+              <div class="etn">Gato</div>
+            </div>
+            <div class="pet-type-card">
+              <span class="eti">🐦</span>
+              <div class="etn">Ave</div>
+            </div>
+            <div class="pet-type-card">
+              <span class="eti">🐇</span>
+              <div class="etn">Otro</div>
+            </div>
+          </div>
+
+          <div style="padding:8px 16px 8px;font-size:13px;font-weight:900;color:var(--dark);">Datos básicos</div>
+          <div class="form-field">
+            <div class="fl">NOMBRE *</div>
+            <div class="fv">Ronbo</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 8px;">
+            <div class="form-field" style="margin:0;">
+              <div class="fl">RAZA</div>
+              <div class="fv">Labrador</div>
+            </div>
+            <div class="form-field" style="margin:0;">
+              <div class="fl">COLOR</div>
+              <div class="fv">Café</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 8px;">
+            <div class="form-field" style="margin:0;">
+              <div class="fl">TAMAÑO</div>
+              <div class="fv">Grande</div>
+            </div>
+            <div class="form-field" style="margin:0;">
+              <div class="fl">SEXO</div>
+              <div class="fv">Macho</div>
+            </div>
+          </div>
+          <!-- Photo upload -->
+          <div style="margin:0 16px 10px;background:white;border-radius:16px;padding:16px;border:2.5px dashed var(--salmon-light);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;">
+            <div style="font-size:32px;">📷</div>
+            <div style="font-size:12px;font-weight:800;color:var(--salmon);">Subir foto de tu mascota</div>
+            <div style="font-size:10px;color:#aaa;">JPG o PNG · máx. 5MB</div>
+          </div>
+          <div class="btn-cta">Continuar →</div>
+          <div style="height:16px;"></div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-tab"><div class="ni">🏠</div><div class="nl">Inicio</div></div>
+          <div class="nav-tab"><div class="ni">🔔</div><div class="nl">Alertas</div></div>
+          <div class="nav-tab active"><div class="ni">🐾</div><div class="nl">Mascotas</div></div>
+          <div class="nav-tab"><div class="ni">👤</div><div class="nl">Perfil</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-note">Flujo C.1 · Registro</div>
+  </div>
+
+  <!-- ══ 7. MAPA ══ -->
+  <div class="phone-wrap">
+    <div class="screen-label">07 · Mapa de Zona</div>
+    <div class="phone">
+      <div class="phone-notch"><div class="notch-pill"></div><div class="notch-cam"></div></div>
+      <div class="screen">
+        <div style="background:var(--cream);">
+          <div class="status-bar"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+          <div class="top-bar">
+            <div>
+              <div class="username">Zona activa 🗺️</div>
+              <div class="greeting">Col. Del Valle, CDMX</div>
+            </div>
+            <div style="width:34px;height:34px;border-radius:12px;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:16px;">⚙️</div>
+          </div>
+        </div>
+
+        <!-- Big map -->
+        <div style="height:260px;background:#c8dfc8;position:relative;overflow:hidden;">
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,#b8dab8 0%,#a8cca8 40%,#b8d4b8 100%);"></div>
+          <!-- Roads -->
+          <div style="position:absolute;left:0;right:0;top:35%;height:10px;background:rgba(255,255,255,.75);"></div>
+          <div style="position:absolute;left:0;right:0;top:65%;height:6px;background:rgba(255,255,255,.6);"></div>
+          <div style="position:absolute;top:0;bottom:0;left:30%;width:10px;background:rgba(255,255,255,.75);"></div>
+          <div style="position:absolute;top:0;bottom:0;left:70%;width:6px;background:rgba(255,255,255,.6);"></div>
+          <!-- Blocks -->
+          <div style="position:absolute;top:5%;left:5%;right:35%;bottom:40%;background:rgba(255,255,255,.15);border-radius:4px;"></div>
+          <div style="position:absolute;top:5%;left:35%;right:5%;bottom:40%;background:rgba(255,255,255,.1);border-radius:4px;"></div>
+          <div style="position:absolute;top:42%;left:5%;right:25%;bottom:10%;background:rgba(255,255,255,.12);border-radius:4px;"></div>
+          <!-- Radius circle -->
+          <div style="position:absolute;left:50%;top:50%;width:130px;height:130px;transform:translate(-50%,-50%);border-radius:50%;border:2px dashed rgba(74,144,226,.5);background:rgba(74,144,226,.06);"></div>
+          <!-- My location -->
+          <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:var(--blue);border:3px solid white;box-shadow:0 0 0 8px rgba(74,144,226,.2);"></div>
+          <!-- Pins -->
+          <div class="map-pin" style="left:38%;top:18%;">
+            <div class="pin-dot" style="background:var(--red);width:30px;height:30px;"><span>🐕</span></div>
+            <div class="pin-label" style="color:var(--red);">Ronbo</div>
+          </div>
+          <div class="map-pin" style="left:62%;top:52%;">
+            <div class="pin-dot" style="background:var(--red);width:26px;height:26px;"><span>🐈</span></div>
+            <div class="pin-label" style="color:var(--red);">Luna</div>
+          </div>
+          <div class="map-pin" style="left:25%;top:60%;">
+            <div class="pin-dot" style="background:var(--green);width:26px;height:26px;"><span>🐕</span></div>
+            <div class="pin-label" style="color:var(--teal-dark);">Max ✓</div>
+          </div>
+          <!-- Legend -->
+          <div style="position:absolute;bottom:10px;right:10px;background:white;border-radius:10px;padding:6px 10px;font-size:9.5px;font-weight:700;line-height:1.8;box-shadow:0 2px 8px rgba(0,0,0,.12);">
+            <div style="color:var(--red);">🔴 Perdido</div>
+            <div style="color:var(--teal-dark);">🟢 Encontrado</div>
+          </div>
+        </div>
+
+        <!-- Filter row -->
+        <div style="display:flex;gap:8px;padding:10px 16px 8px;background:var(--gray-1);overflow-x:auto;scrollbar-width:none;">
+          <div style="background:var(--salmon);color:white;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;">Todos</div>
+          <div style="background:white;color:#888;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;border:1.5px solid var(--gray-2);">Perros</div>
+          <div style="background:white;color:#888;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;border:1.5px solid var(--gray-2);">Gatos</div>
+          <div style="background:white;color:#888;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;border:1.5px solid var(--gray-2);">< 1km</div>
+        </div>
+
+        <!-- Nearby list -->
+        <div class="screen-scroll" style="background:var(--gray-1);">
+          <div class="alert-card" style="border-left:4px solid var(--red);">
+            <div class="ac-img">🐕</div>
+            <div class="ac-body">
+              <div class="ac-name">Ronbo <span class="tag lost" style="font-size:9px;padding:1px 7px;">Perdido</span></div>
+              <div class="ac-breed">Labrador · Col. Del Valle</div>
+              <div class="ac-dist">📍 300m · Ver en mapa</div>
+            </div>
+          </div>
+          <div class="alert-card" style="border-left:4px solid var(--green);">
+            <div class="ac-img">🐕</div>
+            <div class="ac-body">
+              <div class="ac-name">Max <span class="tag found" style="font-size:9px;padding:1px 7px;">Encontrado</span></div>
+              <div class="ac-breed">Bulldog · Col. Roma</div>
+              <div class="ac-dist" style="background:var(--green-pale);color:var(--teal-dark);">📍 800m · Ver en mapa</div>
+            </div>
+          </div>
+          <div style="height:12px;"></div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-tab"><div class="ni">🏠</div><div class="nl">Inicio</div></div>
+          <div class="nav-tab active"><div class="ni">🔔</div><div class="nl">Alertas</div></div>
+          <div class="nav-tab"><div class="ni">🐾</div><div class="nl">Mascotas</div></div>
+          <div class="nav-tab"><div class="ni">👤</div><div class="nl">Perfil</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-note">Flujo B · Mapa</div>
+  </div>
+
+  <!-- ══ 8. MI PERFIL ══ -->
+  <div class="phone-wrap">
+    <div class="screen-label">08 · Mi Perfil</div>
+    <div class="phone">
+      <div class="phone-notch"><div class="notch-pill"></div><div class="notch-cam"></div></div>
+      <div class="screen">
+        <div class="status-bar" style="background:var(--teal-dark);color:white;border-radius:28px 28px 0 0;padding-top:10px;"><span>9:41</span><div class="status-icons">📶 🔋</div></div>
+        <!-- Profile hero -->
+        <div class="profile-hero">
+          <div class="av">M</div>
+          <div class="pname">María García</div>
+          <div class="pemail">maria@email.com · Col. Del Valle</div>
+          <div style="display:flex;gap:20px;justify-content:center;margin-top:14px;">
+            <div style="text-align:center;">
+              <div style="font-size:20px;font-weight:900;color:white;">3</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.6);">Mascotas</div>
+            </div>
+            <div style="width:1px;background:rgba(255,255,255,.2);"></div>
+            <div style="text-align:center;">
+              <div style="font-size:20px;font-weight:900;color:white;">7</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.6);">Alertas enviadas</div>
+            </div>
+            <div style="width:1px;background:rgba(255,255,255,.2);"></div>
+            <div style="text-align:center;">
+              <div style="font-size:20px;font-weight:900;color:white;">12</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.6);">Avistamientos</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen-scroll" style="background:var(--gray-1);padding-top:12px;">
+          <!-- Settings sections -->
+          <div style="padding:0 16px 8px;font-size:11px;font-weight:700;color:#aaa;letter-spacing:1.5px;">MI CUENTA</div>
+          <div class="toggle-row">
+            <div><div class="tl">✏️ Editar perfil</div><div class="ts">Nombre, foto, zona</div></div>
+            <div style="font-size:18px;color:#ccc;">›</div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="tl">🔒 Seguridad</div><div class="ts">Cambiar contraseña</div></div>
+            <div style="font-size:18px;color:#ccc;">›</div>
+          </div>
+
+          <div style="padding:12px 16px 8px;font-size:11px;font-weight:700;color:#aaa;letter-spacing:1.5px;">NOTIFICACIONES</div>
+          <div class="toggle-row">
+            <div><div class="tl">🔔 Alertas de zona</div><div class="ts">Animales perdidos cerca</div></div>
+            <div class="toggle on"><div class="knob"></div></div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="tl">📍 Radio de búsqueda</div><div class="ts">500m · activo</div></div>
+            <div style="font-size:18px;color:#ccc;">›</div>
+          </div>
+          <div class="toggle-row">
+            <div><div class="tl">📢 Noticias comunidad</div><div class="ts">Avisos locales</div></div>
+            <div class="toggle off"><div class="knob"></div></div>
+          </div>
+
+          <div style="padding:12px 16px 8px;font-size:11px;font-weight:700;color:#aaa;letter-spacing:1.5px;">APP</div>
+          <div class="toggle-row">
+            <div><div class="tl">❓ Ayuda y soporte</div></div>
+            <div style="font-size:18px;color:#ccc;">›</div>
+          </div>
+          <div class="toggle-row" style="cursor:pointer;" onclick="this.style.background='var(--red-pale)'">
+            <div><div class="tl" style="color:var(--red);">🚪 Cerrar sesión</div></div>
+            <div style="font-size:18px;color:#ccc;">›</div>
+          </div>
+          <div style="height:16px;"></div>
+        </div>
+
+        <div class="bottom-nav">
+          <div class="nav-tab"><div class="ni">🏠</div><div class="nl">Inicio</div></div>
+          <div class="nav-tab"><div class="ni">🔔</div><div class="nl">Alertas</div></div>
+          <div class="nav-tab"><div class="ni">🐾</div><div class="nl">Mascotas</div></div>
+          <div class="nav-tab active"><div class="ni">👤</div><div class="nl">Perfil</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-note">Flujo D · Perfil</div>
+  </div>
+
+</div><!-- end grid -->
+
+<!-- DESIGN NOTES -->
+<div style="max-width:960px;margin:40px auto 0;background:rgba(255,255,255,.05);border-radius:20px;padding:24px;border:1px solid rgba(255,255,255,.08);">
+  <div style="font-family:var(--font,Nunito);font-size:13px;font-weight:900;color:rgba(255,255,255,.7);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;">📐 Notas de diseño</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+    <div style="background:rgba(255,255,255,.06);border-radius:14px;padding:14px;">
+      <div style="font-size:20px;margin-bottom:6px;">🎨</div>
+      <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.8);margin-bottom:4px;">Paleta oficial</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.6;">Salmón #ff7e70 · Teal #007275 · Crema #faf5e0 · Negro #211f1e</div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:14px;padding:14px;">
+      <div style="font-size:20px;margin-bottom:6px;">🔤</div>
+      <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.8);margin-bottom:4px;">Tipografía</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.6;">Nunito – amigable y redondeada, ideal para +10 años. Alta legibilidad en pantallas pequeñas.</div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:14px;padding:14px;">
+      <div style="font-size:20px;margin-bottom:6px;">♿</div>
+      <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.8);margin-bottom:4px;">Accesibilidad</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.6;">Botones grandes (min 44px), iconos acompañados de texto, contraste AA+, flujo simple de 3 pasos max.</div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:14px;padding:14px;">
+      <div style="font-size:20px;margin-bottom:6px;">📱</div>
+      <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.8);margin-bottom:4px;">Navegación</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.6;">Bottom navigation fija con 4 tabs. Acción primaria siempre en salmón. Navegación por gestos soportada.</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;font-family:Nunito,sans-serif;font-size:11px;color:rgba(255,255,255,.25);text-align:center;">
+  Lucky Tracker · Propuesta UI v1.0 · 2026
+</div>
+</body>
+</html>
