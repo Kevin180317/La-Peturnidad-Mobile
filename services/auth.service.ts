@@ -1,6 +1,8 @@
 import { type ServiceResult } from "@/types";
 import { supabase } from "@/utils/supabase";
 
+export const EMAIL_CONFIRMATION_REDIRECT_URL = "https://la-peturnidad.vercel.app/email-confirmed";
+
 class AuthService {
   async getCurrentUser(): Promise<
     ServiceResult<{ id: string; email?: string }> & { user?: any }
@@ -29,7 +31,11 @@ class AuthService {
   }
 
   async signUp(email: string, password: string) {
-    return supabase.auth.signUp({ email: email.trim(), password: password.trim() });
+    return supabase.auth.signUp({
+      email: email.trim(),
+      password: password.trim(),
+      options: { emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL },
+    });
   }
 
   async isEmailConfirmed(): Promise<boolean> {
@@ -45,7 +51,7 @@ class AuthService {
     return supabase.auth.signUp({
       email: email.trim(),
       password: "",
-      options: { emailRedirectTo: undefined },
+      options: { emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL },
     });
   }
 
