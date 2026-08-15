@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Lucky Tracker — Screen Flow (with screenshots)</title>
+<style>
+  :root{
+    --bg:#0f1417; --panel:#171f24; --panel2:#1e282e; --line:#3a4a52;
+    --edge:#5c7480; --edge-modal:#8a6a4a; --text:#e8edf0; --muted:#9fb0b8;
+    --auth:#3a7d7a; --dash:#c1633e; --node-border:#3a4a52;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f4efe2; --panel:#ffffff; --panel2:#faf6ea; --line:#d8cfb8;
+      --edge:#8a9aa2; --edge-modal:#b98a55; --text:#20241f; --muted:#5c6560;
+      --auth:#2f7a76; --dash:#d9754a; --node-border:#d8cfb8;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: -apple-system, "Segoe UI", Roboto, sans-serif; overflow:hidden; height:100%; }
+  #canvas-wrap { position:relative; width:100%; height:100vh; overflow:auto; }
+  #canvas { position:relative; width:2500px; height:1700px; }
+  svg#edges { position:absolute; top:0; left:0; width:2500px; height:1700px; pointer-events:none; }
+  .node {
+    position:absolute; width:170px; padding:10px 12px; border-radius:10px;
+    background:var(--panel); border:1.5px solid var(--node-border); cursor:grab;
+    font-size:12.5px; line-height:1.3; user-select:none; box-shadow:0 2px 6px rgba(0,0,0,0.15);
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .node:active { cursor:grabbing; }
+  .node:hover { border-color: var(--text); box-shadow:0 4px 12px rgba(0,0,0,0.25); }
+  .node.selected { border-color:#e0a83a; box-shadow:0 0 0 2px #e0a83a55; }
+  .node .title { font-weight:600; }
+  .node .route { color:var(--muted); font-size:10.5px; font-family: ui-monospace, monospace; margin-top:2px; }
+  .node .thumb-badge { margin-top:6px; font-size:10px; color:var(--muted); display:flex; align-items:center; gap:4px; }
+  .node .thumb-badge.missing { color:#c1633e; }
+  .node.auth { border-left:4px solid var(--auth); }
+  .node.dash { border-left:4px solid var(--dash); }
+  .node.hub { background:var(--panel2); font-weight:700; text-align:center; }
+  .node.modal { border-style:dashed; opacity:0.92; }
+  .legend { position:fixed; top:12px; left:12px; z-index:10; background:var(--panel); border:1px solid var(--node-border); border-radius:10px; padding:10px 14px; font-size:12px; box-shadow:0 4px 14px rgba(0,0,0,0.25); max-width:230px; }
+  .legend div { display:flex; align-items:center; gap:6px; margin:3px 0; }
+  .swatch { width:12px; height:12px; border-radius:3px; flex:none; }
+  #panel {
+    position:fixed; top:0; right:0; width:420px; height:100vh; background:var(--panel);
+    border-left:1px solid var(--node-border); padding:20px; overflow-y:auto; z-index:20;
+    transform:translateX(100%); transition:transform .2s ease; box-shadow:-6px 0 20px rgba(0,0,0,0.25);
+  }
+  #panel.open { transform:translateX(0); }
+  #panel h2 { margin:0 0 2px; font-size:17px; }
+  #panel .route { font-family: ui-monospace, monospace; color:var(--muted); font-size:12px; margin-bottom:12px; }
+  #panel p.purpose { font-size:13px; line-height:1.5; color:var(--text); }
+  #panel .close { position:absolute; top:14px; right:16px; cursor:pointer; color:var(--muted); font-size:18px; background:none; border:none; }
+  #panel .close:hover { color:var(--text); }
+  #panel .shots { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  #panel .shots img { width:100%; max-width:170px; border-radius:8px; border:1px solid var(--node-border); cursor:zoom-in; display:block; }
+  #panel .shots figure { margin:0; }
+  #panel .shots figcaption { font-size:10.5px; color:var(--muted); margin-top:3px; text-align:center; }
+  #panel .no-shot { margin-top:14px; padding:12px; border:1px dashed var(--edge-modal); border-radius:8px; color:var(--edge-modal); font-size:12.5px; }
+  #hint { position:fixed; bottom:12px; left:12px; z-index:10; font-size:11.5px; color:var(--muted); background:var(--panel); border:1px solid var(--node-border); border-radius:8px; padding:6px 10px; }
+  #zoom-controls { position:fixed; bottom:12px; right:12px; z-index:10; display:flex; gap:6px; }
+  #zoom-controls button { width:30px; height:30px; border-radius:8px; border:1px solid var(--node-border); background:var(--panel); color:var(--text); cursor:pointer; font-size:16px; }
+  #zoom-controls button:hover { border-color:var(--text); }
+  #lightbox { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:50; display:none; align-items:center; justify-content:center; cursor:zoom-out; }
+  #lightbox.open { display:flex; }
+  #lightbox img { max-width:90vw; max-height:90vh; border-radius:10px; box-shadow:0 10px 40px rgba(0,0,0,0.5); }
+  #lightbox .cap { position:fixed; bottom:24px; left:0; right:0; text-align:center; color:#fff; font-size:13px; }
+</style>
+</head>
+<body>
+
+<div class="legend">
+  <div><span class="swatch" style="background:var(--auth)"></span> AUTH screen</div>
+  <div><span class="swatch" style="background:var(--dash)"></span> Dashboard-area screen</div>
+  <div><span class="swatch" style="border:1.5px dashed var(--muted); background:transparent"></span> Modal / transient state</div>
+  <div style="margin-top:6px; color:var(--muted)">Solid line = navigation · Dotted = modal/confirm</div>
+  <div style="margin-top:6px; color:var(--muted)">Click a node to see its actual screenshot(s)</div>
+</div>
+
+<div id="hint">Drag nodes to rearrange · Click a node to see its screenshot · Click a thumbnail to zoom</div>
+
+<div id="zoom-controls">
+  <button id="zoom-out">–</button>
+  <button id="zoom-reset">⟲</button>
+  <button id="zoom-in">+</button>
+</div>
+
+<div id="canvas-wrap">
+  <div id="canvas">
+    <svg id="edges"></svg>
+  </div>
+</div>
+
+<div id="panel">
+  <button class="close" id="panel-close">✕</button>
+  <h2 id="panel-title"></h2>
+  <div class="route" id="panel-route"></div>
+  <p class="purpose" id="panel-purpose"></p>
+  <div class="shots" id="panel-shots"></div>
+  <div class="no-shot" id="panel-no-shot" style="display:none">No screenshot captured for this state yet — flagged during review.</div>
+</div>
+
+<div id="lightbox">
+  <img id="lightbox-img" src="" alt="" />
+  <div class="cap" id="lightbox-cap"></div>
+</div>
+
+<script>
+// Same graph as FLOW_DIAGRAM.html, plus `shots` mapping each node to its screenshot(s)
+// in docs/images/{AUTH,Dashboard}/. Paths are relative to this file (docs/).
+
+const nodes = [
+  // AUTH column
+  { id:'onboarding', title:'Onboarding', route:'/', kind:'auth', x:280, y:240, purpose:'3-step welcome carousel (Reporta/Conecta/Actúa). Decides entry point based on session state.',
+    shots:[['images/AUTH/1.jpeg','Step 1 — Reporta'],['images/AUTH/2.jpeg','Step 2 — Conecta'],['images/AUTH/3.jpeg','Step 3 — Actúa']] },
+  { id:'login', title:'Login', route:'/login', kind:'auth', x:540, y:240, purpose:'Email + password access. Auto-enters if session already exists.',
+    shots:[['images/AUTH/4.jpeg','Login form']] },
+  { id:'register', title:'Register', route:'/register', kind:'auth', x:800, y:240, purpose:'Create account: email, password, confirm password.',
+    shots:[['images/AUTH/5.jpeg','Register form']] },
+  { id:'register-processing', title:'Register — processing', route:'(transient)', kind:'auth', modal:true, x:800, y:400, purpose:'Brief "Registro exitoso / Procesando registro..." loading state after submit, before redirect.',
+    shots:[['images/AUTH/6.jpeg','Processing state']] },
+  { id:'confirm-email', title:'Confirm Email', route:'/email-confirmacion', kind:'auth', x:800, y:560, purpose:'Prompts user to confirm via emailed link. Shows account email.',
+    shots:[['images/AUTH/7.jpeg','In-app screen'],['images/AUTH/8.jpeg','Actual confirmation email (external)']] },
+  { id:'register-extended', title:'Complete Profile', route:'/register-extended', kind:'auth', x:540, y:560, purpose:'Personal data: name, phone, birth date, postal code → neighborhood lookup (Tijuana).',
+    shots:[['images/AUTH/9.jpeg','Complete profile form']] },
+  { id:'forgot-password', title:'Forgot Password', route:'/forgot-password', kind:'auth', x:280, y:560, purpose:'Requests OTP code sent to email.',
+    shots:[['images/AUTH/10.jpeg','Forgot password form']] },
+  { id:'verify-otp', title:'Verify OTP', route:'/verify-otp', kind:'auth', x:280, y:720, purpose:'8-digit OTP input, auto-verifies on completion.',
+    shots:[['images/AUTH/11.jpeg','Verify OTP form']] },
+  { id:'reset-password', title:'New/Reset Password', route:'/reset-password', kind:'auth', x:540, y:720, purpose:'Set new password after OTP verification.',
+    shots:[['images/AUTH/12.jpeg','New password form']] },
+
+  // DASHBOARD hub + tabs
+  { id:'dashboard', title:'Dashboard (shell)', route:'/dashboard', kind:'hub', x:1240, y:460, purpose:'Main screen. 5-tab bottom bar: Feed, Inicio, Comunidad, Emergencia, Perfil.',
+    shots:[['images/Dashboard/1.jpeg','Shell — Inicio tab, empty state']] },
+  { id:'tab-inicio', title:'Sección Inicio', route:'/dashboard (tab)', kind:'dash', x:1540, y:280, purpose:'Greeting, summary cards, pet list, pet tools.',
+    shots:[['images/Dashboard/1.jpeg','Empty state'],['images/Dashboard/2.jpeg','List expanded, empty'],['images/Dashboard/5.jpeg','1 pet registered']] },
+  { id:'tab-emergencia', title:'Sección Emergencia', route:'/dashboard (tab)', kind:'dash', x:1540, y:460, purpose:'2×2 action grid: report lost, view lost, my alerts, found pets.',
+    shots:[['images/Dashboard/7.jpeg','Grid — default'],['images/Dashboard/14.jpeg','Ver mascotas perdidas — list'],['images/Dashboard/17.jpeg','Mis alertas activas'],['images/Dashboard/18.jpeg','Mascotas encontradas — empty']] },
+  { id:'tab-feed', title:'Sección Feed', route:'/dashboard (tab)', kind:'dash', x:1540, y:640, purpose:'Community posts. Feed / Mis posts sub-tabs, composer, comments.',
+    shots:[['images/Dashboard/11.jpeg','Feed tab'],['images/Dashboard/12.jpeg','Mis posts — composer + empty state']] },
+  { id:'tab-comunidad', title:'Sección Comunidad', route:'/dashboard (tab)', kind:'dash', x:1540, y:820, purpose:'Community notices. Categories: general, aviso, evento, pregunta.',
+    shots:[['images/Dashboard/6.jpeg','Comunidad tab, 1 post']] },
+  { id:'tab-perfil', title:'Perfil (own)', route:'/dashboard (tab)', kind:'dash', x:1540, y:1000, purpose:'Stats, Acciones list, account info, log out.',
+    shots:[['images/Dashboard/8.jpeg','Mi Perfil — info'],['images/Dashboard/9.jpeg','Estadísticas + Acciones'],['images/Dashboard/10.jpeg','Cuenta + Cerrar sesión']] },
+
+  // Modals / satellites off Inicio + Emergencia
+  { id:'pet-form', title:'Pet Form', route:'(modal)', kind:'dash', modal:true, x:1840, y:240, purpose:'Register/edit pet: type, name, color, size, features, photo.',
+    shots:[['images/Dashboard/4.jpeg','Registrar nueva mascota (register mode)'],['images/Dashboard/30.jpeg','Editar mascota (edit mode, pre-filled)']] },
+  { id:'pet-detail', title:'Pet Detail (window)', route:'(modal)', kind:'dash', modal:true, x:2090, y:240, purpose:'Shows photo, name, type, color, size, features, registration date.',
+    shots:[['images/Dashboard/29.jpeg','Ficha de mascota']] },
+  { id:'pet-delete-confirm', title:'Confirm: Delete Pet', route:'(modal)', kind:'dash', modal:true, x:2090, y:400, purpose:'"¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer."',
+    shots:[['images/Dashboard/31.jpeg','Eliminar mascota — confirm']] },
+  { id:'alert-confirm', title:'Confirm: Create Alert', route:'(modal)', kind:'dash', modal:true, x:1840, y:460, purpose:'"Esta alerta será visible para todos los vecinos de tu colonia."',
+    shots:[['images/Dashboard/15.jpeg','Crear alerta de emergencia — confirm']] },
+  { id:'found-confirm', title:'Confirm: Report Found', route:'(modal)', kind:'dash', modal:true, x:2090, y:460, purpose:'"Al confirmar, te pondremos en contacto con el dueño."',
+    shots:[['images/Dashboard/24.jpeg','Reportar mascota encontrada — confirm']] },
+  { id:'push-notif', title:'OS Push Notification', route:'(system)', kind:'dash', modal:true, x:1840, y:580, purpose:'Fires to neighbors when an emergency alert is created. NOTE: sender label still shows old app name "La-Peturnidad".',
+    shots:[['images/Dashboard/16.jpeg','Android notification shade']] },
+
+  // Secondary dashboard-linked screens (own routes)
+  { id:'buscar', title:'Buscar', route:'/buscar', kind:'dash', x:940, y:460, purpose:'Global search, 3 tabs: Mascotas, Grupos, Usuarios.',
+    shots:[['images/Dashboard/3.jpeg','Buscar — Mascotas tab']] },
+  { id:'mensajes', title:'Mensajes', route:'/mensajes', kind:'dash', x:1240, y:1000, purpose:'List of conversations (individual/group), unread badge.',
+    shots:[['images/Dashboard/19.jpeg','Mensajes — empty state']] },
+  { id:'grupos', title:'Grupos', route:'/grupos', kind:'dash', x:1240, y:1140, purpose:'List of neighborhood groups, join/leave, create.',
+    shots:[['images/Dashboard/21.jpeg','Grupos — list']] },
+  { id:'historias', title:'Reuniones Exitosas', route:'/historias', kind:'dash', x:1240, y:1280, purpose:'Pet reunion stories, author can create/delete.',
+    shots:[['images/Dashboard/20.jpeg','Reuniones exitosas — empty state']] },
+  { id:'notificaciones', title:'Notificaciones', route:'/notificaciones', kind:'dash', x:1540, y:1140, purpose:'Push preferences: main toggle + 3 sub-types.',
+    shots:[['images/Dashboard/22.jpeg','Configuración de notificaciones']] },
+  { id:'editar-perfil', title:'Editar Perfil', route:'/editar-perfil', kind:'dash', x:1540, y:1280, purpose:'Pre-filled form: name, phone, address, city, postal code.',
+    shots:[['images/Dashboard/23.jpeg','Editar perfil — form']] },
+  { id:'cerrar-sesion-confirm', title:'Confirm: Log Out', route:'(modal)', kind:'dash', modal:true, x:1840, y:1000, purpose:'"¿Estás seguro de que quieres cerrar sesión?"',
+    shots:[['images/Dashboard/26.jpeg','Cerrar sesión — confirm']] },
+];
+
+const edges = [
+  ['onboarding','login',''],
+  ['login','forgot-password',''],
+  ['login','register',''],
+  ['login','confirm-email','unconfirmed email'],
+  ['login','dashboard','confirmed + profile'],
+  ['login','register-extended','confirmed, no profile'],
+  ['register','register-processing','modal'],
+  ['register-processing','confirm-email',''],
+  ['confirm-email','login','after email link'],
+  ['register-extended','dashboard',''],
+  ['register-extended','onboarding','Omitir'],
+  ['forgot-password','verify-otp',''],
+  ['verify-otp','reset-password',''],
+  ['reset-password','login',''],
+  ['dashboard','tab-inicio',''],
+  ['dashboard','tab-emergencia',''],
+  ['dashboard','tab-feed',''],
+  ['dashboard','tab-comunidad',''],
+  ['dashboard','tab-perfil',''],
+  ['dashboard','buscar','search icon'],
+  ['tab-inicio','pet-form','modal'],
+  ['tab-inicio','pet-detail','modal'],
+  ['pet-detail','pet-form','Editar'],
+  ['pet-detail','pet-delete-confirm','Eliminar'],
+  ['tab-emergencia','alert-confirm','modal'],
+  ['alert-confirm','push-notif','on confirm'],
+  ['tab-emergencia','found-confirm','modal'],
+  ['tab-perfil','editar-perfil',''],
+  ['tab-perfil','notificaciones',''],
+  ['tab-perfil','tab-comunidad','Ir a la comunidad'],
+  ['tab-perfil','mensajes',''],
+  ['tab-perfil','grupos',''],
+  ['tab-perfil','historias',''],
+  ['tab-perfil','cerrar-sesion-confirm','modal'],
+  ['cerrar-sesion-confirm','onboarding','on confirm'],
+];
+
+// ---------- RENDER ----------
+const canvas = document.getElementById('canvas');
+const svg = document.getElementById('edges');
+const nodeEls = {};
+
+nodes.forEach(n => {
+  const el = document.createElement('div');
+  el.className = 'node ' + n.kind + (n.modal ? ' modal' : '');
+  el.style.left = n.x + 'px';
+  el.style.top = n.y + 'px';
+  el.dataset.id = n.id;
+  const count = n.shots ? n.shots.length : 0;
+  const badge = count > 0
+    ? '<div class="thumb-badge">🖼 ' + count + ' screenshot' + (count>1?'s':'') + '</div>'
+    : '<div class="thumb-badge missing">⚠ no screenshot</div>';
+  el.innerHTML = '<div class="title">' + n.title + '</div><div class="route">' + n.route + '</div>' + badge;
+  canvas.appendChild(el);
+  nodeEls[n.id] = el;
+  el.addEventListener('click', () => { if(!el._dragged) openPanel(n); });
+  makeDraggable(el, n);
+});
+
+function drawEdges(){
+  svg.innerHTML = '<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--edge)"/></marker>' +
+                   '<marker id="arrow-modal" markerWidth="9" markerHeight="9" refX="7.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--edge-modal)"/></marker></defs>';
+  edges.forEach((e, i) => {
+    const a = nodeEls[e[0]], b = nodeEls[e[1]];
+    if(!a || !b) return;
+    const isModal = e[2] === 'modal' || nodeIsModal(e[1]) || nodeIsModal(e[0]);
+    const c1 = centerOf(a), c2 = centerOf(b);
+    const dxAll = c2.x - c1.x, dyAll = c2.y - c1.y;
+    // Anchor endpoints to the node's border (not center) so the line — and its
+    // arrowhead — stay outside the opaque box instead of being hidden under it.
+    const p1 = borderPoint(c1, a.offsetWidth/2, a.offsetHeight/2, dxAll, dyAll);
+    const p2 = borderPoint(c2, b.offsetWidth/2, b.offsetHeight/2, -dxAll, -dyAll);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    const dx = (p2.x - p1.x) * 0.5;
+    const d = 'M ' + p1.x + ' ' + p1.y + ' C ' + (p1.x+dx) + ' ' + p1.y + ', ' + (p2.x-dx) + ' ' + p2.y + ', ' + p2.x + ' ' + p2.y;
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', isModal ? 'var(--edge-modal)' : 'var(--edge)');
+    path.setAttribute('stroke-width', '1.6');
+    if(isModal) path.setAttribute('stroke-dasharray', '4 3');
+    path.setAttribute('marker-end', isModal ? 'url(#arrow-modal)' : 'url(#arrow)');
+    svg.appendChild(path);
+
+    if(e[2] && e[2] !== 'modal'){
+      const mid = { x:(p1.x+p2.x)/2, y:(p1.y+p2.y)/2 };
+      const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x', mid.x);
+      label.setAttribute('y', mid.y - 4);
+      label.setAttribute('fill', 'var(--muted)');
+      label.setAttribute('font-size', '10');
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = e[2];
+      svg.appendChild(label);
+    }
+  });
+}
+
+function nodeIsModal(id){
+  const n = nodes.find(n => n.id === id);
+  return n && n.modal;
+}
+
+function centerOf(el){
+  return { x: el.offsetLeft + el.offsetWidth/2, y: el.offsetTop + el.offsetHeight/2 };
+}
+
+// Point where the ray from (center) toward (dx,dy) exits the box (halfW x halfH).
+function borderPoint(center, halfW, halfH, dx, dy){
+  if(dx === 0 && dy === 0) return { x: center.x, y: center.y };
+  const pad = 4; // small gap so the line doesn't touch the border pixel-on-pixel
+  const scaleX = dx !== 0 ? (halfW + pad) / Math.abs(dx) : Infinity;
+  const scaleY = dy !== 0 ? (halfH + pad) / Math.abs(dy) : Infinity;
+  const scale = Math.min(scaleX, scaleY);
+  return { x: center.x + dx * scale, y: center.y + dy * scale };
+}
+
+function makeDraggable(el, n){
+  let sx, sy, ox, oy, dragging = false;
+  el.addEventListener('pointerdown', (e) => {
+    dragging = true; el._dragged = false;
+    sx = e.clientX; sy = e.clientY;
+    ox = el.offsetLeft; oy = el.offsetTop;
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', (e) => {
+    if(!dragging) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if(Math.abs(dx) > 3 || Math.abs(dy) > 3) el._dragged = true;
+    el.style.left = (ox + dx) + 'px';
+    el.style.top = (oy + dy) + 'px';
+    n.x = ox + dx; n.y = oy + dy;
+    drawEdges();
+  });
+  el.addEventListener('pointerup', () => { dragging = false; });
+}
+
+// ---------- PANEL ----------
+const panel = document.getElementById('panel');
+function openPanel(n){
+  document.querySelectorAll('.node').forEach(x => x.classList.remove('selected'));
+  nodeEls[n.id].classList.add('selected');
+  document.getElementById('panel-title').textContent = n.title;
+  document.getElementById('panel-route').textContent = n.route;
+  document.getElementById('panel-purpose').textContent = n.purpose || '';
+  const shotsEl = document.getElementById('panel-shots');
+  const noShotEl = document.getElementById('panel-no-shot');
+  shotsEl.innerHTML = '';
+  if(n.shots && n.shots.length){
+    noShotEl.style.display = 'none';
+    n.shots.forEach(s => {
+      const fig = document.createElement('figure');
+      const img = document.createElement('img');
+      img.src = s[0];
+      img.alt = s[1];
+      img.addEventListener('click', () => openLightbox(s[0], s[1]));
+      const cap = document.createElement('figcaption');
+      cap.textContent = s[1];
+      fig.appendChild(img);
+      fig.appendChild(cap);
+      shotsEl.appendChild(fig);
+    });
+  } else {
+    noShotEl.style.display = 'block';
+  }
+  panel.classList.add('open');
+}
+document.getElementById('panel-close').addEventListener('click', () => {
+  panel.classList.remove('open');
+  document.querySelectorAll('.node').forEach(x => x.classList.remove('selected'));
+});
+
+// ---------- LIGHTBOX ----------
+const lightbox = document.getElementById('lightbox');
+function openLightbox(src, cap){
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox-cap').textContent = cap;
+  lightbox.classList.add('open');
+}
+lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+
+// ---------- ZOOM ----------
+let scale = 1;
+function applyZoom(){ canvas.style.transform = 'scale(' + scale + ')'; canvas.style.transformOrigin = '0 0'; }
+document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(1.6, scale + 0.1); applyZoom(); });
+document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(0.4, scale - 0.1); applyZoom(); });
+document.getElementById('zoom-reset').addEventListener('click', () => { scale = 1; applyZoom(); });
+
+drawEdges();
+</script>
+</body>
+</html>

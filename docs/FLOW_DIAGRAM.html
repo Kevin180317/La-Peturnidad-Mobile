@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Lucky Tracker — Screen Flow Diagram</title>
+<style>
+  :root{
+    --bg:#0f1417; --panel:#171f24; --panel2:#1e282e; --line:#3a4a52;
+    --edge:#5c7480; --edge-modal:#8a6a4a; --text:#e8edf0; --muted:#9fb0b8;
+    --auth:#3a7d7a; --dash:#c1633e; --node-border:#3a4a52;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f4efe2; --panel:#ffffff; --panel2:#faf6ea; --line:#d8cfb8;
+      --edge:#8a9aa2; --edge-modal:#b98a55; --text:#20241f; --muted:#5c6560;
+      --auth:#2f7a76; --dash:#d9754a; --node-border:#d8cfb8;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: -apple-system, "Segoe UI", Roboto, sans-serif; overflow:hidden; height:100%; }
+  #canvas-wrap { position:relative; width:100%; height:100vh; overflow:auto; }
+  #canvas { position:relative; width:2500px; height:1700px; }
+  svg#edges { position:absolute; top:0; left:0; width:2500px; height:1700px; pointer-events:none; }
+  .node {
+    position:absolute; width:170px; padding:10px 12px; border-radius:10px;
+    background:var(--panel); border:1.5px solid var(--node-border); cursor:grab;
+    font-size:12.5px; line-height:1.3; user-select:none; box-shadow:0 2px 6px rgba(0,0,0,0.15);
+    transition: box-shadow .15s, border-color .15s;
+  }
+  .node:active { cursor:grabbing; }
+  .node:hover { border-color: var(--text); box-shadow:0 4px 12px rgba(0,0,0,0.25); }
+  .node.selected { border-color:#e0a83a; box-shadow:0 0 0 2px #e0a83a55; }
+  .node .title { font-weight:600; }
+  .node .route { color:var(--muted); font-size:10.5px; font-family: ui-monospace, monospace; margin-top:2px; }
+  .node.auth { border-left:4px solid var(--auth); }
+  .node.dash { border-left:4px solid var(--dash); }
+  .node.hub { background:var(--panel2); font-weight:700; text-align:center; }
+  .node.modal { border-style:dashed; opacity:0.92; }
+  .legend { position:fixed; top:12px; left:12px; z-index:10; background:var(--panel); border:1px solid var(--node-border); border-radius:10px; padding:10px 14px; font-size:12px; box-shadow:0 4px 14px rgba(0,0,0,0.25); }
+  .legend div { display:flex; align-items:center; gap:6px; margin:3px 0; }
+  .swatch { width:12px; height:12px; border-radius:3px; flex:none; }
+  #panel {
+    position:fixed; top:0; right:0; width:340px; height:100vh; background:var(--panel);
+    border-left:1px solid var(--node-border); padding:20px; overflow-y:auto; z-index:20;
+    transform:translateX(100%); transition:transform .2s ease; box-shadow:-6px 0 20px rgba(0,0,0,0.25);
+  }
+  #panel.open { transform:translateX(0); }
+  #panel h2 { margin:0 0 2px; font-size:17px; }
+  #panel .route { font-family: ui-monospace, monospace; color:var(--muted); font-size:12px; margin-bottom:12px; }
+  #panel p.purpose { font-size:13px; line-height:1.5; color:var(--text); }
+  #panel table { width:100%; border-collapse:collapse; font-size:12px; margin-top:10px; }
+  #panel th, #panel td { text-align:left; padding:6px 4px; border-bottom:1px solid var(--line); vertical-align:top; }
+  #panel th { color:var(--muted); font-weight:600; width:38%; }
+  #panel .close { position:absolute; top:14px; right:16px; cursor:pointer; color:var(--muted); font-size:18px; background:none; border:none; }
+  #panel .close:hover { color:var(--text); }
+  #hint { position:fixed; bottom:12px; left:12px; z-index:10; font-size:11.5px; color:var(--muted); background:var(--panel); border:1px solid var(--node-border); border-radius:8px; padding:6px 10px; }
+  #zoom-controls { position:fixed; bottom:12px; right:12px; z-index:10; display:flex; gap:6px; }
+  #zoom-controls button { width:30px; height:30px; border-radius:8px; border:1px solid var(--node-border); background:var(--panel); color:var(--text); cursor:pointer; font-size:16px; }
+  #zoom-controls button:hover { border-color:var(--text); }
+</style>
+</head>
+<body>
+
+<div class="legend">
+  <div><span class="swatch" style="background:var(--auth)"></span> AUTH screen</div>
+  <div><span class="swatch" style="background:var(--dash)"></span> Dashboard-area screen</div>
+  <div><span class="swatch" style="border:1.5px dashed var(--muted); background:transparent"></span> Modal / transient state</div>
+  <div style="margin-top:6px; color:var(--muted)">Solid line = navigation · Dotted = modal/confirm</div>
+</div>
+
+<div id="hint">Drag nodes to rearrange · Click a node for details · Scroll to pan</div>
+
+<div id="zoom-controls">
+  <button id="zoom-out">–</button>
+  <button id="zoom-reset">⟲</button>
+  <button id="zoom-in">+</button>
+</div>
+
+<div id="canvas-wrap">
+  <div id="canvas">
+    <svg id="edges"></svg>
+    <!-- nodes injected by JS -->
+  </div>
+</div>
+
+<div id="panel">
+  <button class="close" id="panel-close">✕</button>
+  <h2 id="panel-title"></h2>
+  <div class="route" id="panel-route"></div>
+  <p class="purpose" id="panel-purpose"></p>
+  <table id="panel-events"><tbody id="panel-events-body"></tbody></table>
+</div>
+
+<script>
+// ---------- DATA ----------
+// Hand-written from docs/AUTH.md and docs/DASHBOARD.md (verified against screenshots).
+// x/y are canvas positions (px). kind: 'auth' | 'dash' | 'hub'. modal: true for transient/modal states.
+
+const nodes = [
+  // AUTH column
+  { id:'onboarding', title:'Onboarding', route:'/', kind:'auth', x:280,  y:240,  purpose:'3-step welcome carousel (Reporta/Conecta/Actúa). Decides entry point based on session state.',
+    events:[['Saltar / Comenzar','Saves "welcome seen", goes to Login'],['Siguiente','Advances step'],['Swipe','Changes step indicator']] },
+  { id:'login', title:'Login', route:'/login', kind:'auth', x:540, y:240, purpose:'Email + password access. Auto-enters if session already exists.',
+    events:[['Iniciar sesión','Validates → routes to Confirm Email / Dashboard / Complete Profile'],['¿Olvidaste tu contraseña?','→ Forgot Password'],['Regístrate','→ Register']] },
+  { id:'register', title:'Register', route:'/register', kind:'auth', x:800, y:240, purpose:'Create account: email, password, confirm password.',
+    events:[['Registrarse','Validates, creates account → Confirm Email']] },
+  { id:'register-processing', title:'Register — processing', route:'(transient)', kind:'auth', modal:true, x:800, y:400, purpose:'Brief "Registro exitoso / Procesando registro..." loading state after submit, before redirect. Not a distinct route — undocumented in SCREENS.md until this pass.',
+    events:[] },
+  { id:'confirm-email', title:'Confirm Email', route:'/email-confirmacion', kind:'auth', x:800, y:560, purpose:'Prompts user to confirm via emailed link. Shows account email.',
+    events:[['Reenviar email','Resends confirmation email'],['Volver al inicio','→ Onboarding/Login']] },
+  { id:'register-extended', title:'Complete Profile', route:'/register-extended', kind:'auth', x:540, y:560, purpose:'Personal data: name, phone, birth date, postal code → neighborhood lookup (Tijuana).',
+    events:[['Postal code (5 digits)','Looks up neighborhood; "Código no encontrado" if none'],['Completar perfil','Validates, saves → Dashboard'],['Omitir por ahora','→ start']] },
+  { id:'forgot-password', title:'Forgot Password', route:'/forgot-password', kind:'auth', x:280, y:560, purpose:'Requests OTP code sent to email.',
+    events:[['Enviar código','Validates email, sends code → Verify OTP']] },
+  { id:'verify-otp', title:'Verify OTP', route:'/verify-otp', kind:'auth', x:280, y:720, purpose:'8-digit OTP input, auto-verifies on completion.',
+    events:[['8-digit code','Auto-verifies'],['Verificar código','Checks code → New Password'],['Reenviar código','Resends code']] },
+  { id:'reset-password', title:'New/Reset Password', route:'/reset-password', kind:'auth', x:540, y:720, purpose:'Set new password after OTP verification.',
+    events:[['Actualizar contraseña','Validates, saves → back to start']] },
+
+  // DASHBOARD hub + tabs
+  { id:'dashboard', title:'Dashboard (shell)', route:'/dashboard', kind:'hub', x:1240, y:460, purpose:'Main screen. 5-tab bottom bar: Feed, Inicio, Comunidad, Emergencia, Perfil. Loads profile, pets, follower counts, unread messages; registers device for push.',
+    events:[['Pull-to-refresh','Reloads all dashboard data'],['Search icon','→ Buscar']] },
+  { id:'tab-inicio', title:'Sección Inicio', route:'/dashboard (tab)', kind:'dash', x:1540, y:280, purpose:'Greeting, summary cards (Mascotas/Alertas/Encontradas), pet list, pet tools.',
+    events:[['Registrar mascota','Opens Pet Form'],['Ver/Ocultar mascotas','Toggles pet list'],['Tocar mascota','Opens Pet Detail window']] },
+  { id:'tab-emergencia', title:'Sección Emergencia', route:'/dashboard (tab)', kind:'dash', x:1540, y:460, purpose:'2×2 action grid: report lost, view lost, my alerts, found pets.',
+    events:[['Reportar mascota perdida','Pet selector → confirm modal → publishes alert + notifies neighbors'],['Lo encontré','Reports found, removes alert'],['Eliminar alerta','Confirm → deletes']] },
+  { id:'tab-feed', title:'Sección Feed', route:'/dashboard (tab)', kind:'dash', x:1540, y:640, purpose:'Community posts. Feed / Mis posts sub-tabs, composer, comments.',
+    events:[['Publicar','Opens composer → posts, clears text'],['Tocar autor','→ Perfil']] },
+  { id:'tab-comunidad', title:'Sección Comunidad', route:'/dashboard (tab)', kind:'dash', x:1540, y:820, purpose:'Community notices. Categories: general, aviso, evento, pregunta.',
+    events:[['Nuevo','Opens notice form'],['Publicar','Validates title+content → posts']] },
+  { id:'tab-perfil', title:'Perfil (own)', route:'/dashboard (tab)', kind:'dash', x:1540, y:1000, purpose:'Stats (pets/followers/following), Acciones list, account info, log out.',
+    events:[['Editar perfil','→ Edit Profile'],['Configurar notificaciones','→ Notificaciones'],['Cerrar sesión','Confirm modal → logs out → Onboarding/Login']] },
+
+  // Modals / satellites off Inicio + Emergencia
+  { id:'pet-form', title:'Pet Form', route:'(modal)', kind:'dash', modal:true, x:1840, y:240, purpose:'Register/edit pet: type (dog/cat), name, color, size, features, photo.',
+    events:[['Registrar / Actualizar','Saves pet, mode-dependent'],['Cancelar','Closes without saving']] },
+  { id:'pet-detail', title:'Pet Detail (window)', route:'(modal)', kind:'dash', modal:true, x:2090, y:240, purpose:'Shows photo, name, type, color, size, features, registration date.',
+    events:[['Editar','Opens Pet Form in edit mode, pre-filled'],['Eliminar','Opens Confirm: Delete Pet'],['Cerrar','Closes window']] },
+  { id:'pet-delete-confirm', title:'Confirm: Delete Pet', route:'(modal)', kind:'dash', modal:true, x:2090, y:400, purpose:'"¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer."',
+    events:[] },
+  { id:'alert-confirm', title:'Confirm: Create Alert', route:'(modal)', kind:'dash', modal:true, x:1840, y:460, purpose:'"¿Estás seguro...? Esta alerta será visible para todos los vecinos de tu colonia."',
+    events:[] },
+  { id:'found-confirm', title:'Confirm: Report Found', route:'(modal)', kind:'dash', modal:true, x:2090, y:460, purpose:'"¿Has encontrado a {pet}? Al confirmar, te pondremos en contacto con el dueño."',
+    events:[] },
+  { id:'push-notif', title:'OS Push Notification', route:'(system)', kind:'dash', modal:true, x:1840, y:580, purpose:'Fires to neighbors when an emergency alert is created. Tapping opens the alert. NOTE: sender label still shows old app name "La-Peturnidad".',
+    events:[] },
+
+  // Secondary dashboard-linked screens (own routes)
+  { id:'buscar', title:'Buscar', route:'/buscar', kind:'dash', x:940, y:460, purpose:'Global search, 3 tabs: Mascotas, Grupos, Usuarios. Debounced 0.3s.',
+    events:[['Tocar resultado','→ Perfil or Group Detail']] },
+  { id:'mensajes', title:'Mensajes', route:'/mensajes', kind:'dash', x:1240, y:1000, purpose:'List of conversations (individual/group), unread badge.',
+    events:[['Tocar conversación','→ Chat'],['Presión larga','Confirm → deletes conversation']] },
+  { id:'grupos', title:'Grupos', route:'/grupos', kind:'dash', x:1240, y:1140, purpose:'List of neighborhood groups, join/leave, create.',
+    events:[['Crear','Opens group form'],['Unirse/Salir','Joins/leaves, reloads']] },
+  { id:'historias', title:'Reuniones Exitosas', route:'/historias', kind:'dash', x:1240, y:1280, purpose:'Pet reunion stories, author can create/delete.',
+    events:[['Nueva','Opens story form'],['Publicar','Saves story']] },
+  { id:'notificaciones', title:'Notificaciones', route:'/notificaciones', kind:'dash', x:1540, y:1140, purpose:'Push preferences: main toggle + 3 sub-types.',
+    events:[['Guardar preferencias','Saves, shows notice'],['Volver','Goes back']] },
+  { id:'editar-perfil', title:'Editar Perfil', route:'/editar-perfil', kind:'dash', x:1540, y:1280, purpose:'Pre-filled form: name, phone, address, city, postal code.',
+    events:[['Guardar cambios','Validates, saves → back'],['Cancelar','Back without saving']] },
+  { id:'cerrar-sesion-confirm', title:'Confirm: Log Out', route:'(modal)', kind:'dash', modal:true, x:1840, y:1000, purpose:'"¿Estás seguro de que quieres cerrar sesión?"',
+    events:[] },
+];
+
+const edges = [
+  // Onboarding carousel + entry
+  ['onboarding','login',''],
+  // Login
+  ['login','forgot-password',''],
+  ['login','register',''],
+  ['login','confirm-email','unconfirmed email'],
+  ['login','dashboard','confirmed + profile'],
+  ['login','register-extended','confirmed, no profile'],
+  // Register
+  ['register','register-processing','modal'],
+  ['register-processing','confirm-email',''],
+  ['confirm-email','login','after email link'],
+  // Complete profile
+  ['register-extended','dashboard',''],
+  ['register-extended','onboarding','Omitir'],
+  // Password recovery
+  ['forgot-password','verify-otp',''],
+  ['verify-otp','reset-password',''],
+  ['reset-password','login',''],
+
+  // Dashboard hub <-> tabs
+  ['dashboard','tab-inicio',''],
+  ['dashboard','tab-emergencia',''],
+  ['dashboard','tab-feed',''],
+  ['dashboard','tab-comunidad',''],
+  ['dashboard','tab-perfil',''],
+  ['dashboard','buscar','search icon'],
+
+  // Inicio
+  ['tab-inicio','pet-form','modal'],
+  ['tab-inicio','pet-detail','modal'],
+  ['pet-detail','pet-form','Editar'],
+  ['pet-detail','pet-delete-confirm','Eliminar'],
+
+  // Emergencia
+  ['tab-emergencia','alert-confirm','modal'],
+  ['alert-confirm','push-notif','on confirm'],
+  ['tab-emergencia','found-confirm','modal'],
+
+  // Perfil (own) -> secondary screens
+  ['tab-perfil','editar-perfil',''],
+  ['tab-perfil','notificaciones',''],
+  ['tab-perfil','tab-comunidad','Ir a la comunidad'],
+  ['tab-perfil','mensajes',''],
+  ['tab-perfil','grupos',''],
+  ['tab-perfil','historias',''],
+  ['tab-perfil','cerrar-sesion-confirm','modal'],
+  ['cerrar-sesion-confirm','onboarding','on confirm'],
+];
+
+// ---------- RENDER ----------
+const canvas = document.getElementById('canvas');
+const svg = document.getElementById('edges');
+const nodeEls = {};
+
+nodes.forEach(n => {
+  const el = document.createElement('div');
+  el.className = 'node ' + n.kind + (n.modal ? ' modal' : '');
+  el.style.left = n.x + 'px';
+  el.style.top = n.y + 'px';
+  el.dataset.id = n.id;
+  el.innerHTML = '<div class="title">' + n.title + '</div><div class="route">' + n.route + '</div>';
+  canvas.appendChild(el);
+  nodeEls[n.id] = el;
+  el.addEventListener('click', (e) => { if(!el._dragged) openPanel(n); });
+  makeDraggable(el, n);
+});
+
+function edgePath(id){
+  return svg.querySelector('[data-edge="'+id+'"]');
+}
+
+function drawEdges(){
+  svg.innerHTML = '<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="7.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--edge)"/></marker>' +
+                   '<marker id="arrow-modal" markerWidth="9" markerHeight="9" refX="7.5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--edge-modal)"/></marker></defs>';
+  edges.forEach((e, i) => {
+    const a = nodeEls[e[0]], b = nodeEls[e[1]];
+    if(!a || !b) return;
+    const isModal = e[2] === 'modal' || nodeIsModal(e[1]) || nodeIsModal(e[0]);
+    const c1 = centerOf(a), c2 = centerOf(b);
+    const dxAll = c2.x - c1.x, dyAll = c2.y - c1.y;
+    // Anchor endpoints to the node's border (not center) so the line — and its
+    // arrowhead — stay outside the opaque box instead of being hidden under it.
+    const p1 = borderPoint(c1, a.offsetWidth/2, a.offsetHeight/2, dxAll, dyAll);
+    const p2 = borderPoint(c2, b.offsetWidth/2, b.offsetHeight/2, -dxAll, -dyAll);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    const dx = (p2.x - p1.x) * 0.5;
+    const d = 'M ' + p1.x + ' ' + p1.y + ' C ' + (p1.x+dx) + ' ' + p1.y + ', ' + (p2.x-dx) + ' ' + p2.y + ', ' + p2.x + ' ' + p2.y;
+    path.setAttribute('d', d);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', isModal ? 'var(--edge-modal)' : 'var(--edge)');
+    path.setAttribute('stroke-width', '1.6');
+    if(isModal) path.setAttribute('stroke-dasharray', '4 3');
+    path.setAttribute('marker-end', isModal ? 'url(#arrow-modal)' : 'url(#arrow)');
+    path.dataset.edge = i;
+    svg.appendChild(path);
+
+    if(e[2] && e[2] !== 'modal'){
+      const mid = { x:(p1.x+p2.x)/2, y:(p1.y+p2.y)/2 };
+      const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x', mid.x);
+      label.setAttribute('y', mid.y - 4);
+      label.setAttribute('fill', 'var(--muted)');
+      label.setAttribute('font-size', '10');
+      label.setAttribute('text-anchor', 'middle');
+      label.textContent = e[2];
+      svg.appendChild(label);
+    }
+  });
+}
+
+function nodeIsModal(id){
+  const n = nodes.find(n => n.id === id);
+  return n && n.modal;
+}
+
+function centerOf(el){
+  return { x: el.offsetLeft + el.offsetWidth/2, y: el.offsetTop + el.offsetHeight/2 };
+}
+
+// Point where the ray from (center) toward (dx,dy) exits the box (halfW x halfH).
+function borderPoint(center, halfW, halfH, dx, dy){
+  if(dx === 0 && dy === 0) return { x: center.x, y: center.y };
+  const pad = 4; // small gap so the line doesn't touch the border pixel-on-pixel
+  const scaleX = dx !== 0 ? (halfW + pad) / Math.abs(dx) : Infinity;
+  const scaleY = dy !== 0 ? (halfH + pad) / Math.abs(dy) : Infinity;
+  const scale = Math.min(scaleX, scaleY);
+  return { x: center.x + dx * scale, y: center.y + dy * scale };
+}
+
+function makeDraggable(el, n){
+  let sx, sy, ox, oy, dragging = false;
+  el.addEventListener('pointerdown', (e) => {
+    dragging = true; el._dragged = false;
+    sx = e.clientX; sy = e.clientY;
+    ox = el.offsetLeft; oy = el.offsetTop;
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', (e) => {
+    if(!dragging) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if(Math.abs(dx) > 3 || Math.abs(dy) > 3) el._dragged = true;
+    el.style.left = (ox + dx) + 'px';
+    el.style.top = (oy + dy) + 'px';
+    n.x = ox + dx; n.y = oy + dy;
+    drawEdges();
+  });
+  el.addEventListener('pointerup', () => { dragging = false; });
+}
+
+// ---------- PANEL ----------
+const panel = document.getElementById('panel');
+function openPanel(n){
+  document.querySelectorAll('.node').forEach(x => x.classList.remove('selected'));
+  nodeEls[n.id].classList.add('selected');
+  document.getElementById('panel-title').textContent = n.title;
+  document.getElementById('panel-route').textContent = n.route;
+  document.getElementById('panel-purpose').textContent = n.purpose || '';
+  const body = document.getElementById('panel-events-body');
+  body.innerHTML = '';
+  (n.events || []).forEach(ev => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<th>' + ev[0] + '</th><td>' + ev[1] + '</td>';
+    body.appendChild(tr);
+  });
+  panel.classList.add('open');
+}
+document.getElementById('panel-close').addEventListener('click', () => {
+  panel.classList.remove('open');
+  document.querySelectorAll('.node').forEach(x => x.classList.remove('selected'));
+});
+
+// ---------- ZOOM ----------
+let scale = 1;
+function applyZoom(){ canvas.style.transform = 'scale(' + scale + ')'; canvas.style.transformOrigin = '0 0'; }
+document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(1.6, scale + 0.1); applyZoom(); });
+document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(0.4, scale - 0.1); applyZoom(); });
+document.getElementById('zoom-reset').addEventListener('click', () => { scale = 1; applyZoom(); });
+
+drawEdges();
+</script>
+</body>
+</html>
