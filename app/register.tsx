@@ -1,3 +1,4 @@
+import { EMAIL_CONFIRMATION_REDIRECT_URL } from "@/services/auth.service";
 import { supabase } from "@/utils/supabase";
 import { PasswordInput } from "@/components/PasswordInput";
 import { Link, useRouter } from "expo-router";
@@ -58,6 +59,7 @@ export default function RegisterScreen() {
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: password.trim(),
+        options: { emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL },
       });
 
       if (error) {
