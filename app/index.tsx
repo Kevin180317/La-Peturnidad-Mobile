@@ -123,10 +123,10 @@ export default function OnboardingScreen() {
         contentFit="contain"
         className="mb-12"
       />
-      <Text className="text-4xl font-bold text-[#ff7e70] mt-4 mb-4">
+      <Text className="text-4xl font-bold text-[#211f1e] mt-4 mb-4">
         Lucky Tracker
       </Text>
-      <Text className="text-4xl font-bold text-[#ff7e70] mb-4">
+      <Text className="text-4xl font-bold text-[#211f1e] mb-4">
         {item.title}
       </Text>
       <Text className="text-lg text-[#211f1e] text-center leading-6">
@@ -141,7 +141,7 @@ export default function OnboardingScreen() {
         onPress={finishOnboarding}
         className="absolute top-16 right-6 z-10"
       >
-        <Text className="text-[#ff7e70] font-semibold text-base">Saltar</Text>
+        <Text className="text-[#c2402f] font-semibold text-base">Saltar</Text>
       </TouchableOpacity>
 
       <FlatList

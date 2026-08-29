@@ -99,7 +99,7 @@ export default function ResetPasswordScreen() {
       ) : (
         <>
           <View className="mb-8">
-            <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
+            <Text className="text-3xl font-bold text-[#211f1e] mb-2">
               Nueva contraseña
             </Text>
             <Text className="text-[#211f1e] text-lg">

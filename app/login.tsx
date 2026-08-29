@@ -18,6 +18,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -158,7 +159,7 @@ export default function LoginScreen() {
       ) : (
         <>
           <View className="mb-8">
-            <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
+            <Text className="text-3xl font-bold text-[#211f1e] mb-2">
               Lucky Tracker
             </Text>
             <Text className="text-[#211f1e] text-lg">
@@ -171,7 +172,7 @@ export default function LoginScreen() {
               Correo electrónico
             </Text>
             <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
+              className={`${emailFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e]`}
               placeholder="ejemplo@correo.com"
               placeholderTextColor="#9BA1A6"
               value={email}
@@ -179,6 +180,8 @@ export default function LoginScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
               editable={!loading}
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
             />
           </View>
 
@@ -206,14 +209,14 @@ export default function LoginScreen() {
 
           <Link
             href="/forgot-password"
-            className="text-[#ff7e70] font-semibold text-center mb-4"
+            className="text-[#c2402f] font-semibold text-center mb-4"
           >
             ¿Olvidaste tu contraseña?
           </Link>
 
           <View className="flex-row justify-center mt-4">
             <Text className="text-[#211f1e]">¿No tienes cuenta? </Text>
-            <Link href="/register" className="text-[#ff7e70] font-bold">
+            <Link href="/register" className="text-[#c2402f] font-bold">
               Regístrate
             </Link>
           </View>

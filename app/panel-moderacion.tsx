@@ -94,7 +94,7 @@ export default function PanelModeracionScreen() {
 
   const statusColor = (s: string) => {
     switch (s) {
-      case "pending": return "bg-[#ff7e70]/10 text-[#ff7e70]";
+      case "pending": return "bg-[#e8a93b]/15 text-[#8a5a15]";
       case "reviewed": return "bg-[#007275]/10 text-[#007275]";
       case "dismissed": return "bg-gray-100 text-gray-500";
       default: return "bg-gray-100 text-gray-500";

@@ -65,6 +65,8 @@ export function FeedTab({
   const [showPostForm, setShowPostForm] = useState(false);
   const [postContent, setPostContent] = useState("");
   const [posting, setPosting] = useState(false);
+  const [postFocused, setPostFocused] = useState(false);
+  const [commentFocused, setCommentFocused] = useState(false);
 
   const visiblePosts =
     feedSubTab === "all"
@@ -130,7 +132,7 @@ export function FeedTab({
       {showPostForm && (
         <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
           <TextInput
-            className="bg-white p-3 rounded-lg mb-3 border border-gray-300 text-[#211f1e]"
+            className={`bg-white p-3 rounded-lg mb-3 ${postFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`}
             placeholder="¿Qué quieres compartir?"
             placeholderTextColor="#9BA1A6"
             value={postContent}
@@ -138,6 +140,8 @@ export function FeedTab({
             multiline
             numberOfLines={3}
             textAlignVertical="top"
+            onFocus={() => setPostFocused(true)}
+            onBlur={() => setPostFocused(false)}
           />
           <View className="flex-row gap-3">
             <TouchableOpacity
@@ -164,8 +168,8 @@ export function FeedTab({
         <ActivityIndicator size="large" color="#007275" />
       ) : visiblePosts.length === 0 ? (
         <View className="bg-white p-10 rounded-xl items-center">
-          <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
-            <Ionicons name="phone-portrait-outline" size={32} color="#ff7e70" />
+          <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+            <Ionicons name="phone-portrait-outline" size={32} color="#007275" />
           </View>
           <Text className="text-gray-500 text-center">
             {feedSubTab === "all" ? "No hay publicaciones en el feed" : "No has publicado nada aún"}
@@ -191,7 +195,7 @@ export function FeedTab({
                 {post.owner_profile_picture ? (
                   <Image source={{ uri: post.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                 ) : (
-                  <View className="w-10 h-10 bg-[#ff7e70] rounded-full items-center justify-center">
+                  <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center">
                     <Text className="text-white font-bold">{post.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                   </View>
                 )}
@@ -205,7 +209,7 @@ export function FeedTab({
                 </View>
                 {isMine && (
                   <TouchableOpacity onPress={() => onDeletePost(post.id)}>
-                    <Ionicons name="trash-outline" size={20} color="#ff7e70" />
+                    <Ionicons name="trash-outline" size={20} color="#d93a3a" />
                   </TouchableOpacity>
                 )}
               </TouchableOpacity>
@@ -215,7 +219,7 @@ export function FeedTab({
               <View className="flex-row items-center gap-2 pt-2 border-t border-gray-100">
                 <Ionicons name="chatbubble-ellipses-outline" size={16} color="#6B7280" />
                 <Text className="text-gray-500 text-sm">{post.comment_count}</Text>
-                <Text className="text-[#ff7e70] text-xs ml-auto">
+                <Text className="text-[#007275] text-xs ml-auto">
                   {commentTarget?.id === post.id ? "Ocultar comentarios" : "Ver comentarios"}
                 </Text>
               </View>
@@ -232,14 +236,14 @@ export function FeedTab({
                         {c.owner_profile_picture ? (
                           <Image source={{ uri: c.owner_profile_picture }} className="w-7 h-7 rounded-full" />
                         ) : (
-                          <View className="w-7 h-7 bg-[#ff7e70] rounded-full items-center justify-center">
+                          <View className="w-7 h-7 bg-[#007275] rounded-full items-center justify-center">
                             <Text className="text-white text-xs font-bold">{c.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                           </View>
                         )}
                         <View className="flex-1 bg-[#faf5e0] p-2 rounded-lg">
                           <View className="flex-row items-center gap-2">
                             <TouchableOpacity onPress={() => router.push(`/perfil/${c.user_id}`)}>
-                              <Text className="font-semibold text-xs text-[#ff7e70]">{c.owner_name}</Text>
+                              <Text className="font-semibold text-xs text-[#211f1e]">{c.owner_name}</Text>
                             </TouchableOpacity>
                             <Text className="text-gray-500 text-xs">
                               {new Date(c.created_at).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
@@ -252,14 +256,16 @@ export function FeedTab({
                   )}
                   <View className="flex-row items-center gap-2 mt-2">
                     <TextInput
-                      className="flex-1 bg-white rounded-full px-4 py-2 text-sm border border-gray-200 text-[#211f1e]"
+                      className={`flex-1 bg-white rounded-full px-4 py-2 text-sm ${commentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"} text-[#211f1e]`}
                       placeholder="Escribe un comentario..."
                       placeholderTextColor="#9BA1A6"
                       value={commentTarget?.id === post.id ? commentText : ""}
                       onChangeText={onChangeComment}
+                      onFocus={() => setCommentFocused(true)}
+                      onBlur={() => setCommentFocused(false)}
                     />
                     <TouchableOpacity
-                      className="bg-[#ff7e70] rounded-full w-8 h-8 items-center justify-center"
+                      className="bg-[#007275] rounded-full w-8 h-8 items-center justify-center"
                       onPress={onAddComment}
                       disabled={sendingComment || !commentText.trim()}
                     >

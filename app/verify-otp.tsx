@@ -14,6 +14,7 @@ export default function VerifyOtpScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [otpFocused, setOtpFocused] = useState(false);
   const router = useRouter();
 
   const handleVerify = async (code?: string) => {
@@ -81,7 +82,7 @@ export default function VerifyOtpScreen() {
       ) : (
         <>
           <View className="mb-8">
-            <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
+            <Text className="text-3xl font-bold text-[#211f1e] mb-2">
               Verifica tu código
             </Text>
             <Text className="text-[#211f1e] text-lg">
@@ -95,7 +96,7 @@ export default function VerifyOtpScreen() {
               Código OTP
             </Text>
             <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e] text-center tracking-[8px]"
+              className={`${otpFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e] text-center tracking-[8px]`}
               placeholder="--------"
               placeholderTextColor="#9BA1A6"
               value={otp}
@@ -104,6 +105,8 @@ export default function VerifyOtpScreen() {
               maxLength={8}
               autoFocus
               textContentType="oneTimeCode"
+              onFocus={() => setOtpFocused(true)}
+              onBlur={() => setOtpFocused(false)}
             />
           </View>
 
@@ -139,7 +142,7 @@ export default function VerifyOtpScreen() {
               }
             }}
           >
-            <Text className="text-[#ff7e70] text-center font-semibold">
+            <Text className="text-[#c2402f] text-center font-semibold">
               Reenviar código
             </Text>
           </TouchableOpacity>

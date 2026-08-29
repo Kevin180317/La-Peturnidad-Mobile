@@ -113,7 +113,7 @@ export function HomeTab({
           <View className="w-10 h-10 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-2">
             <Ionicons name="warning" size={20} color="#ff7e70" />
           </View>
-          <Text className="text-xl font-bold text-[#ff7e70]">
+          <Text className="text-xl font-bold text-[#c2402f]">
             {myAlerts.length}
           </Text>
           <Text className="text-gray-600 text-sm">Alertas</Text>
@@ -166,8 +166,8 @@ export function HomeTab({
             <ActivityIndicator size="large" color="#007275" />
           ) : pets.length === 0 ? (
             <View className="bg-[#faf5e0] p-8 rounded-xl items-center">
-              <View className="w-14 h-14 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
-                <Ionicons name="paw" size={28} color="#ff7e70" />
+              <View className="w-14 h-14 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+                <Ionicons name="paw" size={28} color="#007275" />
               </View>
               <Text className="text-gray-500 text-center">
                 No tienes mascotas registradas. ¡Agrega tu primera mascota!

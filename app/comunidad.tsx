@@ -36,6 +36,8 @@ export default function ComunidadScreen() {
   const [formContent, setFormContent] = useState("");
   const [formCategory, setFormCategory] = useState<string>("general");
   const [posting, setPosting] = useState(false);
+  const [titleFocused, setTitleFocused] = useState(false);
+  const [contentFocused, setContentFocused] = useState(false);
 
   // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
@@ -134,7 +136,7 @@ export default function ComunidadScreen() {
 
   const categoryColor = (cat: string) => {
     switch (cat) {
-      case "aviso": return "bg-[#ff7e70]/10 text-[#ff7e70]";
+      case "aviso": return "bg-gray-100 text-gray-600";
       case "evento": return "bg-[#007275]/10 text-[#007275]";
       case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]";
       default: return "bg-gray-100 text-gray-600";
@@ -183,7 +185,7 @@ export default function ComunidadScreen() {
                   {item.owner_profile_picture ? (
                     <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                   ) : (
-                    <View className="w-10 h-10 bg-[#ff7e70] rounded-full items-center justify-center">
+                    <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center">
                       <Text className="text-white font-bold">
                         {item.owner_name?.[0]?.toUpperCase() || "U"}
                       </Text>
@@ -199,7 +201,7 @@ export default function ComunidadScreen() {
                   </View>
                   {isOwner && (
                     <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                      <Ionicons name="trash-outline" size={18} color="#ff7e70" />
+                      <Ionicons name="trash-outline" size={18} color="#d93a3a" />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -249,14 +251,16 @@ export default function ComunidadScreen() {
             </View>
 
             <TextInput
-              className="bg-white p-3 rounded-lg mb-3 border border-gray-300 text-[#211f1e]"
+              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${titleFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Título *"
               placeholderTextColor="#9BA1A6"
               value={formTitle}
               onChangeText={setFormTitle}
+              onFocus={() => setTitleFocused(true)}
+              onBlur={() => setTitleFocused(false)}
             />
             <TextInput
-              className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${contentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Escribe tu mensaje... *"
               placeholderTextColor="#9BA1A6"
               value={formContent}
@@ -264,6 +268,8 @@ export default function ComunidadScreen() {
               multiline
               numberOfLines={5}
               textAlignVertical="top"
+              onFocus={() => setContentFocused(true)}
+              onBlur={() => setContentFocused(false)}
             />
 
             <View className="flex-row gap-3">

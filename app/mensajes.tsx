@@ -130,7 +130,7 @@ export default function MensajesScreen() {
             ) : conv.other_user_picture ? (
               <Image source={{ uri: conv.other_user_picture }} className="w-14 h-14 rounded-full mr-3" />
             ) : (
-              <View className="w-14 h-14 rounded-full bg-[#ff7e70] items-center justify-center mr-3">
+              <View className="w-14 h-14 rounded-full bg-[#211f1e] items-center justify-center mr-3">
                 <Text className="text-xl text-white font-bold">
                   {conv.other_user_name?.[0]?.toUpperCase() || "U"}
                 </Text>
@@ -148,7 +148,7 @@ export default function MensajesScreen() {
               </Text>
             </View>
             {conv.unread_count > 0 && (
-              <View className="bg-[#ff7e70] rounded-full w-6 h-6 items-center justify-center ml-2">
+              <View className="bg-[#d93a3a] rounded-full w-6 h-6 items-center justify-center ml-2">
                 <Text className="text-white text-xs font-bold">{conv.unread_count}</Text>
               </View>
             )}

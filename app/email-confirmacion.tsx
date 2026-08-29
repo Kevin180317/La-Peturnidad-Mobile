@@ -47,10 +47,10 @@ export default function EmailConfirmacionScreen() {
       ) : (
         <>
           <View className="items-center mb-8">
-            <View className="w-20 h-20 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-4">
-              <Ionicons name="mail-outline" size={40} color="#ff7e70" />
+            <View className="w-20 h-20 rounded-full bg-[#007275]/10 items-center justify-center mb-4">
+              <Ionicons name="mail-outline" size={40} color="#007275" />
             </View>
-            <Text className="text-3xl font-bold text-[#ff7e70] mb-2 text-center">
+            <Text className="text-3xl font-bold text-[#211f1e] mb-2 text-center">
               Revisá tu email
             </Text>
             <Text className="text-[#211f1e] text-base text-center leading-6">
@@ -63,7 +63,7 @@ export default function EmailConfirmacionScreen() {
           </View>
 
           <TouchableOpacity className="py-2 mb-4" onPress={handleResend}>
-            <Text className="text-[#ff7e70] text-center font-semibold">
+            <Text className="text-[#c2402f] text-center font-semibold">
               Reenviar email
             </Text>
           </TouchableOpacity>

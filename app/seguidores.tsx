@@ -72,7 +72,7 @@ export default function SeguidoresScreen() {
       {user.profile_picture_url ? (
         <Image source={{ uri: user.profile_picture_url }} className="w-12 h-12 rounded-full mr-3" />
       ) : (
-        <View className="w-12 h-12 bg-[#ff7e70] rounded-full items-center justify-center mr-3">
+        <View className="w-12 h-12 bg-[#007275] rounded-full items-center justify-center mr-3">
           <Text className="text-white font-bold text-lg">
             {user.first_name?.[0]?.toUpperCase() || "U"}
           </Text>
@@ -100,7 +100,7 @@ export default function SeguidoresScreen() {
     <View className="flex-1 bg-[#faf5e0]">
       <View className="flex-row bg-white border-b border-gray-200">
         <TouchableOpacity
-          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "followers" ? "border-[#ff7e70]" : "border-transparent"}`}
+          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "followers" ? "border-[#007275]" : "border-transparent"}`}
           onPress={() => setActiveTab("followers")}
         >
           <Text className={`font-semibold ${activeTab === "followers" ? "text-[#007275]" : "text-gray-500"}`}>
@@ -121,8 +121,8 @@ export default function SeguidoresScreen() {
         {activeTab === "followers" ? (
           followers.length === 0 ? (
             <View className="bg-white p-10 rounded-xl items-center mt-10">
-              <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
-                <Ionicons name="people-outline" size={32} color="#ff7e70" />
+              <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+                <Ionicons name="people-outline" size={32} color="#007275" />
               </View>
               <Text className="text-gray-500 text-center">Sin seguidores aún</Text>
             </View>
@@ -131,8 +131,8 @@ export default function SeguidoresScreen() {
           )
         ) : following.length === 0 ? (
           <View className="bg-white p-10 rounded-xl items-center mt-10">
-            <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
-              <Ionicons name="person-outline" size={32} color="#ff7e70" />
+            <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+              <Ionicons name="person-outline" size={32} color="#007275" />
             </View>
             <Text className="text-gray-500 text-center">No sigues a nadie aún</Text>
           </View>

@@ -116,7 +116,7 @@ export default function GrupoDetailScreen() {
 
         {group.created_by === currentUserId && (
           <TouchableOpacity
-            className="bg-red-500 py-3 rounded-lg mb-6 flex-row items-center justify-center"
+            className="bg-[#d93a3a] py-3 rounded-lg mb-6 flex-row items-center justify-center"
             onPress={() => {
               Alert.alert(
                 "Eliminar grupo",
@@ -155,7 +155,7 @@ export default function GrupoDetailScreen() {
           {m.profile_picture_url ? (
             <Image source={{ uri: m.profile_picture_url }} className="w-10 h-10 rounded-full mr-3" />
           ) : (
-            <View className="w-10 h-10 bg-[#ff7e70] rounded-full items-center justify-center mr-3">
+            <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center mr-3">
               <Text className="text-white font-bold">{m.first_name?.[0]?.toUpperCase() || "U"}</Text>
             </View>
           )}
@@ -165,8 +165,8 @@ export default function GrupoDetailScreen() {
             </Text>
           </View>
           {m.role === "admin" && (
-            <View className="bg-[#ff7e70]/20 px-3 py-1 rounded-full">
-              <Text className="text-[#ff7e70] text-xs font-semibold">Admin</Text>
+            <View className="bg-[#211f1e] px-3 py-1 rounded-full">
+              <Text className="text-white text-xs font-semibold">Admin</Text>
             </View>
           )}
         </TouchableOpacity>

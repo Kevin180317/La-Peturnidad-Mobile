@@ -75,8 +75,8 @@ export function EmergencyTab({
       contentContainerClassName="p-5 pb-10"
     >
       <View className="flex-row items-center gap-2 mb-2">
-        <Ionicons name="warning" size={26} color="#ff7e70" />
-        <Text className="text-2xl font-bold text-[#ff7e70]">Emergencia</Text>
+        <Ionicons name="warning" size={26} color="#c2402f" />
+        <Text className="text-2xl font-bold text-[#211f1e]">Emergencia</Text>
       </View>
       <Text className="text-gray-600 mb-6">
         Sistema de alertas para mascotas perdidas en tu comunidad
@@ -104,7 +104,7 @@ export function EmergencyTab({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-[#ff7e70]"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-[#007275]"}`}
             onPress={onToggleAlerts}
           >
             <View
@@ -115,7 +115,7 @@ export function EmergencyTab({
             <Text className="text-white font-bold text-center text-sm leading-5">
               {showAlerts ? "Ocultar" : "Ver"} mascotas perdidas
             </Text>
-            <Text className={`text-[11px] text-center mt-1 ${showAlerts ? "text-[#2dd4bf]" : "text-white/90"}`}>
+            <Text className={`text-[11px] text-center mt-1 text-white/90`}>
               {showAlerts ? "✓ Visible" : "En tu zona"}
             </Text>
           </TouchableOpacity>
@@ -134,7 +134,7 @@ export function EmergencyTab({
             <Text className="text-white font-bold text-center text-sm leading-5">
               {showMyAlerts ? "Ocultar" : "Ver"} mis alertas
             </Text>
-            <Text className={`text-[11px] text-center mt-1 ${showMyAlerts ? "text-[#2dd4bf]" : "text-white/90"}`}>
+            <Text className={`text-[11px] text-center mt-1 text-white/90`}>
               {showMyAlerts ? "✓ Visible" : "Historial propio"}
             </Text>
           </TouchableOpacity>
@@ -151,7 +151,7 @@ export function EmergencyTab({
             <Text className="text-white font-bold text-center text-sm leading-5">
               {showFoundPets ? "Ocultar" : "Ver"} mascotas encontradas
             </Text>
-            <Text className={`text-[11px] text-center mt-1 ${showFoundPets ? "text-[#2dd4bf]" : "text-white/90"}`}>
+            <Text className={`text-[11px] text-center mt-1 text-white/90`}>
               {showFoundPets ? "✓ Visible" : "Rescatadas"}
             </Text>
           </TouchableOpacity>
@@ -202,7 +202,7 @@ export function EmergencyTab({
                   </Text>
                 </View>
                     <View className="bg-[#ff7e70]/10 px-3 py-1 rounded-full">
-                  <Text className="text-[#ff7e70] text-xs font-semibold">
+                  <Text className="text-[#c2402f] text-xs font-semibold">
                     REPORTAR
                   </Text>
                 </View>
@@ -216,7 +216,7 @@ export function EmergencyTab({
       {showAlerts && (
         <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
           <View className="flex-row items-center gap-2 mb-3">
-            <Ionicons name="paw" size={18} color="#ff7e70" />
+            <Ionicons name="paw" size={18} color="#c2402f" />
             <Text className="font-bold">Mascotas perdidas en tu colonia</Text>
           </View>
           {loadingAlerts ? (
@@ -329,7 +329,7 @@ export function EmergencyTab({
                       {formatDate(alert.disappearance_date)}
                     </Text>
                     <TouchableOpacity
-                      className="bg-red-500 py-2 px-4 rounded-lg self-start flex-row items-center gap-1.5"
+                      className="bg-[#d93a3a] py-2 px-4 rounded-lg self-start flex-row items-center gap-1.5"
                       onPress={() => onDeleteAlert(alert.id)}
                     >
                       <Ionicons name="trash" size={14} color="#fff" />

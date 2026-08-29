@@ -27,6 +27,8 @@ export default function GruposScreen() {
   const [formName, setFormName] = useState("");
   const [formDesc, setFormDesc] = useState("");
   const [creating, setCreating] = useState(false);
+  const [nameFocused, setNameFocused] = useState(false);
+  const [descFocused, setDescFocused] = useState(false);
 
   // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
@@ -197,14 +199,16 @@ export default function GruposScreen() {
               </TouchableOpacity>
             </View>
             <TextInput
-              className="bg-white p-3 rounded-lg mb-3 border border-gray-300 text-[#211f1e]"
+              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${nameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Nombre del grupo *"
               placeholderTextColor="#9BA1A6"
               value={formName}
               onChangeText={setFormName}
+              onFocus={() => setNameFocused(true)}
+              onBlur={() => setNameFocused(false)}
             />
             <TextInput
-              className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${descFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Descripción (opcional)"
               placeholderTextColor="#9BA1A6"
               value={formDesc}
@@ -212,6 +216,8 @@ export default function GruposScreen() {
               multiline
               numberOfLines={3}
               textAlignVertical="top"
+              onFocus={() => setDescFocused(true)}
+              onBlur={() => setDescFocused(false)}
             />
             <View className="flex-row gap-3">
               <TouchableOpacity

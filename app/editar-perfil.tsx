@@ -22,6 +22,12 @@ export default function EditarPerfilScreen() {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [firstNameFocused, setFirstNameFocused] = useState(false);
+  const [lastNameFocused, setLastNameFocused] = useState(false);
+  const [phoneFocused, setPhoneFocused] = useState(false);
+  const [addressFocused, setAddressFocused] = useState(false);
+  const [cityFocused, setCityFocused] = useState(false);
+  const [postalCodeFocused, setPostalCodeFocused] = useState(false);
 
   // loadProfile corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
@@ -88,58 +94,70 @@ export default function EditarPerfilScreen() {
       <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
         <Text className="font-semibold mb-2 text-gray-600">Nombre *</Text>
         <TextInput
-          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${firstNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
           placeholder="Nombre"
           placeholderTextColor="#9BA1A6"
           value={firstName}
           onChangeText={setFirstName}
+          onFocus={() => setFirstNameFocused(true)}
+          onBlur={() => setFirstNameFocused(false)}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Apellido *</Text>
         <TextInput
-          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${lastNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
           placeholder="Apellido"
           placeholderTextColor="#9BA1A6"
           value={lastName}
           onChangeText={setLastName}
+          onFocus={() => setLastNameFocused(true)}
+          onBlur={() => setLastNameFocused(false)}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Teléfono</Text>
         <TextInput
-          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${phoneFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
           placeholder="Teléfono"
           placeholderTextColor="#9BA1A6"
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
+          onFocus={() => setPhoneFocused(true)}
+          onBlur={() => setPhoneFocused(false)}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Dirección / Colonia</Text>
         <TextInput
-          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${addressFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
           placeholder="Calle y colonia"
           placeholderTextColor="#9BA1A6"
           value={address}
           onChangeText={setAddress}
+          onFocus={() => setAddressFocused(true)}
+          onBlur={() => setAddressFocused(false)}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Ciudad</Text>
         <TextInput
-          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${cityFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
           placeholder="Ciudad"
           placeholderTextColor="#9BA1A6"
           value={city}
           onChangeText={setCity}
+          onFocus={() => setCityFocused(true)}
+          onBlur={() => setCityFocused(false)}
         />
 
         <Text className="font-semibold mb-2 text-gray-600">Código Postal</Text>
         <TextInput
-          className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${postalCodeFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
           placeholder="C.P."
           placeholderTextColor="#9BA1A6"
           value={postalCode}
           onChangeText={setPostalCode}
           keyboardType="numeric"
+          onFocus={() => setPostalCodeFocused(true)}
+          onBlur={() => setPostalCodeFocused(false)}
         />
       </View>
 

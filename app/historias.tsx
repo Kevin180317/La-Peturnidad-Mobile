@@ -28,6 +28,8 @@ export default function HistoriasScreen() {
   const [petName, setPetName] = useState("");
   const [story, setStory] = useState("");
   const [posting, setPosting] = useState(false);
+  const [petNameFocused, setPetNameFocused] = useState(false);
+  const [storyFocused, setStoryFocused] = useState(false);
 
   // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
@@ -132,12 +134,12 @@ export default function HistoriasScreen() {
               <View key={s.id} className="bg-white p-5 rounded-xl mb-4 shadow-sm">
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center gap-2">
-                    <Ionicons name="paw" size={20} color="#ff7e70" />
+                    <Ionicons name="paw" size={20} color="#007275" />
                     <Text className="font-bold text-lg text-[#211f1e]">{s.pet_name}</Text>
                   </View>
                   {isMine && (
                     <TouchableOpacity onPress={() => handleDelete(s.id)}>
-                      <Ionicons name="trash-outline" size={20} color="#ff7e70" />
+                      <Ionicons name="trash-outline" size={20} color="#d93a3a" />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -166,14 +168,16 @@ export default function HistoriasScreen() {
               </TouchableOpacity>
             </View>
             <TextInput
-              className="bg-white p-3 rounded-lg mb-3 border border-gray-300 text-[#211f1e]"
+              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${petNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Nombre de tu mascota *"
               placeholderTextColor="#9BA1A6"
               value={petName}
               onChangeText={setPetName}
+              onFocus={() => setPetNameFocused(true)}
+              onBlur={() => setPetNameFocused(false)}
             />
             <TextInput
-              className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${storyFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Cuenta tu historia de reencuentro... *"
               placeholderTextColor="#9BA1A6"
               value={story}
@@ -181,6 +185,8 @@ export default function HistoriasScreen() {
               multiline
               numberOfLines={6}
               textAlignVertical="top"
+              onFocus={() => setStoryFocused(true)}
+              onBlur={() => setStoryFocused(false)}
             />
             <View className="flex-row gap-3">
               <TouchableOpacity

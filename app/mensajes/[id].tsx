@@ -25,6 +25,7 @@ export default function ConversationScreen() {
   const [userId, setUserId] = useState<string | null>(null);
   const [isGroup, setIsGroup] = useState(false);
   const [senderNames, setSenderNames] = useState<Record<string, string>>({});
+  const [inputFocused, setInputFocused] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   // init corre al montar o cambiar id (recarga intencional)
@@ -148,14 +149,14 @@ export default function ConversationScreen() {
               )}
               <View className={`mb-3 max-w-[80%] ${isMine ? "self-end" : "self-start"}`}>
                 {isGroup && !isMine && (
-                  <Text className="text-xs font-semibold text-[#ff7e70] mb-0.5 ml-1">
+                  <Text className="text-xs font-semibold text-[#211f1e] mb-0.5 ml-1">
                     {senderNames[item.sender_id] || "Usuario"}
                   </Text>
                 )}
                 <View
                   className={`p-3 rounded-2xl ${
                     isMine
-                      ? "bg-[#ff7e70] rounded-br-md"
+                      ? "bg-[#007275] rounded-br-md"
                       : "bg-white rounded-bl-md shadow-sm"
                   }`}
                 >
@@ -177,15 +178,17 @@ export default function ConversationScreen() {
 
       <View className="flex-row items-center gap-2 p-3 bg-white border-t border-gray-200">
         <TextInput
-          className="flex-1 bg-white rounded-full px-4 py-3 border border-gray-200 text-[#211f1e]"
+          className={`flex-1 bg-white rounded-full px-4 py-3 text-[#211f1e] ${inputFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
           placeholder="Escribe un mensaje..."
           placeholderTextColor="#9BA1A6"
           value={input}
           onChangeText={setInput}
           multiline
+          onFocus={() => setInputFocused(true)}
+          onBlur={() => setInputFocused(false)}
         />
         <TouchableOpacity
-          className={`w-12 h-12 rounded-full items-center justify-center ${sending || !input.trim() ? "bg-gray-300" : "bg-[#ff7e70]"}`}
+          className={`w-12 h-12 rounded-full items-center justify-center ${sending || !input.trim() ? "bg-gray-300" : "bg-[#007275]"}`}
           onPress={handleSend}
           disabled={sending || !input.trim()}
         >

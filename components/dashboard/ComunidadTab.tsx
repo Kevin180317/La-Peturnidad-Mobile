@@ -15,7 +15,7 @@ import {
 import type { CommentTarget } from "./FeedTab";
 
 const comCatColor = (cat: string) => {
-  switch (cat) { case "aviso": return "bg-[#ff7e70]/10 text-[#ff7e70]"; case "evento": return "bg-[#007275]/10 text-[#007275]"; case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]"; default: return "bg-gray-100 text-gray-600"; }
+  switch (cat) { case "aviso": return "bg-gray-100 text-gray-600"; case "evento": return "bg-[#007275]/10 text-[#007275]"; case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]"; default: return "bg-gray-100 text-gray-600"; }
 };
 const comCatIcon = (cat: string): keyof typeof Ionicons.glyphMap => {
   const m: Record<string, keyof typeof Ionicons.glyphMap> = { general: "chatbubbles", aviso: "megaphone", evento: "calendar", pregunta: "help-circle" };
@@ -80,6 +80,9 @@ export function ComunidadTab({
   const [comFormContent, setComFormContent] = useState("");
   const [comFormCategory, setComFormCategory] = useState("general");
   const [comPosting, setComPosting] = useState(false);
+  const [titleFocused, setTitleFocused] = useState(false);
+  const [contentFocused, setContentFocused] = useState(false);
+  const [commentFocused, setCommentFocused] = useState(false);
 
   const visibleItems =
     comSubTab === "all"
@@ -154,8 +157,8 @@ export function ComunidadTab({
           <ActivityIndicator size="large" color="#007275" />
         ) : visibleItems.length === 0 ? (
           <View className="bg-white p-10 rounded-xl items-center">
-            <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
-              <Ionicons name="chatbubbles-outline" size={32} color="#ff7e70" />
+            <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+              <Ionicons name="chatbubbles-outline" size={32} color="#007275" />
             </View>
             <Text className="text-gray-500 text-center">
               {comSubTab === "all" ? "No hay avisos todavía. ¡Sé el primero!" : "No has creado avisos aún"}
@@ -178,7 +181,7 @@ export function ComunidadTab({
                   {item.owner_profile_picture ? (
                     <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                   ) : (
-                    <View className="w-10 h-10 bg-[#ff7e70] rounded-full items-center justify-center">
+                    <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center">
                       <Text className="text-white font-bold">{item.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                     </View>
                   )}
@@ -188,7 +191,7 @@ export function ComunidadTab({
                   </View>
                   {isMine && (
                     <TouchableOpacity onPress={() => onDeleteAnnouncement(item.id)}>
-                      <Ionicons name="trash-outline" size={20} color="#ff7e70" />
+                      <Ionicons name="trash-outline" size={20} color="#d93a3a" />
                     </TouchableOpacity>
                   )}
                 </TouchableOpacity>
@@ -219,14 +222,14 @@ export function ComunidadTab({
                           {c.owner_profile_picture ? (
                             <Image source={{ uri: c.owner_profile_picture }} className="w-7 h-7 rounded-full" />
                           ) : (
-                            <View className="w-7 h-7 bg-[#ff7e70] rounded-full items-center justify-center">
+                            <View className="w-7 h-7 bg-[#007275] rounded-full items-center justify-center">
                               <Text className="text-white text-xs font-bold">{c.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                             </View>
                           )}
                           <View className="flex-1 bg-[#faf5e0] p-2 rounded-lg">
                             <View className="flex-row items-center gap-2">
                               <TouchableOpacity onPress={() => router.push(`/perfil/${c.user_id}`)}>
-                                <Text className="font-semibold text-xs text-[#ff7e70]">{c.owner_name}</Text>
+                                <Text className="font-semibold text-xs text-[#211f1e]">{c.owner_name}</Text>
                               </TouchableOpacity>
                               <Text className="text-gray-500 text-xs">
                                 {new Date(c.created_at).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}
@@ -239,13 +242,15 @@ export function ComunidadTab({
                     )}
                     <View className="flex-row items-center gap-2 mt-2">
                       <TextInput
-                        className="flex-1 bg-[#faf5e0] rounded-full px-4 py-2 text-sm border border-gray-200"
+                        className={`flex-1 bg-[#faf5e0] rounded-full px-4 py-2 text-sm ${commentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
                         placeholder="Escribe un comentario..."
                         value={isCommenting ? commentText : ""}
                         onChangeText={onChangeComment}
+                        onFocus={() => setCommentFocused(true)}
+                        onBlur={() => setCommentFocused(false)}
                       />
                       <TouchableOpacity
-                        className="bg-[#ff7e70] rounded-full w-8 h-8 items-center justify-center"
+                        className="bg-[#007275] rounded-full w-8 h-8 items-center justify-center"
                         onPress={onAddComment}
                         disabled={sendingComment || !commentText.trim()}
                       >
@@ -281,8 +286,8 @@ export function ComunidadTab({
                 </TouchableOpacity>
               ))}
             </View>
-            <TextInput className="bg-white p-3 rounded-lg mb-3 border border-gray-300 text-[#211f1e]" placeholder="Título *" placeholderTextColor="#9BA1A6" value={comFormTitle} onChangeText={setComFormTitle} />
-            <TextInput className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]" placeholder="Escribe tu mensaje... *" placeholderTextColor="#9BA1A6" value={comFormContent} onChangeText={setComFormContent} multiline numberOfLines={4} textAlignVertical="top" />
+            <TextInput className={`bg-white p-3 rounded-lg mb-3 ${titleFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`} placeholder="Título *" placeholderTextColor="#9BA1A6" value={comFormTitle} onChangeText={setComFormTitle} onFocus={() => setTitleFocused(true)} onBlur={() => setTitleFocused(false)} />
+            <TextInput className={`bg-white p-3 rounded-lg mb-4 ${contentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`} placeholder="Escribe tu mensaje... *" placeholderTextColor="#9BA1A6" value={comFormContent} onChangeText={setComFormContent} multiline numberOfLines={4} textAlignVertical="top" onFocus={() => setContentFocused(true)} onBlur={() => setContentFocused(false)} />
             <View className="flex-row gap-3">
               <TouchableOpacity       className={`flex-1 py-3 rounded-lg ${comPosting ? "bg-gray-400" : "bg-[#007275]"}`} disabled={comPosting} onPress={handleComPost}>
                 <Text className={`text-center font-bold ${comPosting ? "text-gray-700" : "text-white"}`}>{comPosting ? "Publicando..." : "Publicar"}</Text>

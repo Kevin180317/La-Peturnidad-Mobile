@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { View, Text, StyleSheet } from "react-native";
 import { BaseToastProps } from "react-native-toast-message";
 
-const primary = "#ff7e70";
+const danger = "#d93a3a";
 const dark = "#211f1e";
 const teal = "#007275";
 
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     backgroundColor: teal,
   },
   error: {
-    backgroundColor: primary,
+    backgroundColor: danger,
   },
   info: {
     backgroundColor: dark,

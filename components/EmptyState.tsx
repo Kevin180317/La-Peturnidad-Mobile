@@ -18,8 +18,8 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <View className="bg-white p-10 rounded-2xl items-center border border-[#211f1e]/10">
-      <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
-        <Ionicons name={icon} size={32} color="#ff7e70" />
+      <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+        <Ionicons name={icon} size={32} color="#007275" />
       </View>
       <Text className="text-[#211f1e] font-semibold text-center">{title}</Text>
       {subtitle && (

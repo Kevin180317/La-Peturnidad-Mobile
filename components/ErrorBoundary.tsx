@@ -29,8 +29,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <View className="flex-1 bg-[#faf5e0] items-center justify-center px-6">
-          <Ionicons name="paw" size={64} color="#ff7e70" style={{ marginBottom: 16 }} />
-          <Text className="text-xl font-bold text-[#ff7e70] mb-2">
+          <Ionicons name="paw" size={64} color="#211f1e" style={{ marginBottom: 16 }} />
+          <Text className="text-xl font-bold text-[#211f1e] mb-2">
             Algo salió mal
           </Text>
           <Text className="text-[#211f1e]/70 text-center mb-6">

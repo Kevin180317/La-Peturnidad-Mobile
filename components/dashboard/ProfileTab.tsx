@@ -124,8 +124,8 @@ export function ProfileTab({
     },
     {
       icon: "notifications-outline",
-      color: "#ff7e70",
-      bg: "bg-[#ff7e70]/10",
+      color: "#007275",
+      bg: "bg-[#007275]/10",
       label: "Configurar notificaciones",
       onPress: () => router.push("/notificaciones"),
     },
@@ -138,8 +138,8 @@ export function ProfileTab({
     },
     {
       icon: "chatbox-ellipses-outline",
-      color: "#ff7e70",
-      bg: "bg-[#ff7e70]/10",
+      color: "#007275",
+      bg: "bg-[#007275]/10",
       label: "Mensajes",
       onPress: () => router.push("/mensajes"),
       badge: unreadCount,
@@ -190,10 +190,10 @@ export function ProfileTab({
                     profile.profile_picture_url ||
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ168Mp9N1EPzK86wWBf_Ipl7gqELKUyhryNg&s",
                 }}
-                className="w-32 h-32 rounded-full border-4 border-[#ff7e70]/30"
+                className="w-32 h-32 rounded-full border-4 border-[#007275]/30"
               />
               <TouchableOpacity
-                className="absolute bottom-0 right-0 bg-[#ff7e70] w-10 h-10 rounded-full items-center justify-center border-2 border-white"
+                className="absolute bottom-0 right-0 bg-[#007275] w-10 h-10 rounded-full items-center justify-center border-2 border-white"
                 onPress={handleSelectProfileImage}
               >
                 <Ionicons name="camera" size={18} color="#fff" />
@@ -282,10 +282,10 @@ export function ProfileTab({
                 <Text className="text-gray-600">Mascotas</Text>
               </View>
               <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=followers`)}>
-                <View className="w-10 h-10 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-1">
-                  <Ionicons name="people" size={18} color="#ff7e70" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-1">
+                  <Ionicons name="people" size={18} color="#007275" />
                 </View>
-                <Text className="text-xl font-bold text-[#ff7e70]">
+                <Text className="text-xl font-bold text-[#007275]">
                   {profile?.followers_count || 0}
                 </Text>
                 <Text className="text-gray-600">Seguidores</Text>
@@ -321,7 +321,7 @@ export function ProfileTab({
                   {item.label}
                 </Text>
                 {item.badge && item.badge > 0 ? (
-                  <View className="bg-[#ff7e70] rounded-full min-w-[22px] h-[22px] items-center justify-center px-1 mr-1">
+                  <View className="bg-[#d93a3a] rounded-full min-w-[22px] h-[22px] items-center justify-center px-1 mr-1">
                     <Text className="text-white text-xs font-bold">{item.badge}</Text>
                   </View>
                 ) : null}
@@ -348,8 +348,8 @@ export function ProfileTab({
           </View>
         </>
       ) : (
-        <View className="bg-[#ff7e70]/10 p-8 rounded-xl items-center">
-          <Ionicons name="alert-circle-outline" size={44} color="#ff7e70" />
+        <View className="bg-[#211f1e]/10 p-8 rounded-xl items-center">
+          <Ionicons name="alert-circle-outline" size={44} color="#211f1e" />
           <Text className="text-gray-600 text-center mt-3">
             No se encontró información de perfil. Completa tu registro.
           </Text>
@@ -369,7 +369,7 @@ export function ProfileTab({
 
       {/* Botón de cerrar sesión */}
       <TouchableOpacity
-        className="bg-[#ff7e70] py-4 rounded-xl mt-4 flex-row items-center justify-center gap-2"
+        className="bg-[#211f1e] py-4 rounded-xl mt-4 flex-row items-center justify-center gap-2"
         onPress={onLogout}
       >
         <Ionicons name="log-out-outline" size={20} color="#fff" />

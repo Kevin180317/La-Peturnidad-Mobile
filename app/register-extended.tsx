@@ -31,6 +31,12 @@ export default function RegisterExtendedScreen() {
   const [selectedColonia, setSelectedColonia] = useState("");
   const [city] = useState("Tijuana");
   const [loading, setLoading] = useState(false);
+  const [firstNameFocused, setFirstNameFocused] = useState(false);
+  const [lastNameFocused, setLastNameFocused] = useState(false);
+  const [phoneFocused, setPhoneFocused] = useState(false);
+  const [birthDateFocused, setBirthDateFocused] = useState(false);
+  const [postalCodeFocused, setPostalCodeFocused] = useState(false);
+  const [cityFocused, setCityFocused] = useState(false);
 
   const handlePostalCodeChange = (text: string) => {
     const cleaned = text.replace(/\D/g, "").slice(0, 5);
@@ -199,7 +205,7 @@ export default function RegisterExtendedScreen() {
       contentContainerClassName="p-6 pb-10"
       keyboardShouldPersistTaps="handled"
     >
-      <Text className="text-2xl font-bold text-[#ff7e70] mb-2 text-center">
+      <Text className="text-2xl font-bold text-[#211f1e] mb-2 text-center">
         Completa tu perfil
       </Text>
       <Text className="text-base text-[#211f1e] text-center mb-8">
@@ -208,43 +214,49 @@ export default function RegisterExtendedScreen() {
 
       <View className="mb-4">
         <Text className="text-[#211f1e] font-semibold mb-2">
-          Nombre <Text className="text-[#ff7e70]">*</Text>
+          Nombre <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
+          className={`${firstNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Tu nombre"
           placeholderTextColor="#9BA1A6"
           value={firstName}
           onChangeText={setFirstName}
           autoCapitalize="words"
+          onFocus={() => setFirstNameFocused(true)}
+          onBlur={() => setFirstNameFocused(false)}
         />
       </View>
 
       <View className="mb-4">
         <Text className="text-[#211f1e] font-semibold mb-2">
-          Apellido <Text className="text-[#ff7e70]">*</Text>
+          Apellido <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
+          className={`${lastNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Tu apellido"
           placeholderTextColor="#9BA1A6"
           value={lastName}
           onChangeText={setLastName}
           autoCapitalize="words"
+          onFocus={() => setLastNameFocused(true)}
+          onBlur={() => setLastNameFocused(false)}
         />
       </View>
 
       <View className="mb-4">
         <Text className="text-[#211f1e] font-semibold mb-2">
-          Teléfono <Text className="text-[#ff7e70]">*</Text>
+          Teléfono <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
+          className={`${phoneFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Número de teléfono"
           placeholderTextColor="#9BA1A6"
           value={phone}
           onChangeText={setPhone}
           keyboardType="phone-pad"
+          onFocus={() => setPhoneFocused(true)}
+          onBlur={() => setPhoneFocused(false)}
         />
       </View>
 
@@ -253,27 +265,31 @@ export default function RegisterExtendedScreen() {
           Fecha de nacimiento
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
+          className={`${birthDateFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e]`}
           placeholder="DD/MM/YYYY"
           placeholderTextColor="#9BA1A6"
           value={birthDate}
           onChangeText={(text) => setBirthDate(formatDateInput(text))}
           keyboardType="numeric"
+          onFocus={() => setBirthDateFocused(true)}
+          onBlur={() => setBirthDateFocused(false)}
         />
       </View>
 
       <View className="mb-4">
         <Text className="text-[#211f1e] font-semibold mb-2">
-          Código Postal <Text className="text-[#ff7e70]">*</Text>
+          Código Postal <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
+          className={`${postalCodeFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Código postal"
           placeholderTextColor="#9BA1A6"
           value={postalCode}
           onChangeText={handlePostalCodeChange}
           keyboardType="numeric"
           maxLength={5}
+          onFocus={() => setPostalCodeFocused(true)}
+          onBlur={() => setPostalCodeFocused(false)}
         />
       </View>
 
@@ -300,9 +316,11 @@ export default function RegisterExtendedScreen() {
       <View className="mb-8">
         <Text className="text-[#211f1e] font-semibold mb-2">Ciudad</Text>
         <TextInput
-          className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
+          className={`${cityFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e]`}
           value={city}
           editable={false}
+          onFocus={() => setCityFocused(true)}
+          onBlur={() => setCityFocused(false)}
         />
       </View>
 

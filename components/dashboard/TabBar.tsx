@@ -30,14 +30,20 @@ export function TabBar({ activeTab, onSelect }: TabBarProps) {
           <TouchableOpacity
             key={tab.key}
             className={`flex-1 py-3 items-center border-t-2 ${
-              active ? "border-t-red-500" : "border-t-transparent"
+              active ? "border-t-[#007275]" : "border-t-transparent"
             }`}
             onPress={() => onSelect(tab.key)}
           >
             <Ionicons
               name={active ? tab.iconActive : tab.icon}
               size={22}
-              color={active ? "#ff7e70" : "#9CA3AF"}
+              color={
+                tab.key === "emergency"
+                  ? "#ff7e70"
+                  : active
+                    ? "#007275"
+                    : "#9CA3AF"
+              }
             />
             <Text
               className={`text-xs mt-1 ${

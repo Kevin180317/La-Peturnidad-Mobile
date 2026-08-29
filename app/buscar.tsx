@@ -40,6 +40,7 @@ export default function BuscarScreen() {
   const [users, setUsers] = useState<UserSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
   const firstRun = useRef(true);
 
   useEffect(() => {
@@ -185,7 +186,9 @@ export default function BuscarScreen() {
   return (
     <View className="flex-1 bg-[#faf5e0] p-4">
       {/* Input de búsqueda */}
-      <View className="flex-row items-center bg-white rounded-2xl border border-[#211f1e]/10 px-4">
+      <View
+        className={`flex-row items-center bg-white rounded-2xl px-4 ${searchFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-[#211f1e]/10"}`}
+      >
         <Ionicons name="search" size={18} color="#6B7280" style={{ marginRight: 8 }} />
         <TextInput
           className="flex-1 py-3 text-[#211f1e]"
@@ -196,6 +199,8 @@ export default function BuscarScreen() {
           autoFocus
           returnKeyType="search"
           onSubmitEditing={performSearch}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
         />
         {query.length > 0 && (
           <TouchableOpacity onPress={() => setQuery("")} activeOpacity={0.7}>

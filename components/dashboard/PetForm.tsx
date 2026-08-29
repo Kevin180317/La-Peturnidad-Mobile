@@ -43,6 +43,9 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
     uri: string;
   } | null>(null);
   const [uploadingPetImage, setUploadingPetImage] = useState(false);
+  const [nameFocused, setNameFocused] = useState(false);
+  const [colorFocused, setColorFocused] = useState(false);
+  const [featuresFocused, setFeaturesFocused] = useState(false);
 
   const handleSelectImage = async () => {
     const result = await dashboardService.selectImage();
@@ -119,21 +122,25 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Nombre */}
       <Text className="font-semibold mb-2">Nombre *</Text>
       <TextInput
-        className="border border-gray-300 rounded-lg p-3 mb-4 bg-white text-[#211f1e]"
+        className={`${nameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
         placeholder="Nombre de la mascota"
         placeholderTextColor="#9BA1A6"
         value={petName}
         onChangeText={setPetName}
+        onFocus={() => setNameFocused(true)}
+        onBlur={() => setNameFocused(false)}
       />
 
       {/* Color */}
       <Text className="font-semibold mb-2">Color *</Text>
       <TextInput
-        className="border border-gray-300 rounded-lg p-3 mb-4 bg-white text-[#211f1e]"
+        className={`${colorFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
         placeholder="Color principal"
         placeholderTextColor="#9BA1A6"
         value={petColor}
         onChangeText={setPetColor}
+        onFocus={() => setColorFocused(true)}
+        onBlur={() => setColorFocused(false)}
       />
 
       {/* Tamaño */}
@@ -154,7 +161,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Características */}
       <Text className="font-semibold mb-2">Características especiales</Text>
       <TextInput
-        className="border border-gray-300 rounded-lg p-3 mb-4 bg-white text-[#211f1e]"
+        className={`${featuresFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
         placeholder="Ej: manchas, cicatrices, comportamiento especial..."
         placeholderTextColor="#9BA1A6"
         value={petFeatures}
@@ -162,6 +169,8 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
         multiline
         numberOfLines={3}
         textAlignVertical="top"
+        onFocus={() => setFeaturesFocused(true)}
+        onBlur={() => setFeaturesFocused(false)}
       />
 
       {/* Foto */}

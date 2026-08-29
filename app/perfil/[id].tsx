@@ -123,8 +123,8 @@ export default function PublicProfileScreen() {
   if (!profile) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0] p-5">
-        <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
-          <Ionicons name="person-remove-outline" size={32} color="#ff7e70" />
+        <View className="w-16 h-16 rounded-full bg-[#211f1e]/10 items-center justify-center mb-3">
+          <Ionicons name="person-remove-outline" size={32} color="#211f1e" />
         </View>
         <Text className="text-gray-500 text-center">Perfil no encontrado</Text>
         <TouchableOpacity className="bg-[#211f1e] py-3 px-6 rounded-lg mt-4" onPress={() => router.back()}>
@@ -144,9 +144,9 @@ export default function PublicProfileScreen() {
     >
       <View className="items-center mb-6">
         {profile.profile_picture_url ? (
-          <Image source={{ uri: profile.profile_picture_url }} className="w-28 h-28 rounded-full border-4 border-[#ff7e70]" />
+          <Image source={{ uri: profile.profile_picture_url }} className="w-28 h-28 rounded-full border-4 border-[#007275]" />
         ) : (
-          <View className="w-28 h-28 rounded-full bg-[#ff7e70] items-center justify-center border-4 border-[#ff7e70]/30">
+          <View className="w-28 h-28 rounded-full bg-[#007275] items-center justify-center border-4 border-[#007275]/30">
             <Text className="text-4xl text-white font-bold">{initial}</Text>
           </View>
         )}
@@ -160,15 +160,15 @@ export default function PublicProfileScreen() {
 
       <View className="flex-row justify-around bg-white p-4 rounded-xl mb-6 shadow-sm">
         <View className="items-center">
-          <Text className="text-xl font-bold text-[#ff7e70]">{pets.length}</Text>
+          <Text className="text-xl font-bold text-[#007275]">{pets.length}</Text>
           <Text className="text-gray-500 text-sm">Mascotas</Text>
         </View>
         <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${id}&tab=followers`)}>
-          <Text className="text-xl font-bold text-[#ff7e70]">{followersCount}</Text>
+          <Text className="text-xl font-bold text-[#007275]">{followersCount}</Text>
           <Text className="text-gray-500 text-sm">Seguidores</Text>
         </TouchableOpacity>
         <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${id}&tab=following`)}>
-          <Text className="text-xl font-bold text-[#ff7e70]">{followingCount}</Text>
+          <Text className="text-xl font-bold text-[#007275]">{followingCount}</Text>
           <Text className="text-gray-500 text-sm">Siguiendo</Text>
         </TouchableOpacity>
       </View>
@@ -186,7 +186,7 @@ export default function PublicProfileScreen() {
       ) : (
         <View className="flex-row gap-3 mb-6">
           <TouchableOpacity
-            className={`flex-1 py-3 rounded-lg ${isFollowing ? "bg-gray-500" : "bg-[#ff7e70]"}`}
+            className={`flex-1 py-3 rounded-lg ${isFollowing ? "bg-gray-500" : "bg-[#007275]"}`}
             onPress={handleFollow}
           >
             <Text className="text-white text-center font-bold">
@@ -203,9 +203,9 @@ export default function PublicProfileScreen() {
       )}
 
       {userRole && (userRole === "moderator" || userRole === "admin") && (
-        <View className="bg-[#ff7e70]/10 p-3 rounded-xl mb-4 flex-row items-center justify-center gap-1.5">
-          <Ionicons name="shield-checkmark" size={18} color="#ff7e70" />
-          <Text className="text-[#ff7e70] text-center font-semibold capitalize">
+        <View className="bg-[#007275] p-3 rounded-xl mb-4 flex-row items-center justify-center gap-1.5">
+          <Ionicons name="shield-checkmark" size={18} color="#fff" />
+          <Text className="text-white text-center font-semibold capitalize">
             {userRole === "admin" ? "Administrador" : "Moderador"}
           </Text>
         </View>

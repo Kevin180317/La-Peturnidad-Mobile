@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import {
   ActivityIndicator,
   GestureResponderEvent,
@@ -72,7 +72,7 @@ export function Button({
       {loading ? (
         <ActivityIndicator
           size="small"
-          color={variant === "primary" || variant === "secondary" ? "#fff" : "#ff7e70"}
+          color={variant === "primary" || variant === "secondary" ? "#fff" : "#211f1e"}
         />
       ) : (
         <View className="flex-row items-center gap-2">
@@ -138,6 +138,8 @@ export function Input({
   style,
   ...props
 }: InputProps & React.ComponentProps<typeof TextInput>) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View className="mb-4">
       {label && (
@@ -145,7 +147,11 @@ export function Input({
       )}
       <View
         className={`flex-row items-center border-2 rounded-xl bg-white ${
-          error ? "border-red-500" : "border-[#211f1e]/20"
+          error
+            ? "border-[#d93a3a]"
+            : focused
+              ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
+              : "border-[#211f1e]/20"
         }`}
       >
         {icon && <View className="pl-4">{icon}</View>}
@@ -155,9 +161,17 @@ export function Input({
           } pr-4`}
           placeholderTextColor="#9BA1A6"
           {...props}
+          onFocus={(e) => {
+            setFocused(true);
+            props.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            props.onBlur?.(e);
+          }}
         />
       </View>
-      {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
+      {error && <Text className="text-[#d93a3a] text-sm mt-1">{error}</Text>}
     </View>
   );
 }
@@ -171,8 +185,8 @@ export function Badge({ label, variant = "primary", style, ...props }: BadgeProp
   const variantStyles = {
     primary: "bg-[#007275]/10 text-[#007275]",
     success: "bg-[#007275]/10 text-[#007275]",
-    warning: "bg-[#ff7e70]/10 text-[#ff7e70]",
-    error: "bg-red-100 text-red-600",
+    warning: "bg-[#e8a93b]/15 text-[#8a5a15]",
+    error: "bg-[#d93a3a]/10 text-[#d93a3a]",
     info: "bg-[#007275]/10 text-[#007275]",
   };
 
@@ -213,21 +227,21 @@ export function Avatar({
     return (
       <Image
         source={{ uri }}
-        className={`${sizeStyles[size]} rounded-full border-[#ff7e70] ${borderSizes[size]}`}
+        className={`${sizeStyles[size]} rounded-full border-[#007275] ${borderSizes[size]}`}
       />
     );
   }
 
   return (
     <View
-      className={`${sizeStyles[size]} rounded-full bg-[#faf5e0] items-center justify-center border-2 border-[#ff7e70] ${borderSizes[size]}`}
+      className={`${sizeStyles[size]} rounded-full bg-[#faf5e0] items-center justify-center border-2 border-[#007275] ${borderSizes[size]}`}
     >
       {fallback ? (
-        <Text className="text-[#ff7e70] font-bold">
+        <Text className="text-[#007275] font-bold">
           {fallback[0].toUpperCase()}
         </Text>
       ) : (
-        <Ionicons name="paw" size={size === "sm" ? 14 : size === "xl" ? 36 : 22} color="#ff7e70" />
+        <Ionicons name="paw" size={size === "sm" ? 14 : size === "xl" ? 36 : 22} color="#007275" />
       )}
     </View>
   );

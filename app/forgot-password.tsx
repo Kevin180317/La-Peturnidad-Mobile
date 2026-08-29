@@ -13,6 +13,7 @@ import Toast from "react-native-toast-message";
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
   const router = useRouter();
 
   const handleSendOtp = async () => {
@@ -71,7 +72,7 @@ export default function ForgotPasswordScreen() {
       ) : (
         <>
           <View className="mb-8">
-            <Text className="text-3xl font-bold text-[#ff7e70] mb-2">
+            <Text className="text-3xl font-bold text-[#211f1e] mb-2">
               Recuperar contraseña
             </Text>
             <Text className="text-[#211f1e] text-lg">
@@ -84,13 +85,15 @@ export default function ForgotPasswordScreen() {
               Correo electrónico
             </Text>
             <TextInput
-              className="border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]"
+              className={`${emailFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e]`}
               placeholder="ejemplo@correo.com"
               placeholderTextColor="#9BA1A6"
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
             />
           </View>
 
@@ -105,7 +108,7 @@ export default function ForgotPasswordScreen() {
 
           <View className="flex-row justify-center mt-4">
             <Text className="text-[#211f1e]">¿Recordaste? </Text>
-            <Link href="/" className="text-[#ff7e70] font-bold">
+            <Link href="/" className="text-[#c2402f] font-bold">
               Inicia sesión
             </Link>
           </View>
