@@ -124,7 +124,7 @@ export default function GruposScreen() {
         <View className="flex-row items-center justify-between mb-6">
           <Text className="text-2xl font-bold text-[#211f1e]">Grupos</Text>
           <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center"
+            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center"
             onPress={() => setShowForm(true)}
           >
             <Ionicons name="add" size={20} color="white" style={{ marginRight: 6 }} />
@@ -144,7 +144,7 @@ export default function GruposScreen() {
           groups.map((group) => (
             <TouchableOpacity
               key={group.id}
-              className="bg-white p-4 rounded-xl mb-3 shadow-sm"
+              className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]"
               onPress={() => router.push(`/grupos/${group.id}`)}
               onLongPress={() => {
                 if (group.created_by !== userId) return;
@@ -169,7 +169,7 @@ export default function GruposScreen() {
               <View className="flex-row items-center justify-between mb-2">
                 <Text className="font-bold text-lg text-[#211f1e]">{group.name}</Text>
                 <TouchableOpacity
-                  className={`px-4 py-2 rounded-lg ${group.isMember ? "bg-gray-300" : "bg-[#007275]"}`}
+                  className={`px-4 py-2 rounded-xl ${group.isMember ? "bg-gray-300" : "bg-[#007275]"}`}
                   onPress={() => handleJoinLeave(group.id, group.isMember)}
                 >
                   <Text className={`font-semibold text-sm ${group.isMember ? "text-gray-700" : "text-white"}`}>
@@ -221,13 +221,13 @@ export default function GruposScreen() {
             />
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-lg ${creating ? "bg-gray-400" : "bg-[#007275]"}`}
+                className={`flex-1 py-3 rounded-xl ${creating ? "bg-gray-400" : "bg-[#007275]"}`}
                 disabled={creating}
                 onPress={handleCreate}
               >
                 <Text className={`text-center font-bold ${creating ? "text-gray-700" : "text-white"}`}>{creating ? "Creando..." : "Crear"}</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-lg" onPress={() => setShowForm(false)}>
+              <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-xl" onPress={() => setShowForm(false)}>
                 <Text className="text-white text-center font-bold">Cancelar</Text>
               </TouchableOpacity>
             </View>

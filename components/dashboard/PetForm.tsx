@@ -87,7 +87,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
   };
 
   return (
-    <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
+    <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
       <Text className="text-xl font-bold mb-4">
         {editingPet ? "Editar mascota" : "Registrar nueva mascota"}
       </Text>
@@ -177,7 +177,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       <Text className="font-semibold mb-2">Foto *</Text>
       <View className="flex-row gap-3 mb-4">
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-3 rounded-lg flex-row items-center justify-center gap-2"
+          className="flex-1 bg-[#007275] py-3 rounded-xl flex-row items-center justify-center gap-2"
           onPress={handleSelectImage}
         >
           <Ionicons name="camera" size={18} color="#fff" />
@@ -185,7 +185,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
         </TouchableOpacity>
         {selectedPetImage && (
           <TouchableOpacity
-            className={`flex-1 py-3 rounded-lg flex-row items-center justify-center gap-2 ${uploadingPetImage ? "bg-gray-400" : "bg-[#007275]"}`}
+            className={`flex-1 py-3 rounded-xl flex-row items-center justify-center gap-2 ${uploadingPetImage ? "bg-gray-400" : "bg-[#007275]"}`}
             onPress={handleUploadImage}
             disabled={uploadingPetImage}
           >
@@ -220,7 +220,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Botones */}
       <View className="flex-row gap-3">
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-lg"
+          className="flex-1 bg-[#007275] py-4 rounded-xl"
           onPress={() => onSubmit({ type: petType, name: petName, color: petColor, size: petSize, features: petFeatures || null, image_url: petImageUrl })}
         >
           <Text className="text-white text-center font-bold">
@@ -228,7 +228,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 bg-[#211f1e] py-4 rounded-lg"
+          className="flex-1 bg-[#211f1e] py-4 rounded-xl"
           onPress={onCancel}
         >
           <Text className="text-white text-center font-bold">Cancelar</Text>

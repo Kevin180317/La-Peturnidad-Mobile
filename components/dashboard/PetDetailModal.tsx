@@ -26,7 +26,7 @@ export function PetDetailModal({
       onRequestClose={onClose}
     >
       <View className="flex-1 justify-center items-center bg-black/50">
-        <View className="bg-white rounded-2xl p-6 w-11/12 max-h-4/5">
+        <View className="bg-white rounded-2xl p-6 w-11/12 max-h-4/5 shadow-[0_12px_32px_rgba(33,31,30,0.18)]">
           {pet && (
             <>
               <ScrollView>
@@ -81,7 +81,7 @@ export function PetDetailModal({
               <View className="flex-row gap-3 mt-4">
                 {onEdit && (
                   <TouchableOpacity
-                    className="flex-1 bg-[#007275] py-3 rounded-lg"
+                    className="flex-1 bg-[#007275] py-3 rounded-xl"
                     onPress={() => {
                       onEdit(pet);
                       onClose();
@@ -93,7 +93,7 @@ export function PetDetailModal({
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
-                  className="flex-1 bg-[#d93a3a] py-3 rounded-lg"
+                  className="flex-1 bg-[#d93a3a] py-3 rounded-xl"
                   onPress={() => {
                     onClose();
                     onDelete(pet.id);
@@ -104,7 +104,7 @@ export function PetDetailModal({
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="flex-1 bg-[#211f1e] py-3 rounded-lg"
+                  className="flex-1 bg-[#211f1e] py-3 rounded-xl"
                   onPress={onClose}
                 >
                   <Text className="text-white text-center font-semibold">Cerrar</Text>

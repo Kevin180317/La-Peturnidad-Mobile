@@ -132,7 +132,7 @@ export default function ResetPasswordScreen() {
           </View>
 
           <TouchableOpacity
-            className="bg-[#007275] py-4 rounded-xl shadow-md mb-4"
+            className="bg-[#007275] py-4 rounded-xl mb-4"
             onPress={handleUpdate}
           >
             <Text className="text-white text-center font-bold text-lg">

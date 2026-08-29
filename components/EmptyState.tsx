@@ -17,7 +17,7 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <View className="bg-white p-10 rounded-2xl items-center border border-[#211f1e]/10">
+    <View className="bg-white p-10 rounded-2xl items-center border border-[#211f1e]/10 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
       <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
         <Ionicons name={icon} size={32} color="#007275" />
       </View>

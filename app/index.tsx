@@ -170,7 +170,7 @@ export default function OnboardingScreen() {
 
         <TouchableOpacity
           onPress={handleNext}
-          className="bg-[#007275] py-4 px-16 rounded-xl shadow-md"
+          className="bg-[#007275] py-4 px-16 rounded-xl"
           activeOpacity={0.8}
         >
           <Text className="text-white font-bold text-lg">

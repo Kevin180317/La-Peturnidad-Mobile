@@ -111,7 +111,7 @@ export default function HistoriasScreen() {
             <Text className="text-2xl font-bold text-[#211f1e]">Reuniones exitosas</Text>
           </View>
           <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center"
+            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center"
             onPress={() => setShowForm(true)}
           >
             <Ionicons name="sparkles" size={18} color="white" style={{ marginRight: 6 }} />
@@ -131,7 +131,7 @@ export default function HistoriasScreen() {
           stories.map((s) => {
             const isMine = s.user_id === userId;
             return (
-              <View key={s.id} className="bg-white p-5 rounded-xl mb-4 shadow-sm">
+              <View key={s.id} className="bg-white p-5 rounded-2xl mb-4 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center gap-2">
                     <Ionicons name="paw" size={20} color="#007275" />
@@ -190,13 +190,13 @@ export default function HistoriasScreen() {
             />
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
+                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
                 disabled={posting}
                 onPress={handleCreate}
               >
                 <Text className={`text-center font-bold ${posting ? "text-gray-700" : "text-white"}`}>{posting ? "Publicando..." : "Publicar"}</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-lg" onPress={() => setShowForm(false)}>
+              <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-xl" onPress={() => setShowForm(false)}>
                 <Text className="text-white text-center font-bold">Cancelar</Text>
               </TouchableOpacity>
             </View>

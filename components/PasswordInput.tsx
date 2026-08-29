@@ -10,7 +10,7 @@ export function PasswordInput(props: PasswordInputProps) {
 
   return (
     <View
-      className={`flex-row items-center border-2 rounded-xl bg-white ${
+      className={`flex-row items-center border-2 rounded-lg bg-white ${
         focused
           ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
           : "border-[#211f1e]/20"

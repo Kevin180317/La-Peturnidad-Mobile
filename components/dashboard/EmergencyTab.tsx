@@ -160,15 +160,15 @@ export function EmergencyTab({
 
       {/* Selección de mascota para alerta */}
       {selectingPetForAlert && (
-        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
           <Text className="font-bold mb-3">Selecciona la mascota perdida:</Text>
           {pets.length === 0 ? (
-            <View className="bg-[#faf5e0] p-6 rounded-lg items-center">
+            <View className="bg-[#faf5e0] p-6 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
               <Text className="text-gray-500">
                 No tienes mascotas registradas
               </Text>
               <TouchableOpacity
-                className="bg-[#007275] py-2 px-4 rounded-lg mt-3"
+                className="bg-[#007275] py-2 px-4 rounded-xl mt-3"
                 onPress={onGoHome}
               >
                 <Text className="text-white">Registrar mascota</Text>
@@ -214,7 +214,7 @@ export function EmergencyTab({
 
       {/* Alertas de mascotas perdidas */}
       {showAlerts && (
-        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
             <Ionicons name="paw" size={18} color="#c2402f" />
             <Text className="font-bold">Mascotas perdidas en tu colonia</Text>
@@ -222,7 +222,7 @@ export function EmergencyTab({
           {loadingAlerts ? (
             <ActivityIndicator size="large" color="#007275" />
           ) : emergencyAlerts.length === 0 ? (
-            <View className="bg-[#007275]/10 p-8 rounded-lg items-center">
+            <View className="bg-[#007275]/10 p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
               <Ionicons name="happy-outline" size={40} color="#007275" />
               <Text className="text-gray-600 text-center mt-2">
                 No hay mascotas perdidas reportadas en tu colonia
@@ -267,7 +267,7 @@ export function EmergencyTab({
                       Dueño: {alert.owner_name} - {alert.owner_phone}
                     </Text>
                       <TouchableOpacity
-                        className="bg-[#007275] py-2 px-4 rounded-lg mt-2 self-start flex-row items-center gap-1.5"
+                        className="bg-[#007275] py-2 px-4 rounded-xl mt-2 self-start flex-row items-center gap-1.5"
                         onPress={() => onFoundPet(alert)}
                       >
                         <Ionicons name="checkmark-circle" size={16} color="#fff" />
@@ -285,13 +285,13 @@ export function EmergencyTab({
 
       {/* Mis alertas */}
       {showMyAlerts && (
-        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
             <Ionicons name="clipboard-outline" size={18} color="#007275" />
             <Text className="font-bold">Mis alertas activas</Text>
           </View>
           {myAlerts.length === 0 ? (
-            <View className="bg-[#faf5e0] p-8 rounded-lg items-center">
+            <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
               <Text className="text-gray-500 text-center">
                 No tienes alertas activas
               </Text>
@@ -329,7 +329,7 @@ export function EmergencyTab({
                       {formatDate(alert.disappearance_date)}
                     </Text>
                     <TouchableOpacity
-                      className="bg-[#d93a3a] py-2 px-4 rounded-lg self-start flex-row items-center gap-1.5"
+                      className="bg-[#d93a3a] py-2 px-4 rounded-xl self-start flex-row items-center gap-1.5"
                       onPress={() => onDeleteAlert(alert.id)}
                     >
                       <Ionicons name="trash" size={14} color="#fff" />
@@ -347,13 +347,13 @@ export function EmergencyTab({
 
       {/* Mascotas encontradas */}
       {showFoundPets && (
-        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
             <Ionicons name="checkmark-circle" size={18} color="#007275" />
             <Text className="font-bold">Mascotas que he encontrado</Text>
           </View>
           {foundPets.length === 0 ? (
-            <View className="bg-[#faf5e0] p-8 rounded-lg items-center">
+            <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
               <Text className="text-gray-500 text-center">
                 No has reportado mascotas encontradas
               </Text>

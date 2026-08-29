@@ -1,10 +1,20 @@
 # PROGRES — Lucky Tracker
 
-> Estado actual del proyecto. Última actualización: 01/08/2026. Log vivo, detalle línea por línea — fuente de verdad. Para un resumen condensado en inglés por fase (más el origen del diseño y próximos pasos), ver [`docs/MILESTONES.md`](docs/MILESTONES.md).
+> Estado actual del proyecto. Última actualización: 29/08/2026. Log vivo, detalle línea por línea — fuente de verdad. Para un resumen condensado en inglés por fase (más el origen del diseño y próximos pasos), ver [`docs/MILESTONES.md`](docs/MILESTONES.md).
 
 ---
 
-## ✅ Fase 8 — Fix Uniwind + Rediseño de iconos (Completada)
+## ✅ Fase 10 — Lucky Tracker Design System v1.0 (Completada)
+
+| Item | Notas |
+|---|---|
+| **Importación del design system** | Proyecto `Lucky Tracker Design System.dc.html` importado desde Claude Design (claude.ai/design) vía el MCP `claude_design`. Refina el look actual sin cambiar la paleta de marca (teal/coral/dark/cream); el cambio es semántico. |
+| **Semántica de color: teal = único color de acción, coral = solo emergencia** | Antes coral (`#ff7e70`) se usaba como "primary" genérico (botones, links, iconos activos, avatares, stats) — falla contraste WCAG como texto sobre crema (~2.2:1, mínimo 4.5:1). Ahora teal (`#007275`) es el único color de acción/navegación primaria; coral queda reservado a la sección Emergencia. Nuevos tokens: `coral-800 #c2402f` (coral legible como texto, único caso permitido), `danger #d93a3a` (reemplaza los `red-500` sueltos de Tailwind), `warning #e8a93b`, `success #2e9e63`, `line #e3dccb`. `constants/Colors.ts` y `utils/theme.ts` actualizados como fuente de verdad de los tokens. `TabBar.tsx`: la barra activa y el ícono activo dejaron de ser coral/rojo para las 5 pestañas por igual — ahora es teal, salvo el ícono de Emergencia que se mantiene coral siempre. Badges de rol alineados al spec ("Admin" = ink-900 sólido, "Moderador" = teal sólido). Aplicado en ~29 archivos (`app/*`, `components/*`, `components/dashboard/*`). |
+| **Foco de inputs (borde teal + halo)** | Ningún `TextInput` cambiaba de aspecto al enfocarse. Agregado estado `focused` (`onFocus`/`onBlur`) a los 34 campos de texto de la app (16 archivos): borde `border-[#007275]` + halo `shadow-[0_0_0_3px_rgba(0,114,117,0.14)]` al enfocar, borde de reposo original sin cambios. Componentes compartidos `PasswordInput.tsx` y el `Input` de `Button.tsx` arreglados de forma centralizada. |
+| **Consistencia de radios y sombras** | Radios unificados por rol: cards/paneles `rounded-2xl` (16px), botones `rounded-xl` (12px), inputs `rounded-lg` (8px) — antes mezclados sin criterio. Sombras: botones ahora planos (sin `shadow-md`/`shadow-lg`, el sistema los define sin elevación), cards con la sombra e1 exacta (`0 1px 2px rgba(33,31,30,.08)`), modales (`ConfirmModal`, `PetDetailModal`) con e3, sheet de "nuevo aviso" en Comunidad con e2, `TabBar` sin sombra (solo borde superior). Espaciado revisado: ya usaba la escala base-4 de Tailwind de forma consistente, sin valores arbitrarios fuera de grilla — no requirió cambios. |
+| **Verificación** | `tsc --noEmit` limpio (0 errores) después de cada una de las 3 pasadas. Grep final: único coral remanente son usos justificados de Emergencia + definiciones de token; único `red-500` remanente, ninguno (todo migrado a `danger`). |
+
+
 
 | Item | Notas |
 |---|---|
@@ -200,6 +210,7 @@
 
 | Item | Notas |
 |---|---|
+| **⏳ Migrar pantallas a componentes compartidos (`Button`/`Card`/`Badge`/`Avatar`)** | `components/Button.tsx` define estos 5 componentes pero ninguna pantalla los importa — todo el código usa `TouchableOpacity`/`View` ad-hoc (112 `TouchableOpacity` en 33 archivos). A diferencia de las pasadas de la Fase 10 (reemplazos mecánicos de valores), esto es reestructurar cada botón/card/badge/avatar para usar el componente compartido — refactor real, no find-and-replace, mayor riesgo de romper algo. Decisión (29/08/2026): dejarlo pendiente, evaluar pantalla por pantalla en vez de las 33 juntas si se retoma. |
 | **Generated types** | ✅ Nuevo `types/database.ts` + `dashboard.service.ts` migrado (Fase 7) |
 | **Onboarding** | ✅ Ya existe (3 pasos) + flag `hasSeenOnboarding` en AsyncStorage (se borra en logout) |
 | **CI/CD** | ✅ GitHub Actions: lint + typecheck (Fase 7) |

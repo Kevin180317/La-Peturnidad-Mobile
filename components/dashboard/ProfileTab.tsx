@@ -207,7 +207,7 @@ export function ProfileTab({
                   className="w-24 h-24 rounded-lg self-center mb-2"
                 />
                 <TouchableOpacity
-                  className={`py-2 rounded-lg ${uploadingProfileImage ? "bg-gray-400" : "bg-[#007275]"}`}
+                  className={`py-2 rounded-xl ${uploadingProfileImage ? "bg-gray-400" : "bg-[#007275]"}`}
                   onPress={handleUploadProfileImage}
                   disabled={uploadingProfileImage}
                 >
@@ -222,7 +222,7 @@ export function ProfileTab({
           </View>
 
           {/* Información personal */}
-          <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
+          <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
             <Text className="text-lg font-bold mb-4">Información personal</Text>
 
             <View className="space-y-3">
@@ -248,7 +248,7 @@ export function ProfileTab({
           </View>
 
           {/* Dirección */}
-          <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
+          <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
             <Text className="text-lg font-bold mb-4">Dirección</Text>
 
             <View className="space-y-3">
@@ -268,7 +268,7 @@ export function ProfileTab({
           </View>
 
           {/* Estadísticas */}
-          <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
+          <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
             <Text className="text-lg font-bold mb-4">Estadísticas</Text>
 
             <View className="flex-row justify-around">
@@ -303,7 +303,7 @@ export function ProfileTab({
           </View>
 
           {/* Acciones - lista de menú */}
-          <View className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+          <View className="bg-white rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6 overflow-hidden">
             <Text className="text-lg font-bold p-5 pb-3">Acciones</Text>
             {menuItems.map((item, index) => (
               <TouchableOpacity
@@ -331,7 +331,7 @@ export function ProfileTab({
           </View>
 
           {/* Información de cuenta */}
-          <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
+          <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
             <Text className="text-lg font-bold mb-4">Cuenta</Text>
             <View className="space-y-3">
               <View className="flex-row border-b border-gray-100 py-2">
@@ -348,13 +348,13 @@ export function ProfileTab({
           </View>
         </>
       ) : (
-        <View className="bg-[#211f1e]/10 p-8 rounded-xl items-center">
+        <View className="bg-[#211f1e]/10 p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
           <Ionicons name="alert-circle-outline" size={44} color="#211f1e" />
           <Text className="text-gray-600 text-center mt-3">
             No se encontró información de perfil. Completa tu registro.
           </Text>
           <TouchableOpacity
-            className="bg-[#007275] py-3 px-6 rounded-lg mt-4"
+            className="bg-[#007275] py-3 px-6 rounded-xl mt-4"
             onPress={() =>
               router.replace({
                 pathname: "/register-extended",

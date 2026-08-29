@@ -126,7 +126,7 @@ export function ComunidadTab({
         <View className="flex-row items-center justify-between mb-4">
           <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
           <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center"
+            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center"
             onPress={() => setComShowForm(true)}
           >
             <Ionicons name="add" size={18} color="#fff" style={{ marginRight: 2 }} />
@@ -156,7 +156,7 @@ export function ComunidadTab({
         {loading ? (
           <ActivityIndicator size="large" color="#007275" />
         ) : visibleItems.length === 0 ? (
-          <View className="bg-white p-10 rounded-xl items-center">
+          <View className="bg-white p-10 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
             <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
               <Ionicons name="chatbubbles-outline" size={32} color="#007275" />
             </View>
@@ -173,7 +173,7 @@ export function ComunidadTab({
             const isCommenting =
               commentTarget?.id === item.id && commentTarget?.type === "announcement";
             return (
-              <View key={item.id} className="bg-white p-4 rounded-xl mb-3 shadow-sm">
+              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
                 <TouchableOpacity
                   className="flex-row items-start gap-3 mb-2"
                   onPress={() => router.push(`/perfil/${item.user_id}`)}
@@ -271,7 +271,7 @@ export function ComunidadTab({
 
       <Modal animationType="slide" transparent visible={comShowForm} onRequestClose={() => setComShowForm(false)}>
         <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-2xl p-5">
+          <View className="bg-white rounded-t-2xl p-5 shadow-[0_4px_12px_rgba(33,31,30,0.10)]">
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-xl font-bold text-[#211f1e]">Nuevo aviso</Text>
               <TouchableOpacity onPress={() => setComShowForm(false)}>
@@ -289,10 +289,10 @@ export function ComunidadTab({
             <TextInput className={`bg-white p-3 rounded-lg mb-3 ${titleFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`} placeholder="Título *" placeholderTextColor="#9BA1A6" value={comFormTitle} onChangeText={setComFormTitle} onFocus={() => setTitleFocused(true)} onBlur={() => setTitleFocused(false)} />
             <TextInput className={`bg-white p-3 rounded-lg mb-4 ${contentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`} placeholder="Escribe tu mensaje... *" placeholderTextColor="#9BA1A6" value={comFormContent} onChangeText={setComFormContent} multiline numberOfLines={4} textAlignVertical="top" onFocus={() => setContentFocused(true)} onBlur={() => setContentFocused(false)} />
             <View className="flex-row gap-3">
-              <TouchableOpacity       className={`flex-1 py-3 rounded-lg ${comPosting ? "bg-gray-400" : "bg-[#007275]"}`} disabled={comPosting} onPress={handleComPost}>
+              <TouchableOpacity       className={`flex-1 py-3 rounded-xl ${comPosting ? "bg-gray-400" : "bg-[#007275]"}`} disabled={comPosting} onPress={handleComPost}>
                 <Text className={`text-center font-bold ${comPosting ? "text-gray-700" : "text-white"}`}>{comPosting ? "Publicando..." : "Publicar"}</Text>
               </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-lg" onPress={() => setComShowForm(false)}>
+              <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-xl" onPress={() => setComShowForm(false)}>
                 <Text className="text-white text-center font-bold">Cancelar</Text>
               </TouchableOpacity>
             </View>

@@ -135,7 +135,7 @@ export default function PanelModeracionScreen() {
         />
       ) : (
         reports.map((report) => (
-          <View key={report.id} className="bg-white p-4 rounded-xl mb-3 shadow-sm">
+          <View key={report.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
             <View className="flex-row items-center justify-between mb-2">
               <Text className="font-bold text-[#211f1e]">Reporte a {report.target_name}</Text>
               <View className={`px-2 py-1 rounded-full ${statusColor(report.status)}`}>
@@ -155,14 +155,14 @@ export default function PanelModeracionScreen() {
             {report.status === "pending" && (
               <View className="flex-row gap-3">
                 <TouchableOpacity
-                  className="flex-1 bg-[#007275] py-2 rounded-lg flex-row items-center justify-center"
+                  className="flex-1 bg-[#007275] py-2 rounded-xl flex-row items-center justify-center"
                   onPress={() => handleReview(report.id, "reviewed")}
                 >
                   <Ionicons name="checkmark-circle" size={16} color="white" style={{ marginRight: 4 }} />
                   <Text className="text-white text-center text-sm font-semibold">Revisado</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="flex-1 bg-gray-500 py-2 rounded-lg"
+                  className="flex-1 bg-gray-500 py-2 rounded-xl"
                   onPress={() => handleReview(report.id, "dismissed")}
                 >
                   <Text className="text-white text-center text-sm font-semibold">Descartar</Text>

@@ -91,7 +91,7 @@ export default function EditarPerfilScreen() {
     <ScrollView contentContainerClassName="p-5 bg-[#faf5e0] flex-1">
       <Text className="text-2xl font-bold text-[#211f1e] mb-6">Editar perfil</Text>
 
-      <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
+      <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
         <Text className="font-semibold mb-2 text-gray-600">Nombre *</Text>
         <TextInput
           className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${firstNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}

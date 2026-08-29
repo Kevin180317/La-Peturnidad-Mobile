@@ -47,7 +47,7 @@ export function ConfirmModal({
         }}
       >
         <TouchableOpacity
-          className="w-[85%] bg-white rounded-3xl p-6 items-center"
+          className="w-[85%] bg-white rounded-3xl p-6 items-center shadow-[0_12px_32px_rgba(33,31,30,0.18)]"
           activeOpacity={1}
           onPress={() => {}}
         >

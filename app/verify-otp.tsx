@@ -96,7 +96,7 @@ export default function VerifyOtpScreen() {
               Código OTP
             </Text>
             <TextInput
-              className={`${otpFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-xl p-4 text-base bg-white text-[#211f1e] text-center tracking-[8px]`}
+              className={`${otpFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e] text-center tracking-[8px]`}
               placeholder="--------"
               placeholderTextColor="#9BA1A6"
               value={otp}
@@ -111,7 +111,7 @@ export default function VerifyOtpScreen() {
           </View>
 
           <TouchableOpacity
-            className="bg-[#007275] py-4 rounded-xl shadow-md mb-4"
+            className="bg-[#007275] py-4 rounded-xl mb-4"
             onPress={() => handleVerify()}
           >
             <Text className="text-white text-center font-bold text-lg">

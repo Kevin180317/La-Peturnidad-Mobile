@@ -102,7 +102,7 @@ export function FeedTab({
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-2xl font-bold text-[#211f1e]">Feed</Text>
         <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center"
+            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center"
           onPress={() => setShowPostForm(true)}
         >
           <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 4 }} />
@@ -130,7 +130,7 @@ export function FeedTab({
       </View>
 
       {showPostForm && (
-        <View className="bg-white p-4 rounded-xl mb-6 shadow-sm">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
           <TextInput
             className={`bg-white p-3 rounded-lg mb-3 ${postFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`}
             placeholder="¿Qué quieres compartir?"
@@ -145,14 +145,14 @@ export function FeedTab({
           />
           <View className="flex-row gap-3">
             <TouchableOpacity
-              className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
+              className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
               onPress={handleCreatePost}
               disabled={posting}
             >
               <Text className={`text-center font-bold ${posting ? "text-gray-700" : "text-white"}`}>{posting ? "Publicando..." : "Publicar"}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="flex-1 bg-[#211f1e] py-3 rounded-lg"
+              className="flex-1 bg-[#211f1e] py-3 rounded-xl"
               onPress={() => {
                 setShowPostForm(false);
                 setPostContent("");
@@ -167,7 +167,7 @@ export function FeedTab({
       {loading ? (
         <ActivityIndicator size="large" color="#007275" />
       ) : visiblePosts.length === 0 ? (
-        <View className="bg-white p-10 rounded-xl items-center">
+        <View className="bg-white p-10 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
           <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
             <Ionicons name="phone-portrait-outline" size={32} color="#007275" />
           </View>
@@ -185,7 +185,7 @@ export function FeedTab({
             <TouchableOpacity
               key={post.id}
               activeOpacity={1}
-              className="bg-white p-4 rounded-xl mb-3 shadow-sm"
+              className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]"
               onPress={() => onToggleComments("post", post.id)}
             >
               <TouchableOpacity

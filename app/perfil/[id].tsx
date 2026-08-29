@@ -127,7 +127,7 @@ export default function PublicProfileScreen() {
           <Ionicons name="person-remove-outline" size={32} color="#211f1e" />
         </View>
         <Text className="text-gray-500 text-center">Perfil no encontrado</Text>
-        <TouchableOpacity className="bg-[#211f1e] py-3 px-6 rounded-lg mt-4" onPress={() => router.back()}>
+        <TouchableOpacity className="bg-[#211f1e] py-3 px-6 rounded-xl mt-4" onPress={() => router.back()}>
           <Text className="text-white font-semibold">Volver</Text>
         </TouchableOpacity>
       </View>
@@ -158,7 +158,7 @@ export default function PublicProfileScreen() {
         )}
       </View>
 
-      <View className="flex-row justify-around bg-white p-4 rounded-xl mb-6 shadow-sm">
+      <View className="flex-row justify-around bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
         <View className="items-center">
           <Text className="text-xl font-bold text-[#007275]">{pets.length}</Text>
           <Text className="text-gray-500 text-sm">Mascotas</Text>
@@ -176,7 +176,7 @@ export default function PublicProfileScreen() {
       {isOwn ? (
         <View className="flex-row gap-3 mb-6">
           <TouchableOpacity
-            className="flex-1 bg-[#007275] py-3 rounded-lg flex-row items-center justify-center"
+            className="flex-1 bg-[#007275] py-3 rounded-xl flex-row items-center justify-center"
             onPress={() => router.push("/editar-perfil")}
           >
             <Ionicons name="pencil" size={16} color="white" style={{ marginRight: 6 }} />
@@ -186,7 +186,7 @@ export default function PublicProfileScreen() {
       ) : (
         <View className="flex-row gap-3 mb-6">
           <TouchableOpacity
-            className={`flex-1 py-3 rounded-lg ${isFollowing ? "bg-gray-500" : "bg-[#007275]"}`}
+            className={`flex-1 py-3 rounded-xl ${isFollowing ? "bg-gray-500" : "bg-[#007275]"}`}
             onPress={handleFollow}
           >
             <Text className="text-white text-center font-bold">
@@ -194,7 +194,7 @@ export default function PublicProfileScreen() {
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="flex-1 bg-[#007275] py-3 rounded-lg"
+            className="flex-1 bg-[#007275] py-3 rounded-xl"
             onPress={handleMessage}
           >
             <Text className="text-white text-center font-bold">Mensaje</Text>
@@ -216,12 +216,12 @@ export default function PublicProfileScreen() {
         <Text className="text-lg font-bold text-[#211f1e]">Mascotas</Text>
       </View>
       {pets.length === 0 ? (
-        <View className="bg-white p-6 rounded-xl items-center mb-6">
+        <View className="bg-white p-6 rounded-2xl items-center mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
           <Text className="text-gray-500">Sin mascotas registradas</Text>
         </View>
       ) : (
         pets.map((pet) => (
-          <View key={pet.id} className="bg-white p-4 rounded-xl mb-3 shadow-sm flex-row">
+          <View key={pet.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)] flex-row">
             {pet.image_url ? (
               <Image source={{ uri: pet.image_url }} className="w-16 h-16 rounded-lg mr-3" />
             ) : (
@@ -242,7 +242,7 @@ export default function PublicProfileScreen() {
         ))
       )}
 
-      <View className="bg-white p-4 rounded-xl shadow-sm mb-6">
+      <View className="bg-white p-4 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
         <Text className="font-bold mb-2 text-[#211f1e]">Información</Text>
         <Text className="text-gray-600">Miembro desde: {formatDate(profile.created_at)}</Text>
       </View>

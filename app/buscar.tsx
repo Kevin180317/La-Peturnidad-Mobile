@@ -94,7 +94,7 @@ export default function BuscarScreen() {
   const renderPet = (pet: PetSearchResult) => (
     <TouchableOpacity
       key={pet.id}
-      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3"
+      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]"
       onPress={() => router.push(`/perfil/${pet.user_id}`)}
       activeOpacity={0.8}
     >
@@ -127,7 +127,7 @@ export default function BuscarScreen() {
   const renderGroup = (group: GroupSearchResult) => (
     <TouchableOpacity
       key={group.id}
-      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3"
+      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]"
       onPress={() => router.push(`/grupos/${group.id}`)}
       activeOpacity={0.8}
     >
@@ -149,7 +149,7 @@ export default function BuscarScreen() {
   const renderUser = (user: UserSearchResult) => (
     <TouchableOpacity
       key={user.user_id}
-      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3"
+      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]"
       onPress={() => router.push(`/perfil/${user.user_id}`)}
       activeOpacity={0.8}
     >
@@ -187,7 +187,7 @@ export default function BuscarScreen() {
     <View className="flex-1 bg-[#faf5e0] p-4">
       {/* Input de búsqueda */}
       <View
-        className={`flex-row items-center bg-white rounded-2xl px-4 ${searchFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-[#211f1e]/10"}`}
+        className={`flex-row items-center bg-white rounded-lg px-4 ${searchFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-[#211f1e]/10"}`}
       >
         <Ionicons name="search" size={18} color="#6B7280" style={{ marginRight: 8 }} />
         <TextInput

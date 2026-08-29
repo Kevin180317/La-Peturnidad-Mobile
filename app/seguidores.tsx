@@ -66,7 +66,7 @@ export default function SeguidoresScreen() {
   const renderUser = (user: any) => (
     <TouchableOpacity
       key={user.user_id}
-      className="flex-row items-center p-3 bg-white rounded-xl mb-2"
+      className="flex-row items-center p-3 bg-white rounded-2xl mb-2 shadow-[0_1px_2px_rgba(33,31,30,0.08)]"
       onPress={() => router.push(`/perfil/${user.user_id}`)}
     >
       {user.profile_picture_url ? (
@@ -120,7 +120,7 @@ export default function SeguidoresScreen() {
       <ScrollView contentContainerClassName="p-4">
         {activeTab === "followers" ? (
           followers.length === 0 ? (
-            <View className="bg-white p-10 rounded-xl items-center mt-10">
+            <View className="bg-white p-10 rounded-2xl items-center mt-10 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
               <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
                 <Ionicons name="people-outline" size={32} color="#007275" />
               </View>
@@ -130,7 +130,7 @@ export default function SeguidoresScreen() {
             followers.map(renderUser)
           )
         ) : following.length === 0 ? (
-          <View className="bg-white p-10 rounded-xl items-center mt-10">
+          <View className="bg-white p-10 rounded-2xl items-center mt-10 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
             <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
               <Ionicons name="person-outline" size={32} color="#007275" />
             </View>

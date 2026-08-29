@@ -92,7 +92,7 @@ export function HomeTab({
           </View>
           <TouchableOpacity
             onPress={onOpenSearch}
-            className="bg-[#007275] p-3 rounded-2xl"
+            className="bg-[#007275] p-3 rounded-xl"
             activeOpacity={0.8}
           >
             <Ionicons name="search" size={22} color="#fff" />
@@ -102,14 +102,14 @@ export function HomeTab({
 
       {/* Tarjetas de resumen */}
       <View className="flex-row gap-3 mb-6">
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
           <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
             <Ionicons name="paw" size={20} color="#007275" />
           </View>
           <Text className="text-xl font-bold text-[#007275]">{pets.length}</Text>
           <Text className="text-gray-600 text-sm">Mascotas</Text>
         </View>
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
           <View className="w-10 h-10 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-2">
             <Ionicons name="warning" size={20} color="#ff7e70" />
           </View>
@@ -118,7 +118,7 @@ export function HomeTab({
           </Text>
           <Text className="text-gray-600 text-sm">Alertas</Text>
         </View>
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-sm items-center">
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
           <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
             <Ionicons name="checkmark-circle" size={20} color="#007275" />
           </View>
@@ -132,7 +132,7 @@ export function HomeTab({
       {/* Botones de acción rápida */}
       <View className="flex-row gap-3 mb-6">
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2 shadow-sm"
+          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2"
           onPress={() => {
             setShowPetForm(true);
             setShowPets(false);
@@ -144,7 +144,7 @@ export function HomeTab({
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2 shadow-sm"
+          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2"
           onPress={() => {
             onLoadPets();
             setShowPets(!showPets);
@@ -165,7 +165,7 @@ export function HomeTab({
           {loadingPets ? (
             <ActivityIndicator size="large" color="#007275" />
           ) : pets.length === 0 ? (
-            <View className="bg-[#faf5e0] p-8 rounded-xl items-center">
+            <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
               <View className="w-14 h-14 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
                 <Ionicons name="paw" size={28} color="#007275" />
               </View>
@@ -177,7 +177,7 @@ export function HomeTab({
             pets.map((pet) => (
               <TouchableOpacity
                 key={pet.id}
-                className="bg-white p-4 rounded-xl mb-3 shadow-sm flex-row"
+                className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)] flex-row"
                 onPress={() => {
                   setSelectedPet(pet);
                   setModalVisible(true);

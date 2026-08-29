@@ -78,7 +78,7 @@ export default function NotificacionesScreen() {
         Configuración de notificaciones
       </Text>
 
-      <View className="bg-white p-5 rounded-xl shadow-sm mb-6">
+      <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
         <Text className="text-lg font-bold mb-4">Preferencias</Text>
 
         <View className="space-y-4">

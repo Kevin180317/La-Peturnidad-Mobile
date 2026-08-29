@@ -160,7 +160,7 @@ export default function ComunidadScreen() {
         <View className="flex-row items-center justify-between mb-6">
           <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
           <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-lg flex-row items-center gap-1"
+            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center gap-1"
             onPress={() => setShowForm(true)}
           >
             <Ionicons name="add" size={18} color="white" />
@@ -180,7 +180,7 @@ export default function ComunidadScreen() {
           announcements.map((item) => {
             const isOwner = item.user_id === userId;
             return (
-              <View key={item.id} className="bg-white p-4 rounded-xl mb-3 shadow-sm">
+              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
                 <View className="flex-row items-start gap-3 mb-2">
                   {item.owner_profile_picture ? (
                     <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
@@ -274,7 +274,7 @@ export default function ComunidadScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-lg ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
+                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
                 onPress={handlePost}
                 disabled={posting}
               >
@@ -283,7 +283,7 @@ export default function ComunidadScreen() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="flex-1 bg-[#211f1e] py-3 rounded-lg"
+                className="flex-1 bg-[#211f1e] py-3 rounded-xl"
                 onPress={() => setShowForm(false)}
               >
                 <Text className="text-white text-center font-bold">Cancelar</Text>

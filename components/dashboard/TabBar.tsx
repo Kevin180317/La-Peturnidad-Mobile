@@ -23,7 +23,7 @@ interface TabBarProps {
 
 export function TabBar({ activeTab, onSelect }: TabBarProps) {
   return (
-    <View className="flex-row bg-white border-t border-[#211f1e]/20 py-2 shadow-lg">
+    <View className="flex-row bg-white border-t border-[#211f1e]/20 py-2">
       {TABS.map((tab) => {
         const active = activeTab === tab.key;
         return (

@@ -40,8 +40,8 @@ export function Button({
   ];
 
   const variantStyles = {
-    primary: "bg-[#007275] shadow-md active:opacity-80",
-    secondary: "bg-[#211f1e] shadow-md active:opacity-80",
+    primary: "bg-[#007275] active:opacity-80",
+    secondary: "bg-[#211f1e] active:opacity-80",
     outline: "border-2 border-[#007275] bg-transparent active:bg-[#007275]/10",
     ghost: "bg-transparent active:bg-[#211f1e]/10",
   };
@@ -102,9 +102,9 @@ export function Card({
   ...props
 }: CardProps) {
   const variantStyles = {
-    default: "bg-white rounded-xl",
-    elevated: "bg-white rounded-xl shadow-lg",
-    outlined: "bg-white rounded-xl border border-[#211f1e]/20",
+    default: "bg-white rounded-2xl",
+    elevated: "bg-white rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)]",
+    outlined: "bg-white rounded-2xl border border-[#211f1e]/20",
   };
 
   const paddingStyles = {
@@ -146,7 +146,7 @@ export function Input({
         <Text className="text-[#211f1e] font-semibold mb-2">{label}</Text>
       )}
       <View
-        className={`flex-row items-center border-2 rounded-xl bg-white ${
+        className={`flex-row items-center border-2 rounded-lg bg-white ${
           error
             ? "border-[#d93a3a]"
             : focused

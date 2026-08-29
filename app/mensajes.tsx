@@ -119,7 +119,7 @@ export default function MensajesScreen() {
         conversations.map((conv) => (
           <TouchableOpacity
             key={conv.id}
-            className="bg-white p-4 rounded-xl mb-3 shadow-sm flex-row items-center"
+            className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)] flex-row items-center"
             onPress={() => router.push(`/mensajes/${conv.id}`)}
             onLongPress={() => handleDelete(conv.id)}
           >
