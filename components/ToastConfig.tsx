@@ -4,7 +4,7 @@ import { BaseToastProps } from "react-native-toast-message";
 
 const danger = "#d93a3a";
 const dark = "#211f1e";
-const teal = "#007275";
+const teal = "#005e66";
 
 const styles = StyleSheet.create({
   base: {

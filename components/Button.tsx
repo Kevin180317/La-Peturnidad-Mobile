@@ -40,9 +40,9 @@ export function Button({
   ];
 
   const variantStyles = {
-    primary: "bg-[#007275] active:opacity-80",
+    primary: "bg-[#005e66] active:opacity-80",
     secondary: "bg-[#211f1e] active:opacity-80",
-    outline: "border-2 border-[#007275] bg-transparent active:bg-[#007275]/10",
+    outline: "border-2 border-[#005e66] bg-transparent active:bg-[#005e66]/10",
     ghost: "bg-transparent active:bg-[#211f1e]/10",
   };
 
@@ -55,7 +55,7 @@ export function Button({
   const textColors = {
     primary: "text-white",
     secondary: "text-white",
-    outline: "text-[#007275]",
+    outline: "text-[#005e66]",
     ghost: "text-[#211f1e]",
   };
 
@@ -78,7 +78,7 @@ export function Button({
         <View className="flex-row items-center gap-2">
           {icon && <View>{icon}</View>}
           <Text
-            className={`font-bold ${sizeStyles[size]} ${textColors[variant]}`}
+            className={`font-bold font-[Inter\_700Bold] ${sizeStyles[size]} ${textColors[variant]}`}
           >
             {title}
           </Text>
@@ -103,7 +103,7 @@ export function Card({
 }: CardProps) {
   const variantStyles = {
     default: "bg-white rounded-2xl",
-    elevated: "bg-white rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)]",
+    elevated: "bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)]",
     outlined: "bg-white rounded-2xl border border-[#211f1e]/20",
   };
 
@@ -143,20 +143,22 @@ export function Input({
   return (
     <View className="mb-4">
       {label && (
-        <Text className="text-[#211f1e] font-semibold mb-2">{label}</Text>
+        <Text className="text-[#211f1e] font-semibold font-[Inter\_600SemiBold] mb-2">
+          {label}
+        </Text>
       )}
       <View
         className={`flex-row items-center border-2 rounded-lg bg-white ${
           error
             ? "border-[#d93a3a]"
             : focused
-              ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
+              ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
               : "border-[#211f1e]/20"
         }`}
       >
         {icon && <View className="pl-4">{icon}</View>}
         <TextInput
-          className={`flex-1 p-4 text-base text-[#211f1e] ${
+          className={`flex-1 p-4 text-base font-[Inter\_400Regular] text-[#211f1e] ${
             icon ? "" : "pl-4"
           } pr-4`}
           placeholderTextColor="#9BA1A6"
@@ -183,11 +185,11 @@ interface BadgeProps extends ViewProps {
 
 export function Badge({ label, variant = "primary", style, ...props }: BadgeProps) {
   const variantStyles = {
-    primary: "bg-[#007275]/10 text-[#007275]",
-    success: "bg-[#007275]/10 text-[#007275]",
+    primary: "bg-[#005e66]/10 text-[#005e66]",
+    success: "bg-[#005e66]/10 text-[#005e66]",
     warning: "bg-[#e8a93b]/15 text-[#8a5a15]",
     error: "bg-[#d93a3a]/10 text-[#d93a3a]",
-    info: "bg-[#007275]/10 text-[#007275]",
+    info: "bg-[#005e66]/10 text-[#005e66]",
   };
 
   return (
@@ -195,7 +197,9 @@ export function Badge({ label, variant = "primary", style, ...props }: BadgeProp
       className={`px-3 py-1 rounded-full ${variantStyles[variant]}`}
       {...props}
     >
-      <Text className="text-xs font-semibold">{label}</Text>
+      <Text className="text-xs font-semibold font-[Inter\_600SemiBold]">
+        {label}
+      </Text>
     </View>
   );
 }
@@ -227,21 +231,21 @@ export function Avatar({
     return (
       <Image
         source={{ uri }}
-        className={`${sizeStyles[size]} rounded-full border-[#007275] ${borderSizes[size]}`}
+        className={`${sizeStyles[size]} rounded-full border-[#005e66] ${borderSizes[size]}`}
       />
     );
   }
 
   return (
     <View
-      className={`${sizeStyles[size]} rounded-full bg-[#faf5e0] items-center justify-center border-2 border-[#007275] ${borderSizes[size]}`}
+      className={`${sizeStyles[size]} rounded-full bg-[#faf5e0] items-center justify-center border-2 border-[#005e66] ${borderSizes[size]}`}
     >
       {fallback ? (
-        <Text className="text-[#007275] font-bold">
+        <Text className="text-[#005e66] font-bold font-[Inter\_700Bold]">
           {fallback[0].toUpperCase()}
         </Text>
       ) : (
-        <Ionicons name="paw" size={size === "sm" ? 14 : size === "xl" ? 36 : 22} color="#007275" />
+        <Ionicons name="paw" size={size === "sm" ? 14 : size === "xl" ? 36 : 22} color="#005e66" />
       )}
     </View>
   );

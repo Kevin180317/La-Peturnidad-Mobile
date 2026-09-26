@@ -81,7 +81,7 @@ export function PetDetailModal({
               <View className="flex-row gap-3 mt-4">
                 {onEdit && (
                   <TouchableOpacity
-                    className="flex-1 bg-[#007275] py-3 rounded-xl"
+                    className="flex-1 bg-[#005e66] py-3 rounded-xl"
                     onPress={() => {
                       onEdit(pet);
                       onClose();

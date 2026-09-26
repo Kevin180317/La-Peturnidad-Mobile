@@ -87,7 +87,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
   };
 
   return (
-    <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
+    <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
       <Text className="text-xl font-bold mb-4">
         {editingPet ? "Editar mascota" : "Registrar nueva mascota"}
       </Text>
@@ -100,7 +100,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
             key={type}
             className={`flex-1 py-3 rounded-xl border-2 flex-row items-center justify-center gap-2 ${
               petType === type
-                ? "border-[#007275] bg-[#007275]"
+                ? "border-[#005e66] bg-[#005e66]"
                 : "border-[#211f1e]/20"
             }`}
             onPress={() => setPetType(type as "perro" | "gato")}
@@ -122,7 +122,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Nombre */}
       <Text className="font-semibold mb-2">Nombre *</Text>
       <TextInput
-        className={`${nameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
+        className={`${nameFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
         placeholder="Nombre de la mascota"
         placeholderTextColor="#9BA1A6"
         value={petName}
@@ -134,7 +134,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Color */}
       <Text className="font-semibold mb-2">Color *</Text>
       <TextInput
-        className={`${colorFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
+        className={`${colorFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
         placeholder="Color principal"
         placeholderTextColor="#9BA1A6"
         value={petColor}
@@ -161,7 +161,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Características */}
       <Text className="font-semibold mb-2">Características especiales</Text>
       <TextInput
-        className={`${featuresFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
+        className={`${featuresFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
         placeholder="Ej: manchas, cicatrices, comportamiento especial..."
         placeholderTextColor="#9BA1A6"
         value={petFeatures}
@@ -177,7 +177,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       <Text className="font-semibold mb-2">Foto *</Text>
       <View className="flex-row gap-3 mb-4">
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-3 rounded-xl flex-row items-center justify-center gap-2"
+          className="flex-1 bg-[#005e66] py-3 rounded-xl flex-row items-center justify-center gap-2"
           onPress={handleSelectImage}
         >
           <Ionicons name="camera" size={18} color="#fff" />
@@ -185,7 +185,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
         </TouchableOpacity>
         {selectedPetImage && (
           <TouchableOpacity
-            className={`flex-1 py-3 rounded-xl flex-row items-center justify-center gap-2 ${uploadingPetImage ? "bg-gray-400" : "bg-[#007275]"}`}
+            className={`flex-1 py-3 rounded-xl flex-row items-center justify-center gap-2 ${uploadingPetImage ? "bg-gray-400" : "bg-[#005e66]"}`}
             onPress={handleUploadImage}
             disabled={uploadingPetImage}
           >
@@ -209,9 +209,9 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       )}
 
       {petImageUrl && (
-        <View className="bg-[#007275]/10 p-3 rounded-lg mb-4 flex-row items-center justify-center gap-1.5">
-          <Ionicons name="checkmark-circle" size={18} color="#007275" />
-          <Text className="text-[#007275] text-center">
+        <View className="bg-[#005e66]/10 p-3 rounded-lg mb-4 flex-row items-center justify-center gap-1.5">
+          <Ionicons name="checkmark-circle" size={18} color="#005e66" />
+          <Text className="text-[#005e66] text-center">
             Foto lista para usar
           </Text>
         </View>
@@ -220,7 +220,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Botones */}
       <View className="flex-row gap-3">
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-xl"
+          className="flex-1 bg-[#005e66] py-4 rounded-xl"
           onPress={() => onSubmit({ type: petType, name: petName, color: petColor, size: petSize, features: petFeatures || null, image_url: petImageUrl })}
         >
           <Text className="text-white text-center font-bold">

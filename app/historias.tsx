@@ -111,7 +111,7 @@ export default function HistoriasScreen() {
             <Text className="text-2xl font-bold text-[#211f1e]">Reuniones exitosas</Text>
           </View>
           <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center"
+            className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center"
             onPress={() => setShowForm(true)}
           >
             <Ionicons name="sparkles" size={18} color="white" style={{ marginRight: 6 }} />
@@ -131,10 +131,10 @@ export default function HistoriasScreen() {
           stories.map((s) => {
             const isMine = s.user_id === userId;
             return (
-              <View key={s.id} className="bg-white p-5 rounded-2xl mb-4 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
+              <View key={s.id} className="bg-white p-5 rounded-2xl mb-4 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center gap-2">
-                    <Ionicons name="paw" size={20} color="#007275" />
+                    <Ionicons name="paw" size={20} color="#005e66" />
                     <Text className="font-bold text-lg text-[#211f1e]">{s.pet_name}</Text>
                   </View>
                   {isMine && (
@@ -168,7 +168,7 @@ export default function HistoriasScreen() {
               </TouchableOpacity>
             </View>
             <TextInput
-              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${petNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
+              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${petNameFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Nombre de tu mascota *"
               placeholderTextColor="#9BA1A6"
               value={petName}
@@ -177,7 +177,7 @@ export default function HistoriasScreen() {
               onBlur={() => setPetNameFocused(false)}
             />
             <TextInput
-              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${storyFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
+              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${storyFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Cuenta tu historia de reencuentro... *"
               placeholderTextColor="#9BA1A6"
               value={story}
@@ -190,7 +190,7 @@ export default function HistoriasScreen() {
             />
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
+                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#005e66]"}`}
                 disabled={posting}
                 onPress={handleCreate}
               >

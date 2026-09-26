@@ -66,13 +66,13 @@ export default function SeguidoresScreen() {
   const renderUser = (user: any) => (
     <TouchableOpacity
       key={user.user_id}
-      className="flex-row items-center p-3 bg-white rounded-2xl mb-2 shadow-[0_1px_2px_rgba(33,31,30,0.08)]"
+      className="flex-row items-center p-3 bg-white rounded-2xl mb-2 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
       onPress={() => router.push(`/perfil/${user.user_id}`)}
     >
       {user.profile_picture_url ? (
         <Image source={{ uri: user.profile_picture_url }} className="w-12 h-12 rounded-full mr-3" />
       ) : (
-        <View className="w-12 h-12 bg-[#007275] rounded-full items-center justify-center mr-3">
+        <View className="w-12 h-12 bg-[#005e66] rounded-full items-center justify-center mr-3">
           <Text className="text-white font-bold text-lg">
             {user.first_name?.[0]?.toUpperCase() || "U"}
           </Text>
@@ -91,7 +91,7 @@ export default function SeguidoresScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#007275" />
+        <ActivityIndicator size="large" color="#005e66" />
       </View>
     );
   }
@@ -100,18 +100,18 @@ export default function SeguidoresScreen() {
     <View className="flex-1 bg-[#faf5e0]">
       <View className="flex-row bg-white border-b border-gray-200">
         <TouchableOpacity
-          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "followers" ? "border-[#007275]" : "border-transparent"}`}
+          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "followers" ? "border-[#005e66]" : "border-transparent"}`}
           onPress={() => setActiveTab("followers")}
         >
-          <Text className={`font-semibold ${activeTab === "followers" ? "text-[#007275]" : "text-gray-500"}`}>
+          <Text className={`font-semibold ${activeTab === "followers" ? "text-[#005e66]" : "text-gray-500"}`}>
             Seguidores ({followers.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "following" ? "border-[#007275]" : "border-transparent"}`}
+          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "following" ? "border-[#005e66]" : "border-transparent"}`}
           onPress={() => setActiveTab("following")}
         >
-          <Text className={`font-semibold ${activeTab === "following" ? "text-[#007275]" : "text-gray-500"}`}>
+          <Text className={`font-semibold ${activeTab === "following" ? "text-[#005e66]" : "text-gray-500"}`}>
             Siguiendo ({following.length})
           </Text>
         </TouchableOpacity>
@@ -120,9 +120,9 @@ export default function SeguidoresScreen() {
       <ScrollView contentContainerClassName="p-4">
         {activeTab === "followers" ? (
           followers.length === 0 ? (
-            <View className="bg-white p-10 rounded-2xl items-center mt-10 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
-              <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
-                <Ionicons name="people-outline" size={32} color="#007275" />
+            <View className="bg-white p-10 rounded-2xl items-center mt-10 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
+              <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
+                <Ionicons name="people-outline" size={32} color="#005e66" />
               </View>
               <Text className="text-gray-500 text-center">Sin seguidores aún</Text>
             </View>
@@ -130,9 +130,9 @@ export default function SeguidoresScreen() {
             followers.map(renderUser)
           )
         ) : following.length === 0 ? (
-          <View className="bg-white p-10 rounded-2xl items-center mt-10 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
-            <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
-              <Ionicons name="person-outline" size={32} color="#007275" />
+          <View className="bg-white p-10 rounded-2xl items-center mt-10 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
+            <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
+              <Ionicons name="person-outline" size={32} color="#005e66" />
             </View>
             <Text className="text-gray-500 text-center">No sigues a nadie aún</Text>
           </View>

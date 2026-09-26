@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { EmptyState } from "@/components/EmptyState";
 import { PetDetailModal } from "./PetDetailModal";
 import { PetForm, type PetFormData } from "./PetForm";
 
@@ -78,10 +79,10 @@ export function HomeTab({
       <View className="mb-6">
         <View className="flex-row items-center justify-between">
           <View className="flex-1">
-            <Text className="text-2xl font-bold text-[#211f1e]">
+            <Text className="text-2xl font-bold font-[Inter\_700Bold] text-[#211f1e]">
               ¡Hola, {profileName || "Usuario"}!
             </Text>
-            <Text className="text-gray-600 mt-1">
+            <Text className="text-gray-600 font-[Inter\_400Regular] mt-1">
               {new Date().toLocaleDateString("es-MX", {
                 weekday: "long",
                 year: "numeric",
@@ -92,7 +93,7 @@ export function HomeTab({
           </View>
           <TouchableOpacity
             onPress={onOpenSearch}
-            className="bg-[#007275] p-3 rounded-xl"
+            className="bg-[#005e66] p-3 rounded-xl"
             activeOpacity={0.8}
           >
             <Ionicons name="search" size={22} color="#fff" />
@@ -102,49 +103,49 @@ export function HomeTab({
 
       {/* Tarjetas de resumen */}
       <View className="flex-row gap-3 mb-6">
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
-          <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
-            <Ionicons name="paw" size={20} color="#007275" />
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
+          <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-2">
+            <Ionicons name="paw" size={20} color="#005e66" />
           </View>
-          <Text className="text-xl font-bold text-[#007275]">{pets.length}</Text>
-          <Text className="text-gray-600 text-sm">Mascotas</Text>
+          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#005e66]">{pets.length}</Text>
+          <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Mascotas</Text>
         </View>
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
           <View className="w-10 h-10 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-2">
             <Ionicons name="warning" size={20} color="#ff7e70" />
           </View>
-          <Text className="text-xl font-bold text-[#c2402f]">
+          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#c2402f]">
             {myAlerts.length}
           </Text>
-          <Text className="text-gray-600 text-sm">Alertas</Text>
+          <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Alertas</Text>
         </View>
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
-          <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
-            <Ionicons name="checkmark-circle" size={20} color="#007275" />
+        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
+          <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-2">
+            <Ionicons name="checkmark-circle" size={20} color="#005e66" />
           </View>
-          <Text className="text-xl font-bold text-[#007275]">
+          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#005e66]">
             {foundPets.length}
           </Text>
-          <Text className="text-gray-600 text-sm">Encontradas</Text>
+          <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Encontradas</Text>
         </View>
       </View>
 
       {/* Botones de acción rápida */}
       <View className="flex-row gap-3 mb-6">
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2"
+          className="flex-1 bg-[#005e66] py-4 rounded-xl flex-row items-center justify-center gap-2"
           onPress={() => {
             setShowPetForm(true);
             setShowPets(false);
           }}
         >
           <Ionicons name="add-circle" size={20} color="#fff" />
-          <Text className="text-white text-center font-semibold">
+          <Text className="text-white text-center font-semibold font-[Inter\_600SemiBold]">
             Registrar mascota
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2"
+          className="flex-1 bg-[#005e66] py-4 rounded-xl flex-row items-center justify-center gap-2"
           onPress={() => {
             onLoadPets();
             setShowPets(!showPets);
@@ -152,7 +153,7 @@ export function HomeTab({
           }}
         >
           <Ionicons name={showPets ? "eye-off" : "eye"} size={20} color="#fff" />
-          <Text className="text-white text-center font-semibold">
+          <Text className="text-white text-center font-semibold font-[Inter\_600SemiBold]">
             {showPets ? "Ocultar" : "Ver"} mascotas
           </Text>
         </TouchableOpacity>
@@ -161,23 +162,25 @@ export function HomeTab({
       {/* Lista de mascotas */}
       {showPets && (
         <View className="mb-6">
-          <Text className="text-lg font-bold mb-3">Mis mascotas</Text>
+          <Text className="text-lg font-bold font-[Inter\_700Bold] mb-3">Mis mascotas</Text>
           {loadingPets ? (
-            <ActivityIndicator size="large" color="#007275" />
+            <ActivityIndicator size="large" color="#005e66" />
           ) : pets.length === 0 ? (
-            <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
-              <View className="w-14 h-14 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
-                <Ionicons name="paw" size={28} color="#007275" />
-              </View>
-              <Text className="text-gray-500 text-center">
-                No tienes mascotas registradas. ¡Agrega tu primera mascota!
-              </Text>
-            </View>
+            <EmptyState
+              icon="paw"
+              title="No tienes mascotas registradas"
+              subtitle="Agrega tu primera mascota para empezar a protegerla."
+              actionLabel="Registrar mascota"
+              onAction={() => {
+                setShowPetForm(true);
+                setShowPets(false);
+              }}
+            />
           ) : (
             pets.map((pet) => (
               <TouchableOpacity
                 key={pet.id}
-                className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)] flex-row"
+                className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)] flex-row"
                 onPress={() => {
                   setSelectedPet(pet);
                   setModalVisible(true);
@@ -198,11 +201,11 @@ export function HomeTab({
                   </View>
                 )}
                 <View className="flex-1">
-                  <Text className="font-bold text-lg">{pet.name}</Text>
-                  <Text className="text-gray-600 capitalize">
+                  <Text className="font-bold font-[Inter\_700Bold] text-lg">{pet.name}</Text>
+                  <Text className="text-gray-600 font-[Inter\_400Regular] capitalize">
                     {pet.type} • {pet.color}
                   </Text>
-                  <Text className="text-gray-500 text-sm">
+                  <Text className="text-gray-500 font-[Inter\_400Regular] text-sm">
                     Tamaño: {pet.size}
                   </Text>
                 </View>

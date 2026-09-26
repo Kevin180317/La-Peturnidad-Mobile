@@ -67,7 +67,7 @@ export default function NotificacionesScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#007275" />
+        <ActivityIndicator size="large" color="#005e66" />
       </View>
     );
   }
@@ -78,7 +78,7 @@ export default function NotificacionesScreen() {
         Configuración de notificaciones
       </Text>
 
-      <View className="bg-white p-5 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] mb-6">
+      <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
         <Text className="text-lg font-bold mb-4">Preferencias</Text>
 
         <View className="space-y-4">
@@ -90,7 +90,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={pushEnabled}
               onValueChange={setPushEnabled}
-              trackColor={{ false: "#ccc", true: "#007275" }}
+              trackColor={{ false: "#ccc", true: "#005e66" }}
               thumbColor={pushEnabled ? "#fff" : "#f4f3f4"}
             />
           </View>
@@ -103,7 +103,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={lostPetAlerts}
               onValueChange={setLostPetAlerts}
-              trackColor={{ false: "#ccc", true: "#007275" }}
+              trackColor={{ false: "#ccc", true: "#005e66" }}
               thumbColor={lostPetAlerts ? "#fff" : "#f4f3f4"}
               disabled={!pushEnabled}
             />
@@ -117,7 +117,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={foundPetAlerts}
               onValueChange={setFoundPetAlerts}
-              trackColor={{ false: "#ccc", true: "#007275" }}
+              trackColor={{ false: "#ccc", true: "#005e66" }}
               thumbColor={foundPetAlerts ? "#fff" : "#f4f3f4"}
               disabled={!pushEnabled}
             />
@@ -131,7 +131,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={communityAnnouncements}
               onValueChange={setCommunityAnnouncements}
-              trackColor={{ false: "#ccc", true: "#007275" }}
+              trackColor={{ false: "#ccc", true: "#005e66" }}
               thumbColor={communityAnnouncements ? "#fff" : "#f4f3f4"}
               disabled={!pushEnabled}
             />
@@ -140,7 +140,7 @@ export default function NotificacionesScreen() {
       </View>
 
       <TouchableOpacity
-        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#007275]"}`}
+        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#005e66]"}`}
         onPress={handleSave}
         disabled={saving}
       >

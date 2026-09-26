@@ -119,12 +119,12 @@ export default function MensajesScreen() {
         conversations.map((conv) => (
           <TouchableOpacity
             key={conv.id}
-            className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)] flex-row items-center"
+            className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)] flex-row items-center"
             onPress={() => router.push(`/mensajes/${conv.id}`)}
             onLongPress={() => handleDelete(conv.id)}
           >
             {conv.is_group ? (
-              <View className="w-14 h-14 rounded-full bg-[#007275] items-center justify-center mr-3">
+              <View className="w-14 h-14 rounded-full bg-[#005e66] items-center justify-center mr-3">
                 <Ionicons name="people" size={26} color="white" />
               </View>
             ) : conv.other_user_picture ? (

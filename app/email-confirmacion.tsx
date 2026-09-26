@@ -41,14 +41,14 @@ export default function EmailConfirmacionScreen() {
     <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
       {loading ? (
         <View className="items-center">
-          <ActivityIndicator size="large" color="#007275" />
+          <ActivityIndicator size="large" color="#005e66" />
           <Text className="mt-4 text-[#211f1e]">Reenviando...</Text>
         </View>
       ) : (
         <>
           <View className="items-center mb-8">
-            <View className="w-20 h-20 rounded-full bg-[#007275]/10 items-center justify-center mb-4">
-              <Ionicons name="mail-outline" size={40} color="#007275" />
+            <View className="w-20 h-20 rounded-full bg-[#005e66]/10 items-center justify-center mb-4">
+              <Ionicons name="mail-outline" size={40} color="#005e66" />
             </View>
             <Text className="text-3xl font-bold text-[#211f1e] mb-2 text-center">
               Revisá tu email

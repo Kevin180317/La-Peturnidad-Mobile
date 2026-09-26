@@ -30,7 +30,7 @@ export function TabBar({ activeTab, onSelect }: TabBarProps) {
           <TouchableOpacity
             key={tab.key}
             className={`flex-1 py-3 items-center border-t-2 ${
-              active ? "border-t-[#007275]" : "border-t-transparent"
+              active ? "border-t-[#005e66]" : "border-t-transparent"
             }`}
             onPress={() => onSelect(tab.key)}
           >
@@ -41,13 +41,15 @@ export function TabBar({ activeTab, onSelect }: TabBarProps) {
                 tab.key === "emergency"
                   ? "#ff7e70"
                   : active
-                    ? "#007275"
+                    ? "#005e66"
                     : "#9CA3AF"
               }
             />
             <Text
               className={`text-xs mt-1 ${
-                active ? "text-[#007275] font-bold" : "text-gray-500 font-medium"
+                active
+                  ? "text-[#005e66] font-bold font-[Inter\_700Bold]"
+                  : "text-gray-500 font-medium font-[Inter\_500Medium]"
               }`}
             >
               {tab.label}

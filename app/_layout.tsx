@@ -1,3 +1,11 @@
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import { Stack, router, type Href } from "expo-router";
@@ -6,7 +14,22 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import { toastConfig } from "../components/ToastConfig";
 import "./global.css";
 
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 export default function RootLayout() {
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded, fontError]);
+
   useEffect(() => {
     let responseListener: { remove: () => void } | null = null;
 
@@ -64,12 +87,16 @@ export default function RootLayout() {
     };
   }, []);
 
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <>
       <ErrorBoundary>
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: "#007275" },
+          headerStyle: { backgroundColor: "#005e66" },
           headerTintColor: "#ffffff",
           headerTitleStyle: { fontWeight: "700" },
         }}
@@ -152,6 +179,14 @@ export default function RootLayout() {
       <Stack.Screen
         name="reset-password"
         options={{ title: "Nueva contraseña" }}
+      />
+      <Stack.Screen
+        name="como-usar"
+        options={{ title: "Cómo usar" }}
+      />
+      <Stack.Screen
+        name="faq"
+        options={{ title: "Preguntas frecuentes" }}
       />
       </Stack>
       </ErrorBoundary>

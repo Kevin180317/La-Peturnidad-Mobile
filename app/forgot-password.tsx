@@ -66,7 +66,7 @@ export default function ForgotPasswordScreen() {
     <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
       {loading ? (
         <View className="items-center">
-          <ActivityIndicator size="large" color="#007275" />
+          <ActivityIndicator size="large" color="#005e66" />
           <Text className="mt-4 text-[#211f1e]">Enviando código...</Text>
         </View>
       ) : (
@@ -85,7 +85,7 @@ export default function ForgotPasswordScreen() {
               Correo electrónico
             </Text>
             <TextInput
-              className={`${emailFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+              className={`${emailFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
               placeholder="ejemplo@correo.com"
               placeholderTextColor="#9BA1A6"
               value={email}
@@ -98,7 +98,7 @@ export default function ForgotPasswordScreen() {
           </View>
 
           <TouchableOpacity
-            className="bg-[#007275] py-4 rounded-xl mb-4"
+            className="bg-[#005e66] py-4 rounded-xl mb-4"
             onPress={handleSendOtp}
           >
             <Text className="text-white text-center font-bold text-lg">

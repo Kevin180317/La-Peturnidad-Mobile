@@ -112,7 +112,7 @@ export default function ConversationScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#007275" />
+        <ActivityIndicator size="large" color="#005e66" />
       </View>
     );
   }
@@ -156,7 +156,7 @@ export default function ConversationScreen() {
                 <View
                   className={`p-3 rounded-2xl ${
                     isMine
-                      ? "bg-[#007275] rounded-br-md"
+                      ? "bg-[#005e66] rounded-br-md"
                       : "bg-white rounded-bl-md shadow-sm"
                   }`}
                 >
@@ -178,7 +178,7 @@ export default function ConversationScreen() {
 
       <View className="flex-row items-center gap-2 p-3 bg-white border-t border-gray-200">
         <TextInput
-          className={`flex-1 bg-white rounded-full px-4 py-3 text-[#211f1e] ${inputFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
+          className={`flex-1 bg-white rounded-full px-4 py-3 text-[#211f1e] ${inputFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
           placeholder="Escribe un mensaje..."
           placeholderTextColor="#9BA1A6"
           value={input}
@@ -188,7 +188,7 @@ export default function ConversationScreen() {
           onBlur={() => setInputFocused(false)}
         />
         <TouchableOpacity
-          className={`w-12 h-12 rounded-full items-center justify-center ${sending || !input.trim() ? "bg-gray-300" : "bg-[#007275]"}`}
+          className={`w-12 h-12 rounded-full items-center justify-center ${sending || !input.trim() ? "bg-gray-300" : "bg-[#005e66]"}`}
           onPress={handleSend}
           disabled={sending || !input.trim()}
         >

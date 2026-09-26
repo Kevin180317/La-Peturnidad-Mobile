@@ -137,7 +137,7 @@ export default function ComunidadScreen() {
   const categoryColor = (cat: string) => {
     switch (cat) {
       case "aviso": return "bg-gray-100 text-gray-600";
-      case "evento": return "bg-[#007275]/10 text-[#007275]";
+      case "evento": return "bg-[#005e66]/10 text-[#005e66]";
       case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]";
       default: return "bg-gray-100 text-gray-600";
     }
@@ -146,7 +146,7 @@ export default function ComunidadScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#007275" />
+        <ActivityIndicator size="large" color="#005e66" />
       </View>
     );
   }
@@ -160,7 +160,7 @@ export default function ComunidadScreen() {
         <View className="flex-row items-center justify-between mb-6">
           <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
           <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center gap-1"
+            className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center gap-1"
             onPress={() => setShowForm(true)}
           >
             <Ionicons name="add" size={18} color="white" />
@@ -180,12 +180,12 @@ export default function ComunidadScreen() {
           announcements.map((item) => {
             const isOwner = item.user_id === userId;
             return (
-              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
+              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
                 <View className="flex-row items-start gap-3 mb-2">
                   {item.owner_profile_picture ? (
                     <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                   ) : (
-                    <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center">
+                    <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
                       <Text className="text-white font-bold">
                         {item.owner_name?.[0]?.toUpperCase() || "U"}
                       </Text>
@@ -239,7 +239,7 @@ export default function ComunidadScreen() {
                 <TouchableOpacity
                   key={cat.key}
                   className={`py-2 px-4 rounded-full border-2 ${
-                    formCategory === cat.key ? "border-[#007275] bg-[#007275]" : "border-gray-200 bg-[#faf5e0]"
+                    formCategory === cat.key ? "border-[#005e66] bg-[#005e66]" : "border-gray-200 bg-[#faf5e0]"
                   }`}
                   onPress={() => setFormCategory(cat.key)}
                 >
@@ -251,7 +251,7 @@ export default function ComunidadScreen() {
             </View>
 
             <TextInput
-              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${titleFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
+              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${titleFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Título *"
               placeholderTextColor="#9BA1A6"
               value={formTitle}
@@ -260,7 +260,7 @@ export default function ComunidadScreen() {
               onBlur={() => setTitleFocused(false)}
             />
             <TextInput
-              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${contentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
+              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${contentFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Escribe tu mensaje... *"
               placeholderTextColor="#9BA1A6"
               value={formContent}
@@ -274,7 +274,7 @@ export default function ComunidadScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
+                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#005e66]"}`}
                 onPress={handlePost}
                 disabled={posting}
               >

@@ -188,7 +188,7 @@ export default function RegisterExtendedScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#007275" />
+        <ActivityIndicator size="large" color="#005e66" />
         <Text className="mt-4 text-[#211f1e]">Guardando información...</Text>
       </View>
     );
@@ -217,7 +217,7 @@ export default function RegisterExtendedScreen() {
           Nombre <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className={`${firstNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${firstNameFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Tu nombre"
           placeholderTextColor="#9BA1A6"
           value={firstName}
@@ -233,7 +233,7 @@ export default function RegisterExtendedScreen() {
           Apellido <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className={`${lastNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${lastNameFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Tu apellido"
           placeholderTextColor="#9BA1A6"
           value={lastName}
@@ -249,7 +249,7 @@ export default function RegisterExtendedScreen() {
           Teléfono <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className={`${phoneFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${phoneFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Número de teléfono"
           placeholderTextColor="#9BA1A6"
           value={phone}
@@ -265,7 +265,7 @@ export default function RegisterExtendedScreen() {
           Fecha de nacimiento
         </Text>
         <TextInput
-          className={`${birthDateFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${birthDateFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="DD/MM/YYYY"
           placeholderTextColor="#9BA1A6"
           value={birthDate}
@@ -281,7 +281,7 @@ export default function RegisterExtendedScreen() {
           Código Postal <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className={`${postalCodeFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${postalCodeFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Código postal"
           placeholderTextColor="#9BA1A6"
           value={postalCode}
@@ -316,7 +316,7 @@ export default function RegisterExtendedScreen() {
       <View className="mb-8">
         <Text className="text-[#211f1e] font-semibold mb-2">Ciudad</Text>
         <TextInput
-          className={`${cityFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${cityFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           value={city}
           editable={false}
           onFocus={() => setCityFocused(true)}
@@ -325,7 +325,7 @@ export default function RegisterExtendedScreen() {
       </View>
 
       <TouchableOpacity
-        className="bg-[#007275] py-4 rounded-xl mb-4"
+        className="bg-[#005e66] py-4 rounded-xl mb-4"
         onPress={handleCompleteProfile}
       >
         <Text className="text-white text-center font-bold text-lg">

@@ -1,7 +1,6 @@
 const emergency = "#ff7e70";
 const dark = "#211f1e";
-const tealDark = "#005e66";
-const teal = "#007275";
+const teal = "#005e66";
 const cream = "#faf5e0";
 
 // Teal es el único color de acción/navegación primaria de la app.

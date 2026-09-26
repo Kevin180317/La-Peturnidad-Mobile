@@ -15,7 +15,7 @@ import {
 import type { CommentTarget } from "./FeedTab";
 
 const comCatColor = (cat: string) => {
-  switch (cat) { case "aviso": return "bg-gray-100 text-gray-600"; case "evento": return "bg-[#007275]/10 text-[#007275]"; case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]"; default: return "bg-gray-100 text-gray-600"; }
+  switch (cat) { case "aviso": return "bg-gray-100 text-gray-600"; case "evento": return "bg-[#005e66]/10 text-[#005e66]"; case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]"; default: return "bg-gray-100 text-gray-600"; }
 };
 const comCatIcon = (cat: string): keyof typeof Ionicons.glyphMap => {
   const m: Record<string, keyof typeof Ionicons.glyphMap> = { general: "chatbubbles", aviso: "megaphone", evento: "calendar", pregunta: "help-circle" };
@@ -126,7 +126,7 @@ export function ComunidadTab({
         <View className="flex-row items-center justify-between mb-4">
           <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
           <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center"
+            className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center"
             onPress={() => setComShowForm(true)}
           >
             <Ionicons name="add" size={18} color="#fff" style={{ marginRight: 2 }} />
@@ -136,7 +136,7 @@ export function ComunidadTab({
 
         <View className="flex-row bg-white rounded-xl mb-4 shadow-sm">
           <TouchableOpacity
-      className={`flex-1 py-3 rounded-l-xl ${comSubTab === "all" ? "bg-[#007275]" : "bg-white"}`}
+      className={`flex-1 py-3 rounded-l-xl ${comSubTab === "all" ? "bg-[#005e66]" : "bg-white"}`}
       onPress={() => setComSubTab("all")}
     >
       <Text className={`text-center font-semibold ${comSubTab === "all" ? "text-white" : "text-gray-500"}`}>
@@ -144,7 +144,7 @@ export function ComunidadTab({
       </Text>
     </TouchableOpacity>
     <TouchableOpacity
-      className={`flex-1 py-3 rounded-r-xl ${comSubTab === "mine" ? "bg-[#007275]" : "bg-white"}`}
+      className={`flex-1 py-3 rounded-r-xl ${comSubTab === "mine" ? "bg-[#005e66]" : "bg-white"}`}
       onPress={() => setComSubTab("mine")}
     >
             <Text className={`text-center font-semibold ${comSubTab === "mine" ? "text-white" : "text-gray-500"}`}>
@@ -154,11 +154,11 @@ export function ComunidadTab({
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#007275" />
+          <ActivityIndicator size="large" color="#005e66" />
         ) : visibleItems.length === 0 ? (
-          <View className="bg-white p-10 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
-            <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
-              <Ionicons name="chatbubbles-outline" size={32} color="#007275" />
+          <View className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
+            <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
+              <Ionicons name="chatbubbles-outline" size={32} color="#005e66" />
             </View>
             <Text className="text-gray-500 text-center">
               {comSubTab === "all" ? "No hay avisos todavía. ¡Sé el primero!" : "No has creado avisos aún"}
@@ -173,7 +173,7 @@ export function ComunidadTab({
             const isCommenting =
               commentTarget?.id === item.id && commentTarget?.type === "announcement";
             return (
-              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
+              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
                 <TouchableOpacity
                   className="flex-row items-start gap-3 mb-2"
                   onPress={() => router.push(`/perfil/${item.user_id}`)}
@@ -181,7 +181,7 @@ export function ComunidadTab({
                   {item.owner_profile_picture ? (
                     <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                   ) : (
-                    <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center">
+                    <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
                       <Text className="text-white font-bold">{item.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                     </View>
                   )}
@@ -213,7 +213,7 @@ export function ComunidadTab({
                 {isCommenting && (
                   <View className="mt-3">
                     {loadingComments ? (
-                      <ActivityIndicator size="small" color="#007275" />
+                      <ActivityIndicator size="small" color="#005e66" />
                     ) : annComments.length === 0 ? (
                       <Text className="text-gray-500 text-sm mb-2">Sin comentarios</Text>
                     ) : (
@@ -222,7 +222,7 @@ export function ComunidadTab({
                           {c.owner_profile_picture ? (
                             <Image source={{ uri: c.owner_profile_picture }} className="w-7 h-7 rounded-full" />
                           ) : (
-                            <View className="w-7 h-7 bg-[#007275] rounded-full items-center justify-center">
+                            <View className="w-7 h-7 bg-[#005e66] rounded-full items-center justify-center">
                               <Text className="text-white text-xs font-bold">{c.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                             </View>
                           )}
@@ -242,7 +242,7 @@ export function ComunidadTab({
                     )}
                     <View className="flex-row items-center gap-2 mt-2">
                       <TextInput
-                        className={`flex-1 bg-[#faf5e0] rounded-full px-4 py-2 text-sm ${commentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
+                        className={`flex-1 bg-[#faf5e0] rounded-full px-4 py-2 text-sm ${commentFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
                         placeholder="Escribe un comentario..."
                         value={isCommenting ? commentText : ""}
                         onChangeText={onChangeComment}
@@ -250,7 +250,7 @@ export function ComunidadTab({
                         onBlur={() => setCommentFocused(false)}
                       />
                       <TouchableOpacity
-                        className="bg-[#007275] rounded-full w-8 h-8 items-center justify-center"
+                        className="bg-[#005e66] rounded-full w-8 h-8 items-center justify-center"
                         onPress={onAddComment}
                         disabled={sendingComment || !commentText.trim()}
                       >
@@ -280,16 +280,16 @@ export function ComunidadTab({
             </View>
             <View className="flex-row gap-2 mb-4 flex-wrap">
               {["general", "aviso", "evento", "pregunta"].map((cat) => (
-                <TouchableOpacity key={cat} className={`py-2 px-4 rounded-full border-2 flex-row items-center gap-1.5 ${comFormCategory === cat ? "border-[#007275] bg-[#007275]" : "border-gray-200 bg-[#faf5e0]"}`} onPress={() => setComFormCategory(cat)}>
+                <TouchableOpacity key={cat} className={`py-2 px-4 rounded-full border-2 flex-row items-center gap-1.5 ${comFormCategory === cat ? "border-[#005e66] bg-[#005e66]" : "border-gray-200 bg-[#faf5e0]"}`} onPress={() => setComFormCategory(cat)}>
                   <Ionicons name={comCatIcon(cat)} size={14} color={comFormCategory === cat ? "#fff" : "#4B5563"} />
                   <Text className={`font-medium ${comFormCategory === cat ? "text-white" : "text-gray-600"}`}>{comCatLabel(cat)}</Text>
                 </TouchableOpacity>
               ))}
             </View>
-            <TextInput className={`bg-white p-3 rounded-lg mb-3 ${titleFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`} placeholder="Título *" placeholderTextColor="#9BA1A6" value={comFormTitle} onChangeText={setComFormTitle} onFocus={() => setTitleFocused(true)} onBlur={() => setTitleFocused(false)} />
-            <TextInput className={`bg-white p-3 rounded-lg mb-4 ${contentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`} placeholder="Escribe tu mensaje... *" placeholderTextColor="#9BA1A6" value={comFormContent} onChangeText={setComFormContent} multiline numberOfLines={4} textAlignVertical="top" onFocus={() => setContentFocused(true)} onBlur={() => setContentFocused(false)} />
+            <TextInput className={`bg-white p-3 rounded-lg mb-3 ${titleFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`} placeholder="Título *" placeholderTextColor="#9BA1A6" value={comFormTitle} onChangeText={setComFormTitle} onFocus={() => setTitleFocused(true)} onBlur={() => setTitleFocused(false)} />
+            <TextInput className={`bg-white p-3 rounded-lg mb-4 ${contentFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`} placeholder="Escribe tu mensaje... *" placeholderTextColor="#9BA1A6" value={comFormContent} onChangeText={setComFormContent} multiline numberOfLines={4} textAlignVertical="top" onFocus={() => setContentFocused(true)} onBlur={() => setContentFocused(false)} />
             <View className="flex-row gap-3">
-              <TouchableOpacity       className={`flex-1 py-3 rounded-xl ${comPosting ? "bg-gray-400" : "bg-[#007275]"}`} disabled={comPosting} onPress={handleComPost}>
+              <TouchableOpacity       className={`flex-1 py-3 rounded-xl ${comPosting ? "bg-gray-400" : "bg-[#005e66]"}`} disabled={comPosting} onPress={handleComPost}>
                 <Text className={`text-center font-bold ${comPosting ? "text-gray-700" : "text-white"}`}>{comPosting ? "Publicando..." : "Publicar"}</Text>
               </TouchableOpacity>
               <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-xl" onPress={() => setComShowForm(false)}>

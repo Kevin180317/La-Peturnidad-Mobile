@@ -72,7 +72,7 @@ export default function GrupoDetailScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#007275" />
+        <ActivityIndicator size="large" color="#005e66" />
       </View>
     );
   }
@@ -100,7 +100,7 @@ export default function GrupoDetailScreen() {
       </Text>
 
       <TouchableOpacity
-        className="bg-[#007275] py-3 rounded-xl mb-6 flex-row items-center justify-center"
+        className="bg-[#005e66] py-3 rounded-xl mb-6 flex-row items-center justify-center"
         onPress={async () => {
           if (!currentUserId || !id) return;
           const userIds = members.map((m) => m.user_id);
@@ -149,13 +149,13 @@ export default function GrupoDetailScreen() {
       {members.map((m) => (
         <TouchableOpacity
           key={m.id}
-          className="flex-row items-center p-3 bg-white rounded-2xl mb-2 shadow-[0_1px_2px_rgba(33,31,30,0.08)]"
+          className="flex-row items-center p-3 bg-white rounded-2xl mb-2 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
           onPress={() => router.push(`/perfil/${m.user_id}`)}
         >
           {m.profile_picture_url ? (
             <Image source={{ uri: m.profile_picture_url }} className="w-10 h-10 rounded-full mr-3" />
           ) : (
-            <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center mr-3">
+            <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center mr-3">
               <Text className="text-white font-bold">{m.first_name?.[0]?.toUpperCase() || "U"}</Text>
             </View>
           )}

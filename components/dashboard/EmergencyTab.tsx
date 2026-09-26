@@ -104,7 +104,7 @@ export function EmergencyTab({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-[#007275]"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-[#005e66]"}`}
             onPress={onToggleAlerts}
           >
             <View
@@ -123,7 +123,7 @@ export function EmergencyTab({
 
         <View className="flex-row gap-4">
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showMyAlerts ? "bg-[#211f1e]" : "bg-[#007275]"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showMyAlerts ? "bg-[#211f1e]" : "bg-[#005e66]"}`}
             onPress={onToggleMyAlerts}
           >
             <View
@@ -140,7 +140,7 @@ export function EmergencyTab({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showFoundPets ? "bg-[#211f1e]" : "bg-[#007275]"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showFoundPets ? "bg-[#211f1e]" : "bg-[#005e66]"}`}
             onPress={onToggleFoundPets}
           >
             <View
@@ -160,15 +160,15 @@ export function EmergencyTab({
 
       {/* Selección de mascota para alerta */}
       {selectingPetForAlert && (
-        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
           <Text className="font-bold mb-3">Selecciona la mascota perdida:</Text>
           {pets.length === 0 ? (
-            <View className="bg-[#faf5e0] p-6 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
+            <View className="bg-[#faf5e0] p-6 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
               <Text className="text-gray-500">
                 No tienes mascotas registradas
               </Text>
               <TouchableOpacity
-                className="bg-[#007275] py-2 px-4 rounded-xl mt-3"
+                className="bg-[#005e66] py-2 px-4 rounded-xl mt-3"
                 onPress={onGoHome}
               >
                 <Text className="text-white">Registrar mascota</Text>
@@ -214,16 +214,16 @@ export function EmergencyTab({
 
       {/* Alertas de mascotas perdidas */}
       {showAlerts && (
-        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
             <Ionicons name="paw" size={18} color="#c2402f" />
             <Text className="font-bold">Mascotas perdidas en tu colonia</Text>
           </View>
           {loadingAlerts ? (
-            <ActivityIndicator size="large" color="#007275" />
+            <ActivityIndicator size="large" color="#005e66" />
           ) : emergencyAlerts.length === 0 ? (
-            <View className="bg-[#007275]/10 p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
-              <Ionicons name="happy-outline" size={40} color="#007275" />
+            <View className="bg-[#005e66]/10 p-8 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
+              <Ionicons name="happy-outline" size={40} color="#005e66" />
               <Text className="text-gray-600 text-center mt-2">
                 No hay mascotas perdidas reportadas en tu colonia
               </Text>
@@ -267,7 +267,7 @@ export function EmergencyTab({
                       Dueño: {alert.owner_name} - {alert.owner_phone}
                     </Text>
                       <TouchableOpacity
-                        className="bg-[#007275] py-2 px-4 rounded-xl mt-2 self-start flex-row items-center gap-1.5"
+                        className="bg-[#005e66] py-2 px-4 rounded-xl mt-2 self-start flex-row items-center gap-1.5"
                         onPress={() => onFoundPet(alert)}
                       >
                         <Ionicons name="checkmark-circle" size={16} color="#fff" />
@@ -285,13 +285,13 @@ export function EmergencyTab({
 
       {/* Mis alertas */}
       {showMyAlerts && (
-        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
-            <Ionicons name="clipboard-outline" size={18} color="#007275" />
+            <Ionicons name="clipboard-outline" size={18} color="#005e66" />
             <Text className="font-bold">Mis alertas activas</Text>
           </View>
           {myAlerts.length === 0 ? (
-            <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
+            <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
               <Text className="text-gray-500 text-center">
                 No tienes alertas activas
               </Text>
@@ -347,13 +347,13 @@ export function EmergencyTab({
 
       {/* Mascotas encontradas */}
       {showFoundPets && (
-        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
+        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
-            <Ionicons name="checkmark-circle" size={18} color="#007275" />
+            <Ionicons name="checkmark-circle" size={18} color="#005e66" />
             <Text className="font-bold">Mascotas que he encontrado</Text>
           </View>
           {foundPets.length === 0 ? (
-            <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_1px_2px_rgba(33,31,30,0.08)] items-center">
+            <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
               <Text className="text-gray-500 text-center">
                 No has reportado mascotas encontradas
               </Text>

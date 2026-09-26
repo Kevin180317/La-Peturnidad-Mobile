@@ -23,17 +23,17 @@ const STEPS = [
   {
     id: "1",
     title: "Reporta",
-    subtitle: "Reportá mascotas perdidas o encontradas al instante",
+    subtitle: "Reporta mascotas perdidas o encontradas al instante",
   },
   {
     id: "2",
     title: "Conecta",
-    subtitle: "Conectá con la comunidad y ayudá a reunirlas",
+    subtitle: "Conecta con la comunidad y ayuda a reunirlas",
   },
   {
     id: "3",
     title: "Actúa",
-    subtitle: "Recibí alertas y activá la red de emergencia",
+    subtitle: "Recibe alertas y activa la red de emergencia",
   },
 ];
 
@@ -105,7 +105,7 @@ export default function OnboardingScreen() {
   if (checking) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#007275" />
+        <ActivityIndicator size="large" color="#005e66" />
       </View>
     );
   }
@@ -162,7 +162,7 @@ export default function OnboardingScreen() {
             <View
               key={index}
               className={`w-3 h-3 rounded-full ${
-                index === currentIndex ? "bg-[#007275]" : "bg-[#007275]/30"
+                index === currentIndex ? "bg-[#005e66]" : "bg-[#005e66]/30"
               }`}
             />
           ))}
@@ -170,7 +170,7 @@ export default function OnboardingScreen() {
 
         <TouchableOpacity
           onPress={handleNext}
-          className="bg-[#007275] py-4 px-16 rounded-xl"
+          className="bg-[#005e66] py-4 px-16 rounded-xl"
           activeOpacity={0.8}
         >
           <Text className="text-white font-bold text-lg">

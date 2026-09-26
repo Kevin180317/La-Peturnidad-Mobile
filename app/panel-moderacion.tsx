@@ -95,7 +95,7 @@ export default function PanelModeracionScreen() {
   const statusColor = (s: string) => {
     switch (s) {
       case "pending": return "bg-[#e8a93b]/15 text-[#8a5a15]";
-      case "reviewed": return "bg-[#007275]/10 text-[#007275]";
+      case "reviewed": return "bg-[#005e66]/10 text-[#005e66]";
       case "dismissed": return "bg-gray-100 text-gray-500";
       default: return "bg-gray-100 text-gray-500";
     }
@@ -112,7 +112,7 @@ export default function PanelModeracionScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#007275" />
+        <ActivityIndicator size="large" color="#005e66" />
       </View>
     );
   }
@@ -135,7 +135,7 @@ export default function PanelModeracionScreen() {
         />
       ) : (
         reports.map((report) => (
-          <View key={report.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_1px_2px_rgba(33,31,30,0.08)]">
+          <View key={report.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
             <View className="flex-row items-center justify-between mb-2">
               <Text className="font-bold text-[#211f1e]">Reporte a {report.target_name}</Text>
               <View className={`px-2 py-1 rounded-full ${statusColor(report.status)}`}>
@@ -155,7 +155,7 @@ export default function PanelModeracionScreen() {
             {report.status === "pending" && (
               <View className="flex-row gap-3">
                 <TouchableOpacity
-                  className="flex-1 bg-[#007275] py-2 rounded-xl flex-row items-center justify-center"
+                  className="flex-1 bg-[#005e66] py-2 rounded-xl flex-row items-center justify-center"
                   onPress={() => handleReview(report.id, "reviewed")}
                 >
                   <Ionicons name="checkmark-circle" size={16} color="white" style={{ marginRight: 4 }} />

@@ -51,8 +51,8 @@ export function ConfirmModal({
           activeOpacity={1}
           onPress={() => {}}
         >
-          <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-4">
-            <Ionicons name={icon} size={32} color="#007275" />
+          <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-4">
+            <Ionicons name={icon} size={32} color="#005e66" />
           </View>
 
           <Text className="text-lg font-bold text-[#211f1e] mb-2 text-center">
@@ -73,7 +73,7 @@ export function ConfirmModal({
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="flex-1 bg-[#007275] py-3 rounded-xl flex-row items-center justify-center"
+              className="flex-1 bg-[#005e66] py-3 rounded-xl flex-row items-center justify-center"
               onPress={onConfirm}
               disabled={loading}
             >
