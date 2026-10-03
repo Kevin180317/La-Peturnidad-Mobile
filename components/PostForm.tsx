@@ -1,0 +1,342 @@
+import { dashboardService } from "@/services/dashboard.service";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Toast from "react-native-toast-message";
+
+export interface PostFormData {
+  content: string;
+  image_urls?: string[];
+  location?: string;
+  tags?: string[];
+  urls?: string[];
+}
+
+interface PostFormProps {
+  visible: boolean;
+  onClose: () => void;
+  onSubmit: (data: PostFormData) => Promise<boolean>;
+  loading?: boolean;
+}
+
+export function PostForm({
+  visible,
+  onClose,
+  onSubmit,
+  loading = false,
+}: PostFormProps) {
+  const [content, setContent] = useState("");
+  const [images, setImages] = useState<{ uri: string }[]>([]);
+  const [location, setLocation] = useState("");
+  const [tagText, setTagText] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [urlText, setUrlText] = useState("");
+  const [urls, setUrls] = useState<string[]>([]);
+  const [gettingLocation, setGettingLocation] = useState(false);
+  const [contentFocused, setContentFocused] = useState(false);
+
+  const handleAddImage = async () => {
+    const result = await dashboardService.selectImage();
+    if (result.success && result.image) {
+      setImages([...images, result.image]);
+    } else if (result.error !== "Selección cancelada") {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: result.error,
+        position: "top",
+      });
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+  const handleGetLocation = async () => {
+    setGettingLocation(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Toast.show({
+          type: "error",
+          text1: "Permiso denegado",
+          text2: "Se requiere acceso a la ubicación",
+          position: "top",
+        });
+        setGettingLocation(false);
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({});
+      const [address] = await Location.reverseGeocodeAsync({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+
+      const locStr = `${address?.city || ""}, ${address?.region || ""}`.trim();
+      setLocation(locStr);
+      Toast.show({
+        type: "success",
+        text1: "Ubicación obtenida",
+        text2: locStr,
+        position: "top",
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "No se pudo obtener la ubicación",
+        position: "top",
+      });
+    }
+    setGettingLocation(false);
+  };
+
+  const handleAddTag = () => {
+    if (tagText.trim() && !tags.includes(tagText.trim())) {
+      setTags([...tags, tagText.trim()]);
+      setTagText("");
+    }
+  };
+
+  const handleRemoveTag = (index: number) => {
+    setTags(tags.filter((_, i) => i !== index));
+  };
+
+  const handleAddUrl = () => {
+    if (urlText.trim() && !urls.includes(urlText.trim())) {
+      setUrls([...urls, urlText.trim()]);
+      setUrlText("");
+    }
+  };
+
+  const handleRemoveUrl = (index: number) => {
+    setUrls(urls.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (!content.trim()) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Escribe algo para compartir",
+        position: "top",
+      });
+      return;
+    }
+
+    const imageUrls = images.map((img) => img.uri);
+    const success = await onSubmit({
+      content: content.trim(),
+      image_urls: imageUrls.length > 0 ? imageUrls : undefined,
+      location: location.trim() || undefined,
+      tags: tags.length > 0 ? tags : undefined,
+      urls: urls.length > 0 ? urls : undefined,
+    });
+
+    if (success) {
+      setContent("");
+      setImages([]);
+      setLocation("");
+      setTags([]);
+      setUrls([]);
+      onClose();
+    }
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      onRequestClose={onClose}
+      transparent
+    >
+      <View className="flex-1 bg-[#faf5e0]">
+        {/* Header */}
+        <View className="bg-[#005e66] px-4 py-4 flex-row items-center justify-between">
+          <TouchableOpacity onPress={onClose}>
+            <Ionicons name="chevron-back" size={28} color="#fff" />
+          </TouchableOpacity>
+          <Text className="text-white text-lg font-bold">Nuevo post</Text>
+          <TouchableOpacity
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            <Text className="text-blue-300 font-semibold">
+              {loading ? "..." : "Compartir"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView className="flex-1 p-4">
+          {/* Contenido */}
+          <Text className="font-semibold text-[#211f1e] mb-2">
+            ¿Qué quieres compartir?
+          </Text>
+          <TextInput
+            className={`bg-white p-4 rounded-lg mb-4 ${
+              contentFocused
+                ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
+                : "border border-gray-300"
+            } text-[#211f1e]`}
+            placeholder="Cuéntale a tu comunidad..."
+            placeholderTextColor="#9BA1A6"
+            value={content}
+            onChangeText={setContent}
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+            onFocus={() => setContentFocused(true)}
+            onBlur={() => setContentFocused(false)}
+          />
+
+          {/* Imágenes */}
+          <Text className="font-semibold text-[#211f1e] mb-2">Imágenes</Text>
+          <View className="flex-row gap-2 mb-4">
+            <TouchableOpacity
+              onPress={handleAddImage}
+              className="w-20 h-20 bg-white rounded-lg border-2 border-dashed border-[#005e66] items-center justify-center"
+            >
+              <Ionicons name="add" size={28} color="#005e66" />
+            </TouchableOpacity>
+            {images.map((img, idx) => (
+              <View key={idx} className="relative">
+                <Image
+                  source={{ uri: img.uri }}
+                  className="w-20 h-20 rounded-lg"
+                />
+                <TouchableOpacity
+                  onPress={() => handleRemoveImage(idx)}
+                  className="absolute top-1 right-1 bg-red-500 rounded-full p-1"
+                >
+                  <Ionicons name="close" size={14} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+
+          {/* Localización */}
+          <Text className="font-semibold text-[#211f1e] mb-2">Ubicación</Text>
+          <View className="flex-row gap-2 mb-4">
+            <TextInput
+              className="flex-1 bg-white p-3 rounded-lg border border-gray-300 text-[#211f1e]"
+              placeholder="Ingresa ubicación"
+              placeholderTextColor="#9BA1A6"
+              value={location}
+              onChangeText={setLocation}
+            />
+            <TouchableOpacity
+              onPress={handleGetLocation}
+              disabled={gettingLocation}
+              className="bg-[#005e66] px-4 rounded-lg items-center justify-center"
+            >
+              {gettingLocation ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Ionicons name="location" size={20} color="#fff" />
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Tags */}
+          <Text className="font-semibold text-[#211f1e] mb-2">Mencionar personas</Text>
+          <View className="flex-row gap-2 mb-3">
+            <TextInput
+              className="flex-1 bg-white p-3 rounded-lg border border-gray-300 text-[#211f1e]"
+              placeholder="@usuario"
+              placeholderTextColor="#9BA1A6"
+              value={tagText}
+              onChangeText={setTagText}
+            />
+            <TouchableOpacity
+              onPress={handleAddTag}
+              className="bg-[#005e66] px-4 rounded-lg items-center justify-center"
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <View className="flex-row flex-wrap gap-2 mb-4">
+            {tags.map((tag, idx) => (
+              <View
+                key={idx}
+                className="bg-[#005e66]/20 px-3 py-1 rounded-full flex-row items-center gap-2"
+              >
+                <Text className="text-[#005e66]">@{tag}</Text>
+                <TouchableOpacity onPress={() => handleRemoveTag(idx)}>
+                  <Ionicons name="close" size={16} color="#005e66" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+
+          {/* URLs */}
+          <Text className="font-semibold text-[#211f1e] mb-2">Agregar links</Text>
+          <View className="flex-row gap-2 mb-3">
+            <TextInput
+              className="flex-1 bg-white p-3 rounded-lg border border-gray-300 text-[#211f1e]"
+              placeholder="https://ejemplo.com"
+              placeholderTextColor="#9BA1A6"
+              value={urlText}
+              onChangeText={setUrlText}
+            />
+            <TouchableOpacity
+              onPress={handleAddUrl}
+              className="bg-[#005e66] px-4 rounded-lg items-center justify-center"
+            >
+              <Ionicons name="add" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <View className="gap-2 mb-4">
+            {urls.map((url, idx) => (
+              <View
+                key={idx}
+                className="bg-white p-3 rounded-lg border border-gray-300 flex-row items-center justify-between"
+              >
+                <Text className="text-blue-600 flex-1 text-xs" numberOfLines={1}>
+                  {url}
+                </Text>
+                <TouchableOpacity onPress={() => handleRemoveUrl(idx)}>
+                  <Ionicons name="close" size={18} color="#c2402f" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+
+        {/* Botones */}
+        <View className="bg-white border-t border-gray-200 px-4 py-3 flex-row gap-3">
+          <TouchableOpacity
+            onPress={onClose}
+            className="flex-1 py-3 rounded-xl bg-gray-200"
+          >
+            <Text className="text-center font-semibold text-[#211f1e]">
+              Cancelar
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleSubmit}
+            disabled={loading}
+            className={`flex-1 py-3 rounded-xl ${
+              loading ? "bg-gray-400" : "bg-[#005e66]"
+            }`}
+          >
+            <Text className="text-center font-semibold text-white">
+              {loading ? "Publicando..." : "Publicar"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}

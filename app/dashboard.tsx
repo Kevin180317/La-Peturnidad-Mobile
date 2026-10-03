@@ -145,9 +145,12 @@ export default function DashboardScreen() {
     setLoadingMyPosts(false);
   }, [user?.id]);
 
-  const handleCreatePost = async (content: string) => {
+  const handleCreatePost = async (data: any) => {
     if (!user?.id) return false;
-    const result = await postsService.create({ user_id: user.id, content });
+    const result = await postsService.create({
+      user_id: user.id,
+      ...data
+    });
     if (result.success) {
       await loadFeed();
       await loadMyPosts();

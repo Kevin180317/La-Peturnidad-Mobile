@@ -57,7 +57,7 @@ export default function LoginScreen() {
       Toast.show({
         type: "error",
         text1: "Campos requeridos",
-        text2: "Email y contraseña son obligatorios",
+        text2: "Correo electrónico y contraseña son obligatorios",
         visibilityTime: 3000,
       });
       return;

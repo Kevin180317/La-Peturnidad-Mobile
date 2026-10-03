@@ -136,7 +136,7 @@ export default function VerifyOtpScreen() {
                 Toast.show({
                   type: "success",
                   text1: "Código reenviado",
-                  text2: "Revisa tu email",
+                  text2: "Revisa tu correo electrónico",
                   visibilityTime: 3000,
                 });
               }

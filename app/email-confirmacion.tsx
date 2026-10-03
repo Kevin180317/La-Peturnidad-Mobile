@@ -30,8 +30,8 @@ export default function EmailConfirmacionScreen() {
     } else {
       Toast.show({
         type: "success",
-        text1: "Email reenviado",
-        text2: "Revisá tu bandeja de entrada",
+        text1: "Correo reenviado",
+        text2: "Revisa tu bandeja de entrada",
         visibilityTime: 3000,
       });
     }
@@ -51,14 +51,14 @@ export default function EmailConfirmacionScreen() {
               <Ionicons name="mail-outline" size={40} color="#005e66" />
             </View>
             <Text className="text-3xl font-bold text-[#211f1e] mb-2 text-center">
-              Revisá tu email
+              Revisa tu correo electrónico
             </Text>
             <Text className="text-[#211f1e] text-base text-center leading-6">
               Te enviamos un link de confirmación a{" "}
               <Text className="font-bold">{email}</Text>
             </Text>
             <Text className="text-[#211f1e]/60 text-center text-sm mt-4">
-              Confirmá tu cuenta desde el email y luego iniciá sesión
+              Confirma tu cuenta desde el correo electrónico y luego inicia sesión
             </Text>
           </View>
 

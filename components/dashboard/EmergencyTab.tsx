@@ -135,7 +135,7 @@ export function EmergencyTab({
               {showMyAlerts ? "Ocultar" : "Ver"} mis alertas
             </Text>
             <Text className={`text-[11px] text-center mt-1 text-white/90`}>
-              {showMyAlerts ? "✓ Visible" : "Historial propio"}
+              {showMyAlerts ? "✓ Visible" : "Historial"}
             </Text>
           </TouchableOpacity>
 

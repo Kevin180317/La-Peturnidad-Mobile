@@ -21,7 +21,7 @@ export default function ForgotPasswordScreen() {
       Toast.show({
         type: "error",
         text1: "Campo requerido",
-        text2: "Ingresa tu email",
+        text2: "Ingresa tu correo electrónico",
         visibilityTime: 3000,
       });
       return;

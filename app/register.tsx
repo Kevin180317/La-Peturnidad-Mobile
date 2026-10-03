@@ -80,7 +80,7 @@ export default function RegisterScreen() {
         Toast.show({
           type: "success",
           text1: "Registro exitoso",
-          text2: "Confirmá tu email para continuar",
+          text2: "Confirma tu correo electrónico para continuar",
           visibilityTime: 2000,
           onHide: () => {
             router.replace({

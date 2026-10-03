@@ -1,3 +1,4 @@
+import { PostForm, type PostFormData } from "@/components/PostForm";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -35,7 +36,7 @@ interface FeedTabProps {
   onToggleComments: (type: string, id: string) => void;
   onChangeComment: (text: string) => void;
   onAddComment: () => void;
-  onCreatePost: (content: string) => Promise<boolean>;
+  onCreatePost: (data: PostFormData) => Promise<boolean>;
   onDeletePost: (postId: string) => void;
 }
 
@@ -63,9 +64,7 @@ export function FeedTab({
   const router = useRouter();
   const [feedSubTab, setFeedSubTab] = useState<"all" | "mine">("all");
   const [showPostForm, setShowPostForm] = useState(false);
-  const [postContent, setPostContent] = useState("");
   const [posting, setPosting] = useState(false);
-  const [postFocused, setPostFocused] = useState(false);
   const [commentFocused, setCommentFocused] = useState(false);
 
   const visiblePosts =
@@ -74,15 +73,11 @@ export function FeedTab({
       : myPosts;
   const loading = feedSubTab === "all" ? loadingFeed : loadingMyPosts;
 
-  const handleCreatePost = async () => {
-    if (!postContent.trim()) return;
+  const handleCreatePost = async (data: PostFormData) => {
     setPosting(true);
-    const ok = await onCreatePost(postContent.trim());
-    if (ok) {
-      setPostContent("");
-      setShowPostForm(false);
-    }
+    const ok = await onCreatePost(data);
     setPosting(false);
+    return ok;
   };
 
   return (
@@ -129,40 +124,12 @@ export function FeedTab({
         </TouchableOpacity>
       </View>
 
-      {showPostForm && (
-        <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-          <TextInput
-            className={`bg-white p-3 rounded-lg mb-3 ${postFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} text-[#211f1e]`}
-            placeholder="¿Qué quieres compartir?"
-            placeholderTextColor="#9BA1A6"
-            value={postContent}
-            onChangeText={setPostContent}
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-            onFocus={() => setPostFocused(true)}
-            onBlur={() => setPostFocused(false)}
-          />
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#005e66]"}`}
-              onPress={handleCreatePost}
-              disabled={posting}
-            >
-              <Text className={`text-center font-bold ${posting ? "text-gray-700" : "text-white"}`}>{posting ? "Publicando..." : "Publicar"}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 bg-[#211f1e] py-3 rounded-xl"
-              onPress={() => {
-                setShowPostForm(false);
-                setPostContent("");
-              }}
-            >
-              <Text className="text-white text-center font-bold">Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+      <PostForm
+        visible={showPostForm}
+        onClose={() => setShowPostForm(false)}
+        onSubmit={handleCreatePost}
+        loading={posting}
+      />
 
       {loading ? (
         <ActivityIndicator size="large" color="#005e66" />
@@ -214,7 +181,52 @@ export function FeedTab({
                 )}
               </TouchableOpacity>
 
-              <Text className="text-[#211f1e] leading-5 mb-2">{post.content}</Text>
+              <Text className="text-[#211f1e] leading-5 mb-3">{post.content}</Text>
+
+              {/* Imágenes */}
+              {post.image_urls && post.image_urls.length > 0 && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
+                  <View className="flex-row gap-2">
+                    {post.image_urls.map((url: string, idx: number) => (
+                      <Image
+                        key={idx}
+                        source={{ uri: url }}
+                        className="w-32 h-32 rounded-lg"
+                      />
+                    ))}
+                  </View>
+                </ScrollView>
+              )}
+
+              {/* Localización */}
+              {post.location && (
+                <View className="flex-row items-center gap-2 mb-2 bg-[#005e66]/10 p-2 rounded-lg">
+                  <Ionicons name="location" size={14} color="#005e66" />
+                  <Text className="text-[#005e66] text-xs font-medium">{post.location}</Text>
+                </View>
+              )}
+
+              {/* Tags */}
+              {post.tags && post.tags.length > 0 && (
+                <View className="flex-row flex-wrap gap-1 mb-2">
+                  {post.tags.map((tag: string, idx: number) => (
+                    <Text key={idx} className="text-[#005e66] text-xs">
+                      @{tag}
+                    </Text>
+                  ))}
+                </View>
+              )}
+
+              {/* URLs */}
+              {post.urls && post.urls.length > 0 && (
+                <View className="gap-1 mb-2">
+                  {post.urls.map((url: string, idx: number) => (
+                    <Text key={idx} className="text-blue-500 text-xs underline">
+                      {url}
+                    </Text>
+                  ))}
+                </View>
+              )}
 
               <View className="flex-row items-center gap-2 pt-2 border-t border-gray-100">
                 <Ionicons name="chatbubble-ellipses-outline" size={16} color="#6B7280" />

@@ -247,8 +247,8 @@ export function ProfileTab({
                 </Text>
               </View>
               <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">Email:</Text>
-                <Text className="flex-1">{email}</Text>
+                <Text className="font-semibold">Correo electrónico:</Text>
+                <Text className="flex-1 text-right ml-2">{email}</Text>
               </View>
               <View className="flex-row border-b border-gray-100 py-2">
                 <Text className="font-semibold w-1/3">Teléfono:</Text>
@@ -293,7 +293,7 @@ export function ProfileTab({
                 <Text className="text-xl font-bold text-[#005e66]">
                   {petsCount}
                 </Text>
-                <Text className="text-gray-600">Mascotas</Text>
+                <Text className="text-gray-600">{petsCount === 1 ? "Mascota" : "Mascotas"}</Text>
               </View>
               <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=followers`)}>
                 <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-1">
@@ -302,7 +302,7 @@ export function ProfileTab({
                 <Text className="text-xl font-bold text-[#005e66]">
                   {profile?.followers_count || 0}
                 </Text>
-                <Text className="text-gray-600">Seguidores</Text>
+                <Text className="text-gray-600">{(profile?.followers_count || 0) === 1 ? "Seguidor" : "Seguidores"}</Text>
               </TouchableOpacity>
               <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=following`)}>
                 <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-1">
@@ -352,11 +352,11 @@ export function ProfileTab({
                 <Text className="font-semibold w-1/3">Miembro desde:</Text>
                 <Text className="flex-1">{formatDate(profile.created_at)}</Text>
               </View>
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">
+              <View className="border-b border-gray-100 py-2">
+                <Text className="font-semibold mb-1">
                   Última actualización:
                 </Text>
-                <Text className="flex-1">{formatDate(profile.updated_at)}</Text>
+                <Text className="text-center">{formatDate(profile.updated_at)}</Text>
               </View>
             </View>
           </View>

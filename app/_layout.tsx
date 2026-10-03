@@ -118,7 +118,7 @@ export default function RootLayout() {
       />
       <Stack.Screen
         name="email-confirmacion"
-        options={{ title: "Confirmar email" }}
+        options={{ title: "Confirmar correo electrónico" }}
       />
       <Stack.Screen
         name="notificaciones"

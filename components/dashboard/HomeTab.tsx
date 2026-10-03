@@ -83,12 +83,15 @@ export function HomeTab({
               ¡Hola, {profileName || "Usuario"}!
             </Text>
             <Text className="text-gray-600 font-[Inter\_400Regular] mt-1">
-              {new Date().toLocaleDateString("es-MX", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {(() => {
+                const date = new Date().toLocaleDateString("es-MX", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                });
+                return date.charAt(0).toUpperCase() + date.slice(1);
+              })()}
             </Text>
           </View>
           <TouchableOpacity
