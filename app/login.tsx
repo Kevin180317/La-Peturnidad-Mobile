@@ -209,14 +209,14 @@ export default function LoginScreen() {
 
           <Link
             href="/forgot-password"
-            className="text-[#c2402f] font-semibold text-center mb-4"
+            className="text-[#005e66] font-semibold text-center mb-4"
           >
             ¿Olvidaste tu contraseña?
           </Link>
 
           <View className="flex-row justify-center mt-4">
             <Text className="text-[#211f1e]">¿No tienes cuenta? </Text>
-            <Link href="/register" className="text-[#c2402f] font-bold">
+            <Link href="/register" className="text-[#005e66] font-bold">
               Regístrate
             </Link>
           </View>

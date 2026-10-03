@@ -49,10 +49,10 @@ export default function FaqScreen() {
       className="bg-[#faf5e0]"
       contentContainerClassName="p-5 pb-10"
     >
-      <Text className="text-2xl font-bold font-[Inter\_700Bold] text-[#211f1e] mb-1">
+      <Text className="text-2xl font-bold text-[#211f1e] mb-1">
         Preguntas frecuentes
       </Text>
-      <Text className="text-gray-500 font-[Inter\_400Regular] mb-6">
+      <Text className="text-gray-500 mb-6">
         Todo lo que necesitas saber sobre Lucky Tracker.
       </Text>
 
@@ -66,7 +66,7 @@ export default function FaqScreen() {
             className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] p-5 mb-4"
           >
             <View className="flex-row items-center justify-between">
-              <Text className="flex-1 font-semibold font-[Inter\_600SemiBold] text-[#211f1e] pr-3">
+              <Text className="flex-1 font-semibold text-[#211f1e] pr-3">
                 {faq.question}
               </Text>
               <Ionicons
@@ -76,7 +76,7 @@ export default function FaqScreen() {
               />
             </View>
             {open && (
-              <Text className="text-gray-500 font-[Inter\_400Regular] mt-3 leading-relaxed">
+              <Text className="text-gray-500 mt-3 leading-relaxed">
                 {faq.answer}
               </Text>
             )}

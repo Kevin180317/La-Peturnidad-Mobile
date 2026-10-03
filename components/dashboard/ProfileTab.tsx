@@ -204,13 +204,13 @@ export function ProfileTab({
                     profile.profile_picture_url ||
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ168Mp9N1EPzK86wWBf_Ipl7gqELKUyhryNg&s",
                 }}
-                className="w-32 h-32 rounded-full border-4 border-[#005e66]/30"
+                className="w-32 h-32 rounded-full border-4 border-[#005e66]"
               />
               <TouchableOpacity
-                className="absolute bottom-0 right-0 bg-[#005e66] w-10 h-10 rounded-full items-center justify-center border-2 border-white"
+                className="absolute bottom-1 right-1 bg-[#005e66] w-11 h-11 rounded-full items-center justify-center border-3 border-white shadow-lg active:bg-[#004052]"
                 onPress={handleSelectProfileImage}
               >
-                <Ionicons name="camera" size={18} color="#fff" />
+                <Ionicons name="camera" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
 
@@ -236,82 +236,116 @@ export function ProfileTab({
           </View>
 
           {/* Información personal */}
-          <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-            <Text className="text-lg font-bold mb-4">Información personal</Text>
-
-            <View className="space-y-3">
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">Nombre:</Text>
-                <Text className="flex-1">
-                  {profile.first_name} {profile.last_name}
-                </Text>
+          <View className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6 overflow-hidden">
+            <Text className="text-lg font-bold p-5 pb-3">Información personal</Text>
+            <View>
+              <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="person" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">NOMBRE</Text>
+                  <Text className="text-[#211f1e] font-semibold">{profile.first_name} {profile.last_name}</Text>
+                </View>
               </View>
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold">Correo electrónico:</Text>
-                <Text className="flex-1 text-right ml-2">{email}</Text>
+              <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="mail" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">CORREO ELECTRÓNICO</Text>
+                  <Text className="text-[#211f1e] font-semibold text-sm">{email}</Text>
+                </View>
               </View>
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">Teléfono:</Text>
-                <Text className="flex-1">{profile.phone}</Text>
+              <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="call" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">TELÉFONO</Text>
+                  <Text className="text-[#211f1e] font-semibold">{profile.phone}</Text>
+                </View>
               </View>
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">Cumpleaños:</Text>
-                <Text className="flex-1">{formatDate(profile.birth_date)}</Text>
+              <View className="flex-row items-center px-5 py-4">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="calendar" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">CUMPLEAÑOS</Text>
+                  <Text className="text-[#211f1e] font-semibold">{formatDate(profile.birth_date)}</Text>
+                </View>
               </View>
             </View>
           </View>
 
           {/* Dirección */}
-          <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-            <Text className="text-lg font-bold mb-4">Dirección</Text>
-
-            <View className="space-y-3">
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">Calle/Colonia:</Text>
-                <Text className="flex-1">{profile.address}</Text>
+          <View className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6 overflow-hidden">
+            <Text className="text-lg font-bold p-5 pb-3">Dirección</Text>
+            <View>
+              <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="home" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">CALLE/COLONIA</Text>
+                  <Text className="text-[#211f1e] font-semibold">{profile.address}</Text>
+                </View>
               </View>
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">Ciudad:</Text>
-                <Text className="flex-1">{profile.city}</Text>
+              <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="location" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">CIUDAD</Text>
+                  <Text className="text-[#211f1e] font-semibold">{profile.city}</Text>
+                </View>
               </View>
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">C.P.:</Text>
-                <Text className="flex-1">{profile.postal_code}</Text>
+              <View className="flex-row items-center px-5 py-4">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="map" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">CÓDIGO POSTAL</Text>
+                  <Text className="text-[#211f1e] font-semibold">{profile.postal_code}</Text>
+                </View>
               </View>
             </View>
           </View>
 
           {/* Estadísticas */}
-          <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-            <Text className="text-lg font-bold mb-4">Estadísticas</Text>
-
-            <View className="flex-row justify-around">
-              <View className="items-center">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-1">
-                  <Ionicons name="paw" size={18} color="#005e66" />
+          <View className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6 overflow-hidden">
+            <Text className="text-lg font-bold p-5 pb-3">Estadísticas</Text>
+            <View>
+              <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="paw" size={20} color="#005e66" />
                 </View>
-                <Text className="text-xl font-bold text-[#005e66]">
-                  {petsCount}
-                </Text>
-                <Text className="text-gray-600">{petsCount === 1 ? "Mascota" : "Mascotas"}</Text>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">MASCOTAS</Text>
+                  <Text className="text-[#211f1e] font-semibold text-lg">{petsCount}</Text>
+                </View>
               </View>
-              <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=followers`)}>
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-1">
-                  <Ionicons name="people" size={18} color="#005e66" />
+
+              <TouchableOpacity onPress={() => router.push(`/seguidores?id=${userId}&tab=followers`)} className="flex-row items-center px-5 py-4 border-b border-gray-100 active:bg-gray-50">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="people" size={20} color="#005e66" />
                 </View>
-                <Text className="text-xl font-bold text-[#005e66]">
-                  {profile?.followers_count || 0}
-                </Text>
-                <Text className="text-gray-600">{(profile?.followers_count || 0) === 1 ? "Seguidor" : "Seguidores"}</Text>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">SEGUIDORES</Text>
+                  <Text className="text-[#211f1e] font-semibold text-lg">{profile?.followers_count || 0}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
               </TouchableOpacity>
-              <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${userId}&tab=following`)}>
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-1">
-                  <Ionicons name="person-add" size={18} color="#005e66" />
+
+              <TouchableOpacity onPress={() => router.push(`/seguidores?id=${userId}&tab=following`)} className="flex-row items-center px-5 py-4 active:bg-gray-50">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="person-add" size={20} color="#005e66" />
                 </View>
-                <Text className="text-xl font-bold text-[#005e66]">
-                  {profile?.following_count || 0}
-                </Text>
-                <Text className="text-gray-600">Siguiendo</Text>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">SIGUIENDO</Text>
+                  <Text className="text-[#211f1e] font-semibold text-lg">{profile?.following_count || 0}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
           </View>
@@ -345,18 +379,27 @@ export function ProfileTab({
           </View>
 
           {/* Información de cuenta */}
-          <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-            <Text className="text-lg font-bold mb-4">Cuenta</Text>
-            <View className="space-y-3">
-              <View className="flex-row border-b border-gray-100 py-2">
-                <Text className="font-semibold w-1/3">Miembro desde:</Text>
-                <Text className="flex-1">{formatDate(profile.created_at)}</Text>
+          <View className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6 overflow-hidden">
+            <Text className="text-lg font-bold p-5 pb-3">Cuenta</Text>
+            <View>
+              <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="calendar" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">MIEMBRO DESDE</Text>
+                  <Text className="text-[#211f1e] font-semibold">{formatDate(profile.created_at)}</Text>
+                </View>
               </View>
-              <View className="border-b border-gray-100 py-2">
-                <Text className="font-semibold mb-1">
-                  Última actualización:
-                </Text>
-                <Text className="text-center">{formatDate(profile.updated_at)}</Text>
+
+              <View className="flex-row items-center px-5 py-4">
+                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
+                  <Ionicons name="refresh" size={20} color="#005e66" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-xs text-gray-500 font-semibold">ÚLTIMA ACTUALIZACIÓN</Text>
+                  <Text className="text-[#211f1e] font-semibold">{formatDate(profile.updated_at)}</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -383,7 +426,7 @@ export function ProfileTab({
 
       {/* Botón de cerrar sesión */}
       <TouchableOpacity
-        className="bg-[#211f1e] py-4 rounded-xl mt-4 flex-row items-center justify-center gap-2"
+        className="bg-red-600 py-4 rounded-xl mt-4 flex-row items-center justify-center gap-2 shadow-sm active:bg-red-700"
         onPress={onLogout}
       >
         <Ionicons name="log-out-outline" size={20} color="#fff" />

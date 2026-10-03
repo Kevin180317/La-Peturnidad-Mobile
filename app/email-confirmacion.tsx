@@ -63,7 +63,7 @@ export default function EmailConfirmacionScreen() {
           </View>
 
           <TouchableOpacity className="py-2 mb-4" onPress={handleResend}>
-            <Text className="text-[#c2402f] text-center font-semibold">
+            <Text className="text-[#005e66] text-center font-semibold">
               Reenviar email
             </Text>
           </TouchableOpacity>

@@ -142,7 +142,7 @@ export default function VerifyOtpScreen() {
               }
             }}
           >
-            <Text className="text-[#c2402f] text-center font-semibold">
+            <Text className="text-[#005e66] text-center font-semibold">
               Reenviar código
             </Text>
           </TouchableOpacity>

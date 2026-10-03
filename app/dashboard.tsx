@@ -147,10 +147,31 @@ export default function DashboardScreen() {
 
   const handleCreatePost = async (data: any) => {
     if (!user?.id) return false;
+
+    let uploadedUrls: string[] = [];
+
+    if (data.image_urls && data.image_urls.length > 0) {
+      try {
+        for (const uri of data.image_urls) {
+          const result = await dashboardService.uploadImage(uri, "posts");
+          if (result.success && result.url) {
+            uploadedUrls.push(result.url);
+          } else {
+            showToast("error", "Error", `No se pudo subir imagen: ${result.error}`);
+          }
+        }
+      } catch (error: any) {
+        showToast("error", "Error", `Error al subir imágenes: ${error.message}`);
+        return false;
+      }
+    }
+
     const result = await postsService.create({
       user_id: user.id,
-      ...data
+      ...data,
+      image_urls: uploadedUrls.length > 0 ? uploadedUrls : undefined
     });
+
     if (result.success) {
       await loadFeed();
       await loadMyPosts();

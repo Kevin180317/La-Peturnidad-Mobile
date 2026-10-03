@@ -108,7 +108,7 @@ export default function ForgotPasswordScreen() {
 
           <View className="flex-row justify-center mt-4">
             <Text className="text-[#211f1e]">¿Recordaste? </Text>
-            <Link href="/" className="text-[#c2402f] font-bold">
+            <Link href="/" className="text-[#005e66] font-bold">
               Inicia sesión
             </Link>
           </View>

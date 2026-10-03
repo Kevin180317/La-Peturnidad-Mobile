@@ -78,7 +78,7 @@ export function Button({
         <View className="flex-row items-center gap-2">
           {icon && <View>{icon}</View>}
           <Text
-            className={`font-bold font-[Inter\_700Bold] ${sizeStyles[size]} ${textColors[variant]}`}
+            className={`font-bold ${sizeStyles[size]} ${textColors[variant]}`}
           >
             {title}
           </Text>
@@ -143,7 +143,7 @@ export function Input({
   return (
     <View className="mb-4">
       {label && (
-        <Text className="text-[#211f1e] font-semibold font-[Inter\_600SemiBold] mb-2">
+        <Text className="text-[#211f1e] font-semibold mb-2">
           {label}
         </Text>
       )}
@@ -158,7 +158,7 @@ export function Input({
       >
         {icon && <View className="pl-4">{icon}</View>}
         <TextInput
-          className={`flex-1 p-4 text-base font-[Inter\_400Regular] text-[#211f1e] ${
+          className={`flex-1 p-4 text-base text-[#211f1e] ${
             icon ? "" : "pl-4"
           } pr-4`}
           placeholderTextColor="#9BA1A6"
@@ -197,7 +197,7 @@ export function Badge({ label, variant = "primary", style, ...props }: BadgeProp
       className={`px-3 py-1 rounded-full ${variantStyles[variant]}`}
       {...props}
     >
-      <Text className="text-xs font-semibold font-[Inter\_600SemiBold]">
+      <Text className="text-xs font-semibold">
         {label}
       </Text>
     </View>
@@ -241,7 +241,7 @@ export function Avatar({
       className={`${sizeStyles[size]} rounded-full bg-[#faf5e0] items-center justify-center border-2 border-[#005e66] ${borderSizes[size]}`}
     >
       {fallback ? (
-        <Text className="text-[#005e66] font-bold font-[Inter\_700Bold]">
+        <Text className="text-[#005e66] font-bold">
           {fallback[0].toUpperCase()}
         </Text>
       ) : (

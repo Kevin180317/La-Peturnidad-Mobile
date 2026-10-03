@@ -49,10 +49,10 @@ export default function ComoUsarScreen() {
       className="bg-[#faf5e0]"
       contentContainerClassName="p-5 pb-10"
     >
-      <Text className="text-2xl font-bold font-[Inter\_700Bold] text-[#211f1e] mb-1">
+      <Text className="text-2xl font-bold text-[#211f1e] mb-1">
         ¿Cómo funciona Lucky Tracker?
       </Text>
-      <Text className="text-gray-500 font-[Inter\_400Regular] mb-6">
+      <Text className="text-gray-500 mb-6">
         Aprende en minutos cómo registrar tus mascotas, reportar emergencias y
         conectar con tu comunidad.
       </Text>
@@ -64,7 +64,7 @@ export default function ComoUsarScreen() {
         >
           <View className="items-center mr-4">
             <View className="w-11 h-11 rounded-full bg-[#005e66] items-center justify-center">
-              <Text className="text-white font-bold font-[Inter\_700Bold]">
+              <Text className="text-white font-bold">
                 {index + 1}
               </Text>
             </View>
@@ -75,11 +75,11 @@ export default function ComoUsarScreen() {
           <View className="flex-1 pb-2">
             <View className="flex-row items-center gap-2 mb-2">
               <Ionicons name={step.icon} size={18} color="#005e66" />
-              <Text className="flex-1 font-bold font-[Inter\_700Bold] text-[#211f1e] text-base">
+              <Text className="flex-1 font-bold text-[#211f1e] text-base">
                 {step.title}
               </Text>
             </View>
-            <Text className="text-gray-500 font-[Inter\_400Regular] leading-relaxed">
+            <Text className="text-gray-500 leading-relaxed">
               {step.body}
             </Text>
           </View>

@@ -2,7 +2,6 @@ import { dashboardService } from "@/services/dashboard.service";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   Modal,
   ScrollView,
@@ -131,16 +130,17 @@ export function PostForm({
     >
       <View className="flex-1 bg-[#faf5e0]">
         {/* Header */}
-        <View className="bg-[#005e66] px-4 py-4 flex-row items-center justify-between">
-          <TouchableOpacity onPress={onClose}>
+        <View className="bg-[#005e66] px-4 py-4 flex-row items-center justify-between shadow-lg">
+          <TouchableOpacity onPress={onClose} className="active:opacity-70">
             <Ionicons name="chevron-back" size={28} color="#fff" />
           </TouchableOpacity>
           <Text className="text-white text-lg font-bold">Nuevo post</Text>
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={loading}
+            className="active:opacity-70"
           >
-            <Text className="text-blue-300 font-semibold">
+            <Text className={`font-semibold ${loading ? "text-gray-300" : "text-white"}`}>
               {loading ? "..." : "Compartir"}
             </Text>
           </TouchableOpacity>
@@ -170,24 +170,25 @@ export function PostForm({
 
           {/* Imágenes */}
           <Text className="font-semibold text-[#211f1e] mb-2">Imágenes</Text>
-          <View className="flex-row gap-2 mb-4">
+          <View className="flex-row gap-2 mb-4 flex-wrap">
             <TouchableOpacity
               onPress={handleAddImage}
-              className="w-20 h-20 bg-white rounded-lg border-2 border-dashed border-[#005e66] items-center justify-center"
+              className="w-24 h-24 bg-[#005e66]/5 rounded-xl border-2 border-dashed border-[#005e66] items-center justify-center active:bg-[#005e66]/10"
             >
-              <Ionicons name="add" size={28} color="#005e66" />
+              <Ionicons name="image-outline" size={32} color="#005e66" />
+              <Text className="text-xs text-[#005e66] mt-1 font-semibold">Agregar</Text>
             </TouchableOpacity>
             {images.map((img, idx) => (
               <View key={idx} className="relative">
                 <Image
                   source={{ uri: img.uri }}
-                  className="w-20 h-20 rounded-lg"
+                  className="w-24 h-24 rounded-xl"
                 />
                 <TouchableOpacity
                   onPress={() => handleRemoveImage(idx)}
-                  className="absolute top-1 right-1 bg-red-500 rounded-full p-1"
+                  className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1.5 shadow-lg"
                 >
-                  <Ionicons name="close" size={14} color="#fff" />
+                  <Ionicons name="close" size={16} color="#fff" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -215,7 +216,7 @@ export function PostForm({
           <Text className="font-semibold text-[#211f1e] mb-2">Mencionar personas</Text>
           <View className="flex-row gap-2 mb-3">
             <TextInput
-              className="flex-1 bg-white p-3 rounded-lg border border-gray-300 text-[#211f1e]"
+              className="flex-1 bg-white p-3 rounded-xl border border-gray-200 text-[#211f1e]"
               placeholder="@usuario"
               placeholderTextColor="#9BA1A6"
               value={tagText}
@@ -223,7 +224,7 @@ export function PostForm({
             />
             <TouchableOpacity
               onPress={handleAddTag}
-              className="bg-[#005e66] px-4 rounded-lg items-center justify-center"
+              className="bg-[#005e66] px-4 rounded-xl items-center justify-center active:bg-[#004052]"
             >
               <Ionicons name="add" size={20} color="#fff" />
             </TouchableOpacity>
@@ -232,11 +233,11 @@ export function PostForm({
             {tags.map((tag, idx) => (
               <View
                 key={idx}
-                className="bg-[#005e66]/20 px-3 py-1 rounded-full flex-row items-center gap-2"
+                className="bg-[#005e66] px-3 py-1.5 rounded-full flex-row items-center gap-2"
               >
-                <Text className="text-[#005e66]">@{tag}</Text>
+                <Text className="text-white font-semibold text-sm">@{tag}</Text>
                 <TouchableOpacity onPress={() => handleRemoveTag(idx)}>
-                  <Ionicons name="close" size={16} color="#005e66" />
+                  <Ionicons name="close" size={14} color="#fff" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -246,7 +247,7 @@ export function PostForm({
           <Text className="font-semibold text-[#211f1e] mb-2">Agregar links</Text>
           <View className="flex-row gap-2 mb-3">
             <TextInput
-              className="flex-1 bg-white p-3 rounded-lg border border-gray-300 text-[#211f1e]"
+              className="flex-1 bg-white p-3 rounded-xl border border-gray-200 text-[#211f1e]"
               placeholder="https://ejemplo.com"
               placeholderTextColor="#9BA1A6"
               value={urlText}
@@ -254,7 +255,7 @@ export function PostForm({
             />
             <TouchableOpacity
               onPress={handleAddUrl}
-              className="bg-[#005e66] px-4 rounded-lg items-center justify-center"
+              className="bg-[#005e66] px-4 rounded-xl items-center justify-center active:bg-[#004052]"
             >
               <Ionicons name="add" size={20} color="#fff" />
             </TouchableOpacity>
@@ -263,13 +264,13 @@ export function PostForm({
             {urls.map((url, idx) => (
               <View
                 key={idx}
-                className="bg-white p-3 rounded-lg border border-gray-300 flex-row items-center justify-between"
+                className="bg-blue-50 p-3 rounded-xl border border-blue-200 flex-row items-center justify-between"
               >
-                <Text className="text-blue-600 flex-1 text-xs" numberOfLines={1}>
+                <Text className="text-blue-600 flex-1 text-sm font-semibold" numberOfLines={1}>
                   {url}
                 </Text>
-                <TouchableOpacity onPress={() => handleRemoveUrl(idx)}>
-                  <Ionicons name="close" size={18} color="#c2402f" />
+                <TouchableOpacity onPress={() => handleRemoveUrl(idx)} className="ml-2">
+                  <Ionicons name="close-circle" size={18} color="#3b82f6" />
                 </TouchableOpacity>
               </View>
             ))}
@@ -277,10 +278,10 @@ export function PostForm({
         </ScrollView>
 
         {/* Botones */}
-        <View className="bg-white border-t border-gray-200 px-4 py-3 flex-row gap-3">
+        <View className="bg-white border-t border-gray-200 px-4 py-3 flex-row gap-3 shadow-lg">
           <TouchableOpacity
             onPress={onClose}
-            className="flex-1 py-3 rounded-xl bg-gray-200"
+            className="flex-1 py-3 rounded-xl bg-gray-100 active:bg-gray-200"
           >
             <Text className="text-center font-semibold text-[#211f1e]">
               Cancelar
@@ -290,7 +291,7 @@ export function PostForm({
             onPress={handleSubmit}
             disabled={loading}
             className={`flex-1 py-3 rounded-xl ${
-              loading ? "bg-gray-400" : "bg-[#005e66]"
+              loading ? "bg-gray-400" : "bg-[#005e66] active:bg-[#004052]"
             }`}
           >
             <Text className="text-center font-semibold text-white">

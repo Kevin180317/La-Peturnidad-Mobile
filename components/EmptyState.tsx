@@ -21,11 +21,11 @@ export function EmptyState({
       <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
         <Ionicons name={icon} size={32} color="#005e66" />
       </View>
-      <Text className="text-[#211f1e] font-semibold font-[Inter\_600SemiBold] text-center">
+      <Text className="text-[#211f1e] font-semibold text-center">
         {title}
       </Text>
       {subtitle && (
-        <Text className="text-gray-500 font-[Inter\_400Regular] text-sm text-center mt-2">
+        <Text className="text-gray-500 text-sm text-center mt-2">
           {subtitle}
         </Text>
       )}
@@ -35,7 +35,7 @@ export function EmptyState({
           onPress={onAction}
           activeOpacity={0.8}
         >
-          <Text className="text-white font-bold font-[Inter\_700Bold]">
+          <Text className="text-white font-bold">
             {actionLabel}
           </Text>
         </TouchableOpacity>
