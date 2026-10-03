@@ -1,6 +1,5 @@
 import { dashboardService } from "@/services/dashboard.service";
 import { Ionicons } from "@expo/vector-icons";
-import * as Location from "expo-location";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -42,7 +41,6 @@ export function PostForm({
   const [tags, setTags] = useState<string[]>([]);
   const [urlText, setUrlText] = useState("");
   const [urls, setUrls] = useState<string[]>([]);
-  const [gettingLocation, setGettingLocation] = useState(false);
   const [contentFocused, setContentFocused] = useState(false);
 
   const handleAddImage = async () => {
@@ -64,43 +62,12 @@ export function PostForm({
   };
 
   const handleGetLocation = async () => {
-    setGettingLocation(true);
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Toast.show({
-          type: "error",
-          text1: "Permiso denegado",
-          text2: "Se requiere acceso a la ubicación",
-          position: "top",
-        });
-        setGettingLocation(false);
-        return;
-      }
-
-      const loc = await Location.getCurrentPositionAsync({});
-      const [address] = await Location.reverseGeocodeAsync({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
-
-      const locStr = `${address?.city || ""}, ${address?.region || ""}`.trim();
-      setLocation(locStr);
-      Toast.show({
-        type: "success",
-        text1: "Ubicación obtenida",
-        text2: locStr,
-        position: "top",
-      });
-    } catch (error: any) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "No se pudo obtener la ubicación",
-        position: "top",
-      });
-    }
-    setGettingLocation(false);
+    Toast.show({
+      type: "info",
+      text1: "Ingresa la ubicación",
+      text2: "Escribe tu ciudad o ubicación manualmente",
+      position: "top",
+    });
   };
 
   const handleAddTag = () => {
@@ -231,21 +198,16 @@ export function PostForm({
           <View className="flex-row gap-2 mb-4">
             <TextInput
               className="flex-1 bg-white p-3 rounded-lg border border-gray-300 text-[#211f1e]"
-              placeholder="Ingresa ubicación"
+              placeholder="Ej: Tijuana, México"
               placeholderTextColor="#9BA1A6"
               value={location}
               onChangeText={setLocation}
             />
             <TouchableOpacity
               onPress={handleGetLocation}
-              disabled={gettingLocation}
               className="bg-[#005e66] px-4 rounded-lg items-center justify-center"
             >
-              {gettingLocation ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <Ionicons name="location" size={20} color="#fff" />
-              )}
+              <Ionicons name="location" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
 
