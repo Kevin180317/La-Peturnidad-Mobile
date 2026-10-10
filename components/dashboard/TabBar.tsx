@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export type TabType = "home" | "profile" | "emergency" | "comunidad" | "feed";
@@ -22,8 +23,10 @@ interface TabBarProps {
 }
 
 export function TabBar({ activeTab, onSelect }: TabBarProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View className="flex-row bg-white border-t border-[#211f1e]/20 py-2">
+    <View style={{ paddingBottom: insets.bottom }} className="flex-row bg-white border-t border-[#211f1e]/20 py-2">
       {TABS.map((tab) => {
         const active = activeTab === tab.key;
         return (
