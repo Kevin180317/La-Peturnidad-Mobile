@@ -184,18 +184,12 @@ export function FeedTab({
               <Text className="text-[#211f1e] leading-5 mb-3">{post.content}</Text>
 
               {/* Imágenes */}
-              {post.image_urls && post.image_urls.length > 0 && (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
-                  <View className="flex-row gap-2">
-                    {post.image_urls.map((url: string, idx: number) => (
-                      <Image
-                        key={idx}
-                        source={{ uri: url }}
-                        className="w-32 h-32 rounded-lg"
-                      />
-                    ))}
-                  </View>
-                </ScrollView>
+              {post.image_url && (
+                <Image
+                  source={{ uri: post.image_url }}
+                  resizeMode="contain"
+                  className="w-full h-64 rounded-lg mb-3 bg-gray-100"
+                />
               )}
 
               {/* Localización */}

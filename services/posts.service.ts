@@ -57,10 +57,6 @@ class PostsService {
         user_id: p.user_id,
         content: p.content,
         image_url: p.image_url,
-        image_urls: p.image_urls,
-        location: p.location,
-        tags: p.tags,
-        urls: p.urls,
         created_at: p.created_at,
         updated_at: p.updated_at,
         owner_name:
@@ -122,10 +118,6 @@ class PostsService {
         user_id: p.user_id,
         content: p.content,
         image_url: p.image_url,
-        image_urls: p.image_urls,
-        location: p.location,
-        tags: p.tags,
-        urls: p.urls,
         created_at: p.created_at,
         updated_at: p.updated_at,
         owner_name:
@@ -203,17 +195,15 @@ class PostsService {
     urls?: string[]
   }) {
     try {
+      // Usar la primera imagen de image_urls si está disponible
+      const imageUrl = data.image_urls?.[0] || data.image_url;
+
       const { data: post, error } = await supabase
         .from("posts")
         .insert([{
           user_id: data.user_id,
           content: data.content,
-          image_url: data.image_url,
-          image_urls: data.image_urls,
-          location: data.location,
-          tags: data.tags,
-          urls: data.urls,
-          created_at: new Date().toISOString()
+          image_url: imageUrl,
         }])
         .select()
         .single();
