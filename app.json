@@ -18,6 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "navigationBar": "immersive",
       "package": "com.idarko.lapeturnidad",
       "googleServicesFile": "./google-services.json"
     },
