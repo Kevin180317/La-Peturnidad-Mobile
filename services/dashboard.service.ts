@@ -517,10 +517,15 @@ class DashboardService {
         const errorText = await response.text();
         console.error(`❌ Error en respuesta: ${response.status}`, errorText);
 
-        // Si el bucket no existe, intentar con public
-        if (response.status === 404 && bucket !== "public") {
-          console.log("🔄 Reintentando con bucket public...");
-          return this.uploadImage(uri, "public");
+        // Si falla, intentar con fallback
+        let fallbackBucket: string | null = null;
+        if (bucket === "posts") fallbackBucket = "public";
+        else if (bucket === "pet-images") fallbackBucket = "public";
+        else if (bucket === "profile-pictures") fallbackBucket = "alternate";
+
+        if (fallbackBucket && response.status === 404) {
+          console.log(`🔄 Reintentando con bucket ${fallbackBucket}...`);
+          return this.uploadImage(uri, fallbackBucket);
         }
 
         throw new Error(`HTTP ${response.status}: ${errorText}`);
