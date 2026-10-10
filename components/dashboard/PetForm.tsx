@@ -65,7 +65,6 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
 
     if (result.success) {
       setPetImageUrl(result.url || null);
-      setSelectedPetImage(null);
       Toast.show({
         type: "success",
         text1: "Éxito",
@@ -176,14 +175,16 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
       {/* Foto */}
       <Text className="font-semibold mb-2">Foto *</Text>
       <View className="flex-row gap-3 mb-4">
-        <TouchableOpacity
-          className="flex-1 bg-[#005e66] py-3 rounded-xl flex-row items-center justify-center gap-2"
-          onPress={handleSelectImage}
-        >
-          <Ionicons name="camera" size={18} color="#fff" />
-          <Text className="text-white text-center">Seleccionar</Text>
-        </TouchableOpacity>
-        {selectedPetImage && (
+        {!petImageUrl && (
+          <TouchableOpacity
+            className="flex-1 bg-[#005e66] py-3 rounded-xl flex-row items-center justify-center gap-2"
+            onPress={handleSelectImage}
+          >
+            <Ionicons name="camera" size={18} color="#fff" />
+            <Text className="text-white text-center">Seleccionar</Text>
+          </TouchableOpacity>
+        )}
+        {selectedPetImage && !petImageUrl && (
           <TouchableOpacity
             className={`flex-1 py-3 rounded-xl flex-row items-center justify-center gap-2 ${uploadingPetImage ? "bg-gray-400" : "bg-[#005e66]"}`}
             onPress={handleUploadImage}
