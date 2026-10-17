@@ -107,82 +107,112 @@ export function ProfileTab({
     setUploadingProfileImage(false);
   };
 
-  const menuItems: {
+  type MenuItem = {
     icon: keyof typeof Ionicons.glyphMap;
     color: string;
     bg: string;
     label: string;
     onPress: () => void;
     badge?: number;
-  }[] = [
+  };
+
+  const menuCategories: Array<{ title: string; items: MenuItem[] }> = [
     {
-      icon: "create-outline",
-      color: "#005e66",
-      bg: "bg-[#005e66]/10",
-      label: "Editar perfil",
-      onPress: () => router.push("/editar-perfil"),
+      title: "Mensajería",
+      items: [
+        {
+          icon: "chatbox-ellipses-outline",
+          color: "#005e66",
+          bg: "bg-[#005e66]/10",
+          label: "Mensajes",
+          onPress: () => router.push("/mensajes"),
+          badge: unreadCount,
+        },
+        {
+          icon: "chatbubbles-outline",
+          color: "#005e66",
+          bg: "bg-[#005e66]/10",
+          label: "Comunidad",
+          onPress: onGoComunidad,
+        },
+      ],
     },
     {
-      icon: "notifications-outline",
-      color: "#005e66",
-      bg: "bg-[#005e66]/10",
-      label: "Configurar notificaciones",
-      onPress: () => router.push("/notificaciones"),
+      title: "Exploración",
+      items: [
+        {
+          icon: "people-outline",
+          color: "#211f1e",
+          bg: "bg-[#211f1e]/10",
+          label: "Grupos",
+          onPress: () => router.push("/grupos"),
+        },
+        {
+          icon: "paw-outline",
+          color: "#005e66",
+          bg: "bg-[#005e66]/10",
+          label: "Reuniones exitosas",
+          onPress: () => router.push("/historias"),
+        },
+      ],
     },
     {
-      icon: "chatbubbles-outline",
-      color: "#005e66",
-      bg: "bg-[#005e66]/10",
-      label: "Ir a la comunidad",
-      onPress: onGoComunidad,
+      title: "Configuración",
+      items: [
+        {
+          icon: "create-outline",
+          color: "#005e66",
+          bg: "bg-[#005e66]/10",
+          label: "Editar perfil",
+          onPress: () => router.push("/editar-perfil"),
+        },
+        {
+          icon: "notifications-outline",
+          color: "#005e66",
+          bg: "bg-[#005e66]/10",
+          label: "Notificaciones",
+          onPress: () => router.push("/notificaciones"),
+        },
+      ],
     },
     {
-      icon: "chatbox-ellipses-outline",
-      color: "#005e66",
-      bg: "bg-[#005e66]/10",
-      label: "Mensajes",
-      onPress: () => router.push("/mensajes"),
-      badge: unreadCount,
-    },
-    {
-      icon: "people-outline",
-      color: "#211f1e",
-      bg: "bg-[#211f1e]/10",
-      label: "Grupos",
-      onPress: () => router.push("/grupos"),
-    },
-    {
-      icon: "paw-outline",
-      color: "#005e66",
-      bg: "bg-[#005e66]/10",
-      label: "Reuniones exitosas",
-      onPress: () => router.push("/historias"),
-    },
-    {
-      icon: "book-outline",
-      color: "#005e66",
-      bg: "bg-[#005e66]/10",
-      label: "Cómo funciona la app",
-      onPress: () => router.push("/como-usar"),
-    },
-    {
-      icon: "help-circle-outline",
-      color: "#005e66",
-      bg: "bg-[#005e66]/10",
-      label: "Preguntas frecuentes",
-      onPress: () => router.push("/faq"),
+      title: "Ayuda",
+      items: [
+        {
+          icon: "book-outline",
+          color: "#005e66",
+          bg: "bg-[#005e66]/10",
+          label: "Cómo funciona",
+          onPress: () => router.push("/como-usar"),
+        },
+        {
+          icon: "help-circle-outline",
+          color: "#005e66",
+          bg: "bg-[#005e66]/10",
+          label: "Preguntas frecuentes",
+          onPress: () => router.push("/faq"),
+        },
+      ],
     },
   ];
 
-  if (profile?.role === "admin" || profile?.role === "moderator") {
-    menuItems.push({
-      icon: "shield-checkmark-outline",
-      color: "#211f1e",
-      bg: "bg-[#211f1e]/10",
-      label: "Panel de moderación",
-      onPress: () => router.push("/panel-moderacion"),
-    });
-  }
+  const moderationItems: Array<{ title: string; items: MenuItem[] }> =
+    profile?.role === "admin" || profile?.role === "moderator"
+      ? [
+          {
+            title: "Administración",
+            items: [
+              {
+                icon: "shield-checkmark-outline",
+                color: "#211f1e",
+                bg: "bg-[#211f1e]/10",
+                label: "Panel de moderación",
+                onPress: () => router.push("/panel-moderacion"),
+              },
+            ],
+          },
+        ]
+      : [];
 
   return (
     <ScrollView
@@ -350,33 +380,35 @@ export function ProfileTab({
             </View>
           </View>
 
-          {/* Acciones - lista de menú */}
-          <View className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6 overflow-hidden">
-            <Text className="text-lg font-bold p-5 pb-3">Acciones</Text>
-            {menuItems.map((item, index) => (
-              <TouchableOpacity
-                key={item.label}
-                className={`flex-row items-center px-5 py-4 ${
-                  index < menuItems.length - 1 ? "border-b border-gray-100" : ""
-                }`}
-                onPress={item.onPress}
-                activeOpacity={0.7}
-              >
-                <View className={`w-10 h-10 rounded-full ${item.bg} items-center justify-center mr-3`}>
-                  <Ionicons name={item.icon} size={20} color={item.color} />
-                </View>
-                <Text className="flex-1 font-medium text-[#211f1e]">
-                  {item.label}
-                </Text>
-                {item.badge && item.badge > 0 ? (
-                  <View className="bg-[#d93a3a] rounded-full min-w-[22px] h-[22px] items-center justify-center px-1 mr-1">
-                    <Text className="text-white text-xs font-bold">{item.badge}</Text>
+          {/* Menú organizado por categorías */}
+          {[...menuCategories, ...moderationItems].map((category, categoryIndex) => (
+            <View key={category.title} className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6 overflow-hidden">
+              <Text className="text-lg font-bold p-5 pb-3">{category.title}</Text>
+              {category.items.map((item, itemIndex) => (
+                <TouchableOpacity
+                  key={item.label}
+                  className={`flex-row items-center px-5 py-4 ${
+                    itemIndex < category.items.length - 1 ? "border-b border-gray-100" : ""
+                  }`}
+                  onPress={item.onPress}
+                  activeOpacity={0.7}
+                >
+                  <View className={`w-10 h-10 rounded-full ${item.bg} items-center justify-center mr-3`}>
+                    <Ionicons name={item.icon} size={20} color={item.color} />
                   </View>
-                ) : null}
-                <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-              </TouchableOpacity>
-            ))}
-          </View>
+                  <Text className="flex-1 font-medium text-[#211f1e]">
+                    {item.label}
+                  </Text>
+                  {item.badge && item.badge > 0 ? (
+                    <View className="bg-[#ff7e70] rounded-full min-w-[24px] h-[24px] items-center justify-center px-1.5 mr-2">
+                      <Text className="text-white text-xs font-bold">{item.badge > 99 ? "99+" : item.badge}</Text>
+                    </View>
+                  ) : null}
+                  <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
 
           {/* Información de cuenta */}
           <View className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6 overflow-hidden">

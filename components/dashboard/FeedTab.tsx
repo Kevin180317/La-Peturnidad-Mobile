@@ -1,4 +1,5 @@
 import { PostForm, type PostFormData } from "@/components/PostForm";
+import { messagesService } from "@/services/messages.service";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 export interface CommentTarget {
   type: string;
@@ -22,8 +24,13 @@ interface FeedTabProps {
   userId?: string;
   feedPosts: any[];
   myPosts: any[];
+  announcements?: any[];
+  myAnnouncements?: any[];
+  emergencyAlerts?: any[];
   loadingFeed: boolean;
   loadingMyPosts: boolean;
+  loadingAnnouncements?: boolean;
+  loadingAlerts?: boolean;
   refreshing: boolean;
   comments: any[];
   commentTarget: CommentTarget | null;
@@ -33,19 +40,28 @@ interface FeedTabProps {
   onRefresh: () => void;
   onLoadFeed: () => void;
   onLoadMyPosts: () => void;
+  onLoadAnnouncements?: () => void;
+  onLoadAlerts?: () => void;
   onToggleComments: (type: string, id: string) => void;
   onChangeComment: (text: string) => void;
   onAddComment: () => void;
   onCreatePost: (data: PostFormData) => Promise<boolean>;
   onDeletePost: (postId: string) => void;
+  onCreateAnnouncement?: (title: string, content: string, category: string) => Promise<boolean>;
+  onDeleteAnnouncement?: (id: string) => void;
 }
 
 export function FeedTab({
   userId,
   feedPosts,
   myPosts,
+  announcements = [],
+  myAnnouncements = [],
+  emergencyAlerts = [],
   loadingFeed,
   loadingMyPosts,
+  loadingAnnouncements = false,
+  loadingAlerts = false,
   refreshing,
   comments,
   commentTarget,
@@ -55,17 +71,23 @@ export function FeedTab({
   onRefresh,
   onLoadFeed,
   onLoadMyPosts,
+  onLoadAnnouncements = () => {},
+  onLoadAlerts = () => {},
   onToggleComments,
   onChangeComment,
   onAddComment,
   onCreatePost,
   onDeletePost,
+  onCreateAnnouncement = async () => false,
+  onDeleteAnnouncement = () => {},
 }: FeedTabProps) {
   const router = useRouter();
+  const [mainTab, setMainTab] = useState<"emergencies" | "announcements" | "social">("social");
   const [feedSubTab, setFeedSubTab] = useState<"all" | "mine">("all");
   const [showPostForm, setShowPostForm] = useState(false);
   const [posting, setPosting] = useState(false);
   const [commentFocused, setCommentFocused] = useState(false);
+  const [contactingUserId, setContactingUserId] = useState<string | null>(null);
 
   const visiblePosts =
     feedSubTab === "all"
@@ -78,6 +100,19 @@ export function FeedTab({
     const ok = await onCreatePost(data);
     setPosting(false);
     return ok;
+  };
+
+  const handleContact = async (authorId: string, authorName: string) => {
+    if (!userId) return;
+    setContactingUserId(authorId);
+    const result = await messagesService.getOrCreateConversation(userId, authorId);
+    setContactingUserId(null);
+    if (result.success) {
+      router.push(`/mensajes/${result.data?.conversation_id}`);
+      Toast.show({ type: "success", text1: "Conversación iniciada", position: "top" });
+    } else {
+      Toast.show({ type: "error", text1: "Error", text2: result.error, position: "top" });
+    }
   };
 
   return (
@@ -97,7 +132,7 @@ export function FeedTab({
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-2xl font-bold text-[#211f1e]">Feed</Text>
         <TouchableOpacity
-            className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center"
+          className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center"
           onPress={() => setShowPostForm(true)}
         >
           <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 4 }} />
@@ -105,21 +140,30 @@ export function FeedTab({
         </TouchableOpacity>
       </View>
 
-      <View className="flex-row bg-white rounded-xl mb-4 shadow-sm">
+      {/* Tabs principales: Emergencias, Anuncios, Social */}
+      <View className="flex-row bg-white rounded-xl mb-4 shadow-sm gap-1 p-1">
         <TouchableOpacity
-          className={`flex-1 py-3 rounded-l-xl ${feedSubTab === "all" ? "bg-[#005e66]" : "bg-white"}`}
-          onPress={() => setFeedSubTab("all")}
+          className={`flex-1 py-2.5 rounded-lg ${mainTab === "emergencies" ? "bg-[#ff7e70]" : "bg-white"}`}
+          onPress={() => setMainTab("emergencies")}
         >
-          <Text className={`text-center font-semibold ${feedSubTab === "all" ? "text-white" : "text-gray-500"}`}>
-            Feed
+          <Text className={`text-center font-semibold text-xs ${mainTab === "emergencies" ? "text-white" : "text-gray-600"}`}>
+            Emergencias
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`flex-1 py-3 rounded-r-xl ${feedSubTab === "mine" ? "bg-[#005e66]" : "bg-white"}`}
-          onPress={() => setFeedSubTab("mine")}
+          className={`flex-1 py-2.5 rounded-lg ${mainTab === "announcements" ? "bg-[#005e66]" : "bg-white"}`}
+          onPress={() => setMainTab("announcements")}
         >
-          <Text className={`text-center font-semibold ${feedSubTab === "mine" ? "text-white" : "text-gray-500"}`}>
-            Mis posts
+          <Text className={`text-center font-semibold text-xs ${mainTab === "announcements" ? "text-white" : "text-gray-600"}`}>
+            Anuncios
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className={`flex-1 py-2.5 rounded-lg ${mainTab === "social" ? "bg-[#005e66]" : "bg-white"}`}
+          onPress={() => setMainTab("social")}
+        >
+          <Text className={`text-center font-semibold text-xs ${mainTab === "social" ? "text-white" : "text-gray-600"}`}>
+            Social
           </Text>
         </TouchableOpacity>
       </View>
@@ -131,19 +175,144 @@ export function FeedTab({
         loading={posting}
       />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#005e66" />
-      ) : visiblePosts.length === 0 ? (
-        <View className="bg-white p-10 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
-          <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
-            <Ionicons name="phone-portrait-outline" size={32} color="#005e66" />
-          </View>
-          <Text className="text-gray-500 text-center">
-            {feedSubTab === "all" ? "No hay publicaciones en el feed" : "No has publicado nada aún"}
-          </Text>
-        </View>
-      ) : (
-        visiblePosts.map((post) => {
+      {/* EMERGENCIAS TAB */}
+      {mainTab === "emergencies" && (
+        <>
+          {(loadingAlerts || !emergencyAlerts?.length) && (
+            <View className="bg-white p-10 rounded-2xl shadow-[0_2px_8px_rgba(33,31,30,0.08)] items-center">
+              {loadingAlerts ? (
+                <ActivityIndicator size="large" color="#ff7e70" />
+              ) : (
+                <>
+                  <View className="w-16 h-16 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-3">
+                    <Ionicons name="alert-circle-outline" size={32} color="#ff7e70" />
+                  </View>
+                  <Text className="text-gray-500 text-center">No hay alertas de emergencia activas</Text>
+                </>
+              )}
+            </View>
+          )}
+          {emergencyAlerts?.map((alert) => (
+            <View key={alert.id} className="bg-red-50 border-l-4 border-[#ff7e70] rounded-2xl mb-3 p-4 shadow-[0_2px_8px_rgba(255,126,112,0.12)]">
+              <View className="flex-row items-start gap-3 mb-3">
+                {alert.image_url ? (
+                  <Image source={{ uri: alert.image_url }} className="w-16 h-16 rounded-lg bg-gray-100" />
+                ) : (
+                  <View className="w-16 h-16 rounded-lg bg-gray-200 items-center justify-center">
+                    <Ionicons name="alert-outline" size={24} color="#ff7e70" />
+                  </View>
+                )}
+                <View className="flex-1">
+                  <View className="bg-[#ff7e70] px-2 py-1 rounded-full self-start mb-2">
+                    <Text className="text-white text-xs font-bold">EMERGENCIA</Text>
+                  </View>
+                  <Text className="font-bold text-base text-[#211f1e]">{alert.pet_name}</Text>
+                  <Text className="text-[#ff7e70] text-xs font-medium mt-1">{alert.disappearance_date}</Text>
+                </View>
+              </View>
+              <Text className="text-sm text-gray-700 leading-5 mb-3">{alert.description}</Text>
+              {alert.last_seen_location && (
+                <View className="flex-row items-center gap-2 bg-white/60 px-3 py-2 rounded-lg">
+                  <Ionicons name="location-sharp" size={12} color="#ff7e70" />
+                  <Text className="text-xs font-medium text-[#211f1e]">{alert.last_seen_location}</Text>
+                </View>
+              )}
+            </View>
+          ))}
+        </>
+      )}
+
+      {/* ANUNCIOS TAB */}
+      {mainTab === "announcements" && (
+        <>
+          {(loadingAnnouncements || !announcements?.length) && (
+            <View className="bg-white p-10 rounded-2xl shadow-[0_2px_8px_rgba(33,31,30,0.08)] items-center">
+              {loadingAnnouncements ? (
+                <ActivityIndicator size="large" color="#005e66" />
+              ) : (
+                <>
+                  <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
+                    <Ionicons name="newspaper-outline" size={32} color="#005e66" />
+                  </View>
+                  <Text className="text-gray-500 text-center">No hay anuncios disponibles</Text>
+                </>
+              )}
+            </View>
+          )}
+          {announcements?.map((item: any) => {
+            const isMine = item.user_id === userId;
+            const annComments = comments.filter(
+              (c) => c.target_type === "announcement" && c.target_id === item.id,
+            );
+            return (
+              <View key={item.id} className="bg-white rounded-2xl mb-3 shadow-[0_2px_8px_rgba(33,31,30,0.08)] overflow-hidden">
+                <TouchableOpacity
+                  className="flex-row items-center gap-3 p-4"
+                  onPress={() => router.push(`/perfil/${item.user_id}`)}
+                >
+                  {item.owner_profile_picture ? (
+                    <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
+                  ) : (
+                    <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
+                      <Text className="text-white font-bold text-sm">{item.owner_name?.[0]?.toUpperCase() || "U"}</Text>
+                    </View>
+                  )}
+                  <View className="flex-1">
+                    <Text className="font-semibold text-[#211f1e] text-sm">{item.owner_name}</Text>
+                    <Text className="text-gray-500 text-xs mt-0.5">{new Date(item.created_at).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}</Text>
+                  </View>
+                  <View className="flex-row gap-3">
+                    {!isMine && (
+                      <TouchableOpacity onPress={() => handleContact(item.user_id, item.owner_name)}>
+                        <Ionicons name="chatbubble-outline" size={18} color="#005e66" />
+                      </TouchableOpacity>
+                    )}
+                    {isMine && (
+                      <TouchableOpacity onPress={() => onDeleteAnnouncement?.(item.id)}>
+                        <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                <View className="px-4 pb-2">
+                  <View className={`self-start px-3 py-1.5 rounded-full flex-row items-center gap-1.5 ${getCategoryStyle(item.category)}`}>
+                    <Ionicons name={getCategoryIcon(item.category)} size={13} />
+                    <Text className="text-xs font-semibold">{getCategoryLabel(item.category)}</Text>
+                  </View>
+                </View>
+
+                <View className="px-4 pb-3">
+                  <Text className="font-bold text-base text-[#211f1e] mb-1">{item.title}</Text>
+                  <Text className="text-gray-700 leading-5 text-sm">{item.content}</Text>
+                </View>
+
+                <View className="flex-row items-center gap-2 px-4 py-3 border-t border-gray-100">
+                  <Ionicons name="chatbubble-ellipses-outline" size={14} color="#6B7280" />
+                  <Text className="text-gray-500 text-xs font-medium">{annComments.length} comentarios</Text>
+                </View>
+              </View>
+            );
+          })}
+        </>
+      )}
+
+      {/* SOCIAL TAB */}
+      {mainTab === "social" && (
+        <>
+          {loadingFeed ? (
+            <ActivityIndicator size="large" color="#005e66" />
+          ) : visiblePosts.length === 0 ? (
+            <View className="bg-white p-10 rounded-2xl shadow-[0_2px_8px_rgba(33,31,30,0.08)] items-center">
+              <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
+                <Ionicons name="images-outline" size={32} color="#005e66" />
+              </View>
+              <Text className="text-gray-500 text-center">
+                {feedSubTab === "all" ? "No hay publicaciones en el feed" : "No has publicado nada aún"}
+              </Text>
+            </View>
+          ) : (
+            visiblePosts.map((post) => {
           const isMine = post.user_id === userId;
           const postComments = comments.filter(
             (c) => c.target_type === "post" && c.target_id === post.id,
@@ -151,82 +320,103 @@ export function FeedTab({
           return (
             <TouchableOpacity
               key={post.id}
-              activeOpacity={1}
-              className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
+              activeOpacity={0.95}
+              className="bg-white rounded-2xl mb-4 shadow-[0_2px_8px_rgba(33,31,30,0.08)] overflow-hidden"
               onPress={() => onToggleComments("post", post.id)}
             >
+              {/* Header: Avatar + Nombre + Acciones */}
               <TouchableOpacity
-                className="flex-row items-center gap-3 mb-3"
+                className="flex-row items-center gap-3 p-4"
                 onPress={() => router.push(`/perfil/${post.user_id}`)}
               >
                 {post.owner_profile_picture ? (
                   <Image source={{ uri: post.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                 ) : (
                   <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
-                    <Text className="text-white font-bold">{post.owner_name?.[0]?.toUpperCase() || "U"}</Text>
+                    <Text className="text-white font-bold text-sm">{post.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                   </View>
                 )}
                 <View className="flex-1">
-                  <Text className="font-semibold text-[#211f1e]">{post.owner_name}</Text>
-                  <Text className="text-gray-500 text-xs">
+                  <Text className="font-semibold text-[#211f1e] text-sm">{post.owner_name}</Text>
+                  <Text className="text-gray-500 text-xs mt-0.5">
                     {new Date(post.created_at).toLocaleDateString("es-MX", {
-                      day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+                      day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
                     })}
                   </Text>
                 </View>
-                {isMine && (
-                  <TouchableOpacity onPress={() => onDeletePost(post.id)}>
-                    <Ionicons name="trash-outline" size={20} color="#d93a3a" />
-                  </TouchableOpacity>
-                )}
+                <View className="flex-row gap-3">
+                  {!isMine && (
+                    <TouchableOpacity
+                      onPress={() => handleContact(post.user_id, post.owner_name)}
+                      disabled={contactingUserId === post.user_id}
+                    >
+                      <Ionicons name="chatbubble-outline" size={18} color={contactingUserId === post.user_id ? "#E5E7EB" : "#005e66"} />
+                    </TouchableOpacity>
+                  )}
+                  {isMine && (
+                    <TouchableOpacity onPress={() => onDeletePost(post.id)}>
+                      <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                    </TouchableOpacity>
+                  )}
+                </View>
               </TouchableOpacity>
 
-              <Text className="text-[#211f1e] leading-5 mb-3">{post.content}</Text>
+              {/* Contenido texto */}
+              <View className="px-4 pb-3">
+                <Text className="text-[#211f1e] leading-5 text-sm">{post.content}</Text>
+              </View>
 
-              {/* Imágenes */}
-              {post.image_url && (
-                <Image
-                  source={{ uri: post.image_url }}
-                  resizeMode="contain"
-                  className="w-full h-64 rounded-lg mb-3 bg-gray-100"
-                />
-              )}
+              {/* IMAGEN FOCAL - primaria (si existe, si no: placeholder) */}
+              <View className="w-full bg-gray-100 overflow-hidden">
+                {post.image_url ? (
+                  <Image
+                    source={{ uri: post.image_url }}
+                    resizeMode="cover"
+                    className="w-full h-72"
+                  />
+                ) : (
+                  <View className="w-full h-48 items-center justify-center bg-gray-100">
+                    <Ionicons name="image-outline" size={48} color="#D1D5DB" />
+                  </View>
+                )}
+              </View>
 
-              {/* Localización */}
-              {post.location && (
-                <View className="flex-row items-center gap-2 mb-2 bg-[#005e66]/10 p-2 rounded-lg">
-                  <Ionicons name="location" size={14} color="#005e66" />
-                  <Text className="text-[#005e66] text-xs font-medium">{post.location}</Text>
-                </View>
-              )}
+              {/* Metadata: ubicación, tags */}
+              <View className="px-4 pt-3 pb-2">
+                {post.location && (
+                  <View className="flex-row items-center gap-2 bg-[#005e66]/8 px-3 py-2 rounded-lg mb-2">
+                    <Ionicons name="location-sharp" size={12} color="#005e66" />
+                    <Text className="text-[#005e66] text-xs font-medium">{post.location}</Text>
+                  </View>
+                )}
 
-              {/* Tags */}
-              {post.tags && post.tags.length > 0 && (
-                <View className="flex-row flex-wrap gap-1 mb-2">
-                  {post.tags.map((tag: string, idx: number) => (
-                    <Text key={idx} className="text-[#005e66] text-xs">
-                      @{tag}
-                    </Text>
-                  ))}
-                </View>
-              )}
+                {post.tags && post.tags.length > 0 && (
+                  <View className="flex-row flex-wrap gap-2 mb-2">
+                    {post.tags.map((tag: string, idx: number) => (
+                      <Text key={idx} className="text-[#005e66] text-xs">
+                        #{tag}
+                      </Text>
+                    ))}
+                  </View>
+                )}
 
-              {/* URLs */}
-              {post.urls && post.urls.length > 0 && (
-                <View className="gap-1 mb-2">
-                  {post.urls.map((url: string, idx: number) => (
-                    <Text key={idx} className="text-blue-500 text-xs underline">
-                      {url}
-                    </Text>
-                  ))}
-                </View>
-              )}
+                {post.urls && post.urls.length > 0 && (
+                  <View className="gap-1">
+                    {post.urls.map((url: string, idx: number) => (
+                      <Text key={idx} className="text-blue-500 text-xs underline">
+                        {url}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </View>
 
-              <View className="flex-row items-center gap-2 pt-2 border-t border-gray-100">
-                <Ionicons name="chatbubble-ellipses-outline" size={16} color="#6B7280" />
-                <Text className="text-gray-500 text-sm">{post.comment_count}</Text>
-                <Text className="text-[#005e66] text-xs ml-auto">
-                  {commentTarget?.id === post.id ? "Ocultar comentarios" : "Ver comentarios"}
+              {/* Footer: comentarios */}
+              <View className="flex-row items-center gap-2 px-4 py-3 border-t border-gray-100">
+                <Ionicons name="chatbubble-ellipses-outline" size={14} color="#6B7280" />
+                <Text className="text-gray-500 text-xs font-medium">{post.comment_count} comentarios</Text>
+                <Text className="text-[#005e66] text-xs font-semibold ml-auto">
+                  {commentTarget?.id === post.id ? "Ocultar" : "Ver"}
                 </Text>
               </View>
 
@@ -285,9 +475,45 @@ export function FeedTab({
                 </View>
               )}
             </TouchableOpacity>
-          );
-        })
+            );
+          })
+          )}
+        </>
       )}
     </ScrollView>
   );
+}
+
+// Helper functions para categorías de anuncios
+function getCategoryStyle(category: string): string {
+  switch (category) {
+    case "aviso":
+      return "bg-gray-100 text-gray-600";
+    case "evento":
+      return "bg-[#005e66]/10 text-[#005e66]";
+    case "pregunta":
+      return "bg-[#211f1e]/10 text-[#211f1e]";
+    default:
+      return "bg-gray-100 text-gray-600";
+  }
+}
+
+function getCategoryIcon(category: string): keyof typeof Ionicons.glyphMap {
+  const iconMap: Record<string, keyof typeof Ionicons.glyphMap> = {
+    general: "chatbubbles",
+    aviso: "megaphone",
+    evento: "calendar",
+    pregunta: "help-circle",
+  };
+  return iconMap[category] || "chatbubbles";
+}
+
+function getCategoryLabel(category: string): string {
+  const labelMap: Record<string, string> = {
+    general: "General",
+    aviso: "Aviso",
+    evento: "Evento",
+    pregunta: "Pregunta",
+  };
+  return labelMap[category] || category;
 }

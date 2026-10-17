@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { messagesService } from "@/services/messages.service";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import type { CommentTarget } from "./FeedTab";
 
 const comCatColor = (cat: string) => {
@@ -83,6 +85,7 @@ export function ComunidadTab({
   const [titleFocused, setTitleFocused] = useState(false);
   const [contentFocused, setContentFocused] = useState(false);
   const [commentFocused, setCommentFocused] = useState(false);
+  const [contactingUserId, setContactingUserId] = useState<string | null>(null);
 
   const visibleItems =
     comSubTab === "all"
@@ -106,6 +109,19 @@ export function ComunidadTab({
       setComFormCategory("general");
     }
     setComPosting(false);
+  };
+
+  const handleContact = async (authorId: string, authorName: string) => {
+    if (!userId) return;
+    setContactingUserId(authorId);
+    const result = await messagesService.getOrCreateConversation(userId, authorId);
+    setContactingUserId(null);
+    if (result.success) {
+      router.push(`/mensajes/${result.data?.conversation_id}`);
+      Toast.show({ type: "success", text1: "Conversación iniciada", position: "top" });
+    } else {
+      Toast.show({ type: "error", text1: "Error", text2: result.error, position: "top" });
+    }
   };
 
   return (
@@ -173,34 +189,53 @@ export function ComunidadTab({
             const isCommenting =
               commentTarget?.id === item.id && commentTarget?.type === "announcement";
             return (
-              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
+              <View key={item.id} className="bg-white rounded-2xl mb-3 shadow-[0_2px_8px_rgba(33,31,30,0.08)] overflow-hidden">
+                {/* Header: Avatar + Nombre + Acciones */}
                 <TouchableOpacity
-                  className="flex-row items-start gap-3 mb-2"
+                  className="flex-row items-center gap-3 p-4"
                   onPress={() => router.push(`/perfil/${item.user_id}`)}
                 >
                   {item.owner_profile_picture ? (
                     <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                   ) : (
                     <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
-                      <Text className="text-white font-bold">{item.owner_name?.[0]?.toUpperCase() || "U"}</Text>
+                      <Text className="text-white font-bold text-sm">{item.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                     </View>
                   )}
                   <View className="flex-1">
-                    <Text className="font-semibold text-[#211f1e]">{item.owner_name}</Text>
-                    <Text className="text-gray-500 text-xs">{new Date(item.created_at).toLocaleDateString("es-MX", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</Text>
+                    <Text className="font-semibold text-[#211f1e] text-sm">{item.owner_name}</Text>
+                    <Text className="text-gray-500 text-xs mt-0.5">{new Date(item.created_at).toLocaleDateString("es-MX", { day: "numeric", month: "short" })}</Text>
                   </View>
-                  {isMine && (
-                    <TouchableOpacity onPress={() => onDeleteAnnouncement(item.id)}>
-                      <Ionicons name="trash-outline" size={20} color="#d93a3a" />
-                    </TouchableOpacity>
-                  )}
+                  <View className="flex-row gap-3">
+                    {!isMine && (
+                      <TouchableOpacity
+                        onPress={() => handleContact(item.user_id, item.owner_name)}
+                        disabled={contactingUserId === item.user_id}
+                      >
+                        <Ionicons name="chatbubble-outline" size={18} color={contactingUserId === item.user_id ? "#E5E7EB" : "#005e66"} />
+                      </TouchableOpacity>
+                    )}
+                    {isMine && (
+                      <TouchableOpacity onPress={() => onDeleteAnnouncement(item.id)}>
+                        <Ionicons name="trash-outline" size={18} color="#ef4444" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </TouchableOpacity>
-                <View className={`self-start px-2.5 py-1 rounded-full mb-1 flex-row items-center gap-1 ${comCatColor(item.category)}`}>
-                  <Ionicons name={comCatIcon(item.category)} size={12} />
-                  <Text className="text-xs font-medium">{comCatLabel(item.category)}</Text>
+
+                {/* BADGE PROMINENTE - focal point */}
+                <View className="px-4 pb-2">
+                  <View className={`self-start px-3 py-1.5 rounded-full flex-row items-center gap-1.5 ${comCatColor(item.category)}`}>
+                    <Ionicons name={comCatIcon(item.category)} size={13} />
+                    <Text className="text-xs font-semibold">{comCatLabel(item.category)}</Text>
+                  </View>
                 </View>
-                <Text className="font-bold text-lg text-[#211f1e]">{item.title}</Text>
-                <Text className="text-gray-600 leading-5 mt-1">{item.content}</Text>
+
+                {/* Contenido estructurado */}
+                <View className="px-4 pb-3">
+                  <Text className="font-bold text-base text-[#211f1e] mb-1">{item.title}</Text>
+                  <Text className="text-gray-700 leading-5 text-sm">{item.content}</Text>
+                </View>
 
                 <TouchableOpacity
                   className="mt-3 pt-2 border-t border-gray-100 flex-row items-center gap-1.5"

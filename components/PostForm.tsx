@@ -12,12 +12,17 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
+export type PostType = "social" | "announcements" | "emergencies";
+
 export interface PostFormData {
   content: string;
   image_urls?: string[];
   location?: string;
   tags?: string[];
   urls?: string[];
+  type?: PostType;
+  title?: string;
+  category?: string;
 }
 
 interface PostFormProps {
@@ -33,7 +38,10 @@ export function PostForm({
   onSubmit,
   loading = false,
 }: PostFormProps) {
+  const [postType, setPostType] = useState<PostType>("social");
   const [content, setContent] = useState("");
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("general");
   const [images, setImages] = useState<{ uri: string }[]>([]);
   const [location, setLocation] = useState("");
   const [tagText, setTagText] = useState("");
@@ -96,7 +104,27 @@ export function PostForm({
       Toast.show({
         type: "error",
         text1: "Error",
-        text2: "Escribe algo para compartir",
+        text2: "Escribe el contenido",
+        position: "top",
+      });
+      return;
+    }
+
+    if ((postType === "announcements" || postType === "emergencies") && !title.trim()) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Agrega un titulo",
+        position: "top",
+      });
+      return;
+    }
+
+    if (postType === "social" && images.length === 0) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Agrega al menos una imagen",
         position: "top",
       });
       return;
@@ -104,7 +132,10 @@ export function PostForm({
 
     const imageUrls = images.map((img) => img.uri);
     const success = await onSubmit({
+      type: postType,
       content: content.trim(),
+      title: title.trim() || undefined,
+      category: (postType === "announcements" || postType === "emergencies") ? category : undefined,
       image_urls: imageUrls.length > 0 ? imageUrls : undefined,
       location: location.trim() || undefined,
       tags: tags.length > 0 ? tags : undefined,
@@ -113,10 +144,13 @@ export function PostForm({
 
     if (success) {
       setContent("");
+      setTitle("");
+      setCategory("general");
       setImages([]);
       setLocation("");
       setTags([]);
       setUrls([]);
+      setPostType("social");
       onClose();
     }
   };
@@ -134,22 +168,134 @@ export function PostForm({
           <TouchableOpacity onPress={onClose} className="active:opacity-70">
             <Ionicons name="chevron-back" size={28} color="#fff" />
           </TouchableOpacity>
-          <Text className="text-white text-lg font-bold">Nuevo post</Text>
+          <Text className="text-white text-lg font-bold">Crear publicacion</Text>
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={loading}
             className="active:opacity-70"
           >
             <Text className={`font-semibold ${loading ? "text-gray-300" : "text-white"}`}>
-              {loading ? "..." : "Compartir"}
+              {loading ? "..." : "Publicar"}
             </Text>
           </TouchableOpacity>
         </View>
 
         <ScrollView className="flex-1 p-4">
+          {/* Selector de tipo de post */}
+          <Text className="font-semibold text-[#211f1e] mb-2">Tipo de publicacion</Text>
+          <View className="flex-row gap-2 mb-4">
+            <TouchableOpacity
+              onPress={() => setPostType("social")}
+              className={`flex-1 py-3 rounded-xl border-2 items-center ${
+                postType === "social"
+                  ? "bg-[#005e66] border-[#005e66]"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <Text className={`font-semibold text-sm ${postType === "social" ? "text-white" : "text-gray-600"}`}>
+                Social
+              </Text>
+              <Text className={`text-xs mt-0.5 ${postType === "social" ? "text-white/70" : "text-gray-400"}`}>
+                Con imagen
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setPostType("announcements")}
+              className={`flex-1 py-3 rounded-xl border-2 items-center ${
+                postType === "announcements"
+                  ? "bg-[#005e66] border-[#005e66]"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <Text className={`font-semibold text-sm ${postType === "announcements" ? "text-white" : "text-gray-600"}`}>
+                Anuncios
+              </Text>
+              <Text className={`text-xs mt-0.5 ${postType === "announcements" ? "text-white/70" : "text-gray-400"}`}>
+                Categorizado
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setPostType("emergencies")}
+              className={`flex-1 py-3 rounded-xl border-2 items-center ${
+                postType === "emergencies"
+                  ? "bg-[#ff7e70] border-[#ff7e70]"
+                  : "bg-white border-gray-200"
+              }`}
+            >
+              <Text className={`font-semibold text-sm ${postType === "emergencies" ? "text-white" : "text-gray-600"}`}>
+                Emergencia
+              </Text>
+              <Text className={`text-xs mt-0.5 ${postType === "emergencies" ? "text-white/70" : "text-gray-400"}`}>
+                Alerta SOS
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Titulo (para Anuncios y Emergencias) */}
+          {(postType === "announcements" || postType === "emergencies") && (
+            <>
+              <Text className="font-semibold text-[#211f1e] mb-2">Titulo</Text>
+              <TextInput
+                className="bg-white p-3 rounded-lg mb-4 border border-gray-300 text-[#211f1e]"
+                placeholder="Titulo de la publicacion"
+                placeholderTextColor="#9BA1A6"
+                value={title}
+                onChangeText={setTitle}
+              />
+            </>
+          )}
+
+          {/* Categoria (para Anuncios y Emergencias) */}
+          {(postType === "announcements" || postType === "emergencies") && (
+            <>
+              <Text className="font-semibold text-[#211f1e] mb-2">Categoria</Text>
+              <View className="flex-row gap-2 mb-4 flex-wrap">
+                {postType === "announcements" ? (
+                  <>
+                    {["general", "aviso", "evento", "pregunta"].map((cat) => (
+                      <TouchableOpacity
+                        key={cat}
+                        onPress={() => setCategory(cat)}
+                        className={`px-3 py-2 rounded-full border-2 ${
+                          category === cat
+                            ? "bg-[#005e66] border-[#005e66]"
+                            : "bg-white border-gray-200"
+                        }`}
+                      >
+                        <Text className={`text-xs font-semibold ${category === cat ? "text-white" : "text-gray-600"}`}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {["perdida", "encontrada"].map((cat) => (
+                      <TouchableOpacity
+                        key={cat}
+                        onPress={() => setCategory(cat)}
+                        className={`px-3 py-2 rounded-full border-2 ${
+                          category === cat
+                            ? "bg-[#ff7e70] border-[#ff7e70]"
+                            : "bg-white border-gray-200"
+                        }`}
+                      >
+                        <Text className={`text-xs font-semibold ${category === cat ? "text-white" : "text-gray-600"}`}>
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </>
+                )}
+              </View>
+            </>
+          )}
+
           {/* Contenido */}
           <Text className="font-semibold text-[#211f1e] mb-2">
-            ¿Qué quieres compartir?
+            {postType === "social" ? "Escribe tu historia" : "Descripcion"}
           </Text>
           <TextInput
             className={`bg-white p-4 rounded-lg mb-4 ${
@@ -168,8 +314,10 @@ export function PostForm({
             onBlur={() => setContentFocused(false)}
           />
 
-          {/* Imágenes */}
-          <Text className="font-semibold text-[#211f1e] mb-2">Imágenes</Text>
+          {/* Imágenes - Obligatoria en Social */}
+          <Text className="font-semibold text-[#211f1e] mb-2">
+            Imágenes {postType === "social" ? "(Requerida)" : "(Opcional)"}
+          </Text>
           <View className="flex-row gap-2 mb-4 flex-wrap">
             <TouchableOpacity
               onPress={handleAddImage}

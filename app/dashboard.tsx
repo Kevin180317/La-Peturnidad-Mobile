@@ -4,9 +4,11 @@ import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { EmergencyTab } from "@/components/dashboard/EmergencyTab";
 import { FeedTab } from "@/components/dashboard/FeedTab";
 import { HomeTab } from "@/components/dashboard/HomeTab";
+import { MessagesTab } from "@/components/dashboard/MessagesTab";
 import type { PetFormData } from "@/components/dashboard/PetForm";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { TabBar, type TabType } from "@/components/dashboard/TabBar";
+import { FAB } from "@/components/FAB";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { announcementsService } from "@/services/announcements.service";
 import { commentsService } from "@/services/comments.service";
@@ -40,6 +42,10 @@ export default function DashboardScreen() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [logoutVisible, setLogoutVisible] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+
+  // Estados para mensajes
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [loadingConversations, setLoadingConversations] = useState(false);
 
   // Estados para mascotas
   const [pets, setPets] = useState<Pet[]>([]);
@@ -224,8 +230,13 @@ export default function DashboardScreen() {
   };
 
   useEffect(() => {
-    if (activeTab === "comunidad") { loadComunidad(); loadMyAnnouncements(); }
-    if (activeTab === "feed") { loadFeed(); loadMyPosts(); }
+    if (activeTab === "feed") {
+      loadFeed();
+      loadMyPosts();
+      loadComunidad();
+      loadMyAnnouncements();
+    }
+    if (activeTab === "messages") { loadConversations(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
@@ -299,6 +310,30 @@ export default function DashboardScreen() {
     if (result.success) {
       const totalUnread = (result.data ?? []).reduce((sum, c) => sum + c.unread_count, 0);
       setUnreadCount(totalUnread);
+      setConversations(result.data ?? []);
+    }
+  };
+
+  const loadConversations = useCallback(async () => {
+    if (!user?.id) return;
+    setLoadingConversations(true);
+    const result = await messagesService.getConversations(user.id);
+    if (result.success) {
+      setConversations(result.data ?? []);
+      const totalUnread = (result.data ?? []).reduce((sum, c) => sum + c.unread_count, 0);
+      setUnreadCount(totalUnread);
+    }
+    setLoadingConversations(false);
+  }, [user?.id]);
+
+  const handleDeleteConversation = async (convId: string) => {
+    if (!user?.id) return;
+    const result = await messagesService.deleteConversation(convId, user.id);
+    if (result.success) {
+      setConversations((prev) => prev.filter((c) => c.id !== convId));
+      showToast("success", "Chat eliminado");
+    } else {
+      showToast("error", "Error", result.error);
     }
   };
 
@@ -312,9 +347,10 @@ export default function DashboardScreen() {
     if (showMyAlerts && user?.id) await loadMyAlerts(user.id);
     if (showFoundPets && user?.id) await loadFoundPets(user.id);
     if (user?.id) await loadUnreadCount(user.id);
+    if (activeTab === "messages") await loadConversations();
     setRefreshing(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAlerts, showMyAlerts, showFoundPets, profile, user]);
+  }, [showAlerts, showMyAlerts, showFoundPets, profile, user, activeTab]);
 
   // ============== FUNCIONES DE MASCOTAS ==============
 
@@ -668,29 +704,6 @@ export default function DashboardScreen() {
   return (
     <View className="flex-1 bg-[#faf5e0]">
       <View className="flex-1">
-        {activeTab === "feed" && (
-          <FeedTab
-            userId={user?.id}
-            feedPosts={feedPosts}
-            myPosts={myPosts}
-            loadingFeed={loadingFeed}
-            loadingMyPosts={loadingMyPosts}
-            refreshing={refreshing}
-            comments={comments}
-            commentTarget={commentTarget}
-            commentText={commentText}
-            loadingComments={loadingComments}
-            sendingComment={sendingComment}
-            onRefresh={onRefresh}
-            onLoadFeed={loadFeed}
-            onLoadMyPosts={loadMyPosts}
-            onToggleComments={handleToggleComments}
-            onChangeComment={setCommentText}
-            onAddComment={handleAddComment}
-            onCreatePost={handleCreatePost}
-            onDeletePost={handleDeletePost}
-          />
-        )}
         {activeTab === "home" && (
           <HomeTab
             profileName={profile?.first_name}
@@ -707,13 +720,18 @@ export default function DashboardScreen() {
             onDeletePet={handleDeletePet}
           />
         )}
-        {activeTab === "comunidad" && (
-          <ComunidadTab
+        {activeTab === "feed" && (
+          <FeedTab
             userId={user?.id}
+            feedPosts={feedPosts}
+            myPosts={myPosts}
             announcements={comunidadAnnouncements}
             myAnnouncements={myAnnouncements}
+            emergencyAlerts={emergencyAlerts}
+            loadingFeed={loadingFeed}
+            loadingMyPosts={loadingMyPosts}
             loadingAnnouncements={loadingComunidad}
-            loadingMyAnnouncements={loadingMyAnnouncements}
+            loadingAlerts={loadingAlerts}
             refreshing={refreshing}
             comments={comments}
             commentTarget={commentTarget}
@@ -721,13 +739,31 @@ export default function DashboardScreen() {
             loadingComments={loadingComments}
             sendingComment={sendingComment}
             onRefresh={onRefresh}
+            onLoadFeed={loadFeed}
+            onLoadMyPosts={loadMyPosts}
             onLoadAnnouncements={loadComunidad}
-            onLoadMyAnnouncements={loadMyAnnouncements}
+            onLoadAlerts={() => {
+              if (profile?.address) loadEmergencyAlerts(profile.address);
+            }}
             onToggleComments={handleToggleComments}
             onChangeComment={setCommentText}
             onAddComment={handleAddComment}
+            onCreatePost={handleCreatePost}
+            onDeletePost={handleDeletePost}
             onCreateAnnouncement={handleComPost}
             onDeleteAnnouncement={handleComDelete}
+          />
+        )}
+        {activeTab === "messages" && (
+          <MessagesTab
+            userId={user?.id}
+            conversations={conversations}
+            loading={loadingConversations}
+            refreshing={refreshing}
+            unreadCount={unreadCount}
+            onRefresh={onRefresh}
+            onLoadConversations={loadConversations}
+            onDeleteConversation={handleDeleteConversation}
           />
         )}
         {activeTab === "profile" && (
@@ -740,41 +776,21 @@ export default function DashboardScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             onLogout={handleLogout}
-            onGoComunidad={() => setActiveTab("comunidad")}
+            onGoComunidad={() => setActiveTab("feed")}
             onProfileUpdated={loadUserData}
           />
         )}
-        {activeTab === "emergency" && (
-          <EmergencyTab
-            pets={pets}
-            emergencyAlerts={emergencyAlerts}
-            myAlerts={myAlerts}
-            foundPets={foundPets}
-            loadingAlerts={loadingAlerts}
-            refreshing={refreshing}
-            selectingPetForAlert={selectingPetForAlert}
-            showAlerts={showAlerts}
-            showMyAlerts={showMyAlerts}
-            showFoundPets={showFoundPets}
-            onRefresh={onRefresh}
-            onLoadPets={() => loadPets(user?.id)}
-            onToggleSelectingPet={handleToggleSelectingPet}
-            onLoadEmergencyAlerts={() => {
-              if (profile?.address) loadEmergencyAlerts(profile.address);
-            }}
-            onToggleAlerts={handleToggleAlerts}
-            onLoadMyAlerts={() => loadMyAlerts(user?.id)}
-            onToggleMyAlerts={handleToggleMyAlerts}
-            onLoadFoundPets={() => loadFoundPets(user?.id)}
-            onToggleFoundPets={handleToggleFoundPets}
-            onCreateAlert={handleCreateEmergencyAlert}
-            onFoundPet={handleFoundPet}
-            onDeleteAlert={handleDeleteAlert}
-            onGoHome={() => setActiveTab("home")}
-          />
-        )}
       </View>
-      <TabBar activeTab={activeTab} onSelect={setActiveTab} />
+      {activeTab === "messages" && (
+        <FAB
+          icon="add-circle"
+          onPress={() => router.push("/buscar")}
+          backgroundColor="#005e66"
+          color="#fff"
+          position="bottom-right"
+        />
+      )}
+      <TabBar activeTab={activeTab} onSelect={setActiveTab} unreadCount={unreadCount} />
       <ConfirmModal
         visible={logoutVisible}
         title="Cerrar sesión"
