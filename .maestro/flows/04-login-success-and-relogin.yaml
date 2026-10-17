@@ -14,6 +14,11 @@ env:
 - hideKeyboard
 - tapOn:
     id: "login-submit"
+# Fresh test accounts have no profile yet: bootstrap one.
+- runFlow:
+    when:
+      visible: "Completa tu perfil"
+    file: ../subflows/complete-profile.yaml
 - extendedWaitUntil:
     visible: "Inicio"
     timeout: 20000

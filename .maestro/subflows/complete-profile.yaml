@@ -1,0 +1,20 @@
+# Fills the "Completa tu perfil" form with dummy data (postal code 22220 has a single colonia).
+appId: com.idarko.lapeturnidad
+---
+- tapOn: "Tu nombre"
+- inputText: "Test"
+- tapOn: "Tu apellido"
+- inputText: "User"
+- tapOn: "Número de teléfono"
+- inputText: "6641234567"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Código postal"
+- tapOn: "Código postal"
+- inputText: "22220"
+- hideKeyboard
+- tapOn: "Selecciona una colonia *"
+- tapOn: "Hacienda el Colorado"
+- scrollUntilVisible:
+    element: "Completar perfil"
+- tapOn: "Completar perfil"

@@ -1,5 +1,5 @@
 appId: com.idarko.lapeturnidad
-name: Logout confirm modal returns to login
+name: Logout confirm modal returns to onboarding then login
 env:
   TEST_EMAIL: ${TEST_EMAIL}
   TEST_PASSWORD: ${TEST_PASSWORD}
@@ -13,6 +13,9 @@ env:
 - tapOn:
     text: "Cerrar sesión"
     index: 1
+# Logout clears hasSeenOnboarding, so the app returns to onboarding.
 - extendedWaitUntil:
-    visible: "Inicia sesión para continuar"
+    visible: "Saltar"
     timeout: 10000
+- tapOn: "Saltar"
+- assertVisible: "Inicia sesión para continuar"
