@@ -42,3 +42,6 @@ app-example
 
 # test coverage
 coverage/
+
+# local secrets
+.env
