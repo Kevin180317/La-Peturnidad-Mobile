@@ -1,8 +1,8 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import type {
-  EmergencyAlert,
   EmergencyAlertWithOwner,
   FoundPetWithDetails,
+  MyEmergencyAlert,
   Pet,
 } from "@/services/dashboard.service";
 import { formatDate } from "@/utils/format";
@@ -19,7 +19,7 @@ import {
 interface EmergencyTabProps {
   pets: Pet[];
   emergencyAlerts: EmergencyAlertWithOwner[];
-  myAlerts: EmergencyAlert[];
+  myAlerts: MyEmergencyAlert[];
   foundPets: FoundPetWithDetails[];
   loadingAlerts: boolean;
   refreshing: boolean;
@@ -39,6 +39,7 @@ interface EmergencyTabProps {
   onCreateAlert: (pet: Pet) => void;
   onFoundPet: (alert: EmergencyAlertWithOwner) => void;
   onDeleteAlert: (alertId: string) => void;
+  onResolveAlert: (alertId: string) => void;
   onGoHome: () => void;
 }
 
@@ -65,6 +66,7 @@ export function EmergencyTab({
   onCreateAlert,
   onFoundPet,
   onDeleteAlert,
+  onResolveAlert,
   onGoHome,
 }: EmergencyTabProps) {
   return (
@@ -288,12 +290,12 @@ export function EmergencyTab({
         <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
             <Ionicons name="clipboard-outline" size={18} color="#005e66" />
-            <Text className="font-bold">Mis alertas activas</Text>
+            <Text className="font-bold">Mis alertas</Text>
           </View>
           {myAlerts.length === 0 ? (
             <View className="bg-[#faf5e0] p-8 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
               <Text className="text-gray-500 text-center">
-                No tienes alertas activas
+                No tienes alertas
               </Text>
             </View>
           ) : (
@@ -328,15 +330,48 @@ export function EmergencyTab({
                     <Text className="text-gray-500 text-xs mb-2">
                       {formatDate(alert.disappearance_date)}
                     </Text>
-                    <TouchableOpacity
-                      className="bg-[#d93a3a] py-2 px-4 rounded-xl self-start flex-row items-center gap-1.5"
-                      onPress={() => onDeleteAlert(alert.id)}
-                    >
-                      <Ionicons name="trash" size={14} color="#fff" />
-                      <Text className="text-white text-xs font-semibold">
-                        Eliminar alerta
-                      </Text>
-                    </TouchableOpacity>
+                    {alert.status === "resolved" ? (
+                      <View className="bg-[#005e66]/10 px-3 py-1 rounded-full self-start mb-2">
+                        <Text className="text-[#005e66] text-xs font-semibold">
+                          Resuelta
+                        </Text>
+                      </View>
+                    ) : null}
+                    {alert.finders.map((finder) => (
+                      <View
+                        key={finder.id}
+                        className="bg-[#005e66]/10 rounded-xl p-3 mb-2"
+                      >
+                        <Text className="text-[#211f1e] text-xs font-semibold">
+                          {finder.finder_name} dice que la encontró
+                        </Text>
+                        <Text className="text-gray-600 text-xs">
+                          Contacto: {finder.finder_phone}
+                        </Text>
+                      </View>
+                    ))}
+                    <View className="flex-row gap-2">
+                      {alert.status !== "resolved" && (
+                        <TouchableOpacity
+                          className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center gap-1.5"
+                          onPress={() => onResolveAlert(alert.id)}
+                        >
+                          <Ionicons name="checkmark-circle" size={14} color="#fff" />
+                          <Text className="text-white text-xs font-semibold">
+                            Ya apareció
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      <TouchableOpacity
+                        className="bg-[#d93a3a] py-2 px-4 rounded-xl flex-row items-center gap-1.5"
+                        onPress={() => onDeleteAlert(alert.id)}
+                      >
+                        <Ionicons name="trash" size={14} color="#fff" />
+                        <Text className="text-white text-xs font-semibold">
+                          Eliminar
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               </View>

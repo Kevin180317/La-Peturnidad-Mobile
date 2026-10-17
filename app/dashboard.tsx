@@ -17,13 +17,14 @@ import {
   type EmergencyAlert,
   type EmergencyAlertWithOwner,
   type FoundPetWithDetails,
+  type MyEmergencyAlert,
   type Pet,
 } from "@/services/dashboard.service";
 import { messagesService } from "@/services/messages.service";
 import { postsService } from "@/services/posts.service";
 import { supabase } from "@/utils/supabase";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, View } from "react-native";
 import Toast from "react-native-toast-message";
 
@@ -58,7 +59,7 @@ export default function DashboardScreen() {
   const [loadingAlerts, setLoadingAlerts] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   const [selectingPetForAlert, setSelectingPetForAlert] = useState(false);
-  const [myAlerts, setMyAlerts] = useState<EmergencyAlert[]>([]);
+  const [myAlerts, setMyAlerts] = useState<MyEmergencyAlert[]>([]);
   const [showMyAlerts, setShowMyAlerts] = useState(false);
   const [foundPets, setFoundPets] = useState<FoundPetWithDetails[]>([]);
   const [showFoundPets, setShowFoundPets] = useState(false);
@@ -239,6 +240,31 @@ export default function DashboardScreen() {
     if (activeTab === "messages") { loadConversations(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
+
+  // Deep link de notificaciones: abre Emergencia y muestra la alerta (mía o de un vecino)
+  const handledAlertRef = useRef<string | null>(null);
+  useEffect(() => {
+    const alertId = typeof params.alertId === "string" ? params.alertId : null;
+    if (loading || !user?.id) return;
+    if (params.tab !== "emergency" && !alertId) return;
+    const key = alertId ?? "emergency";
+    if (handledAlertRef.current === key) return;
+    handledAlertRef.current = key;
+
+    setActiveTab("emergency");
+    const open = async () => {
+      const mine = await dashboardService.getUserEmergencyAlerts(user.id);
+      if (mine.success) setMyAlerts(mine.data as MyEmergencyAlert[]);
+      if (alertId && mine.data.some((a) => a.id === alertId)) {
+        setShowMyAlerts(true);
+      } else if (profile?.address) {
+        setShowAlerts(true);
+        await loadEmergencyAlerts(profile.address);
+      }
+    };
+    open();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.alertId, params.tab, loading, user?.id, profile?.address]);
 
   const registerFcmToken = async (Notifications: any) => {
     try {
@@ -497,6 +523,11 @@ export default function DashboardScreen() {
       return;
     }
 
+    if (myAlerts.some((a) => a.pet_id === pet.id && a.status === "active")) {
+      showToast("error", "Ya reportada", `${pet.name} ya tiene una alerta activa`);
+      return;
+    }
+
     Alert.alert(
       "Crear alerta de emergencia",
       `¿Estás seguro de que quieres reportar a ${pet.name} como perdido? Esta alerta será visible para todos los vecinos de tu colonia.`,
@@ -507,13 +538,14 @@ export default function DashboardScreen() {
           onPress: async () => {
             const result = await dashboardService.createEmergencyAlert({
               user_id: user.id,
+              pet_id: pet.id,
               pet_name: pet.name,
               type: pet.type,
               description: `Mascota perdida: ${pet.name}. Color: ${pet.color}, Tamaño: ${pet.size}. ${pet.features || ""}`,
               last_seen_location: profile.address,
               disappearance_date: new Date().toISOString().split("T")[0],
               image_url: pet.image_url,
-            }, `${profile.first_name} ${profile.last_name}`);
+            });
 
             if (result.success) {
               showToast(
@@ -563,43 +595,53 @@ export default function DashboardScreen() {
     );
   };
 
+  const handleResolveAlert = async (alertId: string) => {
+    Alert.alert(
+      "Mascota encontrada",
+      "¿Ya apareció tu mascota? La alerta dejará de mostrarse a tus vecinos.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sí, ya apareció",
+          onPress: async () => {
+            const result = await dashboardService.resolveEmergencyAlert(alertId);
+            if (result.success) {
+              showToast("success", "¡Qué alegría!", "La alerta fue cerrada");
+              await loadMyAlerts(user?.id);
+              if (profile?.address) await loadEmergencyAlerts(profile.address);
+            } else {
+              showToast("error", "Error", result.error);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const handleFoundPet = async (alert: EmergencyAlertWithOwner) => {
     if (!user?.id) return;
 
+    if (alert.user_id === user.id) {
+      showToast("error", "Es tu alerta", "Usa \"Ya apareció\" en Mis alertas");
+      return;
+    }
+
     Alert.alert(
       "Reportar mascota encontrada",
-      `¿Has encontrado a ${alert.pet_name}? Al confirmar, te pondremos en contacto con el dueño.`,
+      `¿Has encontrado a ${alert.pet_name}? Avisaremos al dueño para que se ponga en contacto contigo.`,
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Sí, lo encontré",
           onPress: async () => {
-            // Buscar la mascota por nombre para obtener su ID
-            const pet = pets.find((p) => p.name === alert.pet_name);
-            if (!pet) {
-              showToast("error", "Error", "No se pudo identificar la mascota");
-              return;
-            }
-
-            const result = await dashboardService.reportFoundPet({
-              user_id: user.id,
-              pet_id: pet.id,
-            });
+            const result = await dashboardService.reportFoundPet(alert, user.id);
 
             if (result.success) {
               showToast(
                 "success",
                 "¡Gracias!",
-                `El dueño de ${alert.pet_name} será notificado`,
+                `El dueño de ${alert.pet_name} fue notificado`,
               );
-
-              // Eliminar la alerta automáticamente
-              await dashboardService.deleteEmergencyAlert(alert.id);
-
-              // Actualizar listas
-              if (profile?.address) {
-                await loadEmergencyAlerts(profile.address);
-              }
               await loadFoundPets(user.id);
             } else {
               showToast("error", "Error", result.error);
@@ -642,6 +684,7 @@ export default function DashboardScreen() {
 
   const handleLogoutConfirm = async () => {
     setSigningOut(true);
+    if (user?.id) await dashboardService.removeDeviceToken(user.id);
     const result = await dashboardService.signOut();
     setSigningOut(false);
     if (result.success) {
@@ -709,7 +752,7 @@ export default function DashboardScreen() {
             profileName={profile?.first_name}
             pets={pets}
             loadingPets={loadingPets}
-            myAlerts={myAlerts}
+            myAlerts={myAlerts.filter((a) => a.status === "active")}
             foundPets={foundPets}
             refreshing={refreshing}
             onRefresh={onRefresh}
@@ -752,6 +795,36 @@ export default function DashboardScreen() {
             onDeletePost={handleDeletePost}
             onCreateAnnouncement={handleComPost}
             onDeleteAnnouncement={handleComDelete}
+          />
+        )}
+        {activeTab === "emergency" && (
+          <EmergencyTab
+            pets={pets}
+            emergencyAlerts={emergencyAlerts}
+            myAlerts={myAlerts}
+            foundPets={foundPets}
+            loadingAlerts={loadingAlerts}
+            refreshing={refreshing}
+            selectingPetForAlert={selectingPetForAlert}
+            showAlerts={showAlerts}
+            showMyAlerts={showMyAlerts}
+            showFoundPets={showFoundPets}
+            onRefresh={onRefresh}
+            onLoadPets={() => loadPets(user?.id)}
+            onToggleSelectingPet={handleToggleSelectingPet}
+            onLoadEmergencyAlerts={() => {
+              if (profile?.address) loadEmergencyAlerts(profile.address);
+            }}
+            onToggleAlerts={handleToggleAlerts}
+            onLoadMyAlerts={() => loadMyAlerts(user?.id)}
+            onToggleMyAlerts={handleToggleMyAlerts}
+            onLoadFoundPets={() => loadFoundPets(user?.id)}
+            onToggleFoundPets={handleToggleFoundPets}
+            onCreateAlert={handleCreateEmergencyAlert}
+            onFoundPet={handleFoundPet}
+            onDeleteAlert={handleDeleteAlert}
+            onResolveAlert={handleResolveAlert}
+            onGoHome={() => setActiveTab("home")}
           />
         )}
         {activeTab === "messages" && (

@@ -1,13 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
-interface NotificationPayload {
-  tokens: string[];
-  title: string;
-  body: string;
-  image?: string | null;
-  channelId?: string;
-  data?: Record<string, string>;
-}
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 function pemToBinary(pem: string): Uint8Array {
   const base64 = pem
@@ -142,65 +134,156 @@ async function sendFcmMessage(
   return { token, success: true };
 }
 
+const JSON_HEADERS = { "Content-Type": "application/json" };
+const respond = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
+
+const norm = (v: string | null | undefined) => (v ?? "").trim().toLowerCase();
+
+interface Message {
+  tokens: string[];
+  title: string;
+  body: string;
+  image?: string | null;
+  data: Record<string, string>;
+}
+
 Deno.serve(async (req) => {
   try {
-    const payload: NotificationPayload = await req.json();
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
-    if (!payload.tokens?.length || !payload.title || !payload.body) {
-      return new Response(
-        JSON.stringify({ error: "Missing required fields: tokens, title, body" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
-      );
+    // Solo usuarios autenticados (la anon key no es un usuario)
+    const jwt = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+    const { data: auth } = await supabase.auth.getUser(jwt);
+    const caller = auth?.user;
+    if (!caller) return respond({ error: "No autenticado" }, 401);
+
+    const input = await req.json();
+    let message: Message | null = null;
+
+    if (input.type === "emergency") {
+      const { data: alert } = await supabase
+        .from("emergency_alerts")
+        .select("*")
+        .eq("id", input.alertId)
+        .maybeSingle();
+      if (!alert || alert.user_id !== caller.id || alert.status !== "active") {
+        return respond({ error: "Alerta no válida" }, 403);
+      }
+
+      const { data: owner } = await supabase
+        .from("user_profiles")
+        .select("first_name, last_name")
+        .eq("user_id", caller.id)
+        .maybeSingle();
+      const ownerName = owner ? `${owner.first_name} ${owner.last_name}`.trim() : "Un vecino";
+
+      const { data: profiles } = await supabase
+        .from("user_profiles")
+        .select("user_id, address")
+        .neq("user_id", caller.id);
+      const target = norm(alert.last_seen_location);
+      const neighborIds = (profiles ?? [])
+        .filter((p) => norm(p.address) === target)
+        .map((p) => p.user_id);
+
+      const tokens = await tokensFor(supabase, neighborIds, "lost_pet_alerts");
+      message = {
+        tokens,
+        title: `⚠️ ${ownerName} reportó a ${alert.pet_name} perdida`,
+        body: `Vista por última vez en ${alert.last_seen_location}.`,
+        image: alert.image_url,
+        data: {
+          type: "emergency",
+          url: `/dashboard?tab=emergency&alertId=${alert.id}`,
+          alertId: alert.id,
+          petName: alert.pet_name,
+          ownerName,
+        },
+      };
+    } else if (input.type === "found") {
+      const { data: found } = await supabase
+        .from("found_pets")
+        .select("*")
+        .eq("id", input.foundId)
+        .maybeSingle();
+      if (!found || found.user_id !== caller.id || !found.alert_owner_id) {
+        return respond({ error: "Reporte no válido" }, 403);
+      }
+
+      const { data: finder } = await supabase
+        .from("user_profiles")
+        .select("first_name, last_name")
+        .eq("user_id", caller.id)
+        .maybeSingle();
+      const finderName = finder ? `${finder.first_name} ${finder.last_name}`.trim() : "Un vecino";
+
+      const tokens = await tokensFor(supabase, [found.alert_owner_id], "found_pet_alerts");
+      message = {
+        tokens,
+        title: `🐾 ${finderName} dice que encontró a ${found.pet_name ?? "tu mascota"}`,
+        body: "Abre la app para ver sus datos de contacto.",
+        image: found.image_url,
+        data: {
+          type: "found",
+          url: `/dashboard?tab=emergency&alertId=${found.alert_id ?? ""}`,
+          alertId: found.alert_id ?? "",
+          petName: found.pet_name ?? "",
+        },
+      };
+    } else {
+      return respond({ error: "Tipo no soportado" }, 400);
     }
+
+    if (message.tokens.length === 0) return respond({ succeeded: 0, failed: 0, details: [] });
 
     const serviceAccountRaw = Deno.env.get("FCM_SERVICE_ACCOUNT");
-    if (!serviceAccountRaw) {
-      return new Response(
-        JSON.stringify({ error: "FCM_SERVICE_ACCOUNT not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
+    if (!serviceAccountRaw) return respond({ error: "FCM_SERVICE_ACCOUNT not configured" }, 500);
     const sa = JSON.parse(serviceAccountRaw);
     if (!sa.client_email || !sa.private_key || !sa.project_id) {
-      return new Response(
-        JSON.stringify({ error: "FCM_SERVICE_ACCOUNT missing required fields (client_email, private_key, project_id)" }),
-        { status: 500, headers: { "Content-Type": "application/json" } },
-      );
+      return respond({ error: "FCM_SERVICE_ACCOUNT missing required fields" }, 500);
     }
 
     const accessToken = await getAccessToken(sa.client_email, sa.private_key);
-
     const results = await Promise.all(
-      payload.tokens.map((token) =>
-        sendFcmMessage(
-          token,
-          payload.title,
-          payload.body,
-          payload.image,
-          payload.channelId,
-          payload.data,
-          accessToken,
-          sa.project_id,
-        )
+      message.tokens.map((token) =>
+        sendFcmMessage(token, message!.title, message!.body, message!.image, "emergency_alerts", message!.data, accessToken, sa.project_id)
       ),
     );
 
-    const succeeded = results.filter((r) => r.success).length;
-    const failed = results.filter((r) => !r.success).length;
-    const details = results.filter((r) => !r.success).map((r) => ({
-      token: r.token.slice(0, 8) + "...",
-      error: r.error,
-    }));
+    // Limpia tokens que FCM ya no reconoce
+    const dead = results.filter((r) => !r.success && /UNREGISTERED|NOT_FOUND|INVALID_ARGUMENT/.test(r.error ?? "")).map((r) => r.token);
+    if (dead.length) await supabase.from("device_tokens").delete().in("token", dead);
 
-    return new Response(
-      JSON.stringify({ succeeded, failed, details }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
+    return respond({
+      succeeded: results.filter((r) => r.success).length,
+      failed: results.filter((r) => !r.success).length,
+    });
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return respond({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
   }
 });
+
+// Tokens de los usuarios que no desactivaron push ni este tipo de aviso
+async function tokensFor(
+  supabase: ReturnType<typeof createClient>,
+  userIds: string[],
+  pref: "lost_pet_alerts" | "found_pet_alerts",
+): Promise<string[]> {
+  if (userIds.length === 0) return [];
+  const { data: prefs } = await supabase
+    .from("notification_preferences")
+    .select("user_id, push_enabled, lost_pet_alerts, found_pet_alerts")
+    .in("user_id", userIds);
+  const muted = new Set(
+    (prefs ?? []).filter((p) => p.push_enabled === false || p[pref] === false).map((p) => p.user_id),
+  );
+  const { data: rows } = await supabase
+    .from("device_tokens")
+    .select("user_id, token")
+    .in("user_id", userIds.filter((id) => !muted.has(id)));
+  return [...new Set((rows ?? []).map((r) => r.token).filter(Boolean))];
+}

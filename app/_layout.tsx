@@ -7,7 +7,7 @@ import {
 } from "@expo-google-fonts/inter";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { Platform, UIManager } from "react-native";
+import { Platform } from "react-native";
 import { Stack, router, type Href } from "expo-router";
 import Toast from "react-native-toast-message";
 import { ErrorBoundary } from "../components/ErrorBoundary";
@@ -23,14 +23,6 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
-
-  useEffect(() => {
-    if (Platform.OS === "android") {
-      if (UIManager.setHasNavigationBar) {
-        UIManager.setHasNavigationBar(false);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {

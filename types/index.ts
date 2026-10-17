@@ -15,8 +15,6 @@ export interface UserProfile {
   postal_code: string;
   city: string;
   profile_picture_url: string | null;
-  push_token: string | null;
-  fcm_token: string | null;
   role: "user" | "moderator" | "admin";
   created_at: string;
   updated_at: string;
@@ -44,6 +42,9 @@ export interface EmergencyAlert {
   disappearance_date: string;
   image_url: string | null;
   created_at: string;
+  pet_id?: string | null;
+  status?: "active" | "resolved";
+  resolved_at?: string | null;
 }
 
 export interface EmergencyAlertWithOwner extends EmergencyAlert {

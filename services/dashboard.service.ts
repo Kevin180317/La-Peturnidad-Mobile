@@ -10,6 +10,7 @@ type PetRow = Database["public"]["Tables"]["pets"]["Row"];
 type EmergencyAlertRow =
   Database["public"]["Tables"]["emergency_alerts"]["Row"];
 type FoundPetRow = Database["public"]["Tables"]["found_pets"]["Row"];
+type AlertInsert = Database["public"]["Tables"]["emergency_alerts"]["Insert"];
 
 export type UserProfile = UserProfileRow;
 export type Pet = PetRow;
@@ -22,9 +23,21 @@ export interface EmergencyAlertWithOwner extends EmergencyAlert {
   owner_address: string;
 }
 
+export interface AlertFinder {
+  id: string;
+  finder_id: string;
+  finder_name: string;
+  finder_phone: string;
+  created_at: string | null;
+}
+
+export interface MyEmergencyAlert extends EmergencyAlert {
+  finders: AlertFinder[];
+}
+
 export interface FoundPetWithDetails {
   id: string;
-  pet_id: string;
+  pet_id: string | null;
   pet_name: string;
   image_url: string | null;
   created_at: string | null;
@@ -190,86 +203,48 @@ class DashboardService {
 
   // ============== ALERTAS DE EMERGENCIA ==============
 
-  async createEmergencyAlert(
-    alertData: Omit<EmergencyAlert, "id" | "created_at">,
-    ownerName?: string,
-  ) {
+  // El servidor valida a quien llama y calcula los destinatarios (ver edge function)
+  private async invokePush(payload: Record<string, string>) {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const res = await fetch(EDGE_FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) console.warn("Error push:", await res.text());
+    } catch (error) {
+      console.warn("Error en notificación:", error);
+    }
+  }
+
+  async createEmergencyAlert(alertData: AlertInsert) {
     try {
       const { data, error } = await supabase
         .from("emergency_alerts")
-        .insert([
-          {
-            ...alertData,
-            created_at: new Date().toISOString(),
-          },
-        ])
+        .insert([alertData])
         .select()
         .single();
 
-      if (error) throw error;
-
-      if (!ownerName) {
-        const { data: ownerProfile } = await supabase
-          .from("user_profiles")
-          .select("first_name, last_name")
-          .eq("user_id", alertData.user_id)
-          .single();
-
-        if (ownerProfile) {
-          ownerName = `${ownerProfile.first_name} ${ownerProfile.last_name}`;
-        } else {
-          ownerName = "Un vecino";
+      if (error) {
+        if (error.code === "23505") {
+          return {
+            success: false,
+            error: "Esta mascota ya tiene una alerta activa",
+          };
         }
+        throw error;
       }
 
-      // Notify neighbors via Edge Function
-      try {
-        const { data: neighbors } = await supabase
-          .from("user_profiles")
-          .select("fcm_token")
-          .eq("address", alertData.last_seen_location)
-          .neq("user_id", alertData.user_id)
-          .not("fcm_token", "is", null)
-          .not("fcm_token", "eq", "");
-
-        const tokens = neighbors
-          ?.map((n) => n.fcm_token)
-          .filter((t): t is string => !!t) ?? [];
-
-        if (tokens.length > 0) {
-          const notifyRes = await fetch(EDGE_FUNCTION_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY}`,
-            },
-            body: JSON.stringify({
-              tokens,
-              title: `⚠️ ${ownerName} reportó a ${alertData.pet_name} perdida`,
-              body: `Vista por última vez en ${alertData.last_seen_location}.`,
-              image: data?.image_url || null,
-              channelId: "emergency_alerts",
-              data: {
-                type: "emergency",
-                url: `/dashboard?alertId=${data?.id || ""}`,
-                alertId: data?.id || "",
-                petName: alertData.pet_name,
-                ownerName,
-              },
-            }),
-          });
-
-          if (!notifyRes.ok) {
-            const errText = await notifyRes.text();
-            console.warn("Error push:", errText);
-          } else {
-            const pushResult = await notifyRes.json();
-            console.log("Notificaciones enviadas:", pushResult);
-          }
-        }
-      } catch (notifyErr) {
-        console.warn("Error en notificación:", notifyErr);
-      }
+      await this.invokePush({ type: "emergency", alertId: data.id });
 
       return { success: true, data };
     } catch (error: any) {
@@ -280,10 +255,14 @@ class DashboardService {
 
   async getEmergencyAlertsByLocation(location: string) {
     try {
+      // ilike sin comodines = comparación sin distinguir mayúsculas
+      const pattern = location.trim().replace(/[\\%_]/g, "\\$&");
+
       const { data: alerts, error: alertsError } = await supabase
         .from("emergency_alerts")
         .select("*")
-        .eq("last_seen_location", location)
+        .eq("status", "active")
+        .ilike("last_seen_location", pattern)
         .order("created_at", { ascending: false });
 
       if (alertsError) throw alertsError;
@@ -301,30 +280,19 @@ class DashboardService {
 
       if (profilesError) throw profilesError;
 
-      const profileMap =
-        profiles?.reduce(
-          (acc, p) => {
-            acc[p.user_id] = p;
-            return acc;
-          },
-          {} as Record<string, any>,
-        ) || {};
+      const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
 
-      const transformedData = alerts.map((alert) => ({
-        id: alert.id,
-        user_id: alert.user_id,
-        pet_name: alert.pet_name,
-        type: alert.type,
-        description: alert.description,
-        image_url: alert.image_url,
-        last_seen_location: alert.last_seen_location,
-        disappearance_date: alert.disappearance_date,
-        owner_name:
-          `${profileMap[alert.user_id]?.first_name || ""} ${profileMap[alert.user_id]?.last_name || ""}`.trim() ||
-          "Usuario",
-        owner_phone: profileMap[alert.user_id]?.phone || "No disponible",
-        owner_address: profileMap[alert.user_id]?.address || "No disponible",
-      }));
+      const transformedData: EmergencyAlertWithOwner[] = alerts.map((alert) => {
+        const owner = profileMap.get(alert.user_id);
+        return {
+          ...alert,
+          owner_name:
+            `${owner?.first_name || ""} ${owner?.last_name || ""}`.trim() ||
+            "Usuario",
+          owner_phone: owner?.phone || "No disponible",
+          owner_address: owner?.address || "No disponible",
+        };
+      });
 
       return { success: true, data: transformedData };
     } catch (error: any) {
@@ -333,19 +301,75 @@ class DashboardService {
     }
   }
 
+  // Mis alertas, con quienes dicen haber encontrado la mascota
   async getUserEmergencyAlerts(userId: string) {
     try {
-      const { data, error } = await supabase
+      const { data: alerts, error } = await supabase
         .from("emergency_alerts")
         .select("*")
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return { success: true, data: data || [] };
+      if (!alerts || alerts.length === 0) return { success: true, data: [] };
+
+      const { data: finds, error: findsError } = await supabase
+        .from("found_pets")
+        .select("id, alert_id, user_id, created_at")
+        .eq("alert_owner_id", userId)
+        .in(
+          "alert_id",
+          alerts.map((a) => a.id),
+        );
+
+      if (findsError) throw findsError;
+
+      const finderIds = [...new Set((finds ?? []).map((f) => f.user_id))];
+      const { data: profiles } = finderIds.length
+        ? await supabase
+            .from("user_profiles")
+            .select("user_id, first_name, last_name, phone")
+            .in("user_id", finderIds)
+        : { data: [] };
+      const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+
+      const result: MyEmergencyAlert[] = alerts.map((alert) => ({
+        ...alert,
+        finders: (finds ?? [])
+          .filter((f) => f.alert_id === alert.id)
+          .map((f) => {
+            const finder = profileMap.get(f.user_id);
+            return {
+              id: f.id,
+              finder_id: f.user_id,
+              finder_name:
+                `${finder?.first_name || ""} ${finder?.last_name || ""}`.trim() ||
+                "Un vecino",
+              finder_phone: finder?.phone || "No disponible",
+              created_at: f.created_at,
+            };
+          }),
+      }));
+
+      return { success: true, data: result };
     } catch (error: any) {
       console.error("Error getting user emergency alerts:", error);
       return { success: false, error: error.message, data: [] };
+    }
+  }
+
+  async resolveEmergencyAlert(alertId: string) {
+    try {
+      const { error } = await supabase
+        .from("emergency_alerts")
+        .update({ status: "resolved", resolved_at: new Date().toISOString() })
+        .eq("id", alertId);
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error: any) {
+      console.error("Error resolving emergency alert:", error);
+      return { success: false, error: error.message };
     }
   }
 
@@ -366,25 +390,32 @@ class DashboardService {
 
   // ============== MASCOTAS ENCONTRADAS ==============
 
-  async reportFoundPet(foundPetData: Omit<FoundPet, "id" | "created_at">) {
+  // Avisa al dueño de la alerta; es él quien decide cerrarla
+  async reportFoundPet(alert: EmergencyAlertWithOwner, finderId: string) {
     try {
       const { data, error } = await supabase
         .from("found_pets")
         .insert([
           {
-            ...foundPetData,
-            created_at: new Date().toISOString(),
+            user_id: finderId,
+            alert_id: alert.id,
+            alert_owner_id: alert.user_id,
+            pet_id: alert.pet_id,
+            pet_name: alert.pet_name,
+            image_url: alert.image_url,
           },
         ])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === "23505") {
+          return { success: false, error: "Ya avisaste al dueño de esta mascota" };
+        }
+        throw error;
+      }
 
-      await supabase
-        .from("emergency_alerts")
-        .delete()
-        .eq("pet_name", foundPetData.pet_id);
+      await this.invokePush({ type: "found", foundId: data.id });
 
       return { success: true, data };
     } catch (error: any) {
@@ -395,45 +426,23 @@ class DashboardService {
 
   async getFoundPetsByUser(userId: string) {
     try {
-      const { data: foundPets, error: foundError } = await supabase
+      const { data, error } = await supabase
         .from("found_pets")
         .select("*")
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
-      if (foundError) throw foundError;
+      if (error) throw error;
 
-      if (!foundPets || foundPets.length === 0) {
-        return { success: true, data: [] };
-      }
-
-      const petIds = foundPets.map((f) => f.pet_id);
-
-      const { data: pets, error: petsError } = await supabase
-        .from("pets")
-        .select("id, name, image_url")
-        .in("id", petIds);
-
-      if (petsError) throw petsError;
-
-      const petMap =
-        pets?.reduce(
-          (acc, p) => {
-            acc[p.id] = p;
-            return acc;
-          },
-          {} as Record<string, any>,
-        ) || {};
-
-      const transformedData = foundPets.map((found) => ({
+      const result: FoundPetWithDetails[] = (data ?? []).map((found) => ({
         id: found.id,
         pet_id: found.pet_id,
-        pet_name: petMap[found.pet_id]?.name || "Mascota",
-        image_url: petMap[found.pet_id]?.image_url || null,
+        pet_name: found.pet_name || "Mascota",
+        image_url: found.image_url,
         created_at: found.created_at,
       }));
 
-      return { success: true, data: transformedData };
+      return { success: true, data: result };
     } catch (error: any) {
       console.error("Error getting found pets:", error);
       return { success: false, error: error.message, data: [] };
@@ -479,9 +488,12 @@ class DashboardService {
       }
 
       // Generar nombre de archivo
-      const fileExt = uri.split(".").pop()?.toLowerCase() || "jpg";
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`; // Siempre .jpg para simplificar
-      const filePath = fileName;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sesión no válida");
+      const filePath = `${session.user.id}/${fileName}`;
 
       // Para React Native, necesitamos crear un objeto FormData especial
       const formData = new FormData();
@@ -495,13 +507,11 @@ class DashboardService {
 
       console.log(`⬆️ Subiendo a ${bucket}/${fileName}...`);
 
-      // Obtener token JWT del usuario autenticado en vez de usar la anon key
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token || supabaseKey;
+      const token = session.access_token;
 
       // Hacer la petición directamente a la API de Storage
       const response = await fetch(
-        `${supabaseUrl}/storage/v1/object/${bucket}/${fileName}`,
+        `${supabaseUrl}/storage/v1/object/${bucket}/${filePath}`,
         {
           method: "POST",
           headers: {
@@ -517,22 +527,11 @@ class DashboardService {
         const errorText = await response.text();
         console.error(`❌ Error en respuesta: ${response.status}`, errorText);
 
-        // Si falla, intentar con fallback
-        let fallbackBucket: string | null = null;
-        if (bucket === "posts") fallbackBucket = "public";
-        else if (bucket === "pet-images") fallbackBucket = "public";
-        else if (bucket === "profile-pictures") fallbackBucket = "alternate";
-
-        if (fallbackBucket && response.status === 404) {
-          console.log(`🔄 Reintentando con bucket ${fallbackBucket}...`);
-          return this.uploadImage(uri, fallbackBucket);
-        }
-
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       // Construir URL pública
-      const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${fileName}`;
+      const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
       console.log("✅ Imagen subida correctamente:", publicUrl);
 
       return { success: true, url: publicUrl };
@@ -594,21 +593,17 @@ class DashboardService {
   // ============== TOKENS Y AUTENTICACIÓN ==============
 
   async saveFcmToken(userId: string, token: string) {
-    try {
-      const { error } = await supabase
-        .from("user_profiles")
-        .update({ fcm_token: token, push_token: token })
-        .eq("user_id", userId);
+    const { error } = await supabase
+      .from("device_tokens")
+      .upsert({ user_id: userId, token, updated_at: new Date().toISOString() });
 
-      if (error) {
-        console.warn("⚠️ No se pudo guardar FCM token:", error.message);
-        return { success: true };
-      }
-      return { success: true };
-    } catch (error: any) {
-      console.warn("⚠️ Error saving FCM token:", error);
-      return { success: true };
-    }
+    if (error) console.warn("⚠️ No se pudo guardar el token:", error.message);
+    return { success: true };
+  }
+
+  // Al cerrar sesión este dispositivo deja de recibir avisos de esa cuenta
+  async removeDeviceToken(userId: string) {
+    await supabase.from("device_tokens").delete().eq("user_id", userId);
   }
 
   async signOut() {

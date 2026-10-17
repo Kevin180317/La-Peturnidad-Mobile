@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Animated, Dimensions, Text, TouchableOpacity, View } from "react-native";
 import { useEffect, useRef } from "react";
 
-export type TabType = "home" | "feed" | "messages" | "profile";
+export type TabType = "home" | "feed" | "emergency" | "messages" | "profile";
 
 const TABS: {
   key: TabType;
@@ -13,6 +13,7 @@ const TABS: {
 }[] = [
   { key: "home", label: "Inicio", icon: "home-outline", iconActive: "home" },
   { key: "feed", label: "Feed", icon: "newspaper-outline", iconActive: "newspaper" },
+  { key: "emergency", label: "Emergencia", icon: "warning-outline", iconActive: "warning" },
   { key: "messages", label: "Mensajes", icon: "chatbox-outline", iconActive: "chatbox" },
   { key: "profile", label: "Perfil", icon: "person-outline", iconActive: "person" },
 ];
@@ -78,7 +79,7 @@ export function TabBar({ activeTab, onSelect, unreadCount = 0 }: TabBarProps) {
                 <Ionicons
                   name={isActive ? tab.iconActive : tab.icon}
                   size={24}
-                  color={isActive ? "#005e66" : "#9CA3AF"}
+                  color={tab.key === "emergency" ? "#ff7e70" : isActive ? "#005e66" : "#9CA3AF"}
                   style={{ opacity: isActive ? 1 : 0.7 }}
                 />
 
