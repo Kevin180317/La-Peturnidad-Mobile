@@ -26,9 +26,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS === "android") {
-      if (UIManager.setHasNavigationBar) {
-        UIManager.setHasNavigationBar(false);
-      }
+      // Not in RN typings; exists only on some native builds.
+      const ui = UIManager as typeof UIManager & {
+        setHasNavigationBar?: (value: boolean) => void;
+      };
+      ui.setHasNavigationBar?.(false);
     }
   }, []);
 
