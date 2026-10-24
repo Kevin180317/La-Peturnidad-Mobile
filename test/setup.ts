@@ -13,3 +13,9 @@ jest.mock("react-native-toast-message", () => {
   Toast.hide = jest.fn();
   return { __esModule: true, default: Toast };
 });
+
+// Icon sets load font assets on mount, which the asset registry can't resolve in Jest.
+jest.mock("@expo/vector-icons", () => {
+  const icon = () => null;
+  return new Proxy({ __esModule: true }, { get: (target, key) => (key in target ? target[key as keyof typeof target] : icon) });
+});

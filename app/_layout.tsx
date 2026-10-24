@@ -54,7 +54,6 @@ export default function RootLayout() {
           await Notifications.setNotificationChannelAsync("emergency_alerts", {
             name: "Alertas de emergencia",
             importance: Notifications.AndroidImportance.HIGH,
-            sound: "default",
             vibrationPattern: [0, 300, 100, 300],
           });
         }

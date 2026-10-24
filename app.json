@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "lapeturnidad",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.idarko.lapeturnidad",
       "supportsTablet": true
@@ -17,8 +16,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "navigationBar": "immersive",
       "package": "com.idarko.lapeturnidad",
       "googleServicesFile": "./google-services.json"
     },
@@ -40,7 +37,9 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-image",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true
