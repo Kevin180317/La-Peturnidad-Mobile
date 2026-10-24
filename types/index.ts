@@ -1,144 +1,69 @@
 // types/index.ts
+// Tipos de dominio derivados del esquema generado (types/database.ts): la base es la fuente de verdad.
+// Solo se sobrescriben las columnas `text` que la app trata como uniones literales (CHECK / convención).
+import type { Tables } from "@/types/database";
+
+type Override<T, O> = Omit<T, keyof O> & O;
+
 export type ServiceResult<T = undefined> =
   | { success: true; data?: T }
   | { success: false; error: string; data?: T };
 
-export interface UserProfile {
-  id: string;
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  birth_date: string;
-  address: string;
-  postal_code: string;
-  city: string;
-  profile_picture_url: string | null;
-  role: "user" | "moderator" | "admin";
-  created_at: string;
-  updated_at: string;
-}
+export type UserProfile = Override<
+  Tables<"user_profiles">,
+  { role: "user" | "moderator" | "admin" }
+>;
 
-export interface Pet {
-  id: string;
-  user_id: string;
-  name: string;
-  type: "perro" | "gato";
-  color: string;
-  size: string;
-  features?: string;
-  image_url: string | null;
-  created_at: string;
-}
+export type Pet = Tables<"pets">;
 
-export interface EmergencyAlert {
-  id: string;
-  user_id: string;
-  pet_name: string;
-  type: string;
-  description: string;
-  last_seen_location: string;
-  disappearance_date: string;
-  image_url: string | null;
-  created_at: string;
-  pet_id?: string | null;
-  status?: "active" | "resolved";
-  resolved_at?: string | null;
-}
+export type EmergencyAlert = Override<
+  Tables<"emergency_alerts">,
+  { status: "active" | "resolved" }
+>;
 
-export interface EmergencyAlertWithOwner extends EmergencyAlert {
+export type EmergencyAlertWithOwner = EmergencyAlert & {
   owner_name: string;
   owner_phone: string;
   owner_address: string;
-}
+};
 
-export interface FoundPet {
-  id: string;
-  pet_id: string;
-  user_id: string;
-  created_at: string;
-}
+export type FoundPet = Tables<"found_pets">;
 
-export interface FoundPetWithDetails {
-  id: string;
-  pet_id: string;
-  pet_name: string;
-  image_url: string | null;
-  created_at: string;
-}
+export type NotificationPreference = Tables<"notification_preferences">;
 
-export interface NotificationPreference {
-  id: string;
-  user_id: string;
-  push_enabled: boolean;
-  lost_pet_alerts: boolean;
-  found_pet_alerts: boolean;
-  community_announcements: boolean;
-  created_at: string;
-  updated_at: string;
-}
+export type Announcement = Override<
+  Tables<"announcements">,
+  { category: "aviso" | "evento" | "pregunta" | "general" }
+>;
 
-export interface Announcement {
-  id: string;
-  user_id: string;
-  title: string;
-  content: string;
-  category: "aviso" | "evento" | "pregunta" | "general";
-  created_at: string;
-  updated_at: string;
-}
-
-export interface AnnouncementWithOwner extends Announcement {
+export type AnnouncementWithOwner = Announcement & {
   owner_name: string;
   owner_profile_picture: string | null;
-}
+};
 
-export interface Post {
-  id: string;
-  user_id: string;
-  content: string;
-  image_url: string | null;
-  created_at: string;
-  updated_at: string;
-}
+export type Post = Tables<"posts">;
 
-export interface PostWithOwner extends Post {
+export type PostWithOwner = Post & {
   owner_name: string;
   owner_profile_picture: string | null;
   comment_count: number;
-}
+};
 
-export interface Comment {
-  id: string;
-  user_id: string;
-  target_type: "post" | "announcement" | "alert";
-  target_id: string;
-  content: string;
-  parent_id: string | null;
-  created_at: string;
-}
+export type Comment = Override<
+  Tables<"comments">,
+  { target_type: "post" | "announcement" | "alert" }
+>;
 
-export interface CommentWithOwner extends Comment {
+export type CommentWithOwner = Comment & {
   owner_name: string;
   owner_profile_picture: string | null;
-}
+};
 
-export interface Follow {
-  id: string;
-  follower_id: string;
-  following_id: string;
-  created_at: string;
-}
+export type Follow = Tables<"follows">;
 
-export interface Conversation {
-  id: string;
-  created_at: string;
-  updated_at: string;
-  group_id: string | null;
-}
+export type Conversation = Tables<"conversations">;
 
-export interface ConversationWithParticipant extends Conversation {
+export type ConversationWithParticipant = Conversation & {
   other_user_id: string;
   other_user_name: string;
   other_user_picture: string | null;
@@ -147,49 +72,17 @@ export interface ConversationWithParticipant extends Conversation {
   unread_count: number;
   is_group: boolean;
   group_name: string | null;
-}
+};
 
-export interface Message {
-  id: string;
-  conversation_id: string;
-  sender_id: string;
-  content: string;
-  created_at: string;
-  read_at: string | null;
-}
+export type Message = Tables<"messages">;
 
-export interface Group {
-  id: string;
-  name: string;
-  description: string | null;
-  created_by: string;
-  created_at: string;
-}
+export type Group = Tables<"groups">;
 
-export interface GroupMember {
-  id: string;
-  group_id: string;
-  user_id: string;
-  role: "member" | "admin";
-  created_at: string;
-}
+export type GroupMember = Override<Tables<"group_members">, { role: "member" | "admin" }>;
 
-export interface SuccessStory {
-  id: string;
-  user_id: string;
-  pet_name: string;
-  story: string;
-  image_url: string | null;
-  created_at: string;
-}
+export type SuccessStory = Tables<"success_stories">;
 
-export interface Report {
-  id: string;
-  reporter_id: string;
-  target_user_id: string;
-  reason: string;
-  status: "pending" | "reviewed" | "dismissed";
-  created_at: string;
-  reviewed_at: string | null;
-  reviewed_by: string | null;
-}
+export type Report = Override<
+  Tables<"reports">,
+  { status: "pending" | "reviewed" | "dismissed" }
+>;

@@ -12,9 +12,35 @@ import { Stack, router, type Href } from "expo-router";
 import Toast from "react-native-toast-message";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { toastConfig } from "../components/ToastConfig";
+import { supabase } from "../utils/supabase";
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// --- Deep link de notificaciones (arranque en frío) ---
+// _layout registra la URL de la notificación que abrió la app; index la consume una sola vez
+// después de confirmar sesión + perfil, para evitar la carrera con su propia redirección.
+const handledNotificationIds = new Set<string>();
+let resolveInitialNotificationUrl: (url: string | null) => void = () => {};
+let initialNotificationUrl: Promise<string | null> | null = new Promise((resolve) => {
+  resolveInitialNotificationUrl = resolve;
+});
+
+function getNotificationUrl(response: {
+  notification: { request: { content: { data?: Record<string, unknown> | null } } };
+}): string | null {
+  const url = response.notification.request.content.data?.url;
+  return typeof url === "string" && url.startsWith("/") ? url : null;
+}
+
+/** Devuelve (una sola vez) la URL de la notificación que abrió la app, o null. */
+export async function consumePendingNotificationUrl(): Promise<string | null> {
+  const pending = initialNotificationUrl;
+  initialNotificationUrl = null;
+  if (!pending) return null;
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+  return Promise.race([pending, timeout]);
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -58,31 +84,52 @@ export default function RootLayout() {
           });
         }
 
-        const lastResponse =
-          await Notifications.getLastNotificationResponseAsync();
+        // Arranque en frío: no navegamos aquí (index decide la ruta tras validar sesión y perfil);
+        // solo dejamos la URL pendiente para que index la consuma.
+        const lastResponse = Notifications.getLastNotificationResponse();
         if (lastResponse) {
-          const url = lastResponse.notification.request.content.data?.url;
-          if (typeof url === "string") {
-            setTimeout(() => router.push(url as Href), 500);
-          }
+          handledNotificationIds.add(lastResponse.notification.request.identifier);
+          resolveInitialNotificationUrl(getNotificationUrl(lastResponse));
+          Notifications.clearLastNotificationResponse();
+        } else {
+          resolveInitialNotificationUrl(null);
         }
 
+        // App abierta o en segundo plano: navegar (sin apilar duplicados) una sola vez por notificación
         responseListener =
-          Notifications.addNotificationResponseReceivedListener(
-            (response: any) => {
-              const url = response.notification.request.content.data?.url;
-              if (typeof url === "string") {
-                router.push(url as Href);
-              }
-            },
-          );
+          Notifications.addNotificationResponseReceivedListener((response) => {
+            const id = response.notification.request.identifier;
+            if (handledNotificationIds.has(id)) return;
+            handledNotificationIds.add(id);
+            const url = getNotificationUrl(response);
+            if (url) {
+              router.navigate(url as Href);
+            }
+            Notifications.clearLastNotificationResponse();
+          });
       } catch {
         // Notifications not available (web, etc.)
+        resolveInitialNotificationUrl(null);
       }
     })();
 
     return () => {
       responseListener?.remove();
+    };
+  }, []);
+
+  // Sesión expirada o cerrada (también desde otro flujo): volver a login sin historial
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        if (router.canDismiss()) router.dismissAll();
+        router.replace("/login");
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -95,7 +142,7 @@ export default function RootLayout() {
       <ErrorBoundary>
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: "#005e66" },
+          headerStyle: { backgroundColor: "#007275" },
           headerTintColor: "#ffffff",
           headerTitleStyle: { fontWeight: "700" },
         }}

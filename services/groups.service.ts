@@ -7,12 +7,44 @@ class GroupsService {
       const { data, error } = await supabase
         .from("groups")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50);
 
       if (error) throw error;
       return { success: true, data: data || [] };
     } catch (error: any) {
       return { success: false, error: error.message, data: [] };
+    }
+  }
+
+  /**
+   * Una sola consulta a group_members para varios grupos: devuelve el
+   * conteo de miembros por grupo y los ids de grupos a los que pertenece userId.
+   */
+  async getMembershipSummary(
+    groupIds: string[],
+    userId: string | null,
+  ): Promise<ServiceResult<{ counts: Record<string, number>; memberOf: string[] }>> {
+    try {
+      if (groupIds.length === 0) {
+        return { success: true, data: { counts: {}, memberOf: [] } };
+      }
+      const { data, error } = await supabase
+        .from("group_members")
+        .select("group_id, user_id")
+        .in("group_id", groupIds);
+
+      if (error) throw error;
+
+      const counts: Record<string, number> = {};
+      const memberOf = new Set<string>();
+      (data || []).forEach((m) => {
+        counts[m.group_id] = (counts[m.group_id] || 0) + 1;
+        if (userId && m.user_id === userId) memberOf.add(m.group_id);
+      });
+      return { success: true, data: { counts, memberOf: [...memberOf] } };
+    } catch (error: any) {
+      return { success: false, error: error.message, data: { counts: {}, memberOf: [] } };
     }
   }
 
@@ -41,9 +73,15 @@ class GroupsService {
 
       if (error) throw error;
 
-      await supabase.from("group_members").insert([
+      const { error: memberError } = await supabase.from("group_members").insert([
         { group_id: group.id, user_id: data.created_by, role: "admin" },
       ]);
+
+      if (memberError) {
+        // Sin el creador como admin el grupo queda huérfano: se revierte
+        await supabase.rpc("delete_group", { group_id_param: group.id });
+        throw memberError;
+      }
 
       return { success: true, data: group };
     } catch (error: any) {
@@ -59,7 +97,7 @@ class GroupsService {
         .eq("group_id", groupId);
 
       if (error) throw error;
-      return { success: true, data: data || [] };
+      return { success: true, data: (data ?? []) as GroupMember[] };
     } catch (error: any) {
       return { success: false, error: error.message, data: [] };
     }
@@ -98,6 +136,24 @@ class GroupsService {
       const { error } = await supabase.rpc("delete_group", { group_id_param: groupId });
       if (error) throw error;
       return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Devuelve el id de la conversación del grupo (la crea si no existe) y
+   * agrega al usuario actual como participante. Requiere ser miembro.
+   */
+  async getGroupChat(groupId: string): Promise<ServiceResult<{ conversation_id: string }>> {
+    try {
+      const { data, error } = await supabase.rpc("join_group_conversation", {
+        group_id_param: groupId,
+      });
+
+      if (error) throw error;
+      if (!data) throw new Error("No se pudo abrir el chat del grupo");
+      return { success: true, data: { conversation_id: data } };
     } catch (error: any) {
       return { success: false, error: error.message };
     }

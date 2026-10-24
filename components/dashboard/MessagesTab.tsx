@@ -113,7 +113,7 @@ export function MessagesTab({
                     className="w-14 h-14 rounded-full"
                   />
                 ) : (
-                  <View className="w-14 h-14 rounded-full bg-gradient-to-br from-[#005e66] to-[#003d42] items-center justify-center">
+                  <View className="w-14 h-14 rounded-full bg-gradient-to-br from-[#007275] to-[#003d42] items-center justify-center">
                     <Text className="text-white font-bold text-xl">
                       {conv.other_user_name?.[0]?.toUpperCase() || "U"}
                     </Text>

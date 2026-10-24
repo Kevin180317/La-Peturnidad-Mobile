@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/EmptyState";
 import { ListSkeleton } from "@/components/Skeleton";
+import { reportsService } from "@/services/reports.service";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   searchService,
@@ -18,6 +19,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 type SearchTab = "pets" | "groups" | "users";
 
@@ -41,17 +43,24 @@ export default function BuscarScreen() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
   const firstRun = useRef(true);
+  // Id incremental por búsqueda: las respuestas de búsquedas viejas se ignoran
+  const requestId = useRef(0);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace("/");
+        return;
       }
+      const blocked = await reportsService.getBlockedUsers(data.user.id);
+      setBlockedIds(blocked.data ?? []);
     });
   }, [router]);
 
   const performSearch = async () => {
+    const reqId = ++requestId.current;
     const q = query.trim();
     if (!q) {
       setPets([]);
@@ -62,21 +71,31 @@ export default function BuscarScreen() {
       return;
     }
     setLoading(true);
-    if (activeTab === "pets") {
-      const res = await searchService.searchPets(q);
-      if (res.success) setPets(res.data ?? []);
-      setSearched(true);
-    } else if (activeTab === "groups") {
-      const res = await searchService.searchGroups(q);
-      if (res.success) setGroups(res.data ?? []);
-      setSearched(true);
+    const tab = activeTab;
+    const res =
+      tab === "pets"
+        ? await searchService.searchPets(q)
+        : tab === "groups"
+          ? await searchService.searchGroups(q)
+          : await searchService.searchUsers(q);
+
+    if (reqId !== requestId.current) return; // respuesta obsoleta
+
+    if (res.success) {
+      if (tab === "pets") setPets((res.data ?? []) as PetSearchResult[]);
+      else if (tab === "groups") setGroups((res.data ?? []) as GroupSearchResult[]);
+      else setUsers((res.data ?? []) as UserSearchResult[]);
     } else {
-      const res = await searchService.searchUsers(q);
-      if (res.success) setUsers(res.data ?? []);
-      setSearched(true);
+      Toast.show({ type: "error", text1: "Error al buscar", text2: res.error, position: "top" });
     }
+    setSearched(true);
     setLoading(false);
   };
+
+  const blocked = new Set(blockedIds);
+  const visiblePets = pets.filter((p) => !blocked.has(p.user_id));
+  const visibleGroups = groups.filter((g) => !g.created_by || !blocked.has(g.created_by));
+  const visibleUsers = users.filter((u) => !blocked.has(u.user_id));
 
   const renderPet = (pet: PetSearchResult) => (
     <TouchableOpacity
@@ -146,7 +165,7 @@ export default function BuscarScreen() {
           className="w-12 h-12 rounded-full"
         />
       ) : (
-        <View className="w-12 h-12 rounded-full bg-[#005e66] items-center justify-center">
+        <View className="w-12 h-12 rounded-full bg-[#007275] items-center justify-center">
           <Text className="text-white font-bold text-lg">
             {(user.first_name || "U").charAt(0).toUpperCase()}
           </Text>
@@ -165,10 +184,10 @@ export default function BuscarScreen() {
     !loading &&
     searched &&
     (activeTab === "pets"
-      ? pets.length === 0
+      ? visiblePets.length === 0
       : activeTab === "groups"
-        ? groups.length === 0
-        : users.length === 0);
+        ? visibleGroups.length === 0
+        : visibleUsers.length === 0);
 
   // Búsqueda con debounce de 300ms (primer render no dispara búsqueda)
   useEffect(() => {
@@ -187,7 +206,7 @@ export default function BuscarScreen() {
     <View className="flex-1 bg-[#faf5e0] p-4">
       {/* Input de búsqueda */}
       <View
-        className={`flex-row items-center bg-white rounded-lg px-4 ${searchFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-[#211f1e]/10"}`}
+        className={`flex-row items-center bg-white rounded-lg px-4 ${searchFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-[#211f1e]/10"}`}
       >
         <Ionicons name="search" size={18} color="#6B7280" style={{ marginRight: 8 }} />
         <TextInput
@@ -218,7 +237,7 @@ export default function BuscarScreen() {
               key={tab.key}
               onPress={() => setActiveTab(tab.key)}
               className={`flex-1 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 ${
-                isActive ? "bg-[#005e66]" : "bg-white"
+                isActive ? "bg-[#007275]" : "bg-white"
               }`}
               activeOpacity={0.8}
             >
@@ -243,11 +262,11 @@ export default function BuscarScreen() {
       ) : (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-10">
           {activeTab === "pets" &&
-            pets.map((p) => renderPet(p))}
+            visiblePets.map((p) => renderPet(p))}
           {activeTab === "groups" &&
-            groups.map((g) => renderGroup(g))}
+            visibleGroups.map((g) => renderGroup(g))}
           {activeTab === "users" &&
-            users.map((u) => renderUser(u))}
+            visibleUsers.map((u) => renderUser(u))}
         </ScrollView>
       )}
     </View>

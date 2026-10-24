@@ -82,6 +82,53 @@
 - Sistema de 3 colores: teal `#007275` (primario: CTAs, selecciones, éxito), coral `#ff7e70` (acento: emergencias, badges, empty states), dark `#211f1e` (texto/superficies) + neutros cream/gris; ~11 tonos sueltos eliminados; rojo SOLO destructivo/errores; tokens actualizados en `utils/theme.ts`
 - Modal branded: `components/ConfirmModal.tsx` (reutilizable, teal/coral/dark) reemplaza el `Alert.alert` de cerrar sesión en `dashboard.tsx` (`handleLogout` abre modal, `handleLogoutConfirm` ejecuta signOut con spinner)
 
+### Auditoría pre-lanzamiento (2026-10-24)
+- Supabase remoto: migraciones `20261024000001_prelaunch_rls_hardening` y `20261024000002_messaging_blocks_push` (WITH CHECK en UPDATE, `anon` sin SECURITY DEFINER, mensajes solo de participantes y sin bloqueados, DM/chat de grupo únicos, `found_pets` rellenado por trigger desde la alerta, `device_tokens` PK=`token` con RPC `register_device_token`, moderadores pueden borrar contenido, realtime en `messages`)
+- Edge functions: `delete-account` (v1, borrado de cuenta exigido por Google Play) y `send-push-notification` (v7: reclamo atómico `notified_at`, destinatario desde la alerta, lotes FCM, solo borra tokens UNREGISTERED)
+- App: Eliminar cuenta (ProfileTab), reportar/bloquear usuarios (`perfil/[id]`), realtime en chat, chat de grupo vía RPC `join_group_conversation`, contraseña 8+ con letras y números (`passwordError`, plan free sin leaked-password protection), auth sin loops de back-stack, deep link de notificación en cold start vía `consumePendingNotificationUrl`
+- `eas.json`: `preview` y `production` ahora llevan las variables de Supabase (production = AAB); `app.json` bloquea permisos de ubicación/audio no usados
+- Código muerto eliminado: alerts/matching/storage services, Button, ComunidadTab, MoreOptionsDrawer
+- `npx tsc` no resuelve el compilador en esta máquina: usar `bun run typecheck` o `node node_modules/typescript/bin/tsc --noEmit`
+- `types/database.ts` regenerado el 2026-10-24 (RPC nuevas y columnas `notified_at`); sin casts en `saveFcmToken` ni `getGroupChat`
+- Cliente tipado: `createClient<Database>` en `utils/supabase.ts`; `types/index.ts` ahora DERIVA de `Tables<>` (no duplicar columnas a mano). Al cambiar el esquema: aplicar migración → regenerar `types/database.ts` (MCP `generate_typescript_types`) → `bun run typecheck` para ver qué rompe. Las uniones de texto (`role`, `status`, `category`, `target_type`) se estrechan con `Override<>` en `types/index.ts` y con `as` en el servicio
+- Pendiente: generar build nuevo (los tokens push cambiaron de esquema)
+
+### Legal (páginas web) — REVISIÓN PENDIENTE
+- La app enlaza a `https://luckytracker.com.mx/terms` y `https://luckytracker.com.mx/policy` (constantes en `utils/legal.ts`): checkbox obligatorio en `app/register.tsx` y entradas en Perfil → Ayuda. Las mismas URLs van en Play Console
+- **Semana del 2026-10-26 (próxima semana): revisar esas 2 páginas** una vez que el equipo web aplique los cambios documentados en Todoist. Al revisar, verificar con WebFetch que existan estos puntos (al 2026-10-24 NO estaban: eran textos genéricos de sitio web):
+  - Privacidad: datos reales de la app (nombre, teléfono, fecha de nacimiento, dirección/ciudad/CP, fotos, mascotas, publicaciones, mensajes, bloqueos/reportes, token push); uso de la dirección para alertas a vecinos; qué ven otros usuarios y el contacto compartido al reportar una mascota encontrada; proveedores (Supabase, Firebase Cloud Messaging, Expo) y país de sus servidores; eliminación de cuenta (Perfil → Eliminar cuenta) y qué se borra; retención; derechos ARCO (LFPDPPP) con domicilio del responsable; edad mínima; fecha de última actualización; correo de contacto en texto plano
+  - Términos: conducta prohibida; licencia sobre el contenido del usuario; moderación (reportar/bloquear, retiro de contenido, suspensión); alertas colaborativas sin garantía; recomendación de seguridad al entregar mascotas; edad mínima; fecha de actualización
+  - Play Console además pide una URL de eliminación de cuenta (puede ser una sección de `/policy`, p. ej. `#eliminar-cuenta`) y el formulario Data safety coherente con la política
+  - Si algo sigue faltando, no subir a producción hasta corregirlo
+
+### Cambios OPCIONALES de mantenimiento (no requeridos para QA ni para Play Store)
+Se aplicaron el 2026-10-24 a petición del usuario y se decidió dejarlos. No cambian lo que ve el usuario; sirven para mantener el código. Si hay que justificarlos o explicarlos, esto es lo que son:
+
+**Cliente Supabase tipado con `Database`**
+- Qué: `createClient<Database>(...)` en `utils/supabase.ts` y `types/index.ts` reescrito para DERIVAR de `Tables<>` (`types/database.ts`) en vez de duplicar columnas a mano.
+- Por qué: un nombre de columna/tabla mal escrito o un cambio de esquema falla al compilar (`bun run typecheck`) en vez de fallar en el teléfono; además destapó que los tipos a mano marcaban como no nulo lo que la base permite nulo (posible crash) y un campo `email` en `UserProfile` que no existe en la tabla.
+- Cómo explicarlo en una frase: "el compilador ahora conoce el esquema real de la base de datos".
+- Límite: los `select("...")` con joins se validan de forma parcial; no reemplaza probar los flujos.
+
+**Archivos tocados por este cambio (solo tipos, salvo lo marcado)**
+- `utils/supabase.ts` (genérico), `types/index.ts` (derivado), `types/database.ts` (regenerado: RPC nuevas + `notified_at`)
+- Estrechamientos de uniones con `as` (sin efecto en ejecución): `services/announcements.service.ts`, `comments.service.ts`, `groups.service.ts`, `profile.service.ts`, `reports.service.ts`
+- `services/messages.service.ts`: `groupNames[conv.group_id ?? ""]` evita indexar con `null` en un chat de grupo
+- Quitados los casts `as any` de `saveFcmToken` (`dashboard.service.ts`) y `getGroupChat` (`groups.service.ts`)
+- **Los únicos dos con efecto en ejecución:**
+  - `app/notificaciones.tsx`: `push_enabled`, `lost_pet_alerts` y `found_pet_alerts` nulos se muestran como activados (`?? true`). Verificar que el default de esas columnas en `notification_preferences` sea `true`; si no, ajustar el `??`.
+  - `app/mensajes/[id].tsx`: `created_at` nulo usa `?? 0` al decidir si se muestra el separador de fecha.
+
+**Cómo revertirlo si se quiere**
+- Todo está sin commit al momento de escribir esto. Revertir en este orden: línea del genérico en `utils/supabase.ts` (volver a `createClient(...)`), `types/index.ts` y los `as`/`??` de los archivos listados. `types/database.ts` puede quedarse (es solo el esquema).
+- Tras revertir: `bun run typecheck` y `bun run lint` deben seguir en 0.
+
+**Otras mejoras ofrecidas y NO hechas**
+- Si alguien te bloqueó, su contenido sigue visible para ti (solo se oculta el de quienes bloqueas tú; los DM sí se bloquean en ambos sentidos vía RPC).
+- Pets y listas de grupos no se filtran por bloqueo.
+- Vecinos con espacios al inicio/fin en `address` no reciben la alerta de mascota perdida.
+- Guardar la fecha de aceptación de términos en el perfil (hoy solo se valida el checkbox al registrarse).
+
 ### Edge Functions
 - `send-push-notification` (v5) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS
 ### SDK 58 (actualizado desde SDK 54)

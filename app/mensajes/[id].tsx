@@ -1,5 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
+import { EmptyState } from "@/components/EmptyState";
 import { messagesService } from "@/services/messages.service";
+import { type Message } from "@/types";
 import { supabase } from "@/utils/supabase";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -15,11 +17,21 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 
+// Agrega o reemplaza un mensaje por id (evita duplicados entre envío propio y realtime)
+function upsertMessage(list: Message[], msg: Message): Message[] {
+  const idx = list.findIndex((m) => m.id === msg.id);
+  if (idx === -1) return [...list, msg];
+  const next = [...list];
+  next[idx] = { ...next[idx], ...msg };
+  return next;
+}
+
 export default function ConversationScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [unavailable, setUnavailable] = useState(false);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -37,40 +49,31 @@ export default function ConversationScreen() {
   const init = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
-    setUserId(user.user.id);
-    if (id) {
-      const { data: conv } = await supabase
-        .from("conversations")
-        .select("group_id")
-        .eq("id", id)
-        .single();
-      setIsGroup(!!conv?.group_id);
-    }
-    await loadMessages();
-    if (id) await messagesService.markAsRead(id, user.user.id);
-  };
+    const uid = user.user.id;
+    if (!id) { setUnavailable(true); setLoading(false); return; }
 
-  const loadMessages = async () => {
-    if (!id) return;
+    // RLS solo devuelve la conversación si soy participante
+    const { data: conv, error } = await supabase
+      .from("conversations")
+      .select("id, group_id")
+      .eq("id", id)
+      .maybeSingle();
+    if (error || !conv) {
+      setUnavailable(true);
+      setLoading(false);
+      return;
+    }
+
+    setIsGroup(!!conv.group_id);
     const result = await messagesService.getMessages(id);
     if (result.success) {
       setMessages(result.data ?? []);
-
-      const uniqueIds = [...new Set((result.data ?? []).map((m: any) => m.sender_id))];
-      if (uniqueIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from("user_profiles")
-          .select("user_id, first_name, last_name")
-          .in("user_id", uniqueIds);
-
-        const map: Record<string, string> = {};
-        profiles?.forEach((p: any) => {
-          map[p.user_id] = `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Usuario";
-        });
-        setSenderNames(map);
-      }
+    } else {
+      Toast.show({ type: "error", text1: "Error", text2: result.error, position: "top" });
     }
+    setUserId(uid);
     setLoading(false);
+    await messagesService.markAsRead(id, uid);
   };
 
   const handleSend = async () => {
@@ -80,13 +83,21 @@ export default function ConversationScreen() {
     setInput("");
 
     const result = await messagesService.sendMessage(id, userId, text);
-    if (result.success) {
-      setMessages((prev) => [...prev, result.data]);
+    if (!result.success) {
+      // Restaura el texto para que el usuario no lo pierda
+      setInput((current) => current || text);
+      Toast.show({ type: "error", text1: "No se pudo enviar", text2: result.error, position: "top" });
+    } else if (result.data) {
+      const sent = result.data;
+      setMessages((prev) => upsertMessage(prev, sent));
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 50);
-    } else {
-      Toast.show({ type: "error", text1: "Error", text2: result.error, position: "top" });
     }
     setSending(false);
+  };
+
+  const goBack = () => {
+    if (router.canGoBack()) router.back();
+    else router.replace("/mensajes");
   };
 
   const formatTime = (dateStr: string) => {
@@ -110,10 +121,82 @@ export default function ConversationScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Mensajes en tiempo real de esta conversación
+  useEffect(() => {
+    if (!id || !userId) return;
+    const channel = supabase
+      .channel(`messages:${id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${id}` },
+        (payload) => {
+          const msg = payload.new as Message;
+          setMessages((prev) => upsertMessage(prev, msg));
+          if (msg.sender_id !== userId) {
+            messagesService.markAsRead(id, userId);
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages", filter: `conversation_id=eq.${id}` },
+        (payload) => {
+          const msg = payload.new as Message;
+          setMessages((prev) => (prev.some((m) => m.id === msg.id) ? upsertMessage(prev, msg) : prev));
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, userId]);
+
+  // En grupos, carga el nombre de remitentes que aún no conocemos (incluye mensajes nuevos)
+  useEffect(() => {
+    if (!isGroup) return;
+    const missing = [
+      ...new Set(messages.map((m) => m.sender_id).filter((sid) => sid !== userId && !(sid in senderNames))),
+    ];
+    if (missing.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const { data: profiles } = await supabase
+        .from("user_profiles")
+        .select("user_id, first_name, last_name")
+        .in("user_id", missing);
+      if (cancelled) return;
+      const map: Record<string, string> = {};
+      // Marca todos como resueltos para no reintentar en bucle si falta el perfil
+      missing.forEach((sid) => { map[sid] = "Usuario"; });
+      profiles?.forEach((p: any) => {
+        map[p.user_id] = `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Usuario";
+      });
+      setSenderNames((prev) => ({ ...map, ...prev }));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isGroup, messages, senderNames, userId]);
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
+      </View>
+    );
+  }
+
+  if (unavailable) {
+    return (
+      <View className="flex-1 justify-center p-5 bg-[#faf5e0]">
+        <EmptyState
+          icon="lock-closed"
+          title="Conversación no disponible"
+          subtitle="Esta conversación no existe o no tienes acceso a ella."
+          actionLabel="Volver"
+          onAction={goBack}
+        />
       </View>
     );
   }
@@ -138,8 +221,8 @@ export default function ConversationScreen() {
         renderItem={({ item, index }) => {
           const isMine = item.sender_id === userId;
           const showDate = index === 0 ||
-            new Date(item.created_at).toDateString() !==
-            new Date(messages[index - 1]?.created_at).toDateString();
+            new Date(item.created_at ?? 0).toDateString() !==
+            new Date(messages[index - 1]?.created_at ?? 0).toDateString();
 
           return (
             <>
@@ -157,7 +240,7 @@ export default function ConversationScreen() {
                 <View
                   className={`p-3 rounded-2xl ${
                     isMine
-                      ? "bg-[#005e66] rounded-br-md"
+                      ? "bg-[#007275] rounded-br-md"
                       : "bg-white rounded-bl-md shadow-sm"
                   }`}
                 >
@@ -179,7 +262,7 @@ export default function ConversationScreen() {
 
       <View className="flex-row items-center gap-2 p-3 bg-white border-t border-gray-200">
         <TextInput
-          className={`flex-1 bg-white rounded-full px-4 py-3 text-[#211f1e] ${inputFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
+          className={`flex-1 bg-white rounded-full px-4 py-3 text-[#211f1e] ${inputFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
           placeholder="Escribe un mensaje..."
           placeholderTextColor="#9BA1A6"
           value={input}
@@ -189,7 +272,7 @@ export default function ConversationScreen() {
           onBlur={() => setInputFocused(false)}
         />
         <TouchableOpacity
-          className={`w-12 h-12 rounded-full items-center justify-center ${sending || !input.trim() ? "bg-gray-300" : "bg-[#005e66]"}`}
+          className={`w-12 h-12 rounded-full items-center justify-center ${sending || !input.trim() ? "bg-gray-300" : "bg-[#007275]"}`}
           onPress={handleSend}
           disabled={sending || !input.trim()}
         >

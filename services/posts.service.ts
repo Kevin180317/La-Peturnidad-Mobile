@@ -1,4 +1,5 @@
 import { type PostWithOwner, type ServiceResult } from "@/types";
+import { dashboardService } from "@/services/dashboard.service";
 import { supabase } from "@/utils/supabase";
 
 class PostsService {
@@ -185,25 +186,14 @@ class PostsService {
     }
   }
 
-  async create(data: {
-    user_id: string
-    content: string
-    image_url?: string
-    image_urls?: string[]
-    location?: string
-    tags?: string[]
-    urls?: string[]
-  }) {
+  async create(data: { user_id: string; content: string; image_url?: string | null }) {
     try {
-      // Usar la primera imagen de image_urls si está disponible
-      const imageUrl = data.image_urls?.[0] || data.image_url;
-
       const { data: post, error } = await supabase
         .from("posts")
         .insert([{
           user_id: data.user_id,
           content: data.content,
-          image_url: imageUrl,
+          image_url: data.image_url ?? null,
         }])
         .select()
         .single();
@@ -215,10 +205,12 @@ class PostsService {
     }
   }
 
-  async delete(postId: string): Promise<ServiceResult> {
+  // Borra el post y, si tenía, su imagen del bucket "posts"
+  async delete(postId: string, imageUrl?: string | null): Promise<ServiceResult> {
     try {
       const { error } = await supabase.from("posts").delete().eq("id", postId);
       if (error) throw error;
+      await dashboardService.removeImageByUrl(imageUrl, "posts");
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };

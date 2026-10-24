@@ -13,7 +13,7 @@ export function FAB({
   icon,
   onPress,
   color = "#fff",
-  backgroundColor = "#005e66",
+  backgroundColor = "#007275",
   position = "bottom-right",
 }: FABProps) {
   const positionClasses =

@@ -1,7 +1,7 @@
 import { supabase } from "@/utils/supabase";
 import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -17,10 +17,7 @@ import colonias from "../assets/colonias.json";
 
 export default function RegisterExtendedScreen() {
   const router = useRouter();
-  const { email } = useLocalSearchParams<{
-    email: string;
-    userId: string;
-  }>();
+  const { email } = useLocalSearchParams<{ email: string }>();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -37,6 +34,8 @@ export default function RegisterExtendedScreen() {
   const [birthDateFocused, setBirthDateFocused] = useState(false);
   const [postalCodeFocused, setPostalCodeFocused] = useState(false);
   const [cityFocused, setCityFocused] = useState(false);
+  const navigatedRef = useRef(false);
+  const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handlePostalCodeChange = (text: string) => {
     const cleaned = text.replace(/\D/g, "").slice(0, 5);
@@ -74,13 +73,42 @@ export default function RegisterExtendedScreen() {
     return formatted;
   };
 
-  const toPostgresDate = (ddmmyyyy: string): string | null => {
-    if (!ddmmyyyy) return null;
-    const parts = ddmmyyyy.split("/");
-    if (parts.length !== 3) return null;
-    const [dd, mm, yyyy] = parts;
-    if (dd.length !== 2 || mm.length !== 2 || yyyy.length !== 4) return null;
-    return `${yyyy}-${mm}-${dd}`;
+  // Convierte DD/MM/YYYY a YYYY-MM-DD validando que sea una fecha real, no futura y desde 1900
+  const parseBirthDate = (
+    ddmmyyyy: string,
+  ): { value: string | null } | { error: string } => {
+    if (!ddmmyyyy) return { value: null };
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(ddmmyyyy);
+    if (!match) {
+      return { error: "Completa la fecha con el formato DD/MM/AAAA" };
+    }
+    const [, dd, mm, yyyy] = match;
+    const day = Number(dd);
+    const month = Number(mm);
+    const year = Number(yyyy);
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return { error: "La fecha de nacimiento no es válida" };
+    }
+    if (year < 1900) {
+      return { error: "El año debe ser 1900 o posterior" };
+    }
+    if (date.getTime() > Date.now()) {
+      return { error: "La fecha de nacimiento no puede ser futura" };
+    }
+    return { value: `${yyyy}-${mm}-${dd}` };
+  };
+
+  const goToDashboard = () => {
+    if (navigatedRef.current) return;
+    navigatedRef.current = true;
+    if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+    if (router.canDismiss()) router.dismissAll();
+    router.replace("/dashboard");
   };
 
   const handleCompleteProfile = async () => {
@@ -115,6 +143,17 @@ export default function RegisterExtendedScreen() {
       return;
     }
 
+    const birth = parseBirthDate(birthDate);
+    if ("error" in birth) {
+      Toast.show({
+        type: "error",
+        text1: "Fecha inválida",
+        text2: birth.error,
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -127,14 +166,12 @@ export default function RegisterExtendedScreen() {
       }
       const finalUserId = user.id;
 
-      console.log("Creando perfil para user_id:", finalUserId);
-
       const payload = {
         user_id: finalUserId,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         phone: phone.trim(),
-        birth_date: toPostgresDate(birthDate),
+        birth_date: birth.value,
         postal_code: postalCode,
         address: selectedColonia,
         city: city,
@@ -145,50 +182,41 @@ export default function RegisterExtendedScreen() {
         .from("user_profiles")
         .upsert(payload, { onConflict: "user_id", ignoreDuplicates: false });
 
-      if (error) {
-        console.error("Upsert error details:", JSON.stringify(error));
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log("Perfil guardado exitosamente");
-
+      // Se mantiene el spinner hasta navegar (una sola vez: al ocultar el toast o por respaldo)
       Toast.show({
         type: "success",
         text1: "¡Perfil completado!",
         text2: "Bienvenido a Lucky Tracker",
         visibilityTime: 1500,
+        onHide: goToDashboard,
       });
-
-      // Navegar después de un breve delay para que se vea el toast
-      setTimeout(() => {
-        router.replace({
-          pathname: "/dashboard",
-          params: { email: email ?? user.email ?? "" },
-        });
-      }, 1600);
-    } catch (error: any) {
-      console.error("Error al guardar perfil:", error);
+      navTimeoutRef.current = setTimeout(goToDashboard, 2500);
+    } catch (error) {
+      if (__DEV__) console.error("Error al guardar perfil:", error);
       Toast.show({
         type: "error",
         text1: "Error al guardar",
-        text2: error.message || "Intenta de nuevo más tarde",
+        text2: "No se pudo guardar tu perfil. Intenta de nuevo más tarde",
         visibilityTime: 3000,
       });
-    } finally {
       setLoading(false);
     }
   };
 
-  const handleSkip = () => {
-    router.replace({
-      pathname: "/",
-    });
-  };
+  useEffect(() => {
+    return () => {
+      // Evita navegar tras desmontar la pantalla
+      navigatedRef.current = true;
+      if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+    };
+  }, []);
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
         <Text className="mt-4 text-[#211f1e]">Guardando información...</Text>
       </View>
     );
@@ -217,8 +245,9 @@ export default function RegisterExtendedScreen() {
           Nombre <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className={`${firstNameFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${firstNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Tu nombre"
+          accessibilityLabel="Nombre"
           placeholderTextColor="#9BA1A6"
           value={firstName}
           onChangeText={setFirstName}
@@ -233,8 +262,9 @@ export default function RegisterExtendedScreen() {
           Apellido <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className={`${lastNameFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${lastNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Tu apellido"
+          accessibilityLabel="Apellido"
           placeholderTextColor="#9BA1A6"
           value={lastName}
           onChangeText={setLastName}
@@ -249,8 +279,9 @@ export default function RegisterExtendedScreen() {
           Teléfono <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className={`${phoneFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${phoneFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Número de teléfono"
+          accessibilityLabel="Teléfono"
           placeholderTextColor="#9BA1A6"
           value={phone}
           onChangeText={setPhone}
@@ -265,8 +296,9 @@ export default function RegisterExtendedScreen() {
           Fecha de nacimiento
         </Text>
         <TextInput
-          className={`${birthDateFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${birthDateFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="DD/MM/YYYY"
+          accessibilityLabel="Fecha de nacimiento"
           placeholderTextColor="#9BA1A6"
           value={birthDate}
           onChangeText={(text) => setBirthDate(formatDateInput(text))}
@@ -281,8 +313,9 @@ export default function RegisterExtendedScreen() {
           Código Postal <Text className="text-[#c2402f]">*</Text>
         </Text>
         <TextInput
-          className={`${postalCodeFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${postalCodeFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           placeholder="Código postal"
+          accessibilityLabel="Código postal"
           placeholderTextColor="#9BA1A6"
           value={postalCode}
           onChangeText={handlePostalCodeChange}
@@ -316,30 +349,25 @@ export default function RegisterExtendedScreen() {
       <View className="mb-8">
         <Text className="text-[#211f1e] font-semibold mb-2">Ciudad</Text>
         <TextInput
-          className={`${cityFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
+          className={`${cityFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
           value={city}
           editable={false}
+          accessibilityLabel="Ciudad"
           onFocus={() => setCityFocused(true)}
           onBlur={() => setCityFocused(false)}
         />
       </View>
 
       <TouchableOpacity
-        className="bg-[#005e66] py-4 rounded-xl mb-4"
+        className="bg-[#007275] py-4 rounded-xl mb-4"
         onPress={handleCompleteProfile}
+        accessibilityRole="button"
       >
         <Text className="text-white text-center font-bold text-lg">
           Completar perfil
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity className="py-4" onPress={handleSkip}>
-        <Text className="text-[#211f1e]/60 text-center font-semibold">
-          Omitir por ahora
-        </Text>
-      </TouchableOpacity>
-
-      <Toast />
     </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -7,7 +7,8 @@ class AnnouncementsService {
       const { data: announcements, error } = await supabase
         .from("announcements")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(50);
 
       if (error) throw error;
 
@@ -103,7 +104,7 @@ class AnnouncementsService {
         .single();
 
       if (error) throw error;
-      return { success: true, data: announcement };
+      return { success: true, data: announcement as Announcement };
     } catch (error: any) {
       return { success: false, error: error.message };
     }

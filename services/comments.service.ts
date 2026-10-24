@@ -1,4 +1,4 @@
-import { type CommentWithOwner, type ServiceResult } from "@/types";
+import { type Comment, type CommentWithOwner, type ServiceResult } from "@/types";
 import { supabase } from "@/utils/supabase";
 
 class CommentsService {
@@ -38,7 +38,7 @@ class CommentsService {
       const transformedData = comments.map((c) => ({
         id: c.id,
         user_id: c.user_id,
-        target_type: c.target_type,
+        target_type: c.target_type as Comment["target_type"],
         target_id: c.target_id,
         content: c.content,
         parent_id: c.parent_id,

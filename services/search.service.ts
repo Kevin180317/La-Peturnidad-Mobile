@@ -29,10 +29,18 @@ export interface UserSearchResult {
   city: string | null;
 }
 
+/**
+ * Limpia la entrada del usuario antes de usarla en filtros PostgREST:
+ * `,()` romperían la sintaxis de `.or(...)` y `%_\` son comodines/escape de ILIKE.
+ */
+export function sanitizeSearchQuery(query: string): string {
+  return query.replace(/[,()%_\\]/g, " ").replace(/\s+/g, " ").trim();
+}
+
 class SearchService {
   async searchPets(query: string): Promise<ServiceResult<PetSearchResult[]>> {
     try {
-      const q = query.trim();
+      const q = sanitizeSearchQuery(query);
       if (!q) return { success: true, data: [] };
 
       const { data: pets, error } = await supabase
@@ -78,7 +86,7 @@ class SearchService {
 
       return { success: true, data: transformedData };
     } catch (error: any) {
-      console.error("Error searching pets:", error);
+      if (__DEV__) console.warn("Error searching pets:", error?.message);
       return { success: false, error: error.message, data: [] };
     }
   }
@@ -87,7 +95,7 @@ class SearchService {
     query: string,
   ): Promise<ServiceResult<GroupSearchResult[]>> {
     try {
-      const q = query.trim();
+      const q = sanitizeSearchQuery(query);
       if (!q) return { success: true, data: [] };
 
       const { data: groups, error } = await supabase
@@ -125,14 +133,14 @@ class SearchService {
 
       return { success: true, data: transformedData };
     } catch (error: any) {
-      console.error("Error searching groups:", error);
+      if (__DEV__) console.warn("Error searching groups:", error?.message);
       return { success: false, error: error.message, data: [] };
     }
   }
 
   async searchUsers(query: string): Promise<ServiceResult<UserSearchResult[]>> {
     try {
-      const q = query.trim();
+      const q = sanitizeSearchQuery(query);
       if (!q) return { success: true, data: [] };
 
       const { data: users, error } = await supabase
@@ -154,7 +162,7 @@ class SearchService {
 
       return { success: true, data: transformedData };
     } catch (error: any) {
-      console.error("Error searching users:", error);
+      if (__DEV__) console.warn("Error searching users:", error?.message);
       return { success: false, error: error.message, data: [] };
     }
   }

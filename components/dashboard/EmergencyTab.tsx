@@ -106,7 +106,7 @@ export function EmergencyTab({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-[#005e66]"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showAlerts ? "bg-[#211f1e]" : "bg-[#007275]"}`}
             onPress={onToggleAlerts}
           >
             <View
@@ -125,7 +125,7 @@ export function EmergencyTab({
 
         <View className="flex-row gap-4">
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showMyAlerts ? "bg-[#211f1e]" : "bg-[#005e66]"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showMyAlerts ? "bg-[#211f1e]" : "bg-[#007275]"}`}
             onPress={onToggleMyAlerts}
           >
             <View
@@ -142,7 +142,7 @@ export function EmergencyTab({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showFoundPets ? "bg-[#211f1e]" : "bg-[#005e66]"}`}
+            className={`flex-1 rounded-2xl p-4 items-center shadow-sm ${showFoundPets ? "bg-[#211f1e]" : "bg-[#007275]"}`}
             onPress={onToggleFoundPets}
           >
             <View
@@ -170,7 +170,7 @@ export function EmergencyTab({
                 No tienes mascotas registradas
               </Text>
               <TouchableOpacity
-                className="bg-[#005e66] py-2 px-4 rounded-xl mt-3"
+                className="bg-[#007275] py-2 px-4 rounded-xl mt-3"
                 onPress={onGoHome}
               >
                 <Text className="text-white">Registrar mascota</Text>
@@ -222,10 +222,10 @@ export function EmergencyTab({
             <Text className="font-bold">Mascotas perdidas en tu colonia</Text>
           </View>
           {loadingAlerts ? (
-            <ActivityIndicator size="large" color="#005e66" />
+            <ActivityIndicator size="large" color="#007275" />
           ) : emergencyAlerts.length === 0 ? (
-            <View className="bg-[#005e66]/10 p-8 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
-              <Ionicons name="happy-outline" size={40} color="#005e66" />
+            <View className="bg-[#007275]/10 p-8 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
+              <Ionicons name="happy-outline" size={40} color="#007275" />
               <Text className="text-gray-600 text-center mt-2">
                 No hay mascotas perdidas reportadas en tu colonia
               </Text>
@@ -269,7 +269,7 @@ export function EmergencyTab({
                       Dueño: {alert.owner_name} - {alert.owner_phone}
                     </Text>
                       <TouchableOpacity
-                        className="bg-[#005e66] py-2 px-4 rounded-xl mt-2 self-start flex-row items-center gap-1.5"
+                        className="bg-[#007275] py-2 px-4 rounded-xl mt-2 self-start flex-row items-center gap-1.5"
                         onPress={() => onFoundPet(alert)}
                       >
                         <Ionicons name="checkmark-circle" size={16} color="#fff" />
@@ -289,7 +289,7 @@ export function EmergencyTab({
       {showMyAlerts && (
         <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
-            <Ionicons name="clipboard-outline" size={18} color="#005e66" />
+            <Ionicons name="clipboard-outline" size={18} color="#007275" />
             <Text className="font-bold">Mis alertas</Text>
           </View>
           {myAlerts.length === 0 ? (
@@ -331,8 +331,8 @@ export function EmergencyTab({
                       {formatDate(alert.disappearance_date)}
                     </Text>
                     {alert.status === "resolved" ? (
-                      <View className="bg-[#005e66]/10 px-3 py-1 rounded-full self-start mb-2">
-                        <Text className="text-[#005e66] text-xs font-semibold">
+                      <View className="bg-[#007275]/10 px-3 py-1 rounded-full self-start mb-2">
+                        <Text className="text-[#007275] text-xs font-semibold">
                           Resuelta
                         </Text>
                       </View>
@@ -340,7 +340,7 @@ export function EmergencyTab({
                     {alert.finders.map((finder) => (
                       <View
                         key={finder.id}
-                        className="bg-[#005e66]/10 rounded-xl p-3 mb-2"
+                        className="bg-[#007275]/10 rounded-xl p-3 mb-2"
                       >
                         <Text className="text-[#211f1e] text-xs font-semibold">
                           {finder.finder_name} dice que la encontró
@@ -353,7 +353,7 @@ export function EmergencyTab({
                     <View className="flex-row gap-2">
                       {alert.status !== "resolved" && (
                         <TouchableOpacity
-                          className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center gap-1.5"
+                          className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center gap-1.5"
                           onPress={() => onResolveAlert(alert.id)}
                         >
                           <Ionicons name="checkmark-circle" size={14} color="#fff" />
@@ -384,7 +384,7 @@ export function EmergencyTab({
       {showFoundPets && (
         <View className="bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
           <View className="flex-row items-center gap-2 mb-3">
-            <Ionicons name="checkmark-circle" size={18} color="#005e66" />
+            <Ionicons name="checkmark-circle" size={18} color="#007275" />
             <Text className="font-bold">Mascotas que he encontrado</Text>
           </View>
           {foundPets.length === 0 ? (

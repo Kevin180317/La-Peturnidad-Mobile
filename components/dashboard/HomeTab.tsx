@@ -96,7 +96,7 @@ export function HomeTab({
           </View>
           <TouchableOpacity
             onPress={onOpenSearch}
-            className="bg-[#005e66] p-3 rounded-xl"
+            className="bg-[#007275] p-3 rounded-xl"
             activeOpacity={0.8}
           >
             <Ionicons name="search" size={22} color="#fff" />
@@ -107,10 +107,10 @@ export function HomeTab({
       {/* Tarjetas de resumen */}
       <View className="flex-row gap-3 mb-6">
         <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
-          <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-2">
-            <Ionicons name="paw" size={20} color="#005e66" />
+          <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
+            <Ionicons name="paw" size={20} color="#007275" />
           </View>
-          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#005e66]">{pets.length}</Text>
+          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#007275]">{pets.length}</Text>
           <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Mascotas</Text>
         </View>
         <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
@@ -123,10 +123,10 @@ export function HomeTab({
           <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Alertas</Text>
         </View>
         <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
-          <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mb-2">
-            <Ionicons name="checkmark-circle" size={20} color="#005e66" />
+          <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
+            <Ionicons name="checkmark-circle" size={20} color="#007275" />
           </View>
-          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#005e66]">
+          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#007275]">
             {foundPets.length}
           </Text>
           <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Encontradas</Text>
@@ -136,8 +136,9 @@ export function HomeTab({
       {/* Botones de acción rápida */}
       <View className="flex-row gap-3 mb-6">
         <TouchableOpacity
-          className="flex-1 bg-[#005e66] py-4 rounded-xl flex-row items-center justify-center gap-2"
+          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2"
           onPress={() => {
+            setEditingPet(null);
             setShowPetForm(true);
             setShowPets(false);
           }}
@@ -148,7 +149,7 @@ export function HomeTab({
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="flex-1 bg-[#005e66] py-4 rounded-xl flex-row items-center justify-center gap-2"
+          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2"
           onPress={() => {
             onLoadPets();
             setShowPets(!showPets);
@@ -167,7 +168,7 @@ export function HomeTab({
         <View className="mb-6">
           <Text className="text-lg font-bold font-[Inter\_700Bold] mb-3">Mis mascotas</Text>
           {loadingPets ? (
-            <ActivityIndicator size="large" color="#005e66" />
+            <ActivityIndicator size="large" color="#007275" />
           ) : pets.length === 0 ? (
             <EmptyState
               icon="paw"
@@ -221,6 +222,7 @@ export function HomeTab({
       {/* Formulario de registro de mascota */}
       {showPetForm && (
         <PetForm
+          key={editingPet?.id ?? "new"}
           editingPet={editingPet}
           onSubmit={handleSubmit}
           onCancel={() => {

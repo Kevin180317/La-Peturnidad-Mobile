@@ -1,6 +1,6 @@
 export const colors = {
-  primary: "#005e66",
-  teal: "#005e66",
+  primary: "#007275",
+  teal: "#007275",
   tealDark: "#00474c",
   tealLight: "#e4efef",
   // Coral: reservado exclusivamente para la sección de Emergencia (mascotas
@@ -22,6 +22,6 @@ export const colors = {
 export const inputBase =
   "border-2 border-[#211f1e]/20 rounded-xl p-4 text-base bg-white text-[#211f1e]";
 
-export const buttonPrimary = "bg-[#005e66] py-4 rounded-xl shadow-md";
+export const buttonPrimary = "bg-[#007275] py-4 rounded-xl shadow-md";
 export const buttonSecondary = "bg-[#211f1e] py-4 rounded-lg";
 export const buttonAccent = "bg-[#ff7e70] py-3 rounded-lg";

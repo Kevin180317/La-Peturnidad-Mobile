@@ -1,5 +1,6 @@
 import { PostForm, type PostFormData } from "@/components/PostForm";
 import { messagesService } from "@/services/messages.service";
+import { formatDate } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -22,13 +23,14 @@ export interface CommentTarget {
 
 interface FeedTabProps {
   userId?: string;
+  /** moderator/admin: puede borrar cualquier post, anuncio o comentario */
+  isModerator?: boolean;
+  /** usuarios que bloqueé: su contenido no se muestra */
+  blockedUserIds?: string[];
   feedPosts: any[];
-  myPosts: any[];
   announcements?: any[];
-  myAnnouncements?: any[];
   emergencyAlerts?: any[];
   loadingFeed: boolean;
-  loadingMyPosts: boolean;
   loadingAnnouncements?: boolean;
   loadingAlerts?: boolean;
   refreshing: boolean;
@@ -37,29 +39,25 @@ interface FeedTabProps {
   commentText: string;
   loadingComments: boolean;
   sendingComment: boolean;
+  /** recarga solo los datos del feed */
   onRefresh: () => void;
-  onLoadFeed: () => void;
-  onLoadMyPosts: () => void;
-  onLoadAnnouncements?: () => void;
-  onLoadAlerts?: () => void;
   onToggleComments: (type: string, id: string) => void;
   onChangeComment: (text: string) => void;
   onAddComment: () => void;
+  onDeleteComment: (commentId: string) => void;
   onCreatePost: (data: PostFormData) => Promise<boolean>;
-  onDeletePost: (postId: string) => void;
-  onCreateAnnouncement?: (title: string, content: string, category: string) => Promise<boolean>;
+  onDeletePost: (post: any) => void;
   onDeleteAnnouncement?: (id: string) => void;
 }
 
 export function FeedTab({
   userId,
+  isModerator = false,
+  blockedUserIds = [],
   feedPosts,
-  myPosts,
   announcements = [],
-  myAnnouncements = [],
   emergencyAlerts = [],
   loadingFeed,
-  loadingMyPosts,
   loadingAnnouncements = false,
   loadingAlerts = false,
   refreshing,
@@ -69,30 +67,26 @@ export function FeedTab({
   loadingComments,
   sendingComment,
   onRefresh,
-  onLoadFeed,
-  onLoadMyPosts,
-  onLoadAnnouncements = () => {},
-  onLoadAlerts = () => {},
   onToggleComments,
   onChangeComment,
   onAddComment,
+  onDeleteComment,
   onCreatePost,
   onDeletePost,
-  onCreateAnnouncement = async () => false,
   onDeleteAnnouncement = () => {},
 }: FeedTabProps) {
   const router = useRouter();
   const [mainTab, setMainTab] = useState<"emergencies" | "announcements" | "social">("social");
-  const [feedSubTab] = useState<"all" | "mine">("all");
   const [showPostForm, setShowPostForm] = useState(false);
   const [posting, setPosting] = useState(false);
   const [commentFocused, setCommentFocused] = useState(false);
   const [contactingUserId, setContactingUserId] = useState<string | null>(null);
 
-  const visiblePosts =
-    feedSubTab === "all"
-      ? feedPosts.filter((p) => p.user_id !== userId)
-      : myPosts;
+  const blocked = new Set(blockedUserIds);
+  // Incluye mis propios posts para que pueda verlos y borrarlos
+  const visiblePosts = feedPosts.filter((p) => !blocked.has(p.user_id));
+  const visibleAnnouncements = announcements.filter((a) => !blocked.has(a.user_id));
+  const visibleComments = comments.filter((c) => !blocked.has(c.user_id));
 
   const handleCreatePost = async (data: PostFormData) => {
     setPosting(true);
@@ -119,11 +113,7 @@ export function FeedTab({
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() => {
-            onLoadFeed();
-            onLoadMyPosts();
-            onRefresh();
-          }}
+          onRefresh={onRefresh}
         />
       }
       contentContainerClassName="p-5 pb-10"
@@ -131,7 +121,7 @@ export function FeedTab({
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-2xl font-bold text-[#211f1e]">Feed</Text>
         <TouchableOpacity
-          className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center"
+          className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center"
           onPress={() => setShowPostForm(true)}
         >
           <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 4 }} />
@@ -150,7 +140,7 @@ export function FeedTab({
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`flex-1 py-2.5 rounded-lg ${mainTab === "announcements" ? "bg-[#005e66]" : "bg-white"}`}
+          className={`flex-1 py-2.5 rounded-lg ${mainTab === "announcements" ? "bg-[#007275]" : "bg-white"}`}
           onPress={() => setMainTab("announcements")}
         >
           <Text className={`text-center font-semibold text-xs ${mainTab === "announcements" ? "text-white" : "text-gray-600"}`}>
@@ -158,7 +148,7 @@ export function FeedTab({
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`flex-1 py-2.5 rounded-lg ${mainTab === "social" ? "bg-[#005e66]" : "bg-white"}`}
+          className={`flex-1 py-2.5 rounded-lg ${mainTab === "social" ? "bg-[#007275]" : "bg-white"}`}
           onPress={() => setMainTab("social")}
         >
           <Text className={`text-center font-semibold text-xs ${mainTab === "social" ? "text-white" : "text-gray-600"}`}>
@@ -206,7 +196,7 @@ export function FeedTab({
                     <Text className="text-white text-xs font-bold">EMERGENCIA</Text>
                   </View>
                   <Text className="font-bold text-base text-[#211f1e]">{alert.pet_name}</Text>
-                  <Text className="text-[#ff7e70] text-xs font-medium mt-1">{alert.disappearance_date}</Text>
+                  <Text className="text-[#ff7e70] text-xs font-medium mt-1">{formatDate(alert.disappearance_date)}</Text>
                 </View>
               </View>
               <Text className="text-sm text-gray-700 leading-5 mb-3">{alert.description}</Text>
@@ -224,25 +214,22 @@ export function FeedTab({
       {/* ANUNCIOS TAB */}
       {mainTab === "announcements" && (
         <>
-          {(loadingAnnouncements || !announcements?.length) && (
+          {(loadingAnnouncements || !visibleAnnouncements.length) && (
             <View className="bg-white p-10 rounded-2xl shadow-[0_2px_8px_rgba(33,31,30,0.08)] items-center">
               {loadingAnnouncements ? (
-                <ActivityIndicator size="large" color="#005e66" />
+                <ActivityIndicator size="large" color="#007275" />
               ) : (
                 <>
-                  <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
-                    <Ionicons name="newspaper-outline" size={32} color="#005e66" />
+                  <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+                    <Ionicons name="newspaper-outline" size={32} color="#007275" />
                   </View>
                   <Text className="text-gray-500 text-center">No hay anuncios disponibles</Text>
                 </>
               )}
             </View>
           )}
-          {announcements?.map((item: any) => {
+          {visibleAnnouncements.map((item: any) => {
             const isMine = item.user_id === userId;
-            const annComments = comments.filter(
-              (c) => c.target_type === "announcement" && c.target_id === item.id,
-            );
             return (
               <View key={item.id} className="bg-white rounded-2xl mb-3 shadow-[0_2px_8px_rgba(33,31,30,0.08)] overflow-hidden">
                 <TouchableOpacity
@@ -252,7 +239,7 @@ export function FeedTab({
                   {item.owner_profile_picture ? (
                     <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                   ) : (
-                    <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
+                    <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center">
                       <Text className="text-white font-bold text-sm">{item.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                     </View>
                   )}
@@ -263,11 +250,11 @@ export function FeedTab({
                   <View className="flex-row gap-3">
                     {!isMine && (
                       <TouchableOpacity onPress={() => handleContact(item.user_id, item.owner_name)}>
-                        <Ionicons name="chatbubble-outline" size={18} color="#005e66" />
+                        <Ionicons name="chatbubble-outline" size={18} color="#007275" />
                       </TouchableOpacity>
                     )}
-                    {isMine && (
-                      <TouchableOpacity onPress={() => onDeleteAnnouncement?.(item.id)}>
+                    {(isMine || isModerator) && (
+                      <TouchableOpacity onPress={() => onDeleteAnnouncement(item.id)}>
                         <Ionicons name="trash-outline" size={18} color="#ef4444" />
                       </TouchableOpacity>
                     )}
@@ -285,11 +272,6 @@ export function FeedTab({
                   <Text className="font-bold text-base text-[#211f1e] mb-1">{item.title}</Text>
                   <Text className="text-gray-700 leading-5 text-sm">{item.content}</Text>
                 </View>
-
-                <View className="flex-row items-center gap-2 px-4 py-3 border-t border-gray-100">
-                  <Ionicons name="chatbubble-ellipses-outline" size={14} color="#6B7280" />
-                  <Text className="text-gray-500 text-xs font-medium">{annComments.length} comentarios</Text>
-                </View>
               </View>
             );
           })}
@@ -300,20 +282,18 @@ export function FeedTab({
       {mainTab === "social" && (
         <>
           {loadingFeed ? (
-            <ActivityIndicator size="large" color="#005e66" />
+            <ActivityIndicator size="large" color="#007275" />
           ) : visiblePosts.length === 0 ? (
             <View className="bg-white p-10 rounded-2xl shadow-[0_2px_8px_rgba(33,31,30,0.08)] items-center">
-              <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
-                <Ionicons name="images-outline" size={32} color="#005e66" />
+              <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+                <Ionicons name="images-outline" size={32} color="#007275" />
               </View>
-              <Text className="text-gray-500 text-center">
-                {feedSubTab === "all" ? "No hay publicaciones en el feed" : "No has publicado nada aún"}
-              </Text>
+              <Text className="text-gray-500 text-center">No hay publicaciones en el feed</Text>
             </View>
           ) : (
             visiblePosts.map((post) => {
           const isMine = post.user_id === userId;
-          const postComments = comments.filter(
+          const postComments = visibleComments.filter(
             (c) => c.target_type === "post" && c.target_id === post.id,
           );
           return (
@@ -331,7 +311,7 @@ export function FeedTab({
                 {post.owner_profile_picture ? (
                   <Image source={{ uri: post.owner_profile_picture }} className="w-10 h-10 rounded-full" />
                 ) : (
-                  <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
+                  <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center">
                     <Text className="text-white font-bold text-sm">{post.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                   </View>
                 )}
@@ -349,11 +329,11 @@ export function FeedTab({
                       onPress={() => handleContact(post.user_id, post.owner_name)}
                       disabled={contactingUserId === post.user_id}
                     >
-                      <Ionicons name="chatbubble-outline" size={18} color={contactingUserId === post.user_id ? "#E5E7EB" : "#005e66"} />
+                      <Ionicons name="chatbubble-outline" size={18} color={contactingUserId === post.user_id ? "#E5E7EB" : "#007275"} />
                     </TouchableOpacity>
                   )}
-                  {isMine && (
-                    <TouchableOpacity onPress={() => onDeletePost(post.id)}>
+                  {(isMine || isModerator) && (
+                    <TouchableOpacity onPress={() => onDeletePost(post)}>
                       <Ionicons name="trash-outline" size={18} color="#ef4444" />
                     </TouchableOpacity>
                   )}
@@ -380,41 +360,11 @@ export function FeedTab({
                 )}
               </View>
 
-              {/* Metadata: ubicación, tags */}
-              <View className="px-4 pt-3 pb-2">
-                {post.location && (
-                  <View className="flex-row items-center gap-2 bg-[#005e66]/8 px-3 py-2 rounded-lg mb-2">
-                    <Ionicons name="location-sharp" size={12} color="#005e66" />
-                    <Text className="text-[#005e66] text-xs font-medium">{post.location}</Text>
-                  </View>
-                )}
-
-                {post.tags && post.tags.length > 0 && (
-                  <View className="flex-row flex-wrap gap-2 mb-2">
-                    {post.tags.map((tag: string, idx: number) => (
-                      <Text key={idx} className="text-[#005e66] text-xs">
-                        #{tag}
-                      </Text>
-                    ))}
-                  </View>
-                )}
-
-                {post.urls && post.urls.length > 0 && (
-                  <View className="gap-1">
-                    {post.urls.map((url: string, idx: number) => (
-                      <Text key={idx} className="text-blue-500 text-xs underline">
-                        {url}
-                      </Text>
-                    ))}
-                  </View>
-                )}
-              </View>
-
               {/* Footer: comentarios */}
               <View className="flex-row items-center gap-2 px-4 py-3 border-t border-gray-100">
                 <Ionicons name="chatbubble-ellipses-outline" size={14} color="#6B7280" />
                 <Text className="text-gray-500 text-xs font-medium">{post.comment_count} comentarios</Text>
-                <Text className="text-[#005e66] text-xs font-semibold ml-auto">
+                <Text className="text-[#007275] text-xs font-semibold ml-auto">
                   {commentTarget?.id === post.id ? "Ocultar" : "Ver"}
                 </Text>
               </View>
@@ -422,7 +372,7 @@ export function FeedTab({
               {commentTarget?.id === post.id && commentTarget?.type === "post" && (
                 <View className="mt-3 pt-3 border-t border-gray-100">
                   {loadingComments ? (
-                    <ActivityIndicator size="small" color="#005e66" />
+                    <ActivityIndicator size="small" color="#007275" />
                   ) : postComments.length === 0 ? (
                     <Text className="text-gray-500 text-sm mb-2">Sin comentarios</Text>
                   ) : (
@@ -431,7 +381,7 @@ export function FeedTab({
                         {c.owner_profile_picture ? (
                           <Image source={{ uri: c.owner_profile_picture }} className="w-7 h-7 rounded-full" />
                         ) : (
-                          <View className="w-7 h-7 bg-[#005e66] rounded-full items-center justify-center">
+                          <View className="w-7 h-7 bg-[#007275] rounded-full items-center justify-center">
                             <Text className="text-white text-xs font-bold">{c.owner_name?.[0]?.toUpperCase() || "U"}</Text>
                           </View>
                         )}
@@ -446,12 +396,21 @@ export function FeedTab({
                           </View>
                           <Text className="text-[#211f1e] text-sm mt-1">{c.content}</Text>
                         </View>
+                        {(c.user_id === userId || isModerator) && (
+                          <TouchableOpacity
+                            className="p-1"
+                            onPress={() => onDeleteComment(c.id)}
+                            accessibilityLabel="Eliminar comentario"
+                          >
+                            <Ionicons name="trash-outline" size={16} color="#ef4444" />
+                          </TouchableOpacity>
+                        )}
                       </View>
                     ))
                   )}
                   <View className="flex-row items-center gap-2 mt-2">
                     <TextInput
-                      className={`flex-1 bg-white rounded-full px-4 py-2 text-sm ${commentFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"} text-[#211f1e]`}
+                      className={`flex-1 bg-white rounded-full px-4 py-2 text-sm ${commentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"} text-[#211f1e]`}
                       placeholder="Escribe un comentario..."
                       placeholderTextColor="#9BA1A6"
                       value={commentTarget?.id === post.id ? commentText : ""}
@@ -460,7 +419,7 @@ export function FeedTab({
                       onBlur={() => setCommentFocused(false)}
                     />
                     <TouchableOpacity
-                      className="bg-[#005e66] rounded-full w-8 h-8 items-center justify-center"
+                      className="bg-[#007275] rounded-full w-8 h-8 items-center justify-center"
                       onPress={onAddComment}
                       disabled={sendingComment || !commentText.trim()}
                     >
@@ -489,7 +448,7 @@ function getCategoryStyle(category: string): string {
     case "aviso":
       return "bg-gray-100 text-gray-600";
     case "evento":
-      return "bg-[#005e66]/10 text-[#005e66]";
+      return "bg-[#007275]/10 text-[#007275]";
     case "pregunta":
       return "bg-[#211f1e]/10 text-[#211f1e]";
     default:

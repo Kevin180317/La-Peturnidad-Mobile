@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { dashboardService } from "@/services/dashboard.service";
 import { supabase } from "@/utils/supabase";
+import { consumePendingNotificationUrl } from "./_layout";
 
 const { width } = Dimensions.get("window");
 
@@ -59,15 +60,16 @@ export default function OnboardingScreen() {
           const profileResult = await dashboardService.getProfileByUserId(
             sessionUser.id,
           );
-          if (profileResult.success && profileResult.data) {
-            router.replace({
-              pathname: "/dashboard",
-              params: { email: sessionUser.email, userId: sessionUser.id },
-            });
+          if (!profileResult.success) {
+            // Error al cargar el perfil (red, etc.): no asumir que falta; login reintenta y avisa
+            router.replace("/login");
+          } else if (profileResult.data) {
+            const pendingUrl = await consumePendingNotificationUrl();
+            router.replace((pendingUrl ?? "/dashboard") as Href);
           } else {
             router.replace({
               pathname: "/register-extended",
-              params: { email: sessionUser.email ?? "", userId: sessionUser.id },
+              params: { email: sessionUser.email ?? "" },
             });
           }
           return;
@@ -105,7 +107,7 @@ export default function OnboardingScreen() {
   if (checking) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
@@ -140,6 +142,9 @@ export default function OnboardingScreen() {
       <TouchableOpacity
         onPress={finishOnboarding}
         className="absolute top-16 right-6 z-10"
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel="Saltar introducción"
       >
         <Text className="text-[#c2402f] font-semibold text-base">Saltar</Text>
       </TouchableOpacity>
@@ -162,7 +167,7 @@ export default function OnboardingScreen() {
             <View
               key={index}
               className={`w-3 h-3 rounded-full ${
-                index === currentIndex ? "bg-[#005e66]" : "bg-[#005e66]/30"
+                index === currentIndex ? "bg-[#007275]" : "bg-[#007275]/30"
               }`}
             />
           ))}
@@ -170,8 +175,9 @@ export default function OnboardingScreen() {
 
         <TouchableOpacity
           onPress={handleNext}
-          className="bg-[#005e66] py-4 px-16 rounded-xl"
+          className="bg-[#007275] py-4 px-16 rounded-xl"
           activeOpacity={0.8}
+          accessibilityRole="button"
         >
           <Text className="text-white font-bold text-lg">
             {currentIndex === STEPS.length - 1 ? "Comenzar" : "Siguiente"}

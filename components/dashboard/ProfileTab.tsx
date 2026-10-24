@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
-import { dashboardService } from "@/services/dashboard.service";
+import { dashboardService, type PickedImage } from "@/services/dashboard.service";
 import { formatDate } from "@/utils/format";
+import { openLegalUrl } from "@/utils/legal";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -22,6 +23,7 @@ interface ProfileTabProps {
   refreshing: boolean;
   onRefresh: () => void;
   onLogout: () => void;
+  onDeleteAccount: () => void;
   onGoComunidad: () => void;
   onProfileUpdated: () => void;
 }
@@ -35,19 +37,19 @@ export function ProfileTab({
   refreshing,
   onRefresh,
   onLogout,
+  onDeleteAccount,
   onGoComunidad,
   onProfileUpdated,
 }: ProfileTabProps) {
   const router = useRouter();
-  const [selectedProfileImage, setSelectedProfileImage] = useState<{
-    uri: string;
-  } | null>(null);
+  const [selectedProfileImage, setSelectedProfileImage] =
+    useState<PickedImage | null>(null);
   const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
 
   const handleSelectProfileImage = async () => {
     const result = await dashboardService.selectImage();
     if (result.success) {
-      setSelectedProfileImage(result.image || null);
+      setSelectedProfileImage(result.image);
     } else if (result.error !== "Selección cancelada") {
       Toast.show({
         type: "error",
@@ -65,7 +67,7 @@ export function ProfileTab({
     setUploadingProfileImage(true);
 
     const uploadResult = await dashboardService.uploadImage(
-      selectedProfileImage.uri,
+      selectedProfileImage,
       "profile-pictures",
     );
 
@@ -122,16 +124,16 @@ export function ProfileTab({
       items: [
         {
           icon: "chatbox-ellipses-outline",
-          color: "#005e66",
-          bg: "bg-[#005e66]/10",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
           label: "Mensajes",
           onPress: () => router.push("/mensajes"),
           badge: unreadCount,
         },
         {
           icon: "chatbubbles-outline",
-          color: "#005e66",
-          bg: "bg-[#005e66]/10",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
           label: "Comunidad",
           onPress: onGoComunidad,
         },
@@ -149,8 +151,8 @@ export function ProfileTab({
         },
         {
           icon: "paw-outline",
-          color: "#005e66",
-          bg: "bg-[#005e66]/10",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
           label: "Reuniones exitosas",
           onPress: () => router.push("/historias"),
         },
@@ -161,15 +163,15 @@ export function ProfileTab({
       items: [
         {
           icon: "create-outline",
-          color: "#005e66",
-          bg: "bg-[#005e66]/10",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
           label: "Editar perfil",
           onPress: () => router.push("/editar-perfil"),
         },
         {
           icon: "notifications-outline",
-          color: "#005e66",
-          bg: "bg-[#005e66]/10",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
           label: "Notificaciones",
           onPress: () => router.push("/notificaciones"),
         },
@@ -180,17 +182,31 @@ export function ProfileTab({
       items: [
         {
           icon: "book-outline",
-          color: "#005e66",
-          bg: "bg-[#005e66]/10",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
           label: "Cómo funciona",
           onPress: () => router.push("/como-usar"),
         },
         {
           icon: "help-circle-outline",
-          color: "#005e66",
-          bg: "bg-[#005e66]/10",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
           label: "Preguntas frecuentes",
           onPress: () => router.push("/faq"),
+        },
+        {
+          icon: "document-text-outline",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
+          label: "Términos y condiciones",
+          onPress: () => openLegalUrl("terms"),
+        },
+        {
+          icon: "shield-outline",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
+          label: "Política de privacidad",
+          onPress: () => openLegalUrl("privacy"),
         },
       ],
     },
@@ -234,10 +250,10 @@ export function ProfileTab({
                     profile.profile_picture_url ||
                     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ168Mp9N1EPzK86wWBf_Ipl7gqELKUyhryNg&s",
                 }}
-                className="w-32 h-32 rounded-full border-4 border-[#005e66]"
+                className="w-32 h-32 rounded-full border-4 border-[#007275]"
               />
               <TouchableOpacity
-                className="absolute bottom-1 right-1 bg-[#005e66] w-11 h-11 rounded-full items-center justify-center border-3 border-white shadow-lg active:bg-[#004052]"
+                className="absolute bottom-1 right-1 bg-[#007275] w-11 h-11 rounded-full items-center justify-center border-3 border-white shadow-lg active:bg-[#004052]"
                 onPress={handleSelectProfileImage}
               >
                 <Ionicons name="camera" size={20} color="#fff" />
@@ -251,7 +267,7 @@ export function ProfileTab({
                   className="w-24 h-24 rounded-lg self-center mb-2"
                 />
                 <TouchableOpacity
-                  className={`py-2 rounded-xl ${uploadingProfileImage ? "bg-gray-400" : "bg-[#005e66]"}`}
+                  className={`py-2 rounded-xl ${uploadingProfileImage ? "bg-gray-400" : "bg-[#007275]"}`}
                   onPress={handleUploadProfileImage}
                   disabled={uploadingProfileImage}
                 >
@@ -270,8 +286,8 @@ export function ProfileTab({
             <Text className="text-lg font-bold p-5 pb-3">Información personal</Text>
             <View>
               <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="person" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="person" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">NOMBRE</Text>
@@ -279,8 +295,8 @@ export function ProfileTab({
                 </View>
               </View>
               <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="mail" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="mail" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">CORREO ELECTRÓNICO</Text>
@@ -288,8 +304,8 @@ export function ProfileTab({
                 </View>
               </View>
               <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="call" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="call" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">TELÉFONO</Text>
@@ -297,8 +313,8 @@ export function ProfileTab({
                 </View>
               </View>
               <View className="flex-row items-center px-5 py-4">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="calendar" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="calendar" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">CUMPLEAÑOS</Text>
@@ -313,8 +329,8 @@ export function ProfileTab({
             <Text className="text-lg font-bold p-5 pb-3">Dirección</Text>
             <View>
               <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="home" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="home" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">CALLE/COLONIA</Text>
@@ -322,8 +338,8 @@ export function ProfileTab({
                 </View>
               </View>
               <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="location" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="location" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">CIUDAD</Text>
@@ -331,8 +347,8 @@ export function ProfileTab({
                 </View>
               </View>
               <View className="flex-row items-center px-5 py-4">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="map" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="map" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">CÓDIGO POSTAL</Text>
@@ -347,8 +363,8 @@ export function ProfileTab({
             <Text className="text-lg font-bold p-5 pb-3">Estadísticas</Text>
             <View>
               <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="paw" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="paw" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">MASCOTAS</Text>
@@ -357,8 +373,8 @@ export function ProfileTab({
               </View>
 
               <TouchableOpacity onPress={() => router.push(`/seguidores?id=${userId}&tab=followers`)} className="flex-row items-center px-5 py-4 border-b border-gray-100 active:bg-gray-50">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="people" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="people" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">SEGUIDORES</Text>
@@ -368,8 +384,8 @@ export function ProfileTab({
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => router.push(`/seguidores?id=${userId}&tab=following`)} className="flex-row items-center px-5 py-4 active:bg-gray-50">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="person-add" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="person-add" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">SIGUIENDO</Text>
@@ -415,8 +431,8 @@ export function ProfileTab({
             <Text className="text-lg font-bold p-5 pb-3">Cuenta</Text>
             <View>
               <View className="flex-row items-center px-5 py-4 border-b border-gray-100">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="calendar" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="calendar" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">MIEMBRO DESDE</Text>
@@ -425,8 +441,8 @@ export function ProfileTab({
               </View>
 
               <View className="flex-row items-center px-5 py-4">
-                <View className="w-10 h-10 rounded-full bg-[#005e66]/10 items-center justify-center mr-3">
-                  <Ionicons name="refresh" size={20} color="#005e66" />
+                <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="refresh" size={20} color="#007275" />
                 </View>
                 <View className="flex-1">
                   <Text className="text-xs text-gray-500 font-semibold">ÚLTIMA ACTUALIZACIÓN</Text>
@@ -443,7 +459,7 @@ export function ProfileTab({
             No se encontró información de perfil. Completa tu registro.
           </Text>
           <TouchableOpacity
-            className="bg-[#005e66] py-3 px-6 rounded-xl mt-4"
+            className="bg-[#007275] py-3 px-6 rounded-xl mt-4"
             onPress={() =>
               router.replace({
                 pathname: "/register-extended",
@@ -463,6 +479,16 @@ export function ProfileTab({
       >
         <Ionicons name="log-out-outline" size={20} color="#fff" />
         <Text className="text-white text-center font-bold">Cerrar Sesión</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        className="py-4 mt-2 flex-row items-center justify-center gap-2"
+        onPress={onDeleteAccount}
+        accessibilityRole="button"
+        accessibilityLabel="Eliminar cuenta"
+      >
+        <Ionicons name="trash-outline" size={18} color="#dc2626" />
+        <Text className="text-red-600 text-center font-semibold">Eliminar cuenta</Text>
       </TouchableOpacity>
     </ScrollView>
   );

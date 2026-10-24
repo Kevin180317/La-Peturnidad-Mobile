@@ -77,6 +77,7 @@ interface FcmResult {
   token: string;
   success: boolean;
   error?: string;
+  errorCode?: string;
 }
 
 async function sendFcmMessage(
@@ -113,32 +114,54 @@ async function sendFcmMessage(
   };
   if (data) message.data = data;
 
-  const res = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+  try {
+    const res = await fetch(
+      `https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ message }),
       },
-      body: JSON.stringify({ message }),
-    },
-  );
+    );
 
-  const bodyRes = await res.json();
+    const bodyRes = await res.json().catch(() => ({}));
 
-  if (bodyRes.error) {
-    return { token, success: false, error: bodyRes.error.message || bodyRes.error.status };
+    if (!res.ok || bodyRes.error) {
+      const err = bodyRes.error ?? {};
+      const details: { errorCode?: string }[] = Array.isArray(err.details) ? err.details : [];
+      const errorCode = details.find((d) => typeof d?.errorCode === "string")?.errorCode;
+      return {
+        token,
+        success: false,
+        error: err.message || err.status || `HTTP ${res.status}`,
+        errorCode,
+      };
+    }
+
+    return { token, success: true };
+  } catch (e) {
+    return { token, success: false, error: e instanceof Error ? e.message : "fetch error" };
   }
-
-  return { token, success: true };
 }
 
-const JSON_HEADERS = { "Content-Type": "application/json" };
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+const JSON_HEADERS = { ...CORS_HEADERS, "Content-Type": "application/json" };
 const respond = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
 
 const norm = (v: string | null | undefined) => (v ?? "").trim().toLowerCase();
+
+// Escapa los comodines de LIKE para que ilike funcione como igualdad sin distinguir mayúsculas
+const escapeLike = (v: string) => v.replace(/[\\%_]/g, (c) => `\\${c}`);
+
+const FCM_BATCH_SIZE = 100;
 
 interface Message {
   tokens: string[];
@@ -149,6 +172,10 @@ interface Message {
 }
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: CORS_HEADERS });
+  }
+
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -161,109 +188,178 @@ Deno.serve(async (req) => {
     const caller = auth?.user;
     if (!caller) return respond({ error: "No autenticado" }, 401);
 
-    const input = await req.json();
+    let input: { type?: unknown; alertId?: unknown; foundId?: unknown } | null;
+    try {
+      input = await req.json();
+    } catch {
+      return respond({ error: "JSON inválido" }, 400);
+    }
+    if (!input || typeof input !== "object") return respond({ error: "JSON inválido" }, 400);
+
     let message: Message | null = null;
 
     if (input.type === "emergency") {
-      const { data: alert } = await supabase
-        .from("emergency_alerts")
-        .select("*")
-        .eq("id", input.alertId)
-        .maybeSingle();
-      if (!alert || alert.user_id !== caller.id || alert.status !== "active") {
-        return respond({ error: "Alerta no válida" }, 403);
+      if (typeof input.alertId !== "string" || !input.alertId) {
+        return respond({ error: "alertId requerido" }, 400);
       }
+
+      // Reclama la alerta de forma atómica: solo una llamada puede notificarla
+      const { data: alert, error: claimError } = await supabase
+        .from("emergency_alerts")
+        .update({ notified_at: new Date().toISOString() })
+        .eq("id", input.alertId)
+        .eq("user_id", caller.id)
+        .eq("status", "active")
+        .is("notified_at", null)
+        .select("*")
+        .maybeSingle();
+      if (claimError) console.error("claim emergency_alerts:", claimError.message);
+      if (!alert) return respond({ error: "Alerta ya notificada o no válida" }, 409);
 
       const { data: owner } = await supabase
         .from("user_profiles")
         .select("first_name, last_name")
         .eq("user_id", caller.id)
         .maybeSingle();
-      const ownerName = owner ? `${owner.first_name} ${owner.last_name}`.trim() : "Un vecino";
+      const ownerName = owner
+        ? `${owner.first_name ?? ""} ${owner.last_name ?? ""}`.trim() || "Un vecino"
+        : "Un vecino";
 
-      const { data: profiles } = await supabase
-        .from("user_profiles")
-        .select("user_id, address")
-        .neq("user_id", caller.id);
-      const target = norm(alert.last_seen_location);
-      const neighborIds = (profiles ?? [])
-        .filter((p) => norm(p.address) === target)
-        .map((p) => p.user_id);
+      // Vecinos: misma dirección/colonia (igualdad normalizada), filtrado en SQL
+      const location = (alert.last_seen_location ?? "").trim();
+      let neighborIds: string[] = [];
+      if (location) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from("user_profiles")
+          .select("user_id, address")
+          .ilike("address", escapeLike(location))
+          .neq("user_id", caller.id);
+        if (profilesError) console.error("neighbour lookup:", profilesError.message);
+        const target = norm(location);
+        neighborIds = (profiles ?? [])
+          .filter((p) => norm(p.address) === target)
+          .map((p) => p.user_id);
+      }
 
       const tokens = await tokensFor(supabase, neighborIds, "lost_pet_alerts");
       message = {
         tokens,
         title: `⚠️ ${ownerName} reportó a ${alert.pet_name} perdida`,
-        body: `Vista por última vez en ${alert.last_seen_location}.`,
+        body: `Vista por última vez en ${location || "tu colonia"}.`,
         image: alert.image_url,
         data: {
           type: "emergency",
           url: `/dashboard?tab=emergency&alertId=${alert.id}`,
-          alertId: alert.id,
-          petName: alert.pet_name,
+          alertId: String(alert.id),
+          petName: alert.pet_name ?? "",
           ownerName,
         },
       };
     } else if (input.type === "found") {
-      const { data: found } = await supabase
-        .from("found_pets")
-        .select("*")
-        .eq("id", input.foundId)
-        .maybeSingle();
-      if (!found || found.user_id !== caller.id || !found.alert_owner_id) {
-        return respond({ error: "Reporte no válido" }, 403);
+      if (typeof input.foundId !== "string" || !input.foundId) {
+        return respond({ error: "foundId requerido" }, 400);
       }
+
+      // Reclama el reporte de forma atómica
+      const { data: found, error: claimError } = await supabase
+        .from("found_pets")
+        .update({ notified_at: new Date().toISOString() })
+        .eq("id", input.foundId)
+        .eq("user_id", caller.id)
+        .is("notified_at", null)
+        .select("*")
+        .maybeSingle();
+      if (claimError) console.error("claim found_pets:", claimError.message);
+      if (!found || !found.alert_id) {
+        return respond({ error: "Reporte ya notificado o no válido" }, 409);
+      }
+
+      // Destinatario, nombre e imagen salen de la alerta, no del reporte
+      const { data: alert } = await supabase
+        .from("emergency_alerts")
+        .select("id, user_id, pet_name, image_url, status")
+        .eq("id", found.alert_id)
+        .maybeSingle();
+      if (!alert || alert.status !== "active") {
+        return respond({ error: "Alerta no válida" }, 409);
+      }
+      if (alert.user_id === caller.id) return respond({ succeeded: 0, failed: 0 });
 
       const { data: finder } = await supabase
         .from("user_profiles")
         .select("first_name, last_name")
         .eq("user_id", caller.id)
         .maybeSingle();
-      const finderName = finder ? `${finder.first_name} ${finder.last_name}`.trim() : "Un vecino";
+      const finderName = finder
+        ? `${finder.first_name ?? ""} ${finder.last_name ?? ""}`.trim() || "Un vecino"
+        : "Un vecino";
 
-      const tokens = await tokensFor(supabase, [found.alert_owner_id], "found_pet_alerts");
+      const tokens = await tokensFor(supabase, [alert.user_id], "found_pet_alerts");
       message = {
         tokens,
-        title: `🐾 ${finderName} dice que encontró a ${found.pet_name ?? "tu mascota"}`,
+        title: `🐾 ${finderName} dice que encontró a ${alert.pet_name ?? "tu mascota"}`,
         body: "Abre la app para ver sus datos de contacto.",
-        image: found.image_url,
+        image: alert.image_url,
         data: {
           type: "found",
-          url: `/dashboard?tab=emergency&alertId=${found.alert_id ?? ""}`,
-          alertId: found.alert_id ?? "",
-          petName: found.pet_name ?? "",
+          url: `/dashboard?tab=emergency&alertId=${alert.id}`,
+          alertId: String(alert.id),
+          petName: alert.pet_name ?? "",
         },
       };
     } else {
       return respond({ error: "Tipo no soportado" }, 400);
     }
 
-    if (message.tokens.length === 0) return respond({ succeeded: 0, failed: 0, details: [] });
+    if (message.tokens.length === 0) return respond({ succeeded: 0, failed: 0 });
 
     const serviceAccountRaw = Deno.env.get("FCM_SERVICE_ACCOUNT");
-    if (!serviceAccountRaw) return respond({ error: "FCM_SERVICE_ACCOUNT not configured" }, 500);
+    if (!serviceAccountRaw) {
+      console.error("FCM_SERVICE_ACCOUNT not configured");
+      return respond({ error: "Error interno" }, 500);
+    }
     const sa = JSON.parse(serviceAccountRaw);
     if (!sa.client_email || !sa.private_key || !sa.project_id) {
-      return respond({ error: "FCM_SERVICE_ACCOUNT missing required fields" }, 500);
+      console.error("FCM_SERVICE_ACCOUNT missing required fields");
+      return respond({ error: "Error interno" }, 500);
     }
 
     const accessToken = await getAccessToken(sa.client_email, sa.private_key);
-    const results = await Promise.all(
-      message.tokens.map((token) =>
-        sendFcmMessage(token, message!.title, message!.body, message!.image, "emergency_alerts", message!.data, accessToken, sa.project_id)
-      ),
-    );
+    const msg = message;
 
-    // Limpia tokens que FCM ya no reconoce
-    const dead = results.filter((r) => !r.success && /UNREGISTERED|NOT_FOUND|INVALID_ARGUMENT/.test(r.error ?? "")).map((r) => r.token);
-    if (dead.length) await supabase.from("device_tokens").delete().in("token", dead);
+    // Lotes secuenciales; dentro de cada lote, envíos en paralelo
+    const results: FcmResult[] = [];
+    for (let i = 0; i < msg.tokens.length; i += FCM_BATCH_SIZE) {
+      const batch = msg.tokens.slice(i, i + FCM_BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map((token) =>
+          sendFcmMessage(token, msg.title, msg.body, msg.image, "emergency_alerts", msg.data, accessToken, sa.project_id)
+        ),
+      );
+      results.push(...batchResults);
+    }
+
+    // Solo borra tokens que FCM reporta como UNREGISTERED (nunca por INVALID_ARGUMENT)
+    const dead = results
+      .filter((r) => !r.success && r.errorCode === "UNREGISTERED")
+      .map((r) => r.token);
+    if (dead.length) {
+      const { error: delError } = await supabase.from("device_tokens").delete().in("token", dead);
+      if (delError) console.error("delete dead tokens:", delError.message);
+    }
+
+    const failed = results.filter((r) => !r.success);
+    if (failed.length) {
+      console.error("FCM failures:", failed.map((r) => r.errorCode ?? r.error).join(", "));
+    }
 
     return respond({
-      succeeded: results.filter((r) => r.success).length,
-      failed: results.filter((r) => !r.success).length,
+      succeeded: results.length - failed.length,
+      failed: failed.length,
     });
   } catch (error) {
-    return respond({ error: error instanceof Error ? error.message : "Unknown error" }, 500);
+    console.error("send-push-notification error:", error instanceof Error ? error.message : error);
+    return respond({ error: "Error interno" }, 500);
   }
 });
 
@@ -281,9 +377,11 @@ async function tokensFor(
   const muted = new Set(
     (prefs ?? []).filter((p) => p.push_enabled === false || p[pref] === false).map((p) => p.user_id),
   );
+  const allowed = userIds.filter((id) => !muted.has(id));
+  if (allowed.length === 0) return [];
   const { data: rows } = await supabase
     .from("device_tokens")
-    .select("user_id, token")
-    .in("user_id", userIds.filter((id) => !muted.has(id)));
+    .select("token")
+    .in("user_id", allowed);
   return [...new Set((rows ?? []).map((r) => r.token).filter(Boolean))];
 }

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Component, type ReactNode } from "react";
+import { Component, type ErrorInfo, type ReactNode } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
@@ -19,6 +19,12 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    if (__DEV__) {
+      console.error("ErrorBoundary:", error, info.componentStack);
+    }
+  }
+
   handleRetry = () => {
     this.setState({ hasError: false, error: undefined });
   };
@@ -34,11 +40,14 @@ export class ErrorBoundary extends Component<Props, State> {
             Algo salió mal
           </Text>
           <Text className="text-[#211f1e]/70 text-center mb-6">
-            {this.state.error?.message || "Error inesperado"}
+            {__DEV__ && this.state.error?.message
+              ? this.state.error.message
+              : "Ocurrió un error inesperado. Intenta de nuevo."}
           </Text>
           <TouchableOpacity
-            className="bg-[#005e66] py-3 px-8 rounded-xl"
+            className="bg-[#007275] py-3 px-8 rounded-xl"
             onPress={this.handleRetry}
+            accessibilityRole="button"
           >
             <Text className="text-white font-bold">Intentar de nuevo</Text>
           </TouchableOpacity>

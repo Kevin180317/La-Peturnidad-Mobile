@@ -30,6 +30,31 @@ describe("followsService", () => {
     expect(calls).toContainEqual({ table: "follows", method: "eq", args: ["following_id", "b"] });
   });
 
+  it("getCounts uses head count queries for both directions", async () => {
+    // El mock no tipa `count`, pero lo propaga al resultado
+    mockTable("follows", { count: 3 } as never, { count: 5 } as never);
+    expect(await followsService.getCounts("u")).toEqual({
+      success: true,
+      data: { followers: 3, following: 5 },
+    });
+    expect(calls).toContainEqual({
+      table: "follows",
+      method: "select",
+      args: ["id", { count: "exact", head: true }],
+    });
+    expect(calls).toContainEqual({ table: "follows", method: "eq", args: ["following_id", "u"] });
+    expect(calls).toContainEqual({ table: "follows", method: "eq", args: ["follower_id", "u"] });
+  });
+
+  it("getCounts surfaces errors with zero counts", async () => {
+    mockTable("follows", { error: { message: "boom" } });
+    expect(await followsService.getCounts("u")).toEqual({
+      success: false,
+      error: "boom",
+      data: { followers: 0, following: 0 },
+    });
+  });
+
   it("getFollowers / getFollowing default to []", async () => {
     mockTable("follows", { data: null });
     expect((await followsService.getFollowers("u")).data).toEqual([]);

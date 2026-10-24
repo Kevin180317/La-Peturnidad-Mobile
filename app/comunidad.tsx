@@ -1,5 +1,6 @@
 import { EmptyState } from "@/components/EmptyState";
 import { announcementsService } from "@/services/announcements.service";
+import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -7,10 +8,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   Image,
   Modal,
   RefreshControl,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -38,6 +39,7 @@ export default function ComunidadScreen() {
   const [posting, setPosting] = useState(false);
   const [titleFocused, setTitleFocused] = useState(false);
   const [contentFocused, setContentFocused] = useState(false);
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
 
   const init = async () => {
     const { data: user } = await supabase.auth.getUser();
@@ -46,7 +48,11 @@ export default function ComunidadScreen() {
       return;
     }
     setUserId(user.user.id);
-    await loadAnnouncements();
+    const [blocked] = await Promise.all([
+      reportsService.getBlockedUsers(user.user.id),
+      loadAnnouncements(),
+    ]);
+    setBlockedIds(blocked.data ?? []);
   };
 
   const loadAnnouncements = useCallback(async () => {
@@ -131,7 +137,7 @@ export default function ComunidadScreen() {
   const categoryColor = (cat: string) => {
     switch (cat) {
       case "aviso": return "bg-gray-100 text-gray-600";
-      case "evento": return "bg-[#005e66]/10 text-[#005e66]";
+      case "evento": return "bg-[#007275]/10 text-[#007275]";
       case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]";
       default: return "bg-gray-100 text-gray-600";
     }
@@ -144,32 +150,37 @@ export default function ComunidadScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const blockedSet = new Set(blockedIds);
+  const visibleAnnouncements = announcements.filter((a) => !blockedSet.has(a.user_id));
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
 
   return (
     <View className="flex-1 bg-[#faf5e0]">
-      <ScrollView
+      <FlatList
+        data={visibleAnnouncements}
+        keyExtractor={(item) => item.id}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerClassName="p-5 pb-10"
-      >
-        <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
-          <TouchableOpacity
-            className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center gap-1"
-            onPress={() => setShowForm(true)}
-          >
-            <Ionicons name="add" size={18} color="white" />
-            <Text className="text-white font-semibold">Nuevo</Text>
-          </TouchableOpacity>
-        </View>
-
-        {announcements.length === 0 ? (
+        ListHeaderComponent={
+          <View className="flex-row items-center justify-between mb-6">
+            <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
+            <TouchableOpacity
+              className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center gap-1"
+              onPress={() => setShowForm(true)}
+            >
+              <Ionicons name="add" size={18} color="white" />
+              <Text className="text-white font-semibold">Nuevo</Text>
+            </TouchableOpacity>
+          </View>
+        }
+        ListEmptyComponent={
           <EmptyState
             icon="chatbubbles-outline"
             title="No hay avisos en la comunidad todavía"
@@ -177,52 +188,51 @@ export default function ComunidadScreen() {
             actionLabel="Publicar aviso"
             onAction={() => setShowForm(true)}
           />
-        ) : (
-          announcements.map((item) => {
-            const isOwner = item.user_id === userId;
-            return (
-              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-                <View className="flex-row items-start gap-3 mb-2">
-                  {item.owner_profile_picture ? (
-                    <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
-                  ) : (
-                    <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
-                      <Text className="text-white font-bold">
-                        {item.owner_name?.[0]?.toUpperCase() || "U"}
-                      </Text>
-                    </View>
-                  )}
-                  <View className="flex-1">
-                    <Text className="font-semibold text-[#211f1e]">{item.owner_name}</Text>
-                    <Text className="text-gray-500 text-xs">
-                      {new Date(item.created_at).toLocaleDateString("es-MX", {
-                        day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-                      })}
+        }
+        renderItem={({ item }) => {
+          const isOwner = item.user_id === userId;
+          return (
+            <View className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
+              <View className="flex-row items-start gap-3 mb-2">
+                {item.owner_profile_picture ? (
+                  <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
+                ) : (
+                  <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center">
+                    <Text className="text-white font-bold">
+                      {item.owner_name?.[0]?.toUpperCase() || "U"}
                     </Text>
                   </View>
-                  {isOwner && (
-                    <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                      <Ionicons name="trash-outline" size={18} color="#d93a3a" />
-                    </TouchableOpacity>
-                  )}
+                )}
+                <View className="flex-1">
+                  <Text className="font-semibold text-[#211f1e]">{item.owner_name}</Text>
+                  <Text className="text-gray-500 text-xs">
+                    {new Date(item.created_at).toLocaleDateString("es-MX", {
+                      day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+                    })}
+                  </Text>
                 </View>
-
-                <View className="mb-2">
-                  <View className={`self-start px-2.5 py-1 rounded-full mb-1 flex-row items-center gap-1 ${categoryColor(item.category)}`}>
-                    <Ionicons name={categoryIcon(item.category)} size={12} />
-                    <Text className="text-xs font-medium">
-                      {categories.find((c) => c.key === item.category)?.label || item.category}
-                    </Text>
-                  </View>
-                  <Text className="font-bold text-lg text-[#211f1e]">{item.title}</Text>
-                </View>
-
-                <Text className="text-gray-600 leading-5">{item.content}</Text>
+                {isOwner && (
+                  <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                    <Ionicons name="trash-outline" size={18} color="#d93a3a" />
+                  </TouchableOpacity>
+                )}
               </View>
-            );
-          })
-        )}
-      </ScrollView>
+
+              <View className="mb-2">
+                <View className={`self-start px-2.5 py-1 rounded-full mb-1 flex-row items-center gap-1 ${categoryColor(item.category)}`}>
+                  <Ionicons name={categoryIcon(item.category)} size={12} />
+                  <Text className="text-xs font-medium">
+                    {categories.find((c) => c.key === item.category)?.label || item.category}
+                  </Text>
+                </View>
+                <Text className="font-bold text-lg text-[#211f1e]">{item.title}</Text>
+              </View>
+
+              <Text className="text-gray-600 leading-5">{item.content}</Text>
+            </View>
+          );
+        }}
+      />
 
       <Modal animationType="slide" transparent visible={showForm} onRequestClose={() => setShowForm(false)}>
         <View className="flex-1 bg-black/50 justify-end">
@@ -240,19 +250,26 @@ export default function ComunidadScreen() {
                 <TouchableOpacity
                   key={cat.key}
                   className={`py-2 px-4 rounded-full border-2 ${
-                    formCategory === cat.key ? "border-[#005e66] bg-[#005e66]" : "border-gray-200 bg-[#faf5e0]"
+                    formCategory === cat.key ? "border-[#007275] bg-[#007275]" : "border-gray-200 bg-[#faf5e0]"
                   }`}
                   onPress={() => setFormCategory(cat.key)}
                 >
-                  <Text className={`font-medium ${formCategory === cat.key ? "text-white" : "text-gray-600"}`}>
-                    {cat.icon} {cat.label}
-                  </Text>
+                  <View className="flex-row items-center gap-1.5">
+                    <Ionicons
+                      name={cat.icon}
+                      size={14}
+                      color={formCategory === cat.key ? "#fff" : "#4B5563"}
+                    />
+                    <Text className={`font-medium ${formCategory === cat.key ? "text-white" : "text-gray-600"}`}>
+                      {cat.label}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
 
             <TextInput
-              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${titleFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
+              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${titleFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Título *"
               placeholderTextColor="#9BA1A6"
               value={formTitle}
@@ -261,7 +278,7 @@ export default function ComunidadScreen() {
               onBlur={() => setTitleFocused(false)}
             />
             <TextInput
-              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${contentFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
+              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${contentFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
               placeholder="Escribe tu mensaje... *"
               placeholderTextColor="#9BA1A6"
               value={formContent}
@@ -275,7 +292,7 @@ export default function ComunidadScreen() {
 
             <View className="flex-row gap-3">
               <TouchableOpacity
-                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#005e66]"}`}
+                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#007275]"}`}
                 onPress={handlePost}
                 disabled={posting}
               >

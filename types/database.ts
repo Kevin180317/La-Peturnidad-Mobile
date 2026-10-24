@@ -187,6 +187,7 @@ export type Database = {
           id: string
           image_url: string | null
           last_seen_location: string | null
+          notified_at: string | null
           pet_id: string | null
           pet_name: string | null
           resolved_at: string | null
@@ -201,6 +202,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           last_seen_location?: string | null
+          notified_at?: string | null
           pet_id?: string | null
           pet_name?: string | null
           resolved_at?: string | null
@@ -215,6 +217,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           last_seen_location?: string | null
+          notified_at?: string | null
           pet_id?: string | null
           pet_name?: string | null
           resolved_at?: string | null
@@ -253,6 +256,7 @@ export type Database = {
           id: string
           image_url: string | null
           note: string | null
+          notified_at: string | null
           pet_id: string | null
           pet_name: string | null
           user_id: string
@@ -264,6 +268,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           note?: string | null
+          notified_at?: string | null
           pet_id?: string | null
           pet_name?: string | null
           user_id: string
@@ -275,6 +280,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           note?: string | null
+          notified_at?: string | null
           pet_id?: string | null
           pet_name?: string | null
           user_id?: string
@@ -628,11 +634,21 @@ export type Database = {
         Returns: string
       }
       delete_group: { Args: { group_id_param: string }; Returns: undefined }
+      is_blocked_between: { Args: { a: string; b: string }; Returns: boolean }
+      is_blocked_in_conversation: {
+        Args: { conv_id: string; uid: string }
+        Returns: boolean
+      }
       is_moderator_or_admin: { Args: never; Returns: boolean }
       is_participant: {
         Args: { conv_id: string; uid: string }
         Returns: boolean
       }
+      join_group_conversation: {
+        Args: { group_id_param: string }
+        Returns: string
+      }
+      register_device_token: { Args: { p_token: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

@@ -15,7 +15,7 @@ class ReportsService {
         .single();
 
       if (error) throw error;
-      return { success: true, data: report };
+      return { success: true, data: report as Report };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -30,7 +30,7 @@ class ReportsService {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return { success: true, data: data || [] };
+      return { success: true, data: (data ?? []) as Report[] };
     } catch (error: any) {
       return { success: false, error: error.message, data: [] };
     }
@@ -44,7 +44,7 @@ class ReportsService {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return { success: true, data: data || [] };
+      return { success: true, data: (data ?? []) as Report[] };
     } catch (error: any) {
       return { success: false, error: error.message, data: [] };
     }
@@ -102,11 +102,12 @@ class ReportsService {
 
   async getBlockedUsers(userId: string): Promise<ServiceResult<string[]>> {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("blocks")
         .select("blocked_id")
         .eq("blocker_id", userId);
 
+      if (error) throw error;
       return { success: true, data: data?.map((b) => b.blocked_id) || [] };
     } catch (error: any) {
       return { success: false, error: error.message, data: [] };

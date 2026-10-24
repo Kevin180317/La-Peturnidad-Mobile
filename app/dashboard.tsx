@@ -9,7 +9,9 @@ import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { TabBar, type TabType } from "@/components/dashboard/TabBar";
 import { FAB } from "@/components/FAB";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import type { PostFormData } from "@/components/PostForm";
 import { announcementsService } from "@/services/announcements.service";
+import { authService } from "@/services/auth.service";
 import { commentsService } from "@/services/comments.service";
 import {
   dashboardService,
@@ -18,8 +20,11 @@ import {
   type MyEmergencyAlert,
   type Pet,
 } from "@/services/dashboard.service";
+import { followsService } from "@/services/follows.service";
 import { messagesService } from "@/services/messages.service";
 import { postsService } from "@/services/posts.service";
+import { reportsService } from "@/services/reports.service";
+import { toLocalDateString } from "@/utils/format";
 import { supabase } from "@/utils/supabase";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -28,9 +33,8 @@ import Toast from "react-native-toast-message";
 
 export default function DashboardScreen() {
   const router = useRouter();
+  // Solo se usan para el deep link (tab / alertId); la identidad sale siempre de la sesión
   const params = useLocalSearchParams();
-  const email = params.email as string;
-  const userId = params.userId as string;
 
   // Estados generales
   const [user, setUser] = useState<any>(null);
@@ -41,6 +45,9 @@ export default function DashboardScreen() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [logoutVisible, setLogoutVisible] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [deleteAccountVisible, setDeleteAccountVisible] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
 
   // Estados para mensajes
   const [conversations, setConversations] = useState<any[]>([]);
@@ -65,13 +72,10 @@ export default function DashboardScreen() {
   // Estados para comunidad
   const [comunidadAnnouncements, setComunidadAnnouncements] = useState<any[]>([]);
   const [loadingComunidad, setLoadingComunidad] = useState(false);
-  const [myAnnouncements, setMyAnnouncements] = useState<any[]>([]);
 
   // Estados para feed
   const [feedPosts, setFeedPosts] = useState<any[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(false);
-  const [myPosts, setMyPosts] = useState<any[]>([]);
-  const [loadingMyPosts, setLoadingMyPosts] = useState(false);
 
   // Estados para comentarios
   const [commentTarget, setCommentTarget] = useState<{ type: string; id: string } | null>(null);
@@ -79,6 +83,8 @@ export default function DashboardScreen() {
   const [loadingComments, setLoadingComments] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
+
+  const isModerator = profile?.role === "moderator" || profile?.role === "admin";
 
   const showToast = useCallback(
     (type: "success" | "error" | "info", text1: string, text2?: string) => {
@@ -94,13 +100,6 @@ export default function DashboardScreen() {
     setLoadingComunidad(false);
   }, []);
 
-  const loadMyAnnouncements = useCallback(async () => {
-    const uid = user?.id;
-    if (!uid) return;
-    const result = await announcementsService.getMyAnnouncements(uid);
-    if (result.success) setMyAnnouncements(result.data ?? []);
-  }, [user?.id]);
-
   const loadFeed = useCallback(async () => {
     if (!user?.id) return;
     setLoadingFeed(true);
@@ -109,55 +108,73 @@ export default function DashboardScreen() {
     setLoadingFeed(false);
   }, [user?.id]);
 
-  const loadMyPosts = useCallback(async () => {
-    const uid = user?.id;
-    if (!uid) return;
-    setLoadingMyPosts(true);
-    const result = await postsService.getMyPosts(uid);
-    if (result.success) setMyPosts(result.data ?? []);
-    setLoadingMyPosts(false);
-  }, [user?.id]);
-
-  const handleCreatePost = async (data: any) => {
+  const handleCreatePost = async (data: PostFormData) => {
     if (!user?.id) return false;
 
-    let uploadedUrls: string[] = [];
+    if (data.type === "announcements") {
+      const r = await announcementsService.create({
+        user_id: user.id,
+        title: data.title ?? "",
+        content: data.content,
+        category: data.category ?? "general",
+      });
+      if (r.success) {
+        showToast("success", "Publicado");
+        await loadComunidad();
+        return true;
+      }
+      showToast("error", "Error", r.error);
+      return false;
+    }
 
-    if (data.image_urls && data.image_urls.length > 0) {
-      try {
-        for (const uri of data.image_urls) {
-          const result = await dashboardService.uploadImage(uri, "posts");
-          if (result.success && result.url) {
-            uploadedUrls.push(result.url);
-          } else {
-            showToast("error", "Error", `No se pudo subir imagen: ${result.error}`);
-          }
-        }
-      } catch (error: any) {
-        showToast("error", "Error", `Error al subir imágenes: ${error.message}`);
+    // Social: la imagen se sube primero; si falla no se crea el post
+    let imageUrl: string | null = null;
+    if (data.image) {
+      const upload = await dashboardService.uploadImage(data.image, "posts");
+      if (!upload.success || !upload.url) {
+        showToast("error", "No se pudo subir la imagen", upload.error);
         return false;
       }
+      imageUrl = upload.url;
     }
 
     const result = await postsService.create({
       user_id: user.id,
-      ...data,
-      image_urls: uploadedUrls.length > 0 ? uploadedUrls : undefined
+      content: data.content,
+      image_url: imageUrl,
     });
 
     if (result.success) {
       await loadFeed();
-      await loadMyPosts();
       return true;
     }
+    // El post no se creó: la imagen ya subida queda huérfana, se borra
+    await dashboardService.removeImageByUrl(imageUrl, "posts");
     showToast("error", "Error", result.error);
     return false;
   };
 
-  const handleDeletePost = async (postId: string) => {
-    const result = await postsService.delete(postId);
-    if (result.success) { await loadFeed(); await loadMyPosts(); }
-    else showToast("error", "Error", result.error);
+  const handleDeletePost = (post: { id: string; image_url?: string | null }) => {
+    Alert.alert(
+      "Eliminar publicación",
+      "¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            const result = await postsService.delete(post.id, post.image_url);
+            if (result.success) {
+              showToast("success", "Publicación eliminada");
+              await loadFeed();
+            } else {
+              showToast("error", "Error", result.error);
+            }
+          },
+        },
+      ],
+    );
   };
 
   const loadComments = async (targetType: string, targetId: string) => {
@@ -196,24 +213,45 @@ export default function DashboardScreen() {
     setSendingComment(false);
   };
 
+  const handleDeleteComment = (commentId: string) => {
+    Alert.alert(
+      "Eliminar comentario",
+      "¿Estás seguro de que quieres eliminar este comentario?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            const result = await commentsService.delete(commentId);
+            if (result.success) {
+              setComments((prev) => prev.filter((c) => c.id !== commentId));
+              await loadFeed();
+            } else {
+              showToast("error", "Error", result.error);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const registerFcmToken = async (Notifications: any) => {
     try {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== "granted") return;
 
       const token = (await Notifications.getDevicePushTokenAsync()).data;
-      await dashboardService.saveFcmToken(user.id, token);
-      console.log("FCM token guardado:", token);
+      await dashboardService.saveFcmToken(token);
     } catch (error) {
       console.error("Error registering FCM token:", error);
     }
   };
 
+  // El skeleton solo se muestra en la carga inicial (loading arranca en true);
+  // las recargas posteriores (refresh, foto de perfil) no desmontan la pantalla
   const loadUserData = async () => {
-    setLoading(true);
-
     try {
-      // Obtener usuario actual
       const {
         data: { user: currentUser },
       } = await supabase.auth.getUser();
@@ -224,19 +262,16 @@ export default function DashboardScreen() {
       }
 
       setUser(currentUser);
-      console.log("Usuario actual:", currentUser.id);
 
-      // Cargar perfil
+      // Siempre el usuario de la sesión: los params de ruta se pueden falsear por deep link
       const profileResult = await dashboardService.getProfileByUserId(
-        userId || currentUser.id,
+        currentUser.id,
       );
 
       if (profileResult.success && profileResult.data) {
-        console.log("Perfil cargado:", profileResult.data);
-
         const [followersRes, followingRes] = await Promise.all([
-          import("@/services/follows.service").then((m) => m.followsService.getFollowers(currentUser.id)),
-          import("@/services/follows.service").then((m) => m.followsService.getFollowing(currentUser.id)),
+          followsService.getFollowers(currentUser.id),
+          followsService.getFollowing(currentUser.id),
         ]);
 
         setProfile({
@@ -245,13 +280,16 @@ export default function DashboardScreen() {
           following_count: followingRes.data?.length ?? 0,
         });
 
-        // Cargar mascotas automáticamente
-        await loadPets(currentUser.id);
-
-        // Cargar mensajes no leídos
-        await loadUnreadCount(currentUser.id);
+        const [, , , , blockedRes] = await Promise.all([
+          loadPets(currentUser.id),
+          loadUnreadCount(currentUser.id),
+          loadMyAlerts(currentUser.id),
+          loadFoundPets(currentUser.id),
+          reportsService.getBlockedUsers(currentUser.id),
+        ]);
+        if (blockedRes.success) setBlockedUserIds(blockedRes.data ?? []);
       } else {
-        console.log("No se encontró perfil");
+        setProfile(null);
       }
     } catch (error) {
       console.error("Error cargando datos:", error);
@@ -289,6 +327,7 @@ export default function DashboardScreen() {
     if (result.success) {
       setConversations((prev) => prev.filter((c) => c.id !== convId));
       showToast("success", "Chat eliminado");
+      await loadUnreadCount(user.id);
     } else {
       showToast("error", "Error", result.error);
     }
@@ -297,10 +336,11 @@ export default function DashboardScreen() {
   // ============== FUNCIONES DE MASCOTAS ==============
 
   const loadPets = async (uid?: string) => {
-    if (!uid && !user?.id) return;
+    const id = uid || user?.id;
+    if (!id) return;
 
     setLoadingPets(true);
-    const result = await dashboardService.getPets(uid || user?.id);
+    const result = await dashboardService.getPets(id);
     if (result.success) {
       setPets(result.data);
     } else {
@@ -316,7 +356,7 @@ export default function DashboardScreen() {
     }
 
     if (!data.image_url) {
-      showToast("error", "Error", "Debes subir una foto de la mascota");
+      showToast("error", "Error", "Agrega una foto de la mascota");
       return false;
     }
 
@@ -370,16 +410,22 @@ export default function DashboardScreen() {
   };
 
   const handleDeletePet = (petId: string) => {
+    const pet = pets.find((p) => p.id === petId);
+    const hasActiveAlert = myAlerts.some(
+      (a) => a.pet_id === petId && a.status === "active",
+    );
     Alert.alert(
       "Eliminar mascota",
-      "¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer.",
+      hasActiveAlert
+        ? "Esta mascota tiene una alerta de emergencia activa: se cerrará y dejará de mostrarse a tus vecinos. ¿Eliminar la mascota? Esta acción no se puede deshacer."
+        : "¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer.",
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Eliminar",
           style: "destructive",
           onPress: async () => {
-            const result = await dashboardService.deletePet(petId);
+            const result = await dashboardService.deletePet(petId, pet?.image_url);
             if (result.success) {
               showToast(
                 "success",
@@ -387,6 +433,10 @@ export default function DashboardScreen() {
                 "La mascota ha sido eliminada",
               );
               await loadPets(user?.id);
+              if (hasActiveAlert) {
+                await loadMyAlerts(user?.id);
+                if (profile?.address) await loadEmergencyAlerts(profile.address);
+              }
             } else {
               showToast("error", "Error", result.error);
             }
@@ -410,11 +460,10 @@ export default function DashboardScreen() {
   };
 
   const loadMyAlerts = async (uid?: string) => {
-    if (!uid && !user?.id) return;
+    const id = uid || user?.id;
+    if (!id) return;
 
-    const result = await dashboardService.getUserEmergencyAlerts(
-      uid || user?.id,
-    );
+    const result = await dashboardService.getUserEmergencyAlerts(id);
     if (result.success) {
       setMyAlerts(result.data);
     } else {
@@ -423,9 +472,10 @@ export default function DashboardScreen() {
   };
 
   const loadFoundPets = async (uid?: string) => {
-    if (!uid && !user?.id) return;
+    const id = uid || user?.id;
+    if (!id) return;
 
-    const result = await dashboardService.getFoundPetsByUser(uid || user?.id);
+    const result = await dashboardService.getFoundPetsByUser(id);
     if (result.success) {
       setFoundPets(result.data);
     } else {
@@ -459,16 +509,16 @@ export default function DashboardScreen() {
               type: pet.type,
               description: `Mascota perdida: ${pet.name}. Color: ${pet.color}, Tamaño: ${pet.size}. ${pet.features || ""}`,
               last_seen_location: profile.address,
-              disappearance_date: new Date().toISOString().split("T")[0],
+              disappearance_date: toLocalDateString(),
               image_url: pet.image_url,
             });
 
             if (result.success) {
-              showToast(
-                "success",
-                "Alerta creada",
-                "Se ha notificado a los vecinos",
-              );
+              if (result.notified) {
+                showToast("success", "Alerta creada", "Se ha notificado a los vecinos");
+              } else {
+                showToast("success", "Alerta publicada", "Tus vecinos la verán en la app");
+              }
               setSelectingPetForAlert(false);
               await loadMyAlerts(user.id);
               if (profile?.address) {
@@ -556,11 +606,16 @@ export default function DashboardScreen() {
               showToast(
                 "success",
                 "¡Gracias!",
-                `El dueño de ${alert.pet_name} fue notificado`,
+                result.notified
+                  ? `El dueño de ${alert.pet_name} fue notificado`
+                  : "Tu aviso quedó registrado para el dueño",
               );
               await loadFoundPets(user.id);
             } else {
-              showToast("error", "Error", result.error);
+              showToast("error", "No se pudo reportar", result.error);
+              if (result.error === "La alerta ya no está activa" && profile?.address) {
+                await loadEmergencyAlerts(profile.address);
+              }
             }
           },
         },
@@ -570,26 +625,27 @@ export default function DashboardScreen() {
 
   // ============== FUNCIONES DE COMUNIDAD ==============
 
-  const handleComPost = async (title: string, content: string, category: string) => {
-    if (!title.trim() || !content.trim()) {
-      showToast("error", "Completa todos los campos");
-      return false;
-    }
-    const r = await announcementsService.create({ user_id: user?.id || "", title, content, category: category as any });
-    if (r.success) {
-      showToast("success", "Publicado");
-      await loadComunidad();
-      await loadMyAnnouncements();
-      return true;
-    }
-    showToast("error", "Error", r.error);
-    return false;
-  };
-
-  const handleComDelete = async (id: string) => {
-    const r = await announcementsService.delete(id);
-    if (r.success) { loadComunidad(); loadMyAnnouncements(); showToast("success", "Eliminado"); }
-    else showToast("error", "Error", r.error);
+  const handleComDelete = (id: string) => {
+    Alert.alert(
+      "Eliminar anuncio",
+      "¿Estás seguro de que quieres eliminar este anuncio? Esta acción no se puede deshacer.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            const r = await announcementsService.delete(id);
+            if (r.success) {
+              showToast("success", "Eliminado");
+              await loadComunidad();
+            } else {
+              showToast("error", "Error", r.error);
+            }
+          },
+        },
+      ],
+    );
   };
 
   // ============== FUNCIONES DE CUENTA ==============
@@ -618,6 +674,24 @@ export default function DashboardScreen() {
       );
     } else {
       showToast("error", "Error", result.error);
+    }
+  };
+
+  const handleDeleteAccountConfirm = async () => {
+    setDeletingAccount(true);
+    const result = await authService.deleteAccount();
+    setDeletingAccount(false);
+    if (result.success) {
+      setDeleteAccountVisible(false);
+      try {
+        await AsyncStorage.removeItem("hasSeenOnboarding");
+      } catch (error) {
+        console.warn("Error borrando onboarding:", error);
+      }
+      router.replace("/");
+      showToast("success", "Cuenta eliminada", "Tus datos fueron borrados");
+    } else {
+      showToast("error", "No se pudo eliminar la cuenta", result.error);
     }
   };
 
@@ -656,11 +730,26 @@ export default function DashboardScreen() {
     setShowMyAlerts(false);
   };
 
+  // Datos de la pestaña Feed (posts, anuncios y emergencias de mi colonia)
+  const loadFeedTabData = async () => {
+    await Promise.all([
+      loadFeed(),
+      loadComunidad(),
+      profile?.address ? loadEmergencyAlerts(profile.address) : Promise.resolve(),
+    ]);
+  };
+
+  const onRefreshFeed = async () => {
+    setRefreshing(true);
+    await loadFeedTabData();
+    setRefreshing(false);
+  };
+
   // Cargar datos iniciales
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
     loadUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al montar
   }, []);
 
   // Registrar token FCM nativo
@@ -678,8 +767,7 @@ export default function DashboardScreen() {
     };
 
     initNotifications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [user?.id]);
 
   // Recargar mensajes no leídos al volver a la pantalla
   useFocusEffect(
@@ -691,13 +779,10 @@ export default function DashboardScreen() {
   useEffect(() => {
     if (activeTab === "feed") {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- recarga al cambiar de pestaña: el setState ocurre tras la consulta async
-      loadFeed();
-      loadMyPosts();
-      loadComunidad();
-      loadMyAnnouncements();
+      loadFeedTabData();
     }
     if (activeTab === "messages") { loadConversations(); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar de pestaña
   }, [activeTab]);
 
   // Deep link de notificaciones: abre Emergencia y muestra la alerta (mía o de un vecino)
@@ -722,23 +807,20 @@ export default function DashboardScreen() {
       }
     };
     open();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reacciona solo a los params del deep link y al fin de la carga
   }, [params.alertId, params.tab, loading, user?.id, profile?.address]);
 
+  // loadUserData ya recarga mascotas, alertas propias, encontradas y no leídos
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadUserData();
-    await loadPets(user?.id);
     if (showAlerts && profile?.address) {
       await loadEmergencyAlerts(profile.address);
     }
-    if (showMyAlerts && user?.id) await loadMyAlerts(user.id);
-    if (showFoundPets && user?.id) await loadFoundPets(user.id);
-    if (user?.id) await loadUnreadCount(user.id);
     if (activeTab === "messages") await loadConversations();
     setRefreshing(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAlerts, showMyAlerts, showFoundPets, profile, user, activeTab]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- las funciones de carga se recrean en cada render
+  }, [showAlerts, profile, user, activeTab]);
 
   if (loading) {
     return <DashboardSkeleton />;
@@ -766,13 +848,12 @@ export default function DashboardScreen() {
         {activeTab === "feed" && (
           <FeedTab
             userId={user?.id}
+            isModerator={isModerator}
+            blockedUserIds={blockedUserIds}
             feedPosts={feedPosts}
-            myPosts={myPosts}
             announcements={comunidadAnnouncements}
-            myAnnouncements={myAnnouncements}
             emergencyAlerts={emergencyAlerts}
             loadingFeed={loadingFeed}
-            loadingMyPosts={loadingMyPosts}
             loadingAnnouncements={loadingComunidad}
             loadingAlerts={loadingAlerts}
             refreshing={refreshing}
@@ -781,19 +862,13 @@ export default function DashboardScreen() {
             commentText={commentText}
             loadingComments={loadingComments}
             sendingComment={sendingComment}
-            onRefresh={onRefresh}
-            onLoadFeed={loadFeed}
-            onLoadMyPosts={loadMyPosts}
-            onLoadAnnouncements={loadComunidad}
-            onLoadAlerts={() => {
-              if (profile?.address) loadEmergencyAlerts(profile.address);
-            }}
+            onRefresh={onRefreshFeed}
             onToggleComments={handleToggleComments}
             onChangeComment={setCommentText}
             onAddComment={handleAddComment}
+            onDeleteComment={handleDeleteComment}
             onCreatePost={handleCreatePost}
             onDeletePost={handleDeletePost}
-            onCreateAnnouncement={handleComPost}
             onDeleteAnnouncement={handleComDelete}
           />
         )}
@@ -842,13 +917,14 @@ export default function DashboardScreen() {
         {activeTab === "profile" && (
           <ProfileTab
             profile={profile}
-            email={email}
+            email={user?.email ?? ""}
             userId={user?.id}
             petsCount={pets.length}
             unreadCount={unreadCount}
             refreshing={refreshing}
             onRefresh={onRefresh}
             onLogout={handleLogout}
+            onDeleteAccount={() => setDeleteAccountVisible(true)}
             onGoComunidad={() => setActiveTab("feed")}
             onProfileUpdated={loadUserData}
           />
@@ -858,7 +934,7 @@ export default function DashboardScreen() {
         <FAB
           icon="add-circle"
           onPress={() => router.push("/buscar")}
-          backgroundColor="#005e66"
+          backgroundColor="#007275"
           color="#fff"
           position="bottom-right"
         />
@@ -873,7 +949,16 @@ export default function DashboardScreen() {
         onConfirm={handleLogoutConfirm}
         onCancel={() => setLogoutVisible(false)}
       />
-      <Toast />
+      <ConfirmModal
+        visible={deleteAccountVisible}
+        title="Eliminar cuenta"
+        message="Se borrarán tu perfil, mascotas, alertas, publicaciones y mensajes. Esta acción no se puede deshacer."
+        confirmLabel="Eliminar cuenta"
+        icon="trash-outline"
+        loading={deletingAccount}
+        onConfirm={handleDeleteAccountConfirm}
+        onCancel={() => setDeleteAccountVisible(false)}
+      />
     </View>
   );
 }

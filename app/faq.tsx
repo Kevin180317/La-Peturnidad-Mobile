@@ -18,7 +18,7 @@ const FAQS = [
   {
     question: "¿Qué tipo de alertas recibo si mi mascota está perdida?",
     answer:
-      "Recibes alertas sobre avistamientos de mascotas que coinciden con la descripción de tu mascota en tu área, así como notificaciones push cuando un vecino marca que la encontró.",
+      "Cuando reportas a tu mascota como perdida, enviamos una notificación push a los vecinos cuya dirección o colonia coincide con el lugar donde la viste por última vez. Además, recibes una notificación cuando un vecino marca que la encontró.",
   },
   {
     question: "¿Cómo puedo reportar a una mascota perdida?",
@@ -29,6 +29,16 @@ const FAQS = [
     question: "¿Qué debo hacer si encuentro a una mascota?",
     answer:
       "Puedes crear un reporte de mascota encontrada desde la pestaña de Emergencia con \"Lo encontré\" para ayudar a conectarla con su dueño. Asegúrate de proporcionar fotos claras y detalles sobre dónde la encontraste.",
+  },
+  {
+    question: "¿Cómo bloqueo o reporto a un usuario?",
+    answer:
+      "Abre el perfil de la persona y toca el menú ⋯ en la parte superior. Ahí puedes reportarla para que nuestro equipo de moderación lo revise, o bloquearla para que ya no pueda enviarte mensajes.",
+  },
+  {
+    question: "¿Cómo elimino mi cuenta?",
+    answer:
+      "Ve a Perfil → Eliminar cuenta y confirma. Se borrarán tu cuenta y tus datos (mascotas, alertas, publicaciones y mensajes) de forma permanente; esta acción no se puede deshacer.",
   },
   {
     question: "¿Hay alguna tarifa para usar Lucky Tracker?",
@@ -72,7 +82,7 @@ export default function FaqScreen() {
               <Ionicons
                 name={open ? "chevron-up" : "chevron-down"}
                 size={20}
-                color="#005e66"
+                color="#007275"
               />
             </View>
             {open && (

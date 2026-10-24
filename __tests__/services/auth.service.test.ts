@@ -1,7 +1,16 @@
-import { authService, EMAIL_CONFIRMATION_REDIRECT_URL } from "@/services/auth.service";
+import {
+  authErrorMessage,
+  authService,
+  EMAIL_CONFIRMATION_REDIRECT_URL,
+  GENERIC_AUTH_ERROR,
+  isRateLimitError,
+  passwordError,
+} from "@/services/auth.service";
 import { resetSupabaseMock, supabaseMock } from "../../test/supabaseMock";
 
 const auth = supabaseMock.auth;
+// El mock compartido no incluye auth.resend; resetSupabaseMock lo reinicia junto al resto.
+auth.resend = jest.fn();
 
 beforeEach(resetSupabaseMock);
 
@@ -37,21 +46,25 @@ describe("authService", () => {
     });
   });
 
-  describe("getCurrentUser", () => {
-    it("returns user", async () => {
-      auth.getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
-      expect(await authService.getCurrentUser()).toEqual({ success: true, user: { id: "u1" } });
+  it("resendConfirmation uses auth.resend with the signup type", async () => {
+    await authService.resendConfirmation(" a@b.com ");
+    expect(auth.resend).toHaveBeenCalledWith({
+      type: "signup",
+      email: "a@b.com",
+      options: { emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL },
     });
+    expect(auth.signUp).not.toHaveBeenCalled();
+  });
 
-    it("returns error message on failure", async () => {
-      auth.getUser.mockResolvedValue({ data: {}, error: new Error("jwt expired") });
-      expect(await authService.getCurrentUser()).toEqual({ success: false, error: "jwt expired" });
-    });
+  it("updatePassword trims the password", async () => {
+    await authService.updatePassword(" newpass ");
+    expect(auth.updateUser).toHaveBeenCalledWith({ password: "newpass" });
   });
 
   describe("signOut", () => {
-    it("succeeds", async () => {
+    it("succeeds with local scope", async () => {
       expect(await authService.signOut()).toEqual({ success: true });
+      expect(auth.signOut).toHaveBeenCalledWith({ scope: "local" });
     });
 
     it("surfaces error", async () => {
@@ -59,28 +72,46 @@ describe("authService", () => {
       expect(await authService.signOut()).toEqual({ success: false, error: "net" });
     });
   });
+});
 
-  describe("isEmailConfirmed", () => {
-    it("true when email_confirmed_at set", async () => {
-      auth.getUser.mockResolvedValue({ data: { user: { email_confirmed_at: "2024-01-01" } } });
-      expect(await authService.isEmailConfirmed()).toBe(true);
-    });
-
-    it("false when unset", async () => {
-      auth.getUser.mockResolvedValue({ data: { user: { email_confirmed_at: null } } });
-      expect(await authService.isEmailConfirmed()).toBe(false);
-    });
-
-    it("false when call throws", async () => {
-      auth.getUser.mockRejectedValue(new Error("boom"));
-      expect(await authService.isEmailConfirmed()).toBe(false);
-    });
+describe("authErrorMessage", () => {
+  it("maps known codes to Spanish", () => {
+    expect(authErrorMessage({ code: "invalid_credentials" })).toBe("Correo o contraseña incorrectos");
+    expect(authErrorMessage({ code: "over_email_send_rate_limit" })).toBe(
+      "Demasiados intentos, espera un momento",
+    );
+    expect(authErrorMessage({ code: "over_request_rate_limit" })).toBe(
+      "Demasiados intentos, espera un momento",
+    );
+    expect(authErrorMessage({ status: 429, message: "Too many" })).toBe(
+      "Demasiados intentos, espera un momento",
+    );
   });
 
-  it("resetPassword passes deep link redirect", async () => {
-    await authService.resetPassword(" a@b.com ");
-    expect(auth.resetPasswordForEmail).toHaveBeenCalledWith("a@b.com", {
-      redirectTo: "lapeturnidad://",
-    });
+  it("falls back to a generic Spanish message", () => {
+    expect(authErrorMessage({ code: "something_new", message: "raw english" })).toBe(GENERIC_AUTH_ERROR);
+    expect(authErrorMessage(null)).toBe(GENERIC_AUTH_ERROR);
+  });
+
+  it("detects rate limit errors", () => {
+    expect(isRateLimitError({ code: "over_email_send_rate_limit" })).toBe(true);
+    expect(isRateLimitError({ code: "otp_disabled" })).toBe(false);
+    expect(isRateLimitError(null)).toBe(false);
+  });
+});
+
+describe("passwordError", () => {
+
+  it("rechaza contraseñas cortas", () => {
+    expect(passwordError("abc123")).toMatch(/al menos 8/);
+  });
+
+  it("exige letras y números", () => {
+    expect(passwordError("abcdefgh")).toMatch(/letras y números/);
+    expect(passwordError("12345678")).toMatch(/letras y números/);
+  });
+
+  it("acepta una contraseña válida", () => {
+    expect(passwordError("lucky2026")).toBeNull();
   });
 });

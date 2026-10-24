@@ -11,7 +11,7 @@ class ProfileService {
         .maybeSingle();
 
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: (data ?? undefined) as UserProfile | undefined };
     } catch (error: any) {
       return { success: false, error: error.message, data: undefined };
     }
@@ -34,7 +34,7 @@ class ProfileService {
         .single();
 
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as UserProfile };
     } catch (error: any) {
       return { success: false, error: error.message };
     }
@@ -45,12 +45,17 @@ class ProfileService {
     profileData: Partial<UserProfile>,
   ): Promise<ServiceResult> {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("user_profiles")
         .update({ ...profileData, updated_at: new Date().toISOString() })
-        .eq("user_id", userId);
+        .eq("user_id", userId)
+        .select("id");
 
       if (error) throw error;
+      // RLS o un perfil inexistente devuelven 0 filas sin error
+      if (!data || data.length === 0) {
+        return { success: false, error: "No se encontró tu perfil" };
+      }
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };

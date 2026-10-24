@@ -12,7 +12,7 @@ export function PasswordInput(props: PasswordInputProps) {
     <View
       className={`flex-row items-center border-2 rounded-lg bg-white ${
         focused
-          ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
+          ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
           : "border-[#211f1e]/20"
       }`}
     >
@@ -20,6 +20,7 @@ export function PasswordInput(props: PasswordInputProps) {
         className="flex-1 p-4 text-base text-[#211f1e]"
         placeholderTextColor="#9BA1A6"
         secureTextEntry={!visible}
+        accessibilityLabel="Contraseña"
         {...props}
         onFocus={(e) => {
           setFocused(true);

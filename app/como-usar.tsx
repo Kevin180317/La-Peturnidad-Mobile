@@ -39,7 +39,7 @@ const STEPS: {
   {
     icon: "person",
     title: "Tu perfil y ajustes",
-    body: "En Perfil consulta tus estadísticas (mascotas, seguidores, siguiendo), edita tus datos, configura tus notificaciones, accede a Mensajes, Grupos y Reuniones Exitosas, y cierra sesión cuando quieras.",
+    body: "En Perfil consulta tus estadísticas (mascotas, seguidores, siguiendo), edita tus datos y tu foto, configura tus notificaciones, accede a Mensajes, Grupos y Reuniones Exitosas, cierra sesión o elimina tu cuenta de forma permanente.",
   },
 ];
 
@@ -63,7 +63,7 @@ export default function ComoUsarScreen() {
           className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] p-5 mb-4 flex-row"
         >
           <View className="items-center mr-4">
-            <View className="w-11 h-11 rounded-full bg-[#005e66] items-center justify-center">
+            <View className="w-11 h-11 rounded-full bg-[#007275] items-center justify-center">
               <Text className="text-white font-bold">
                 {index + 1}
               </Text>
@@ -74,7 +74,7 @@ export default function ComoUsarScreen() {
           </View>
           <View className="flex-1 pb-2">
             <View className="flex-row items-center gap-2 mb-2">
-              <Ionicons name={step.icon} size={18} color="#005e66" />
+              <Ionicons name={step.icon} size={18} color="#007275" />
               <Text className="flex-1 font-bold text-[#211f1e] text-base">
                 {step.title}
               </Text>

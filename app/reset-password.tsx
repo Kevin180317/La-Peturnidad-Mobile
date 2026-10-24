@@ -1,4 +1,4 @@
-import { authService } from "@/services/auth.service";
+import { authErrorMessage, authService, passwordError } from "@/services/auth.service";
 import { PasswordInput } from "@/components/PasswordInput";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -19,7 +19,9 @@ export default function ResetPasswordScreen() {
   const router = useRouter();
 
   const handleUpdate = async () => {
-    if (!password || !confirmPassword) {
+    const trimmedPassword = password.trim();
+
+    if (!trimmedPassword || !confirmPassword.trim()) {
       Toast.show({
         type: "error",
         text1: "Campos requeridos",
@@ -29,7 +31,7 @@ export default function ResetPasswordScreen() {
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (trimmedPassword !== confirmPassword.trim()) {
       Toast.show({
         type: "error",
         text1: "Error de validación",
@@ -39,11 +41,12 @@ export default function ResetPasswordScreen() {
       return;
     }
 
-    if (password.length < 6) {
+    const weakPassword = passwordError(trimmedPassword);
+    if (weakPassword) {
       Toast.show({
         type: "error",
         text1: "Error de validación",
-        text2: "La contraseña debe tener al menos 6 caracteres",
+        text2: weakPassword,
         visibilityTime: 3000,
       });
       return;
@@ -51,13 +54,13 @@ export default function ResetPasswordScreen() {
 
     setLoading(true);
     try {
-      const { error } = await authService.updatePassword(password);
+      const { error } = await authService.updatePassword(trimmedPassword);
 
       if (error) {
         Toast.show({
           type: "error",
           text1: "Error",
-          text2: error.message,
+          text2: authErrorMessage(error),
           visibilityTime: 3000,
         });
         setLoading(false);
@@ -67,17 +70,20 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: "success",
         text1: "Contraseña actualizada",
-        text2: "Ya puedes iniciar sesión con tu nueva contraseña",
+        text2: "Tu nueva contraseña ya está activa",
         visibilityTime: 2000,
         onHide: () => {
+          // La verificación OTP dejó una sesión activa: index decide (dashboard o perfil)
+          // y se limpia el historial de recuperación para que "atrás" no regrese aquí.
+          if (router.canDismiss()) router.dismissAll();
           router.replace("/");
         },
       });
-    } catch (error: any) {
+    } catch {
       Toast.show({
         type: "error",
         text1: "Error inesperado",
-        text2: error.message || "Intenta de nuevo más tarde",
+        text2: "Intenta de nuevo más tarde",
         visibilityTime: 3000,
       });
       setLoading(false);
@@ -93,7 +99,7 @@ export default function ResetPasswordScreen() {
       <View className="flex-1 justify-center p-6">
       {loading ? (
         <View className="items-center">
-          <ActivityIndicator size="large" color="#005e66" />
+          <ActivityIndicator size="large" color="#007275" />
           <Text className="mt-4 text-[#211f1e]">Actualizando...</Text>
         </View>
       ) : (
@@ -116,6 +122,8 @@ export default function ResetPasswordScreen() {
               value={password}
               onChangeText={setPassword}
               autoCapitalize="none"
+              autoComplete="new-password"
+              accessibilityLabel="Nueva contraseña"
             />
           </View>
 
@@ -128,12 +136,15 @@ export default function ResetPasswordScreen() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               autoCapitalize="none"
+              autoComplete="new-password"
+              accessibilityLabel="Confirmar contraseña"
             />
           </View>
 
           <TouchableOpacity
-            className="bg-[#005e66] py-4 rounded-xl mb-4"
+            className="bg-[#007275] py-4 rounded-xl mb-4"
             onPress={handleUpdate}
+            accessibilityRole="button"
           >
             <Text className="text-white text-center font-bold text-lg">
               Actualizar contraseña
@@ -141,7 +152,6 @@ export default function ResetPasswordScreen() {
           </TouchableOpacity>
         </>
       )}
-      <Toast />
       </View>
     </KeyboardAvoidingView>
   );

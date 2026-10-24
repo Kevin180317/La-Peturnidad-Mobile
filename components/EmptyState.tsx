@@ -18,8 +18,8 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <View className="bg-white p-10 rounded-2xl items-center border border-[#211f1e]/10 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-      <View className="w-16 h-16 rounded-full bg-[#005e66]/10 items-center justify-center mb-3">
-        <Ionicons name={icon} size={32} color="#005e66" />
+      <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+        <Ionicons name={icon} size={32} color="#007275" />
       </View>
       <Text className="text-[#211f1e] font-semibold text-center">
         {title}
@@ -31,7 +31,7 @@ export function EmptyState({
       )}
       {actionLabel && onAction && (
         <TouchableOpacity
-            className="bg-[#005e66] py-3 px-6 rounded-xl mt-5"
+            className="bg-[#007275] py-3 px-6 rounded-xl mt-5"
           onPress={onAction}
           activeOpacity={0.8}
         >

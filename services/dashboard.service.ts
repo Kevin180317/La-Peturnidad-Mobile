@@ -1,8 +1,47 @@
 import { supabase } from "@/utils/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import type { Database } from "@/types/database";
 
-const EDGE_FUNCTION_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notification`;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const DEVICE_TOKEN_KEY = "deviceToken";
+
+// Token push de este dispositivo (para borrarlo solo a él al cerrar sesión)
+let currentDeviceToken: string | null = null;
+
+export interface PickedImage {
+  uri: string;
+  mimeType?: string | null;
+  fileSize?: number | null;
+}
+
+const IMAGE_TYPES: Record<string, { ext: string; contentType: string }> = {
+  jpeg: { ext: "jpg", contentType: "image/jpeg" },
+  jpg: { ext: "jpg", contentType: "image/jpeg" },
+  png: { ext: "png", contentType: "image/png" },
+  webp: { ext: "webp", contentType: "image/webp" },
+  gif: { ext: "gif", contentType: "image/gif" },
+};
+
+export function getImageType(asset: PickedImage) {
+  const fromMime = asset.mimeType?.toLowerCase().replace("image/", "");
+  const fromUri = asset.uri.split("?")[0].split(".").pop()?.toLowerCase();
+  return (
+    (fromMime && IMAGE_TYPES[fromMime]) ||
+    (fromUri && IMAGE_TYPES[fromUri]) ||
+    IMAGE_TYPES.jpeg
+  );
+}
+
+// Ruta dentro del bucket a partir de la URL pública (.../object/public/<bucket>/<ruta>)
+export function getStoragePath(url: string | null | undefined, bucket: string) {
+  if (!url) return null;
+  const marker = `/object/public/${bucket}/`;
+  const idx = url.indexOf(marker);
+  if (idx === -1) return null;
+  const path = decodeURIComponent(url.slice(idx + marker.length).split("?")[0]);
+  return path || null;
+}
 
 type UserProfileRow = Database["public"]["Tables"]["user_profiles"]["Row"];
 type PetRow = Database["public"]["Tables"]["pets"]["Row"];
@@ -58,52 +97,6 @@ class DashboardService {
     } catch (error: any) {
       console.error("Error getting profile by user_id:", error);
       return { success: false, error: error.message, data: null };
-    }
-  }
-
-  async getProfileByEmail(email: string) {
-    try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        return { success: false, data: null, error: "Usuario no encontrado" };
-      }
-
-      if (user.email === email) {
-        return this.getProfileByUserId(user.id);
-      }
-
-      return { success: false, data: null };
-    } catch (error: any) {
-      console.error("Error getting profile by email:", error);
-      return { success: false, error: error.message, data: null };
-    }
-  }
-
-  async createProfile(
-    profileData: Omit<UserProfile, "id" | "created_at" | "updated_at">,
-  ) {
-    try {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .insert([
-          {
-            ...profileData,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return { success: true, data };
-    } catch (error: any) {
-      console.error("Error creating profile:", error);
-      return { success: false, error: error.message };
     }
   }
 
@@ -168,11 +161,20 @@ class DashboardService {
     }
   }
 
-  async deletePet(petId: string) {
+  // Cierra las alertas activas de la mascota, la borra y elimina su foto
+  async deletePet(petId: string, imageUrl?: string | null) {
     try {
+      const { error: alertsError } = await supabase
+        .from("emergency_alerts")
+        .update({ status: "resolved", resolved_at: new Date().toISOString() })
+        .eq("pet_id", petId)
+        .eq("status", "active");
+      if (alertsError) throw alertsError;
+
       const { error } = await supabase.from("pets").delete().eq("id", petId);
 
       if (error) throw error;
+      await this.removeImageByUrl(imageUrl, "pet-images");
       return { success: true };
     } catch (error: any) {
       console.error("Error deleting pet:", error);
@@ -203,25 +205,20 @@ class DashboardService {
   // ============== ALERTAS DE EMERGENCIA ==============
 
   // El servidor valida a quien llama y calcula los destinatarios (ver edge function)
-  private async invokePush(payload: Record<string, string>) {
+  // Idempotente por alerta / reporte: el servidor solo envía una vez
+  private async invokePush(payload: Record<string, string>): Promise<boolean> {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const res = await fetch(EDGE_FUNCTION_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(payload),
+      const { error } = await supabase.functions.invoke("send-push-notification", {
+        body: payload,
       });
-
-      if (!res.ok) console.warn("Error push:", await res.text());
+      if (error) {
+        console.warn("Error push:", error.message);
+        return false;
+      }
+      return true;
     } catch (error) {
       console.warn("Error en notificación:", error);
+      return false;
     }
   }
 
@@ -243,9 +240,9 @@ class DashboardService {
         throw error;
       }
 
-      await this.invokePush({ type: "emergency", alertId: data.id });
+      const notified = await this.invokePush({ type: "emergency", alertId: data.id });
 
-      return { success: true, data };
+      return { success: true, data, notified };
     } catch (error: any) {
       console.error("Error creating emergency alert:", error);
       return { success: false, error: error.message };
@@ -390,20 +387,12 @@ class DashboardService {
   // ============== MASCOTAS ENCONTRADAS ==============
 
   // Avisa al dueño de la alerta; es él quien decide cerrarla
+  // Un trigger completa alert_owner_id, pet_id, pet_name e image_url desde la alerta
   async reportFoundPet(alert: EmergencyAlertWithOwner, finderId: string) {
     try {
       const { data, error } = await supabase
         .from("found_pets")
-        .insert([
-          {
-            user_id: finderId,
-            alert_id: alert.id,
-            alert_owner_id: alert.user_id,
-            pet_id: alert.pet_id,
-            pet_name: alert.pet_name,
-            image_url: alert.image_url,
-          },
-        ])
+        .insert([{ user_id: finderId, alert_id: alert.id }])
         .select()
         .single();
 
@@ -411,12 +400,15 @@ class DashboardService {
         if (error.code === "23505") {
           return { success: false, error: "Ya avisaste al dueño de esta mascota" };
         }
+        if (/no est[aá] activa|not active/i.test(error.message ?? "")) {
+          return { success: false, error: "La alerta ya no está activa" };
+        }
         throw error;
       }
 
-      await this.invokePush({ type: "found", foundId: data.id });
+      const notified = await this.invokePush({ type: "found", foundId: data.id });
 
-      return { success: true, data };
+      return { success: true, data, notified };
     } catch (error: any) {
       console.error("Error reporting found pet:", error);
       return { success: false, error: error.message };
@@ -448,94 +440,48 @@ class DashboardService {
     }
   }
 
-  async checkIfPetIsFound(petId: string) {
-    try {
-      const { data, error } = await supabase
-        .from("found_pets")
-        .select("*")
-        .eq("pet_id", petId)
-        .maybeSingle();
-
-      if (error) throw error;
-      return { success: true, isFound: !!data, data };
-    } catch (error: any) {
-      console.error("Error checking if pet is found:", error);
-      return { success: false, error: error.message, isFound: false };
-    }
-  }
-
-  // ============== SUBIDA DE IMÁGENES - VERSIÓN SIMPLIFICADA ==============
+  // ============== IMÁGENES ==============
 
   async uploadImage(
-    uri: string,
+    image: string | PickedImage,
     bucket: string = "pet-images",
   ): Promise<{ success: boolean; url?: string; error?: string }> {
     try {
-      if (!uri) {
+      const asset: PickedImage = typeof image === "string" ? { uri: image } : image;
+      if (!asset.uri) {
         return { success: false, error: "URI de imagen inválida" };
       }
-
-      console.log(`📤 Iniciando carga a bucket: ${bucket}`);
-      console.log(`📸 URI: ${uri}`);
-
-      // Obtener credenciales
-      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-      const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-      if (!supabaseUrl || !supabaseKey) {
-        throw new Error("Credenciales de Supabase no configuradas");
+      if (asset.fileSize && asset.fileSize > MAX_IMAGE_BYTES) {
+        return { success: false, error: "La imagen supera 5 MB" };
       }
 
-      // Generar nombre de archivo
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`; // Siempre .jpg para simplificar
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session) throw new Error("Sesión no válida");
+
+      const { ext, contentType } = getImageType(asset);
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${ext}`;
       const filePath = `${session.user.id}/${fileName}`;
 
-      // Para React Native, necesitamos crear un objeto FormData especial
-      const formData = new FormData();
-
-      // @ts-ignore - necesario para React Native
-      formData.append("file", {
-        uri: uri,
-        type: "image/jpeg", // Forzar image/jpeg
-        name: fileName,
-      });
-
-      console.log(`⬆️ Subiendo a ${bucket}/${fileName}...`);
-
-      const token = session.access_token;
-
-      // Hacer la petición directamente a la API de Storage
-      const response = await fetch(
-        `${supabaseUrl}/storage/v1/object/${bucket}/${filePath}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-            "x-upsert": "true",
-          },
-          body: formData,
-        },
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`❌ Error en respuesta: ${response.status}`, errorText);
-
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      // En RN, fetch(uri).arrayBuffer() lee el archivo local sin pasar por Blob
+      const body = await fetch(asset.uri).then((res) => res.arrayBuffer());
+      if (body.byteLength > MAX_IMAGE_BYTES) {
+        return { success: false, error: "La imagen supera 5 MB" };
       }
 
-      // Construir URL pública
-      const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
-      console.log("✅ Imagen subida correctamente:", publicUrl);
+      const { error } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, body, { contentType, upsert: false });
+      if (error) throw error;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(bucket).getPublicUrl(filePath);
 
       return { success: true, url: publicUrl };
     } catch (error: any) {
-      console.error("❌ Error en uploadImage:", error);
+      console.error("Error en uploadImage:", error);
       return {
         success: false,
         error: `Error al subir imagen: ${error.message || "Desconocido"}`,
@@ -543,9 +489,19 @@ class DashboardService {
     }
   }
 
+  // Borra del bucket la imagen a la que apunta una URL pública (best effort)
+  async removeImageByUrl(url: string | null | undefined, bucket: string) {
+    const path = getStoragePath(url, bucket);
+    if (!path) return;
+    const { error } = await supabase.storage.from(bucket).remove([path]);
+    if (error) console.warn("No se pudo borrar la imagen:", error.message);
+  }
+
   // ============== UTILIDADES ==============
 
-  async selectImage() {
+  async selectImage(): Promise<
+    { success: true; image: PickedImage } | { success: false; error: string }
+  > {
     try {
       const permissionResult =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -564,45 +520,73 @@ class DashboardService {
         quality: 0.8,
       });
 
-      if (result.canceled) {
+      if (result.canceled || !result.assets?.[0]) {
         return { success: false, error: "Selección cancelada" };
       }
 
-      return { success: true, image: result.assets[0] };
+      const asset = result.assets[0];
+      return {
+        success: true,
+        image: {
+          uri: asset.uri,
+          mimeType: asset.mimeType ?? null,
+          fileSize: asset.fileSize ?? null,
+        },
+      };
     } catch (error: any) {
       console.error("Error selecting image:", error);
-      return { success: false, error: error.message };
-    }
-  }
-
-  async getCurrentUser() {
-    try {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-      if (error) throw error;
-      return { success: true, user };
-    } catch (error: any) {
-      console.error("Error getting current user:", error);
-      return { success: false, error: error.message };
+      return { success: false, error: error.message ?? "No se pudo abrir la galería" };
     }
   }
 
   // ============== TOKENS Y AUTENTICACIÓN ==============
 
-  async saveFcmToken(userId: string, token: string) {
-    const { error } = await supabase
-      .from("device_tokens")
-      .upsert({ user_id: userId, token, updated_at: new Date().toISOString() });
+  // Registra el token de ESTE dispositivo para auth.uid() (varios dispositivos por usuario)
+  async saveFcmToken(token: string): Promise<{ success: boolean; error?: string }> {
+    const { error } = await supabase.rpc("register_device_token", {
+      p_token: token,
+    });
 
-    if (error) console.warn("⚠️ No se pudo guardar el token:", error.message);
+    if (error) {
+      console.warn("No se pudo guardar el token:", error.message);
+      return { success: false, error: error.message };
+    }
+    currentDeviceToken = token;
+    try {
+      await AsyncStorage.setItem(DEVICE_TOKEN_KEY, token);
+    } catch {
+      // sin almacenamiento: queda el valor en memoria
+    }
     return { success: true };
   }
 
-  // Al cerrar sesión este dispositivo deja de recibir avisos de esa cuenta
+  // Al cerrar sesión ESTE dispositivo deja de recibir avisos de esa cuenta
   async removeDeviceToken(userId: string) {
-    await supabase.from("device_tokens").delete().eq("user_id", userId);
+    let token = currentDeviceToken;
+    if (!token) {
+      try {
+        token = await AsyncStorage.getItem(DEVICE_TOKEN_KEY);
+      } catch {
+        token = null;
+      }
+    }
+    if (!token) return;
+
+    const { error } = await supabase
+      .from("device_tokens")
+      .delete()
+      .eq("user_id", userId)
+      .eq("token", token);
+    if (error) {
+      console.warn("No se pudo borrar el token:", error.message);
+      return;
+    }
+    currentDeviceToken = null;
+    try {
+      await AsyncStorage.removeItem(DEVICE_TOKEN_KEY);
+    } catch {
+      // ignorar
+    }
   }
 
   async signOut() {

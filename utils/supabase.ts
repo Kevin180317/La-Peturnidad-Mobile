@@ -1,12 +1,18 @@
 // utils/supabase.ts
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
-import { Platform } from "react-native";
+import type { Database } from "@/types/database";
+import { AppState, Platform } from "react-native";
 
 // Configuración adaptada para diferentes plataformas
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || "your-supabase-url";
-const supabaseAnonKey =
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "your-anon-key";
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    "Faltan variables de entorno de Supabase: define EXPO_PUBLIC_SUPABASE_URL y EXPO_PUBLIC_SUPABASE_ANON_KEY (en .env.local o en el perfil de eas.json).",
+  );
+}
 
 // Storage adaptado para web y móvil
 const getStorage = () => {
@@ -37,7 +43,7 @@ const getStorage = () => {
   return AsyncStorage;
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: getStorage(),
     autoRefreshToken: true,
@@ -45,3 +51,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
+
+// En móvil, refrescar el token solo con la app en primer plano (recomendación de Supabase para RN)
+if (Platform.OS !== "web") {
+  AppState.addEventListener("change", (state) => {
+    if (state === "active") {
+      supabase.auth.startAutoRefresh();
+    } else {
+      supabase.auth.stopAutoRefresh();
+    }
+  });
+}

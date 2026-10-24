@@ -53,7 +53,7 @@ export function TabBar({ activeTab, onSelect, unreadCount = 0 }: TabBarProps) {
           transform: [{ translateX: indicatorPosition }],
           width: tabWidth,
           height: 3,
-          backgroundColor: "#005e66",
+          backgroundColor: "#007275",
         }}
         className="absolute top-0"
       />
@@ -79,7 +79,7 @@ export function TabBar({ activeTab, onSelect, unreadCount = 0 }: TabBarProps) {
                 <Ionicons
                   name={isActive ? tab.iconActive : tab.icon}
                   size={24}
-                  color={tab.key === "emergency" ? "#ff7e70" : isActive ? "#005e66" : "#9CA3AF"}
+                  color={tab.key === "emergency" ? "#ff7e70" : isActive ? "#007275" : "#9CA3AF"}
                   style={{ opacity: isActive ? 1 : 0.7 }}
                 />
 
@@ -96,7 +96,7 @@ export function TabBar({ activeTab, onSelect, unreadCount = 0 }: TabBarProps) {
               {/* Label - solo visible cuando activo (Material Design 3 pattern) */}
               {isActive && (
                 <Text
-                  className="text-[#005e66] text-xs font-semibold leading-3"
+                  className="text-[#007275] text-xs font-semibold leading-3"
                   numberOfLines={1}
                 >
                   {tab.label}

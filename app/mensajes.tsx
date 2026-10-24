@@ -104,7 +104,7 @@ export default function MensajesScreen() {
   return (
     <ScrollView
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      contentContainerClassName="p-5 bg-[#faf5e0] flex-1"
+      contentContainerClassName="p-5 bg-[#faf5e0] grow"
     >
       <Text className="text-2xl font-bold text-[#211f1e] mb-6">Mensajes</Text>
 
@@ -125,7 +125,7 @@ export default function MensajesScreen() {
             onLongPress={() => handleDelete(conv.id)}
           >
             {conv.is_group ? (
-              <View className="w-14 h-14 rounded-full bg-[#005e66] items-center justify-center mr-3">
+              <View className="w-14 h-14 rounded-full bg-[#007275] items-center justify-center mr-3">
                 <Ionicons name="people" size={26} color="white" />
               </View>
             ) : conv.other_user_picture ? (
@@ -149,7 +149,7 @@ export default function MensajesScreen() {
               </Text>
             </View>
             {conv.unread_count > 0 && (
-              <View className="bg-[#d93a3a] rounded-full w-6 h-6 items-center justify-center ml-2">
+              <View className="bg-[#ff7e70] rounded-full min-w-6 h-6 px-1.5 items-center justify-center ml-2">
                 <Text className="text-white text-xs font-bold">{conv.unread_count}</Text>
               </View>
             )}

@@ -19,7 +19,6 @@ export default function NotificacionesScreen() {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [lostPetAlerts, setLostPetAlerts] = useState(true);
   const [foundPetAlerts, setFoundPetAlerts] = useState(true);
-  const [communityAnnouncements, setCommunityAnnouncements] = useState(true);
 
   const loadPreferences = async () => {
     const { data: user } = await supabase.auth.getUser();
@@ -30,10 +29,9 @@ export default function NotificacionesScreen() {
 
     const result = await notificationsService.getPreferences(user.user.id);
     if (result.success && result.data) {
-      setPushEnabled(result.data.push_enabled);
-      setLostPetAlerts(result.data.lost_pet_alerts);
-      setFoundPetAlerts(result.data.found_pet_alerts);
-      setCommunityAnnouncements(result.data.community_announcements);
+      setPushEnabled(result.data.push_enabled ?? true);
+      setLostPetAlerts(result.data.lost_pet_alerts ?? true);
+      setFoundPetAlerts(result.data.found_pet_alerts ?? true);
     }
     setLoading(false);
   };
@@ -41,13 +39,16 @@ export default function NotificacionesScreen() {
   const handleSave = async () => {
     setSaving(true);
     const { data: user } = await supabase.auth.getUser();
-    if (!user?.user) return;
+    if (!user?.user) {
+      setSaving(false);
+      router.replace("/");
+      return;
+    }
 
     const result = await notificationsService.update(user.user.id, {
       push_enabled: pushEnabled,
       lost_pet_alerts: lostPetAlerts,
       found_pet_alerts: foundPetAlerts,
-      community_announcements: communityAnnouncements,
     });
 
     if (result.success) {
@@ -68,13 +69,13 @@ export default function NotificacionesScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerClassName="p-5 bg-[#faf5e0] flex-1">
+    <ScrollView contentContainerClassName="p-5 bg-[#faf5e0] grow">
       <Text className="text-2xl font-bold text-[#211f1e] mb-6">
         Configuración de notificaciones
       </Text>
@@ -91,7 +92,7 @@ export default function NotificacionesScreen() {
             <Switch
               value={pushEnabled}
               onValueChange={setPushEnabled}
-              trackColor={{ false: "#ccc", true: "#005e66" }}
+              trackColor={{ false: "#ccc", true: "#007275" }}
               thumbColor={pushEnabled ? "#fff" : "#f4f3f4"}
             />
           </View>
@@ -104,13 +105,13 @@ export default function NotificacionesScreen() {
             <Switch
               value={lostPetAlerts}
               onValueChange={setLostPetAlerts}
-              trackColor={{ false: "#ccc", true: "#005e66" }}
+              trackColor={{ false: "#ccc", true: "#007275" }}
               thumbColor={lostPetAlerts ? "#fff" : "#f4f3f4"}
               disabled={!pushEnabled}
             />
           </View>
 
-          <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
+          <View className="flex-row items-center justify-between py-3">
             <View className="flex-1 mr-4">
               <Text className="font-semibold text-[#211f1e]">Mascotas encontradas</Text>
               <Text className="text-gray-500 text-sm">Cuando alguien encuentre a tu mascota</Text>
@@ -118,22 +119,8 @@ export default function NotificacionesScreen() {
             <Switch
               value={foundPetAlerts}
               onValueChange={setFoundPetAlerts}
-              trackColor={{ false: "#ccc", true: "#005e66" }}
+              trackColor={{ false: "#ccc", true: "#007275" }}
               thumbColor={foundPetAlerts ? "#fff" : "#f4f3f4"}
-              disabled={!pushEnabled}
-            />
-          </View>
-
-          <View className="flex-row items-center justify-between py-3">
-            <View className="flex-1 mr-4">
-              <Text className="font-semibold text-[#211f1e]">Avisos de la comunidad</Text>
-              <Text className="text-gray-500 text-sm">Nuevos avisos y eventos en tu colonia</Text>
-            </View>
-            <Switch
-              value={communityAnnouncements}
-              onValueChange={setCommunityAnnouncements}
-              trackColor={{ false: "#ccc", true: "#005e66" }}
-              thumbColor={communityAnnouncements ? "#fff" : "#f4f3f4"}
               disabled={!pushEnabled}
             />
           </View>
@@ -141,7 +128,7 @@ export default function NotificacionesScreen() {
       </View>
 
       <TouchableOpacity
-        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#005e66]"}`}
+        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#007275]"}`}
         onPress={handleSave}
         disabled={saving}
       >

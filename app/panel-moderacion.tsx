@@ -22,6 +22,36 @@ export default function PanelModeracionScreen() {
   const [userId, setUserId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
+  const fullName = (p?: { first_name: string | null; last_name: string | null }) =>
+    p ? `${p.first_name || ""} ${p.last_name || ""}`.trim() || "Usuario" : "Usuario";
+
+  const loadReports = async () => {
+    const result = await reportsService.getAll();
+    if (!result.success) {
+      Toast.show({ type: "error", text1: "Error", text2: result.error, position: "top" });
+      return;
+    }
+    const list = result.data ?? [];
+    const ids = [...new Set(list.flatMap((r) => [r.target_user_id, r.reporter_id]).filter(Boolean))];
+    const names: Record<string, string> = {};
+    if (ids.length > 0) {
+      const { data: profiles } = await supabase
+        .from("user_profiles")
+        .select("user_id, first_name, last_name")
+        .in("user_id", ids);
+      profiles?.forEach((p) => {
+        names[p.user_id] = fullName(p);
+      });
+    }
+    setReports(
+      list.map((r) => ({
+        ...r,
+        target_name: names[r.target_user_id] || "Usuario",
+        reporter_name: names[r.reporter_id] || "Usuario",
+      })),
+    );
+  };
+
   const init = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
@@ -30,48 +60,23 @@ export default function PanelModeracionScreen() {
       .from("user_profiles")
       .select("role")
       .eq("user_id", user.user.id)
-      .single();
+      .maybeSingle();
 
     if (!profile || (profile.role !== "moderator" && profile.role !== "admin")) {
       Toast.show({ type: "error", text1: "Acceso denegado", text2: "No tienes permisos de moderador", position: "top" });
-      router.back();
+      router.replace("/dashboard");
       return;
     }
 
     setUserId(user.user.id);
     setUserRole(profile.role);
-
-    const result = await reportsService.getAll();
-    if (result.success) {
-      const enriched = await Promise.all(
-        (result.data ?? []).map(async (r) => {
-          const { data: target } = await supabase
-            .from("user_profiles")
-            .select("first_name, last_name")
-            .eq("user_id", r.target_user_id)
-            .single();
-
-          const { data: reporter } = await supabase
-            .from("user_profiles")
-            .select("first_name, last_name")
-            .eq("user_id", r.reporter_id)
-            .single();
-
-          return {
-            ...r,
-            target_name: target ? `${target.first_name || ""} ${target.last_name || ""}`.trim() : "Usuario",
-            reporter_name: reporter ? `${reporter.first_name || ""} ${reporter.last_name || ""}`.trim() : "Usuario",
-          };
-        }),
-      );
-      setReports(enriched);
-    }
+    await loadReports();
     setLoading(false);
   };
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await init();
+    await loadReports();
     setRefreshing(false);
   };
 
@@ -80,7 +85,7 @@ export default function PanelModeracionScreen() {
     const r = await reportsService.updateStatus(reportId, status, userId);
     if (r.success) {
       Toast.show({ type: "success", text1: `Reporte ${status === "dismissed" ? "descartado" : "revisado"}`, position: "top" });
-      await init();
+      await loadReports();
     } else {
       Toast.show({ type: "error", text1: "Error", text2: r.error, position: "top" });
     }
@@ -89,7 +94,7 @@ export default function PanelModeracionScreen() {
   const statusColor = (s: string) => {
     switch (s) {
       case "pending": return "bg-[#e8a93b]/15 text-[#8a5a15]";
-      case "reviewed": return "bg-[#005e66]/10 text-[#005e66]";
+      case "reviewed": return "bg-[#007275]/10 text-[#007275]";
       case "dismissed": return "bg-gray-100 text-gray-500";
       default: return "bg-gray-100 text-gray-500";
     }
@@ -113,7 +118,7 @@ export default function PanelModeracionScreen() {
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
@@ -121,7 +126,7 @@ export default function PanelModeracionScreen() {
   return (
     <ScrollView
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-      contentContainerClassName="p-5 bg-[#faf5e0] flex-1"
+      contentContainerClassName="p-5 bg-[#faf5e0] grow"
     >
       <View className="flex-row items-center justify-between mb-6">
         <Text className="text-2xl font-bold text-[#211f1e]">Panel de moderación</Text>
@@ -153,10 +158,18 @@ export default function PanelModeracionScreen() {
               })}
             </Text>
 
+            <TouchableOpacity
+              className="flex-row items-center justify-center border border-[#007275] py-2 rounded-xl mb-3"
+              onPress={() => router.push(`/perfil/${report.target_user_id}`)}
+            >
+              <Ionicons name="person-circle-outline" size={16} color="#007275" style={{ marginRight: 4 }} />
+              <Text className="text-[#007275] text-sm font-semibold">Ver perfil</Text>
+            </TouchableOpacity>
+
             {report.status === "pending" && (
               <View className="flex-row gap-3">
                 <TouchableOpacity
-                  className="flex-1 bg-[#005e66] py-2 rounded-xl flex-row items-center justify-center"
+                  className="flex-1 bg-[#007275] py-2 rounded-xl flex-row items-center justify-center"
                   onPress={() => handleReview(report.id, "reviewed")}
                 >
                   <Ionicons name="checkmark-circle" size={16} color="white" style={{ marginRight: 4 }} />
