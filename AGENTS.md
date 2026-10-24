@@ -91,6 +91,7 @@
 - `npx tsc` no resuelve el compilador en esta máquina: usar `bun run typecheck` o `node node_modules/typescript/bin/tsc --noEmit`
 - `types/database.ts` regenerado el 2026-10-24 (RPC nuevas y columnas `notified_at`); sin casts en `saveFcmToken` ni `getGroupChat`
 - Cliente tipado: `createClient<Database>` en `utils/supabase.ts`; `types/index.ts` ahora DERIVA de `Tables<>` (no duplicar columnas a mano). Al cambiar el esquema: aplicar migración → regenerar `types/database.ts` (MCP `generate_typescript_types`) → `bun run typecheck` para ver qué rompe. Las uniones de texto (`role`, `status`, `category`, `target_type`) se estrechan con `Override<>` en `types/index.ts` y con `as` en el servicio
+- Íconos (2026-10-24): `icon.png`, `adaptive-icon.png`, `splash-icon.png` y `favicon.png` generados desde `Isotipo_color_Salmon.png` (hexágono salmón sobre crema `#faf5e0`; antes eran los de la plantilla de Expo). `app.json`: fondo del ícono adaptable y del splash en `#faf5e0`. Para la ficha de Play Store: `assets/store/play-store-icon-512.png` (se sube en Play Console, no va en el build). Requieren build nuevo para verse. Para regenerarlos: script de PowerShell con System.Drawing (centra el isotipo; adaptable al 620/1024 para respetar la zona segura de Android)
 - Pendiente: generar build nuevo (los tokens push cambiaron de esquema)
 
 ### Legal (páginas web) — REVISIÓN PENDIENTE
