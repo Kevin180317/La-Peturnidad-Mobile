@@ -28,6 +28,9 @@ interface FeedTabProps {
   /** usuarios que bloqueé: su contenido no se muestra */
   blockedUserIds?: string[];
   feedPosts: any[];
+  /** scroll infinito de posts */
+  loadingMoreFeed?: boolean;
+  onLoadMoreFeed?: () => void;
   announcements?: any[];
   emergencyAlerts?: any[];
   loadingFeed: boolean;
@@ -55,6 +58,8 @@ export function FeedTab({
   isModerator = false,
   blockedUserIds = [],
   feedPosts,
+  loadingMoreFeed = false,
+  onLoadMoreFeed,
   announcements = [],
   emergencyAlerts = [],
   loadingFeed,
@@ -117,6 +122,13 @@ export function FeedTab({
         />
       }
       contentContainerClassName="p-5 pb-10"
+      testID="feed-scroll"
+      scrollEventThrottle={200}
+      onScroll={({ nativeEvent: { layoutMeasurement, contentOffset, contentSize } }) => {
+        if (mainTab === "social" && layoutMeasurement.height + contentOffset.y >= contentSize.height - 400) {
+          onLoadMoreFeed?.();
+        }
+      }}
     >
       <View className="flex-row items-center justify-between mb-4">
         <Text className="text-2xl font-bold text-[#211f1e]">Feed</Text>
@@ -254,7 +266,7 @@ export function FeedTab({
                       </TouchableOpacity>
                     )}
                     {(isMine || isModerator) && (
-                      <TouchableOpacity onPress={() => onDeleteAnnouncement(item.id)}>
+                      <TouchableOpacity onPress={() => onDeleteAnnouncement(item.id)} accessibilityLabel="Eliminar anuncio">
                         <Ionicons name="trash-outline" size={18} color="#ef4444" />
                       </TouchableOpacity>
                     )}
@@ -333,7 +345,7 @@ export function FeedTab({
                     </TouchableOpacity>
                   )}
                   {(isMine || isModerator) && (
-                    <TouchableOpacity onPress={() => onDeletePost(post)}>
+                    <TouchableOpacity onPress={() => onDeletePost(post)} accessibilityLabel="Eliminar publicación">
                       <Ionicons name="trash-outline" size={18} color="#ef4444" />
                     </TouchableOpacity>
                   )}
@@ -438,6 +450,7 @@ export function FeedTab({
           )}
         </>
       )}
+      {mainTab === "social" && loadingMoreFeed && <ActivityIndicator className="mt-4" color="#007275" />}
     </ScrollView>
   );
 }

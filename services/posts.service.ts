@@ -2,6 +2,8 @@ import { type PostWithOwner, type ServiceResult } from "@/types";
 import { dashboardService } from "@/services/dashboard.service";
 import { supabase } from "@/utils/supabase";
 
+export const FEED_PAGE_SIZE = 20;
+
 class PostsService {
   async getFeed(userId: string): Promise<ServiceResult<PostWithOwner[]>> {
     try {
@@ -73,13 +75,12 @@ class PostsService {
     }
   }
 
-  async getAllPosts(): Promise<ServiceResult<PostWithOwner[]>> {
+  // Paginación por cursor: pasa el created_at del último post cargado para pedir la página siguiente
+  async getAllPosts(before?: string | null, limit = FEED_PAGE_SIZE): Promise<ServiceResult<PostWithOwner[]>> {
     try {
-      const { data: posts, error } = await supabase
-        .from("posts")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50);
+      let query = supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(limit);
+      if (before) query = query.lt("created_at", before);
+      const { data: posts, error } = await query;
 
       if (error) throw error;
 

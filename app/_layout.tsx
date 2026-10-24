@@ -195,6 +195,14 @@ export default function RootLayout() {
         options={{ title: "Editar perfil" }}
       />
       <Stack.Screen
+        name="bandeja"
+        options={{ title: "Notificaciones" }}
+      />
+      <Stack.Screen
+        name="seguridad"
+        options={{ title: "Cuenta y seguridad" }}
+      />
+      <Stack.Screen
         name="grupos"
         options={{ title: "Grupos" }}
       />

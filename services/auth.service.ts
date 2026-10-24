@@ -113,6 +113,11 @@ class AuthService {
     });
   }
 
+  // Envía un enlace de confirmación al correo nuevo; el correo actual sigue vigente hasta confirmarlo
+  async changeEmail(email: string) {
+    return supabase.auth.updateUser({ email: email.trim() }, { emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL });
+  }
+
   async updatePassword(password: string) {
     return supabase.auth.updateUser({ password: password.trim() });
   }

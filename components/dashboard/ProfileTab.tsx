@@ -20,6 +20,7 @@ interface ProfileTabProps {
   userId: string;
   petsCount: number;
   unreadCount: number;
+  notificationsUnread: number;
   refreshing: boolean;
   onRefresh: () => void;
   onLogout: () => void;
@@ -34,6 +35,7 @@ export function ProfileTab({
   userId,
   petsCount,
   unreadCount,
+  notificationsUnread,
   refreshing,
   onRefresh,
   onLogout,
@@ -131,6 +133,14 @@ export function ProfileTab({
           badge: unreadCount,
         },
         {
+          icon: "notifications-outline",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
+          label: "Notificaciones",
+          onPress: () => router.push("/bandeja"),
+          badge: notificationsUnread,
+        },
+        {
           icon: "chatbubbles-outline",
           color: "#007275",
           bg: "bg-[#007275]/10",
@@ -169,10 +179,17 @@ export function ProfileTab({
           onPress: () => router.push("/editar-perfil"),
         },
         {
+          icon: "lock-closed-outline",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
+          label: "Cuenta y seguridad",
+          onPress: () => router.push("/seguridad"),
+        },
+        {
           icon: "notifications-outline",
           color: "#007275",
           bg: "bg-[#007275]/10",
-          label: "Notificaciones",
+          label: "Preferencias de notificaciones",
           onPress: () => router.push("/notificaciones"),
         },
       ],

@@ -275,6 +275,8 @@ export default function ConversationScreen() {
           className={`w-12 h-12 rounded-full items-center justify-center ${sending || !input.trim() ? "bg-gray-300" : "bg-[#007275]"}`}
           onPress={handleSend}
           disabled={sending || !input.trim()}
+          accessibilityRole="button"
+          accessibilityLabel="Enviar mensaje"
         >
           {sending ? (
             <ActivityIndicator size="small" color="#fff" />

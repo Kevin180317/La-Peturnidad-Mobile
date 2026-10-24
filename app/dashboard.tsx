@@ -22,7 +22,8 @@ import {
 } from "@/services/dashboard.service";
 import { followsService } from "@/services/follows.service";
 import { messagesService } from "@/services/messages.service";
-import { postsService } from "@/services/posts.service";
+import { notificationsService } from "@/services/notifications.service";
+import { FEED_PAGE_SIZE, postsService } from "@/services/posts.service";
 import { reportsService } from "@/services/reports.service";
 import { toLocalDateString } from "@/utils/format";
 import { supabase } from "@/utils/supabase";
@@ -43,6 +44,7 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationsUnread, setNotificationsUnread] = useState(0);
   const [logoutVisible, setLogoutVisible] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [deleteAccountVisible, setDeleteAccountVisible] = useState(false);
@@ -76,6 +78,9 @@ export default function DashboardScreen() {
   // Estados para feed
   const [feedPosts, setFeedPosts] = useState<any[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(false);
+  const [feedHasMore, setFeedHasMore] = useState(false);
+  const [loadingMoreFeed, setLoadingMoreFeed] = useState(false);
+  const loadingMoreFeedRef = useRef(false);
 
   // Estados para comentarios
   const [commentTarget, setCommentTarget] = useState<{ type: string; id: string } | null>(null);
@@ -104,9 +109,28 @@ export default function DashboardScreen() {
     if (!user?.id) return;
     setLoadingFeed(true);
     const result = await postsService.getAllPosts();
-    if (result.success) setFeedPosts(result.data ?? []);
+    if (result.success) {
+      setFeedPosts(result.data ?? []);
+      setFeedHasMore((result.data?.length ?? 0) >= FEED_PAGE_SIZE);
+    }
     setLoadingFeed(false);
   }, [user?.id]);
+
+  // Siguiente página del feed (scroll infinito); la ref evita pedir la misma página dos veces seguidas
+  const loadMoreFeed = async () => {
+    const last = feedPosts[feedPosts.length - 1];
+    if (!feedHasMore || loadingMoreFeedRef.current || !last) return;
+    loadingMoreFeedRef.current = true;
+    setLoadingMoreFeed(true);
+    const result = await postsService.getAllPosts(last.created_at);
+    if (result.success) {
+      const page = result.data ?? [];
+      setFeedPosts((current) => [...current, ...page.filter((p) => !current.some((c) => c.id === p.id))]);
+      setFeedHasMore(page.length >= FEED_PAGE_SIZE);
+    }
+    setLoadingMoreFeed(false);
+    loadingMoreFeedRef.current = false;
+  };
 
   const handleCreatePost = async (data: PostFormData) => {
     if (!user?.id) return false;
@@ -280,9 +304,10 @@ export default function DashboardScreen() {
           following_count: followingRes.data?.length ?? 0,
         });
 
-        const [, , , , blockedRes] = await Promise.all([
+        const [, , , , , blockedRes] = await Promise.all([
           loadPets(currentUser.id),
           loadUnreadCount(currentUser.id),
+          loadNotificationsUnread(currentUser.id),
           loadMyAlerts(currentUser.id),
           loadFoundPets(currentUser.id),
           reportsService.getBlockedUsers(currentUser.id),
@@ -306,6 +331,10 @@ export default function DashboardScreen() {
       setUnreadCount(totalUnread);
       setConversations(result.data ?? []);
     }
+  };
+
+  const loadNotificationsUnread = async (uid: string) => {
+    setNotificationsUnread(await notificationsService.getUnreadCount(uid));
   };
 
   const loadConversations = useCallback(async () => {
@@ -772,7 +801,10 @@ export default function DashboardScreen() {
   // Recargar mensajes no leídos al volver a la pantalla
   useFocusEffect(
     useCallback(() => {
-      if (user?.id) loadUnreadCount(user.id);
+      if (user?.id) {
+        loadUnreadCount(user.id);
+        loadNotificationsUnread(user.id);
+      }
     }, [user?.id]),
   );
 
@@ -854,6 +886,8 @@ export default function DashboardScreen() {
             announcements={comunidadAnnouncements}
             emergencyAlerts={emergencyAlerts}
             loadingFeed={loadingFeed}
+            loadingMoreFeed={loadingMoreFeed}
+            onLoadMoreFeed={loadMoreFeed}
             loadingAnnouncements={loadingComunidad}
             loadingAlerts={loadingAlerts}
             refreshing={refreshing}
@@ -921,6 +955,7 @@ export default function DashboardScreen() {
             userId={user?.id}
             petsCount={pets.length}
             unreadCount={unreadCount}
+            notificationsUnread={notificationsUnread}
             refreshing={refreshing}
             onRefresh={onRefresh}
             onLogout={handleLogout}

@@ -61,6 +61,14 @@ describe("authService", () => {
     expect(auth.updateUser).toHaveBeenCalledWith({ password: "newpass" });
   });
 
+  it("changeEmail trims the address and sends the redirect url", async () => {
+    await authService.changeEmail(" nuevo@correo.com ");
+    expect(auth.updateUser).toHaveBeenCalledWith(
+      { email: "nuevo@correo.com" },
+      { emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL },
+    );
+  });
+
   describe("signOut", () => {
     it("succeeds with local scope", async () => {
       expect(await authService.signOut()).toEqual({ success: true });

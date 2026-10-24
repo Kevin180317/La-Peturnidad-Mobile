@@ -164,6 +164,7 @@ const escapeLike = (v: string) => v.replace(/[\\%_]/g, (c) => `\\${c}`);
 const FCM_BATCH_SIZE = 100;
 
 interface Message {
+  recipients: string[];
   tokens: string[];
   title: string;
   body: string;
@@ -241,8 +242,10 @@ Deno.serve(async (req) => {
           .map((p) => p.user_id);
       }
 
-      const tokens = await tokensFor(supabase, neighborIds, "lost_pet_alerts");
+      const recipients = await allowedUsers(supabase, neighborIds, "lost_pet_alerts");
+      const tokens = await tokensFor(supabase, recipients);
       message = {
+        recipients,
         tokens,
         title: `⚠️ ${ownerName} reportó a ${alert.pet_name} perdida`,
         body: `Vista por última vez en ${location || "tu colonia"}.`,
@@ -294,8 +297,10 @@ Deno.serve(async (req) => {
         ? `${finder.first_name ?? ""} ${finder.last_name ?? ""}`.trim() || "Un vecino"
         : "Un vecino";
 
-      const tokens = await tokensFor(supabase, [alert.user_id], "found_pet_alerts");
+      const recipients = await allowedUsers(supabase, [alert.user_id], "found_pet_alerts");
+      const tokens = await tokensFor(supabase, recipients);
       message = {
+        recipients,
         tokens,
         title: `🐾 ${finderName} dice que encontró a ${alert.pet_name ?? "tu mascota"}`,
         body: "Abre la app para ver sus datos de contacto.",
@@ -311,7 +316,17 @@ Deno.serve(async (req) => {
       return respond({ error: "Tipo no soportado" }, 400);
     }
 
-    if (message.tokens.length === 0) return respond({ succeeded: 0, failed: 0 });
+    const msg = message;
+
+    // Bandeja dentro de la app: se guarda aunque el usuario no tenga token (el reclamo atómico evita duplicados)
+    if (msg.recipients.length > 0) {
+      const { error: inboxError } = await supabase.from("notifications").insert(
+        msg.recipients.map((user_id) => ({ user_id, title: msg.title, body: msg.body, data: msg.data })),
+      );
+      if (inboxError) console.error("inbox insert:", inboxError.message);
+    }
+
+    if (msg.tokens.length === 0) return respond({ succeeded: 0, failed: 0 });
 
     const serviceAccountRaw = Deno.env.get("FCM_SERVICE_ACCOUNT");
     if (!serviceAccountRaw) {
@@ -325,7 +340,6 @@ Deno.serve(async (req) => {
     }
 
     const accessToken = await getAccessToken(sa.client_email, sa.private_key);
-    const msg = message;
 
     // Lotes secuenciales; dentro de cada lote, envíos en paralelo
     const results: FcmResult[] = [];
@@ -363,8 +377,8 @@ Deno.serve(async (req) => {
   }
 });
 
-// Tokens de los usuarios que no desactivaron push ni este tipo de aviso
-async function tokensFor(
+// Usuarios que no desactivaron push ni este tipo de aviso (aplica a push y a la bandeja)
+async function allowedUsers(
   supabase: ReturnType<typeof createClient>,
   userIds: string[],
   pref: "lost_pet_alerts" | "found_pet_alerts",
@@ -377,11 +391,11 @@ async function tokensFor(
   const muted = new Set(
     (prefs ?? []).filter((p) => p.push_enabled === false || p[pref] === false).map((p) => p.user_id),
   );
-  const allowed = userIds.filter((id) => !muted.has(id));
-  if (allowed.length === 0) return [];
-  const { data: rows } = await supabase
-    .from("device_tokens")
-    .select("token")
-    .in("user_id", allowed);
+  return userIds.filter((id) => !muted.has(id));
+}
+
+async function tokensFor(supabase: ReturnType<typeof createClient>, userIds: string[]): Promise<string[]> {
+  if (userIds.length === 0) return [];
+  const { data: rows } = await supabase.from("device_tokens").select("token").in("user_id", userIds);
   return [...new Set((rows ?? []).map((r) => r.token).filter(Boolean))];
 }
