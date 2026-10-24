@@ -129,6 +129,17 @@ Se aplicaron el 2026-10-24 a petición del usuario y se decidió dejarlos. No ca
 - Vecinos con espacios al inicio/fin en `address` no reciben la alerta de mascota perdida.
 - Guardar la fecha de aceptación de términos en el perfil (hoy solo se valida el checkbox al registrarse).
 
+### Pendientes por integrar (detectados 2026-10-24; ninguno bloquea QA)
+Orden sugerido por costo/beneficio. Tokens = estimado aproximado.
+1. **Límites de creación** (~20-30k, sin build): triggers en Supabase que limiten posts, mensajes, comentarios y alertas por usuario y ventana de tiempo (migración + mapear el error a un mensaje legible en la app). Cierra el riesgo de spam en el feed
+2. **Cambio de contraseña y correo con sesión iniciada** (~25-35k, sin build): pantalla nueva en Perfil + servicio; contraseña con `passwordError` (8+, letras y números); el correo requiere confirmación
+3. **Paginación del feed** (~30-50k, sin build): `.range()` en `posts.service.ts` y scroll infinito en `FeedTab` (hoy usa `ScrollView` + `.map`; pasar a `FlatList`). Es lo más delicado de tocar
+4. **Bandeja de notificaciones** (~40-60k): hoy solo existen las preferencias; la tabla `notifications` no se usa y no tiene política de INSERT. Hace falta que `send-push-notification` escriba en ella (service role), pantalla nueva, contador de no leídas y marcar como leídas
+5. **Tests** (~60-100k): dashboard, push (edge function) y chat; son pantallas pesadas que requieren muchos mocks
+- Total estimado: ~175-300k tokens
+- Antes de producción también (no son código de la app): SMTP propio en Supabase (el correo por defecto tiene límite bajo por hora), plan Pro o respaldos manuales (el free pausa el proyecto tras ~7 días sin actividad y no tiene respaldos), reporte de caídas (Sentry), fichas de Play Console y pruebas en teléfono real
+- Ver también: "Plan de avatares" y "Cambios OPCIONALES de mantenimiento" más abajo
+
 ### Edge Functions
 - `send-push-notification` (v5) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS
 ### SDK 58 (actualizado desde SDK 54)
@@ -140,6 +151,15 @@ Se aplicaron el 2026-10-24 a petición del usuario y se decidió dejarlos. No ca
 - Build de desarrollo: `eas build --profile development --platform android`; el APK de SDK 54 no sirve con SDK 58
 
 ### Consideraciones futuras
+
+#### Plan de avatares (decidido 2026-10-24: hacerlo DESPUÉS de QA / lanzamiento)
+- No bloquea Play Store ni QA. Un cambio nativo obligaría a otro build en pleno QA; por eso se pospone.
+- Opción 1 (recomendada, JS puro, sin build): componente `components/Avatar.tsx` con iniciales sobre círculo de color de la paleta (teal/coral/dark), color determinista por `user_id`. Props: `uri`, `name`, `size`. Usa `uri` si hay foto; si no, iniciales. Recordar el `@source "../components"` (ver Uniwind scanning)
+- Opción 2 (`blobatar`, requiere build nuevo): ver sección siguiente
+- Dónde reemplazar la imagen por defecto (~8 sitios): `ProfileTab`, `FeedTab`, `comunidad`, `mensajes`, `mensajes/[id]`, `buscar`, `seguidores`, `perfil/[id]`, miembros en `grupos/[id]`
+- ProfileTab hoy usa una imagen remota (gstatic) como foto por defecto: sustituirla por `Avatar`
+- Verificar al terminar: `bun run typecheck`, `bun run lint`, `npx jest`; revisar en teléfono la fluidez de las listas largas
+- Estimado: ~40 mil tokens (iniciales) / ~80 mil (blobatar)
 
 #### Avatares con `blobatar` (no implementado)
 - Paquete `blobatar` (npm, MIT, v2.7.0): avatares geométricos deterministas a partir de un string (p. ej. email). Para RN: `@blobatar/react-native`
