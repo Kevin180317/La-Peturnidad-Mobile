@@ -1,0 +1,3 @@
+# Run all flows:  maestro test .maestro   (credentials: -e TEST_EMAIL=... -e TEST_PASSWORD=...)
+flows:
+  - flows/*.yaml

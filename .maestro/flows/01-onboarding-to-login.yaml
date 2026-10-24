@@ -1,0 +1,10 @@
+appId: com.idarko.lapeturnidad
+name: Onboarding skip leads to login
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Saltar"
+- tapOn: "Saltar"
+- assertVisible: "Inicia sesión para continuar"
+- assertVisible:
+    id: "login-submit"

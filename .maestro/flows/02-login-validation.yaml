@@ -1,0 +1,9 @@
+appId: com.idarko.lapeturnidad
+name: Login rejects empty form
+---
+- launchApp:
+    clearState: true
+- tapOn: "Saltar"
+- tapOn:
+    id: "login-submit"
+- assertVisible: "Campos requeridos"

@@ -201,6 +201,7 @@ export default function LoginScreen() {
             className="bg-[#005e66] py-4 rounded-xl mb-4"
             onPress={handleLogin}
             disabled={loading}
+            testID="login-submit"
           >
             <Text className="text-white text-center font-bold text-lg">
               Iniciar sesión

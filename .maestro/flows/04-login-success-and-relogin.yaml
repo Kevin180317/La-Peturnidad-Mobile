@@ -1,0 +1,30 @@
+appId: com.idarko.lapeturnidad
+name: Login, reach dashboard, auto-login after relaunch
+env:
+  TEST_EMAIL: ${TEST_EMAIL}
+  TEST_PASSWORD: ${TEST_PASSWORD}
+---
+- launchApp:
+    clearState: true
+- tapOn: "Saltar"
+- tapOn: "ejemplo@correo.com"
+- inputText: ${TEST_EMAIL}
+- tapOn: "••••••••"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "login-submit"
+# Fresh test accounts have no profile yet: bootstrap one.
+- runFlow:
+    when:
+      visible: "Completa tu perfil"
+    file: ../subflows/complete-profile.yaml
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 20000
+- assertVisible: "Emergencia"
+# Session persists: relaunch without clearing state lands on dashboard.
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 20000

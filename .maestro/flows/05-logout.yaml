@@ -1,0 +1,21 @@
+appId: com.idarko.lapeturnidad
+name: Logout confirm modal returns to onboarding then login
+env:
+  TEST_EMAIL: ${TEST_EMAIL}
+  TEST_PASSWORD: ${TEST_PASSWORD}
+---
+- runFlow: 04-login-success-and-relogin.yaml
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Cerrar Sesión"
+- tapOn: "Cerrar Sesión"
+# Modal title + confirm button share the label "Cerrar sesión"; confirm is the second match.
+- tapOn:
+    text: "Cerrar sesión"
+    index: 1
+# Logout clears hasSeenOnboarding, so the app returns to onboarding.
+- extendedWaitUntil:
+    visible: "Saltar"
+    timeout: 10000
+- tapOn: "Saltar"
+- assertVisible: "Inicia sesión para continuar"

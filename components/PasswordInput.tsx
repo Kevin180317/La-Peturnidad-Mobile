@@ -34,6 +34,8 @@ export function PasswordInput(props: PasswordInputProps) {
         onPress={() => setVisible(!visible)}
         className="px-4 py-4"
         hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
       >
         <Ionicons name={visible ? "eye-off" : "eye"} size={22} color="#6b7280" />
       </TouchableOpacity>
