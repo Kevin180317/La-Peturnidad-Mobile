@@ -21,12 +21,6 @@ export default function NotificacionesScreen() {
   const [foundPetAlerts, setFoundPetAlerts] = useState(true);
   const [communityAnnouncements, setCommunityAnnouncements] = useState(true);
 
-  // loadPreferences corre una sola vez al montar (deps estables intencionales)
-  useEffect(() => {
-    loadPreferences();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const loadPreferences = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) {
@@ -63,6 +57,13 @@ export default function NotificacionesScreen() {
     }
     setSaving(false);
   };
+
+  // loadPreferences corre una sola vez al montar (deps estables intencionales)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    loadPreferences();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (

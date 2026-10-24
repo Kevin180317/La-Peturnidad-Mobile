@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Animated, Dimensions, Text, TouchableOpacity, View } from "react-native";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 export type TabType = "home" | "feed" | "emergency" | "messages" | "profile";
 
@@ -30,7 +30,7 @@ export function TabBar({ activeTab, onSelect, unreadCount = 0 }: TabBarProps) {
   const tabWidth = screenWidth / TABS.length;
 
   // Animación para el indicador
-  const indicatorPosition = useRef(new Animated.Value(0)).current;
+  const [indicatorPosition] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     const activeIndex = TABS.findIndex(t => t.key === activeTab);
@@ -40,7 +40,7 @@ export function TabBar({ activeTab, onSelect, unreadCount = 0 }: TabBarProps) {
       speed: 10,
       bounciness: 5,
     }).start();
-  }, [activeTab, tabWidth]);
+  }, [activeTab, tabWidth, indicatorPosition]);
 
   return (
     <View

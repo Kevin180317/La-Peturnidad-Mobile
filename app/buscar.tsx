@@ -51,19 +51,6 @@ export default function BuscarScreen() {
     });
   }, [router]);
 
-  // Búsqueda con debounce de 300ms (primer render no dispara búsqueda)
-  useEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false;
-      return;
-    }
-    const timer = setTimeout(() => {
-      performSearch();
-    }, 300);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, activeTab]);
-
   const performSearch = async () => {
     const q = query.trim();
     if (!q) {
@@ -182,6 +169,19 @@ export default function BuscarScreen() {
       : activeTab === "groups"
         ? groups.length === 0
         : users.length === 0);
+
+  // Búsqueda con debounce de 300ms (primer render no dispara búsqueda)
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
+    const timer = setTimeout(() => {
+      performSearch();
+    }, 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, activeTab]);
 
   return (
     <View className="flex-1 bg-[#faf5e0] p-4">

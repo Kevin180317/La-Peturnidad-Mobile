@@ -1,7 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { messagesService } from "@/services/messages.service";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
 import {
   Alert,
   Image,

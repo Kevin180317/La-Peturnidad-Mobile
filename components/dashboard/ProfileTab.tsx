@@ -116,7 +116,7 @@ export function ProfileTab({
     badge?: number;
   };
 
-  const menuCategories: Array<{ title: string; items: MenuItem[] }> = [
+  const menuCategories: { title: string; items: MenuItem[] }[] = [
     {
       title: "Mensajería",
       items: [
@@ -196,7 +196,7 @@ export function ProfileTab({
     },
   ];
 
-  const moderationItems: Array<{ title: string; items: MenuItem[] }> =
+  const moderationItems: { title: string; items: MenuItem[] }[] =
     profile?.role === "admin" || profile?.role === "moderator"
       ? [
           {

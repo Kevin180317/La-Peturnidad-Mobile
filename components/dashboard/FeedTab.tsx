@@ -83,7 +83,7 @@ export function FeedTab({
 }: FeedTabProps) {
   const router = useRouter();
   const [mainTab, setMainTab] = useState<"emergencies" | "announcements" | "social">("social");
-  const [feedSubTab, setFeedSubTab] = useState<"all" | "mine">("all");
+  const [feedSubTab] = useState<"all" | "mine">("all");
   const [showPostForm, setShowPostForm] = useState(false);
   const [posting, setPosting] = useState(false);
   const [commentFocused, setCommentFocused] = useState(false);
@@ -93,7 +93,6 @@ export function FeedTab({
     feedSubTab === "all"
       ? feedPosts.filter((p) => p.user_id !== userId)
       : myPosts;
-  const loading = feedSubTab === "all" ? loadingFeed : loadingMyPosts;
 
   const handleCreatePost = async (data: PostFormData) => {
     setPosting(true);

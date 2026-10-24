@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ComunidadTab } from "@/components/dashboard/ComunidadTab";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { EmergencyTab } from "@/components/dashboard/EmergencyTab";
 import { FeedTab } from "@/components/dashboard/FeedTab";
@@ -14,7 +13,6 @@ import { announcementsService } from "@/services/announcements.service";
 import { commentsService } from "@/services/comments.service";
 import {
   dashboardService,
-  type EmergencyAlert,
   type EmergencyAlertWithOwner,
   type FoundPetWithDetails,
   type MyEmergencyAlert,
@@ -68,7 +66,6 @@ export default function DashboardScreen() {
   const [comunidadAnnouncements, setComunidadAnnouncements] = useState<any[]>([]);
   const [loadingComunidad, setLoadingComunidad] = useState(false);
   const [myAnnouncements, setMyAnnouncements] = useState<any[]>([]);
-  const [loadingMyAnnouncements, setLoadingMyAnnouncements] = useState(false);
 
   // Estados para feed
   const [feedPosts, setFeedPosts] = useState<any[]>([]);
@@ -90,37 +87,6 @@ export default function DashboardScreen() {
     [],
   );
 
-  // Cargar datos iniciales
-  useEffect(() => {
-    loadUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Registrar token FCM nativo
-  useEffect(() => {
-    const initNotifications = async () => {
-      try {
-        const Notifications = await import("expo-notifications");
-
-        if (user?.id) {
-          registerFcmToken(Notifications);
-        }
-      } catch (error) {
-        console.warn("Notificaciones no disponibles en este entorno:", error);
-      }
-    };
-
-    initNotifications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  // Recargar mensajes no leídos al volver a la pantalla
-  useFocusEffect(
-    useCallback(() => {
-      if (user?.id) loadUnreadCount(user.id);
-    }, [user?.id]),
-  );
-
   const loadComunidad = useCallback(async () => {
     setLoadingComunidad(true);
     const result = await announcementsService.getAll();
@@ -129,11 +95,10 @@ export default function DashboardScreen() {
   }, []);
 
   const loadMyAnnouncements = useCallback(async () => {
-    if (!user?.id) return;
-    setLoadingMyAnnouncements(true);
-    const result = await announcementsService.getMyAnnouncements(user.id);
+    const uid = user?.id;
+    if (!uid) return;
+    const result = await announcementsService.getMyAnnouncements(uid);
     if (result.success) setMyAnnouncements(result.data ?? []);
-    setLoadingMyAnnouncements(false);
   }, [user?.id]);
 
   const loadFeed = useCallback(async () => {
@@ -145,9 +110,10 @@ export default function DashboardScreen() {
   }, [user?.id]);
 
   const loadMyPosts = useCallback(async () => {
-    if (!user?.id) return;
+    const uid = user?.id;
+    if (!uid) return;
     setLoadingMyPosts(true);
-    const result = await postsService.getMyPosts(user.id);
+    const result = await postsService.getMyPosts(uid);
     if (result.success) setMyPosts(result.data ?? []);
     setLoadingMyPosts(false);
   }, [user?.id]);
@@ -230,42 +196,6 @@ export default function DashboardScreen() {
     setSendingComment(false);
   };
 
-  useEffect(() => {
-    if (activeTab === "feed") {
-      loadFeed();
-      loadMyPosts();
-      loadComunidad();
-      loadMyAnnouncements();
-    }
-    if (activeTab === "messages") { loadConversations(); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
-
-  // Deep link de notificaciones: abre Emergencia y muestra la alerta (mía o de un vecino)
-  const handledAlertRef = useRef<string | null>(null);
-  useEffect(() => {
-    const alertId = typeof params.alertId === "string" ? params.alertId : null;
-    if (loading || !user?.id) return;
-    if (params.tab !== "emergency" && !alertId) return;
-    const key = alertId ?? "emergency";
-    if (handledAlertRef.current === key) return;
-    handledAlertRef.current = key;
-
-    setActiveTab("emergency");
-    const open = async () => {
-      const mine = await dashboardService.getUserEmergencyAlerts(user.id);
-      if (mine.success) setMyAlerts(mine.data as MyEmergencyAlert[]);
-      if (alertId && mine.data.some((a) => a.id === alertId)) {
-        setShowMyAlerts(true);
-      } else if (profile?.address) {
-        setShowAlerts(true);
-        await loadEmergencyAlerts(profile.address);
-      }
-    };
-    open();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.alertId, params.tab, loading, user?.id, profile?.address]);
-
   const registerFcmToken = async (Notifications: any) => {
     try {
       const { status } = await Notifications.requestPermissionsAsync();
@@ -341,9 +271,10 @@ export default function DashboardScreen() {
   };
 
   const loadConversations = useCallback(async () => {
-    if (!user?.id) return;
+    const uid = user?.id;
+    if (!uid) return;
     setLoadingConversations(true);
-    const result = await messagesService.getConversations(user.id);
+    const result = await messagesService.getConversations(uid);
     if (result.success) {
       setConversations(result.data ?? []);
       const totalUnread = (result.data ?? []).reduce((sum, c) => sum + c.unread_count, 0);
@@ -362,21 +293,6 @@ export default function DashboardScreen() {
       showToast("error", "Error", result.error);
     }
   };
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadUserData();
-    await loadPets(user?.id);
-    if (showAlerts && profile?.address) {
-      await loadEmergencyAlerts(profile.address);
-    }
-    if (showMyAlerts && user?.id) await loadMyAlerts(user.id);
-    if (showFoundPets && user?.id) await loadFoundPets(user.id);
-    if (user?.id) await loadUnreadCount(user.id);
-    if (activeTab === "messages") await loadConversations();
-    setRefreshing(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAlerts, showMyAlerts, showFoundPets, profile, user, activeTab]);
 
   // ============== FUNCIONES DE MASCOTAS ==============
 
@@ -739,6 +655,90 @@ export default function DashboardScreen() {
     setShowAlerts(false);
     setShowMyAlerts(false);
   };
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    loadUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Registrar token FCM nativo
+  useEffect(() => {
+    const initNotifications = async () => {
+      try {
+        const Notifications = await import("expo-notifications");
+
+        if (user?.id) {
+          registerFcmToken(Notifications);
+        }
+      } catch (error) {
+        console.warn("Notificaciones no disponibles en este entorno:", error);
+      }
+    };
+
+    initNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Recargar mensajes no leídos al volver a la pantalla
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.id) loadUnreadCount(user.id);
+    }, [user?.id]),
+  );
+
+  useEffect(() => {
+    if (activeTab === "feed") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- recarga al cambiar de pestaña: el setState ocurre tras la consulta async
+      loadFeed();
+      loadMyPosts();
+      loadComunidad();
+      loadMyAnnouncements();
+    }
+    if (activeTab === "messages") { loadConversations(); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  // Deep link de notificaciones: abre Emergencia y muestra la alerta (mía o de un vecino)
+  const handledAlertRef = useRef<string | null>(null);
+  useEffect(() => {
+    const alertId = typeof params.alertId === "string" ? params.alertId : null;
+    if (loading || !user?.id) return;
+    if (params.tab !== "emergency" && !alertId) return;
+    const key = alertId ?? "emergency";
+    if (handledAlertRef.current === key) return;
+    handledAlertRef.current = key;
+
+    setActiveTab("emergency");
+    const open = async () => {
+      const mine = await dashboardService.getUserEmergencyAlerts(user.id);
+      if (mine.success) setMyAlerts(mine.data as MyEmergencyAlert[]);
+      if (alertId && mine.data.some((a) => a.id === alertId)) {
+        setShowMyAlerts(true);
+      } else if (profile?.address) {
+        setShowAlerts(true);
+        await loadEmergencyAlerts(profile.address);
+      }
+    };
+    open();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.alertId, params.tab, loading, user?.id, profile?.address]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadUserData();
+    await loadPets(user?.id);
+    if (showAlerts && profile?.address) {
+      await loadEmergencyAlerts(profile.address);
+    }
+    if (showMyAlerts && user?.id) await loadMyAlerts(user.id);
+    if (showFoundPets && user?.id) await loadFoundPets(user.id);
+    if (user?.id) await loadUnreadCount(user.id);
+    if (activeTab === "messages") await loadConversations();
+    setRefreshing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAlerts, showMyAlerts, showFoundPets, profile, user, activeTab]);
 
   if (loading) {
     return <DashboardSkeleton />;

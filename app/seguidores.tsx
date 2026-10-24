@@ -22,12 +22,6 @@ export default function SeguidoresScreen() {
   const [following, setFollowing] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // loadData corre al montar o cambiar id (recarga intencional)
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
   const loadData = async () => {
     if (!id) return;
 
@@ -87,6 +81,13 @@ export default function SeguidoresScreen() {
       <Text className="text-gray-500">›</Text>
     </TouchableOpacity>
   );
+
+  // loadData corre al montar o cambiar id (recarga intencional)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   if (loading) {
     return (

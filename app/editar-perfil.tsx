@@ -29,12 +29,6 @@ export default function EditarPerfilScreen() {
   const [cityFocused, setCityFocused] = useState(false);
   const [postalCodeFocused, setPostalCodeFocused] = useState(false);
 
-  // loadProfile corre una sola vez al montar (deps estables intencionales)
-  useEffect(() => {
-    loadProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const loadProfile = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
@@ -78,6 +72,13 @@ export default function EditarPerfilScreen() {
     }
     setSaving(false);
   };
+
+  // loadProfile corre una sola vez al montar (deps estables intencionales)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (

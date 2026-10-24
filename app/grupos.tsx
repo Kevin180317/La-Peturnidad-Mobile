@@ -30,12 +30,6 @@ export default function GruposScreen() {
   const [nameFocused, setNameFocused] = useState(false);
   const [descFocused, setDescFocused] = useState(false);
 
-  // init corre una sola vez al montar (deps estables intencionales)
-  useEffect(() => {
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const init = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
@@ -106,6 +100,13 @@ export default function GruposScreen() {
       if (r.success) await loadGroups();
     }
   };
+
+  // init corre una sola vez al montar (deps estables intencionales)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (loading) {
     return (

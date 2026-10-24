@@ -1,9 +1,8 @@
 import { supabase } from "@/utils/supabase";
 import * as ImagePicker from "expo-image-picker";
+import type { Database } from "@/types/database";
 
 const EDGE_FUNCTION_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notification`;
-
-import type { Database } from "@/types/database";
 
 type UserProfileRow = Database["public"]["Tables"]["user_profiles"]["Row"];
 type PetRow = Database["public"]["Tables"]["pets"]["Row"];

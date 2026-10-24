@@ -30,12 +30,6 @@ export default function PublicProfileScreen() {
   const [followingCount, setFollowingCount] = useState(0);
   const [userRole, setUserRole] = useState<string | null>(null);
 
-  // init corre al montar o cambiar id (recarga intencional)
-  useEffect(() => {
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
   const init = async () => {
     const { data: user } = await supabase.auth.getUser();
     if (!user?.user) { router.replace("/"); return; }
@@ -111,6 +105,13 @@ export default function PublicProfileScreen() {
     const date = new Date(d);
     return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")}/${date.getFullYear()}`;
   };
+
+  // init corre al montar o cambiar id (recarga intencional)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   if (loading) {
     return (

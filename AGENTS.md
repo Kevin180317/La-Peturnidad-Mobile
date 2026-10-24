@@ -22,8 +22,8 @@
 
 ## Tech Stack
 
-- Expo SDK 54, React Native 0.79, React 19
-- TypeScript (strict mode)
+- Expo SDK 58, React Native 0.88, React 19.3
+- TypeScript 6 (strict mode; `tsconfig.json` declara `types: ["jest", "node"]` porque TS 6 ya no carga los `@types/*` solos)
 - Bun as package manager (bun.lockb)
 
 ## Key Files
@@ -71,7 +71,7 @@
 - UI/UX: `components/EmptyState.tsx` (ícono/título/subtítulo/botón de acción) en grupos, historias, comunidad, panel-moderacion, mensajes
 - UX verify-otp: auto-verifica al llegar a 8 dígitos (filtra no-dígitos) + `textContentType="oneTimeCode"`
 - Recarga al enfocar: `useFocusEffect` + ref `firstFocus` en grupos, mensajes, comunidad (omite carga inicial, refresca al volver)
-- Lint en **0 errores, 0 warnings**: los `exhaustive-deps` se suprimen con `// eslint-disable-next-line react-hooks/exhaustive-deps` colocado ANTES de la línea de cierre del hook (`}, []);` — no antes del `useEffect` — con comentario justificativo
+- Lint en **0 errores, 0 warnings** (reglas de React Hooks de SDK 58 en su nivel por defecto). Efectos de carga de datos van DESPUÉS de las funciones que llaman (justo antes del primer `return`/`if (loading)`), para cumplir `react-hooks/immutability`; la llamada inicial lleva `// eslint-disable-next-line react-hooks/set-state-in-effect -- <motivo>`. En `useCallback`, leer `const uid = user?.id` en vez de `user.id` tras el guard (`preserve-manual-memoization`). Valores `Animated.Value` con `useState(() => new Animated.Value(x))`, no `useRef(...).current` (`react-hooks/refs`). Los warnings `exhaustive-deps` se suprimen: los `exhaustive-deps` se suprimen con `// eslint-disable-next-line react-hooks/exhaustive-deps` colocado ANTES de la línea de cierre del hook (`}, []);` — no antes del `useEffect` — con comentario justificativo
 - CI/CD: `.github/workflows/ci.yml` (push main + PR, `bun install --frozen-lockfile` + `bun run lint` + `bun run typecheck`); script `typecheck` en `package.json`
 - Generated types: `types/database.ts` (18 tablas + 5 funciones RPC, helpers `Tables`/`TablesInsert`/`TablesUpdate`); `services/dashboard.service.ts` usa alias de `Row` (`UserProfile`, `Pet`, `EmergencyAlert`, `FoundPet` — campos opcionales `string | null`); `EmergencyAlertWithOwner`/`FoundPetWithDetails` siguen manuales (joins calculados)
 - Buscador: `app/buscar.tsx` (tabs Mascotas/Grupos/Usuarios, debounce 300ms) + `services/search.service.ts` (`ilike`, límite 20, muestra dueño/miembros/ciudad); botón 🔍 en header del dashboard; política RLS `Authenticated users can view all pets` agregada
@@ -84,3 +84,20 @@
 
 ### Edge Functions
 - `send-push-notification` (v5) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS
+### SDK 58 (actualizado desde SDK 54)
+- `expo@58.0.19`, dependencias alineadas con `expo install --fix`; `expo-doctor` sin problemas
+- `app.json`: eliminados `newArchEnabled`, `edgeToEdgeEnabled` y `navigationBar` (SDK 58 ya no los acepta); agregados plugins `expo-image` y `expo-status-bar`. La barra de navegación de Android ya no se oculta por configuración
+- Jest 30 + `jest-expo` 58; `test/setup.ts` mockea `@expo/vector-icons` (expo-font intenta cargar fuentes en Jest)
+- `eslint.config.js` ignora `.expo/`, `supabase/` y `legacy/`
+- Canal Android `emergency_alerts` sin `sound`: en `expo-notifications` 58, `sound: "default"` se interpreta como archivo de sonido propio y avisa que no existe
+- Build de desarrollo: `eas build --profile development --platform android`; el APK de SDK 54 no sirve con SDK 58
+
+### Consideraciones futuras
+
+#### Avatares con `blobatar` (no implementado)
+- Paquete `blobatar` (npm, MIT, v2.7.0): avatares geométricos deterministas a partir de un string (p. ej. email). Para RN: `@blobatar/react-native`
+- Uso previsto: avatar por defecto cuando el usuario no tiene foto de perfil (`ProfileTab`, listas de comunidad/mensajes/buscar). No reemplaza la foto subida
+- Requiere `react-native-svg` (código nativo, hoy no está en `package.json`): instalar con `npx expo install react-native-svg` + `bun add blobatar @blobatar/react-native`, y **generar un build nuevo** (`eas build --profile development --platform android`); recargar JS no basta
+- `size` es obligatorio (RN no tiene caja CSS de la que heredar). El componente no usa `className`; si se envuelve, el wrapper debe vivir en `app/` o `components/` (ver Uniwind scanning)
+- En listas largas, envolver con `React.memo` y verificar rendimiento en dispositivo (cada avatar es un árbol SVG)
+- Verificar compatibilidad de `react-native-svg` con RN 0.88 antes de instalar

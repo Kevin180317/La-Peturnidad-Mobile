@@ -28,12 +28,6 @@ export default function ConversationScreen() {
   const [inputFocused, setInputFocused] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  // init corre al montar o cambiar id (recarga intencional)
-  useEffect(() => {
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: false }), 100);
@@ -108,6 +102,13 @@ export default function ConversationScreen() {
     if (diff < 172800000) return "Ayer";
     return d.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
   };
+
+  // init corre al montar o cambiar id (recarga intencional)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   if (loading) {
     return (
