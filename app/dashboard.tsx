@@ -27,6 +27,7 @@ import { FEED_PAGE_SIZE, postsService } from "@/services/posts.service";
 import { reportsService } from "@/services/reports.service";
 import { toLocalDateString } from "@/utils/format";
 import { supabase } from "@/utils/supabase";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, View } from "react-native";
@@ -784,6 +785,8 @@ export default function DashboardScreen() {
   // Registrar token FCM nativo
   useEffect(() => {
     const initNotifications = async () => {
+      // Expo Go (SDK 53+) no soporta push remotas en Android: requiere build de desarrollo
+      if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) return;
       try {
         const Notifications = await import("expo-notifications");
 
