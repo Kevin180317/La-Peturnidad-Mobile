@@ -6,10 +6,11 @@ import {
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { Stack, router, type Href } from "expo-router";
 import Toast from "react-native-toast-message";
+import { AnimatedSplash } from "../components/AnimatedSplash";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { toastConfig } from "../components/ToastConfig";
 import { supabase } from "../utils/supabase";
@@ -49,6 +50,8 @@ export default function RootLayout() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  // Overlay animado que continúa el splash nativo; el Stack (y el auto-login) se monta debajo en paralelo
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -244,6 +247,7 @@ export default function RootLayout() {
       />
       </Stack>
       </ErrorBoundary>
+      {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
       <Toast config={toastConfig} />
     </>
   );
