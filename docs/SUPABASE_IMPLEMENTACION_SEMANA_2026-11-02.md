@@ -11,10 +11,27 @@ Escrito el 2026-10-31, a partir de la auditoría local y sin acceso a Supabase.
 
 - **Nada de este documento está aplicado.**
 - **El SQL es un borrador sin ejecutar.** Se escribió leyendo las migraciones del repo, no la base real. Primero corre la revisión del Paso 1.3 y ajusta lo que no coincida.
-- **El SQL está aquí a propósito, no en `supabase/migrations/`,** para que un `supabase db push` no lo aplique por accidente. Cópialo a su archivo cuando llegue su paso.
+- **El SQL está aquí a propósito, no en `supabase/migrations/`,** para que no se aplique por accidente. Cópialo a su archivo cuando llegue su paso.
 - **Requisitos:** acceso al proyecto `owtcrciujfdlcuopimof`, contraseña de la base, teléfono o emulador, y 2 cuentas de prueba (3 para grupos).
-- **Herramientas:** esta máquina no tiene `supabase`, `docker` ni `psql`. Instala Supabase CLI y Docker, que el CLI usa para `db dump`, `db pull` y la base local.
+- **Herramientas:** el plan se ejecuta con Claude y el **MCP de Supabase**, sin CLI ni Docker. Debe estar conectado, con permiso de escritura (sin modo solo lectura) y al proyecto correcto. Se comprobó el 2026-10-31: en esa sesión no estaba conectado. `pg_dump` (`postgresql-client` 17 o superior) solo hace falta para el respaldo del Paso 1.2.
 - **Si el proyecto está pausado** (plan free, unos 7 días sin actividad), reactívalo primero.
+
+## Cómo se ejecuta con el MCP
+
+| Tarea | Herramienta |
+|---|---|
+| Consultas de revisión (Paso 1.3) y pruebas | `execute_sql` |
+| Aplicar las migraciones A y B | `apply_migration` |
+| Ver el historial remoto | `list_migrations` |
+| Publicar edge functions | `deploy_edge_function` |
+| Regenerar tipos | `generate_typescript_types` |
+| Revisar seguridad y errores después de cada cambio | `get_advisors`, `get_logs` |
+
+**Reglas:**
+
+- **Datos personales:** no leas contenido de tablas con el MCP para respaldar o revisar, porque pasaría por la conversación. Las consultas de este plan piden esquema o datos agregados, sin identificar usuarios. Una dirección en texto libre puede incluir la calle del usuario: el resultado del Paso 5.1 es sensible, así que no lo copies fuera de la sesión.
+- **Confirmación:** cada `apply_migration` y `deploy_edge_function` se revisa antes de ejecutarse. Cambian producción.
+- **Historial:** guarda en `supabase/migrations/` el mismo SQL que se aplique y compara con `list_migrations`.
 
 ## Calendario
 
@@ -32,27 +49,28 @@ Escrito el 2026-10-31, a partir de la auditoría local y sin acceso a Supabase.
 
 ### Paso 1.1: entrar
 
-```bash
-supabase login
-supabase link --project-ref owtcrciujfdlcuopimof
-supabase migration list
-```
+1. Conecta el MCP de Supabase con acceso de escritura y comprueba que el proyecto sea `owtcrciujfdlcuopimof`.
+2. Ejecuta `list_migrations`.
 
 La lista remota probablemente no coincide con el repo: `docs/SUPABASE_SCHEMA.md` registra versiones de 2026-06 que no están en `supabase/migrations/`. Eso es justo lo que corrige el Paso 1.4.
 
 ### Paso 1.2: respaldar antes de tocar nada
 
+**El MCP no hace respaldos**, y este paso no debe saltarse: el plan free no tiene respaldos automáticos. Necesitas la contraseña de la base. Copia la cadena de conexión de **Session pooler** en el panel (botón **Connect**) y úsala con `pg_dump`:
+
 ```bash
 mkdir -p ~/respaldos-lucky/2026-11-02
-supabase db dump --schema public,storage -f ~/respaldos-lucky/2026-11-02/schema.sql
-supabase db dump --data-only -f ~/respaldos-lucky/2026-11-02/data.sql
+export DB_URL='<cadena de Session pooler, con la contraseña de la base>'
+pg_dump "$DB_URL" --schema-only --no-owner -n public -n storage -f ~/respaldos-lucky/2026-11-02/schema.sql
+pg_dump "$DB_URL" --data-only --no-owner -n public -f ~/respaldos-lucky/2026-11-02/data.sql
+unset DB_URL
 ```
 
-Guárdalo **fuera del repo**: `data.sql` contiene datos personales.
+Guárdalo **fuera del repo**: `data.sql` contiene datos personales, y no dejes la contraseña en un archivo.
 
 ### Paso 1.3: comparar la base real con lo que asume este plan
 
-Ejecuta en el SQL Editor y anota cualquier diferencia:
+Ejecuta con `execute_sql` y anota cualquier diferencia:
 
 ```sql
 -- Todas las políticas SELECT de perfiles. Las permisivas se suman:
@@ -95,19 +113,20 @@ where not exists (
 
 ### Paso 1.4: versionar el esquema base (#8)
 
-```bash
-supabase init                # crea config.toml; no sobrescribas nada que ya exista
-supabase db pull             # genera <timestamp>_remote_schema.sql
-```
+1. Genera `supabase/migrations/20261102000000_baseline.sql` a partir de `~/respaldos-lucky/2026-11-02/schema.sql` (Paso 1.2), que ya trae el esquema `public` y `storage`. Deja de `storage` solo las políticas y agrega los buckets.
+2. Complétalo con lo que no viene en ese respaldo. Consúltalo con `execute_sql`:
 
-Después:
+   ```sql
+   select id, public, file_size_limit, allowed_mime_types from storage.buckets;
+   select tgname, pg_get_triggerdef(oid) from pg_trigger where tgrelid = 'auth.users'::regclass and not tgisinternal;
+   select tablename from pg_publication_tables where pubname = 'supabase_realtime';
+   ```
 
-1. Revisa que el archivo generado incluya tablas, RLS, funciones y triggers, también los de `storage.objects`.
-2. Las 5 migraciones actuales ya quedan incluidas en esa foto. Muévelas a `supabase/migrations_archivo/` para que no se vuelvan a ejecutar encima.
-3. Ajusta el historial con `supabase migration repair` hasta que `supabase migration list` coincida en ambos lados. El propio `db pull` indica qué versiones reparar.
-4. Comprueba que se puede reconstruir: `supabase db start && supabase db reset`.
+3. Las 5 migraciones actuales ya quedan incluidas en esa foto. Muévelas a `supabase/migrations_archivo/` para que no se vuelvan a ejecutar encima.
+4. **No apliques el baseline en producción:** solo documenta lo que ya existe. El historial remoto se queda como está.
+5. **Comprueba que se puede reconstruir:** crea un segundo proyecto gratuito como staging y aplica ahí el baseline con el MCP. Hay que apuntar el MCP a ese proyecto; asegúrate de volver a producción después.
 
-**Hecho cuando:** `supabase db reset` levanta una base local sin errores. A partir de aquí, prueba cada migración en local antes de aplicarla.
+**Hecho cuando:** el esquema se aplica sin errores en staging. A partir de aquí, prueba cada migración ahí antes de aplicarla en producción. El plan free permite 2 proyectos activos; si no hay lugar para staging, usa la prueba con `rollback` del Paso 2.1.
 
 ### Paso 1.5: ajustes del panel
 
@@ -259,7 +278,12 @@ revoke execute on function public.clear_conversation(uuid) from public, anon;
 grant execute on function public.clear_conversation(uuid) to authenticated;
 ```
 
-Aplica en local (`supabase db reset`), prueba y luego `supabase db push`.
+**Cómo aplicarla:**
+
+1. Pruébala en staging con `apply_migration`.
+2. Si no hay staging, ensáyala en producción con `execute_sql`, con el contenido entre `begin;` y `rollback;`. Comprueba que no marque errores y que no quede nada aplicado. Esto valida la sintaxis y los objetos, no el comportamiento de la app.
+3. Aplícala en producción con `apply_migration`.
+4. Revisa `get_advisors`. Es esperado que marque `public_profiles` como "security definer view".
 
 **Riesgo conocido:** con el trigger de #2, un intento de cambiar la colonia falla con error. La app actual no edita alertas, así que no debería notarse.
 
@@ -332,13 +356,10 @@ Los tests actuales solo comprueban que el título contenga el nombre, así que d
 
 ### Paso 2.4: publicar
 
-```bash
-bun run test
-supabase functions deploy delete-account
-supabase functions deploy send-push-notification
-```
-
-Antes de publicar, revisa en el panel si cada función tiene "Verify JWT" activo y mantén esa misma configuración.
+1. Corre `bun run test`.
+2. Antes de publicar, revisa con `get_edge_function` o en el panel si cada función tiene "Verify JWT" activo, y mantén esa misma configuración.
+3. Publica `delete-account` y `send-push-notification` con `deploy_edge_function`.
+4. Revisa `get_logs` después de la primera llamada.
 
 ## Miércoles: cambios en la app
 
@@ -348,7 +369,7 @@ Cuando la migración B esté lista, el aviso de "Conversación cerrada" de `app/
 
 ### Paso 3.1: regenerar tipos
 
-Regenera `types/database.ts` (`supabase gen types typescript --linked`) y corre `bun run typecheck`. En los tipos generados, las columnas de una vista salen como opcionales, incluido `user_id`; hay que estrecharlas con `Override<>` en `types/index.ts`.
+Regenera `types/database.ts` con `generate_typescript_types` y corre `bun run typecheck`. En los tipos generados, las columnas de una vista salen como opcionales, incluido `user_id`; hay que estrecharlas con `Override<>` en `types/index.ts`.
 
 ### Paso 3.2: leer perfiles ajenos desde la vista (#1)
 
@@ -407,6 +428,8 @@ eas build --profile preview --platform android
 
 ### Paso 4.1: `20261105000001_close_profile_access.sql`
 
+Se aplica igual que la migración A (Paso 2.1).
+
 ```sql
 -- #1 Cerrar el acceso: cada quien lee su fila; moderadores leen todas
 -- Elimina también cualquier otra política abierta que haya encontrado el Paso 1.3
@@ -454,7 +477,7 @@ select phone from public.public_profiles limit 1;
 rollback;
 ```
 
-La tercera consulta aborta la transacción; ejecútala al final, como aquí.
+La tercera consulta aborta la transacción; ejecútala al final, como aquí. Con `execute_sql`, corre el bloque sin esa tercera consulta para ver los conteos, y luego solo esa consulta para confirmar el error.
 
 ### Paso 4.3: prueba de aceptación en teléfono
 
@@ -487,7 +510,8 @@ Usa la cuenta A y la cuenta B en la misma colonia, y la cuenta C en otra colonia
 ### Paso 5.1: direcciones que no son una colonia (#4)
 
 ```sql
-select user_id, address, postal_code from public.user_profiles where address is not null;
+select address, postal_code, count(*) from public.user_profiles
+where address is not null group by address, postal_code order by address;
 ```
 
 Compara el resultado con `assets/colonias.json` (`Asentamiento` y `Código Postal`) y luego:
@@ -540,7 +564,7 @@ No bloquean producción. Si falta tiempo, se mueven a `BACKLOG.md`.
 - [ ] #4 Direcciones existentes corregidas
 - [ ] #5 Salir de un grupo saca del chat
 - [ ] #6 "Eliminar chat" ya no deja al otro escribiendo al vacío
-- [ ] #8 Esquema base versionado y `supabase db reset` funcionando
+- [ ] #8 Esquema base versionado y aplicado sin errores en staging
 - [ ] #9 Moderadores pueden eliminar su cuenta
 - [ ] Panel configurado (SMTP, correo seguro, OTP, URLs, Storage)
 - [ ] Plan o respaldos decididos
