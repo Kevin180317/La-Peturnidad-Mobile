@@ -1,4 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
 import { PasswordInput } from "@/components/PasswordInput";
+import { CARD, Field, PrimaryButton } from "@/components/kit/Kit";
 import { authErrorMessage, authService, passwordError } from "@/services/auth.service";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
@@ -9,8 +11,6 @@ import {
   Platform,
   ScrollView,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -26,7 +26,6 @@ export default function SeguridadScreen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
-  const [emailFocused, setEmailFocused] = useState(false);
 
   const showError = (text2: string) =>
     Toast.show({ type: "error", text1: "No se pudo guardar", text2, position: "top" });
@@ -116,8 +115,6 @@ export default function SeguridadScreen() {
     );
   }
 
-  const buttonClass = (active: boolean) => `py-4 rounded-xl ${active ? "bg-gray-400" : "bg-[#007275]"}`;
-  const buttonText = (active: boolean) => `text-center font-bold ${active ? "text-gray-700" : "text-white"}`;
 
   return (
     <KeyboardAvoidingView
@@ -125,12 +122,20 @@ export default function SeguridadScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
-      <ScrollView contentContainerClassName="p-5 bg-[#faf5e0] grow" keyboardShouldPersistTaps="handled">
-        <Text className="text-2xl font-bold text-[#211f1e] mb-1">Cuenta y seguridad</Text>
-        <Text className="text-gray-500 mb-6">{currentEmail}</Text>
+      <ScrollView contentContainerClassName="p-5 pb-10 bg-[#faf5e0] grow" keyboardShouldPersistTaps="handled">
+        <View className={`${CARD} flex-row items-center p-4 mb-6`}>
+          <View className="w-11 h-11 rounded-2xl bg-[#007275]/10 items-center justify-center mr-3">
+            <Ionicons name="shield-checkmark" size={22} color="#007275" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-xs text-gray-500">Sesión iniciada como</Text>
+            <Text className="font-bold text-[#211f1e] text-[15px]" numberOfLines={1}>{currentEmail}</Text>
+          </View>
+        </View>
 
-        <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-          <Text className="font-semibold mb-2 text-gray-600">Contraseña actual</Text>
+        <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Verificación</Text>
+        <View className={`${CARD} p-4 mb-6`}>
+          <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Contraseña actual</Text>
           <PasswordInput
             placeholder="••••••••"
             value={currentPassword}
@@ -139,12 +144,12 @@ export default function SeguridadScreen() {
             autoComplete="current-password"
             accessibilityLabel="Contraseña actual"
           />
-          <Text className="text-gray-500 text-xs mt-2">La necesitamos para confirmar que eres tú.</Text>
+          <Text className="text-gray-500 text-xs mt-2 ml-1">La necesitamos para confirmar que eres tú.</Text>
         </View>
 
-        <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-          <Text className="text-lg font-bold text-[#211f1e] mb-4">Cambiar contraseña</Text>
-          <Text className="font-semibold mb-2 text-gray-600">Nueva contraseña</Text>
+        <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Cambiar contraseña</Text>
+        <View className={`${CARD} p-4 mb-6`}>
+          <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Nueva contraseña</Text>
           <View className="mb-4">
             <PasswordInput
               placeholder="Mínimo 8, con letras y números"
@@ -155,8 +160,8 @@ export default function SeguridadScreen() {
               accessibilityLabel="Nueva contraseña"
             />
           </View>
-          <Text className="font-semibold mb-2 text-gray-600">Confirmar nueva contraseña</Text>
-          <View className="mb-4">
+          <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Confirmar nueva contraseña</Text>
+          <View className="mb-5">
             <PasswordInput
               placeholder="••••••••"
               value={confirmPassword}
@@ -166,49 +171,36 @@ export default function SeguridadScreen() {
               accessibilityLabel="Confirmar nueva contraseña"
             />
           </View>
-          <TouchableOpacity
-            className={buttonClass(busy === "password")}
+          <PrimaryButton
+            title={busy === "password" ? "Guardando..." : "Actualizar contraseña"}
+            icon="key-outline"
             onPress={handleChangePassword}
+            loading={busy === "password"}
             disabled={busy !== null}
-            accessibilityRole="button"
-          >
-            <Text className={buttonText(busy === "password")}>
-              {busy === "password" ? "Guardando..." : "Actualizar contraseña"}
-            </Text>
-          </TouchableOpacity>
+          />
         </View>
 
-        <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-          <Text className="text-lg font-bold text-[#211f1e] mb-4">Cambiar correo</Text>
-          <Text className="font-semibold mb-2 text-gray-600">Nuevo correo</Text>
-          <TextInput
-            className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${emailFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
+        <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Cambiar correo</Text>
+        <View className={`${CARD} p-4 mb-6`}>
+          <Field
+            label="Nuevo correo"
+            icon="mail-outline"
             placeholder="nuevo@correo.com"
-            placeholderTextColor="#9BA1A6"
             value={newEmail}
             onChangeText={setNewEmail}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"
             accessibilityLabel="Nuevo correo"
-            onFocus={() => setEmailFocused(true)}
-            onBlur={() => setEmailFocused(false)}
           />
-          <TouchableOpacity
-            className={buttonClass(busy === "email")}
+          <PrimaryButton
+            title={busy === "email" ? "Enviando..." : "Cambiar correo"}
+            icon="mail"
             onPress={handleChangeEmail}
+            loading={busy === "email"}
             disabled={busy !== null}
-            accessibilityRole="button"
-          >
-            <Text className={buttonText(busy === "email")}>
-              {busy === "email" ? "Enviando..." : "Cambiar correo"}
-            </Text>
-          </TouchableOpacity>
+          />
         </View>
-
-        <TouchableOpacity className="py-4 rounded-xl bg-[#211f1e]" onPress={() => router.back()} accessibilityRole="button">
-          <Text className="text-white text-center font-bold">Volver</Text>
-        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );

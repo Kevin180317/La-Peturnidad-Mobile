@@ -15,6 +15,8 @@ interface ConfirmModalProps {
   cancelLabel?: string;
   loading?: boolean;
   icon?: keyof typeof Ionicons.glyphMap;
+  /** acción destructiva (eliminar): ícono y botón en rojo */
+  destructive?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -27,6 +29,7 @@ export function ConfirmModal({
   cancelLabel = "Cancelar",
   loading = false,
   icon = "log-out-outline",
+  destructive = false,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
@@ -51,8 +54,8 @@ export function ConfirmModal({
           activeOpacity={1}
           onPress={() => {}}
         >
-          <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-4">
-            <Ionicons name={icon} size={32} color="#007275" />
+          <View className={`w-16 h-16 rounded-3xl items-center justify-center mb-4 ${destructive ? "bg-red-50" : "bg-[#007275]/10"}`}>
+            <Ionicons name={icon} size={32} color={destructive ? "#dc2626" : "#007275"} />
           </View>
 
           <Text className="text-lg font-bold text-[#211f1e] mb-2 text-center">
@@ -64,23 +67,27 @@ export function ConfirmModal({
 
           <View className="flex-row gap-3 w-full">
             <TouchableOpacity
-              className="flex-1 bg-gray-100 py-3 rounded-xl"
+              className="flex-1 bg-gray-100 h-12 rounded-full items-center justify-center"
               onPress={onCancel}
               disabled={loading}
+              accessibilityRole="button"
+              accessibilityLabel={cancelLabel}
             >
-              <Text className="text-gray-700 text-center font-semibold">
+              <Text className="text-gray-700 text-center font-bold">
                 {cancelLabel}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              className="flex-1 bg-[#007275] py-3 rounded-xl flex-row items-center justify-center"
+              className={`flex-1 h-12 rounded-full flex-row items-center justify-center ${destructive ? "bg-[#dc2626] shadow-[0_6px_16px_rgba(220,38,38,0.3)]" : "bg-[#007275] shadow-[0_6px_16px_rgba(0,114,117,0.3)]"}`}
               onPress={onConfirm}
               disabled={loading}
+              accessibilityRole="button"
+              accessibilityLabel={confirmLabel}
             >
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text className="text-white text-center font-semibold">
+                <Text className="text-white text-center font-bold">
                   {confirmLabel}
                 </Text>
               )}

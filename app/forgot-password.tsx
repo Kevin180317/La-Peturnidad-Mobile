@@ -1,3 +1,5 @@
+import { AuthScreen } from "@/components/auth/AuthScreen";
+import { Field, PrimaryButton } from "@/components/kit/Kit";
 import {
   authErrorMessage,
   authService,
@@ -8,8 +10,6 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -17,7 +17,6 @@ import Toast from "react-native-toast-message";
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
   const router = useRouter();
 
   const handleSendOtp = async () => {
@@ -75,65 +74,42 @@ export default function ForgotPasswordScreen() {
     else router.replace("/login");
   };
 
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#faf5e0]">
+        <ActivityIndicator size="large" color="#007275" />
+        <Text className="mt-4 text-gray-600 font-medium">Enviando código...</Text>
+      </View>
+    );
+  }
+
   return (
-    <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
-      {loading ? (
-        <View className="items-center">
-          <ActivityIndicator size="large" color="#007275" />
-          <Text className="mt-4 text-[#211f1e]">Enviando código...</Text>
+    <AuthScreen
+      headerless
+      onBack={goToLogin}
+      title="Recuperar contraseña"
+      subtitle="Te enviaremos un código OTP a tu email"
+      footer={
+        <View className="flex-row justify-center">
+          <Text className="text-[#211f1e]">¿Recordaste? </Text>
+          <Text className="text-[#007275] font-bold" onPress={goToLogin} accessibilityRole="link">
+            Inicia sesión
+          </Text>
         </View>
-      ) : (
-        <>
-          <View className="mb-8">
-            <Text className="text-3xl font-bold text-[#211f1e] mb-2">
-              Recuperar contraseña
-            </Text>
-            <Text className="text-[#211f1e] text-lg">
-              Te enviaremos un código OTP a tu email
-            </Text>
-          </View>
-
-          <View className="mb-6">
-            <Text className="text-[#211f1e] font-semibold mb-2">
-              Correo electrónico
-            </Text>
-            <TextInput
-              className={`${emailFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-              placeholder="ejemplo@correo.com"
-              placeholderTextColor="#9BA1A6"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
-              accessibilityLabel="Correo electrónico"
-              onFocus={() => setEmailFocused(true)}
-              onBlur={() => setEmailFocused(false)}
-            />
-          </View>
-
-          <TouchableOpacity
-            className="bg-[#007275] py-4 rounded-xl mb-4"
-            onPress={handleSendOtp}
-            accessibilityRole="button"
-          >
-            <Text className="text-white text-center font-bold text-lg">
-              Enviar código
-            </Text>
-          </TouchableOpacity>
-
-          <View className="flex-row justify-center mt-4">
-            <Text className="text-[#211f1e]">¿Recordaste? </Text>
-            <Text
-              className="text-[#007275] font-bold"
-              onPress={goToLogin}
-              accessibilityRole="link"
-            >
-              Inicia sesión
-            </Text>
-          </View>
-        </>
-      )}
-    </View>
+      }
+    >
+      <Field
+        label="Correo electrónico"
+        icon="mail-outline"
+        placeholder="ejemplo@correo.com"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        autoComplete="email"
+        accessibilityLabel="Correo electrónico"
+      />
+      <PrimaryButton title="Enviar código" icon="paper-plane-outline" onPress={handleSendOtp} className="mt-1" />
+    </AuthScreen>
   );
 }

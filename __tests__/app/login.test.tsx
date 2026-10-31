@@ -96,7 +96,7 @@ describe("LoginScreen", () => {
     await render(<LoginScreen />);
     await fillAndSubmit("  a@b.com ", " pw123456 ");
     await waitFor(() =>
-      expect(toast).toHaveBeenCalledWith(expect.objectContaining({ text2: "Hola Ana" })),
+      expect(toast).toHaveBeenCalledWith(expect.objectContaining({ type: "welcome", text1: "¡Hola, Ana!" })),
     );
     expect(auth.signInWithPassword).toHaveBeenCalledWith({ email: "a@b.com", password: "pw123456" });
     toast.mock.calls[0][0].onHide();

@@ -2,11 +2,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { followsService } from "@/services/follows.service";
 import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
+import { Avatar, CARD, EmptyCard, Segmented } from "@/components/kit/Kit";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -79,28 +79,26 @@ export default function SeguidoresScreen() {
     setLoading(false);
   };
 
-  const renderUser = (user: any) => (
+  const renderUser = (user: any, i: number) => (
     <TouchableOpacity
       key={user.user_id}
-      className="flex-row items-center p-3 bg-white rounded-2xl mb-2 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
+      className={`flex-row items-center px-4 py-3 ${i > 0 ? "border-t border-gray-100" : ""}`}
+      activeOpacity={0.7}
       onPress={() => router.push(`/perfil/${user.user_id}`)}
     >
-      {user.profile_picture_url ? (
-        <Image source={{ uri: user.profile_picture_url }} className="w-12 h-12 rounded-full mr-3" />
-      ) : (
-        <View className="w-12 h-12 bg-[#007275] rounded-full items-center justify-center mr-3">
-          <Text className="text-white font-bold text-lg">
-            {user.first_name?.[0]?.toUpperCase() || "U"}
-          </Text>
-        </View>
-      )}
-      <View className="flex-1">
-        <Text className="font-semibold text-[#211f1e]">
+      <Avatar uri={user.profile_picture_url} name={user.first_name} size={48} ring={false} />
+      <View className="flex-1 ml-3">
+        <Text className="font-bold text-[#211f1e] text-[15px]">
           {user.first_name} {user.last_name}
         </Text>
-        {user.city && <Text className="text-gray-500 text-sm">{user.city}</Text>}
+        {!!user.city && (
+          <View className="flex-row items-center gap-1 mt-0.5">
+            <Ionicons name="location-outline" size={12} color="#6B7280" />
+            <Text className="text-gray-500 text-xs">{user.city}</Text>
+          </View>
+        )}
       </View>
-      <Text className="text-gray-500">›</Text>
+      <Ionicons name="chevron-forward" size={18} color="#C4C4C4" />
     </TouchableOpacity>
   );
 
@@ -133,50 +131,26 @@ export default function SeguidoresScreen() {
     );
   }
 
-  return (
-    <View className="flex-1 bg-[#faf5e0]">
-      <View className="flex-row bg-white border-b border-gray-200">
-        <TouchableOpacity
-          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "followers" ? "border-[#007275]" : "border-transparent"}`}
-          onPress={() => setActiveTab("followers")}
-        >
-          <Text className={`font-semibold ${activeTab === "followers" ? "text-[#007275]" : "text-gray-500"}`}>
-            Seguidores ({followers.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className={`flex-1 py-4 items-center border-b-2 ${activeTab === "following" ? "border-[#007275]" : "border-transparent"}`}
-          onPress={() => setActiveTab("following")}
-        >
-          <Text className={`font-semibold ${activeTab === "following" ? "text-[#007275]" : "text-gray-500"}`}>
-            Siguiendo ({following.length})
-          </Text>
-        </TouchableOpacity>
-      </View>
+  const list = activeTab === "followers" ? followers : following;
 
-      <ScrollView contentContainerClassName="p-4">
-        {activeTab === "followers" ? (
-          followers.length === 0 ? (
-            <View className="bg-white p-10 rounded-2xl items-center mt-10 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-              <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
-                <Ionicons name="people-outline" size={32} color="#007275" />
-              </View>
-              <Text className="text-gray-500 text-center">Sin seguidores aún</Text>
-            </View>
-          ) : (
-            followers.map(renderUser)
-          )
-        ) : following.length === 0 ? (
-          <View className="bg-white p-10 rounded-2xl items-center mt-10 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-            <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
-              <Ionicons name="person-outline" size={32} color="#007275" />
-            </View>
-            <Text className="text-gray-500 text-center">No sigues a nadie aún</Text>
-          </View>
-        ) : (
-          following.map(renderUser)
-        )}
-      </ScrollView>
-    </View>
+  return (
+    <ScrollView className="flex-1 bg-[#faf5e0]" contentContainerClassName="p-5 pb-10">
+      <Segmented
+        options={[
+          { key: "followers", label: `Seguidores (${followers.length})`, icon: "people" },
+          { key: "following", label: `Siguiendo (${following.length})`, icon: "person-add" },
+        ]}
+        value={activeTab}
+        onChange={setActiveTab}
+      />
+      {list.length === 0 ? (
+        <EmptyCard
+          icon={activeTab === "followers" ? "people-outline" : "person-outline"}
+          text={activeTab === "followers" ? "Sin seguidores aún" : "No sigues a nadie aún"}
+        />
+      ) : (
+        <View className={`${CARD} overflow-hidden`}>{list.map(renderUser)}</View>
+      )}
+    </ScrollView>
   );
 }

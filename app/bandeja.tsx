@@ -1,7 +1,7 @@
-import { EmptyState } from "@/components/EmptyState";
 import { notificationsService } from "@/services/notifications.service";
 import type { Tables } from "@/types/database";
-import { formatDate } from "@/utils/format";
+import { formatDate, formatTimeAgo } from "@/utils/format";
+import { CARD_SHADOW, EmptyCard, ScreenTitle } from "@/components/kit/Kit";
 import { supabase } from "@/utils/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
@@ -75,51 +75,58 @@ export default function BandejaScreen() {
   return (
     <FlatList
       className="flex-1 bg-[#faf5e0]"
-      contentContainerClassName="p-5 grow"
+      contentContainerClassName="p-5 pb-10 grow"
       data={items}
       keyExtractor={(item) => item.id}
       refreshing={refreshing}
       onRefresh={handleRefresh}
       ListHeaderComponent={
-        <View className="flex-row items-center justify-between mb-4">
-          <Text className="text-2xl font-bold text-[#211f1e]">Notificaciones</Text>
-          {hasUnread && (
-            <TouchableOpacity onPress={handleMarkAll} accessibilityRole="button">
-              <Text className="text-[#007275] font-semibold">Marcar todas como leídas</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        <ScreenTitle
+          title="Notificaciones"
+          subtitle={hasUnread ? "Tienes avisos sin leer" : "Estás al día"}
+          right={
+            hasUnread ? (
+              <TouchableOpacity
+                className="bg-[#007275]/10 px-3 py-2 rounded-full flex-row items-center gap-1"
+                onPress={handleMarkAll}
+                accessibilityRole="button"
+                accessibilityLabel="Marcar todas como leídas"
+              >
+                <Ionicons name="checkmark-done" size={15} color="#007275" />
+                <Text className="text-[#007275] font-semibold text-xs">Marcar leídas</Text>
+              </TouchableOpacity>
+            ) : null
+          }
+        />
       }
       ListEmptyComponent={
-        <EmptyState
+        <EmptyCard
           icon="notifications-outline"
           title="Sin notificaciones"
-          subtitle="Aquí verás las alertas de mascotas perdidas en tu colonia y los avisos de mascotas encontradas."
+          text="Aquí verás las alertas de mascotas perdidas en tu colonia y los avisos de mascotas encontradas."
         />
       }
       renderItem={({ item }) => {
         const emergency = (item.data as NotificationData)?.type === "emergency";
         return (
           <TouchableOpacity
-            className={`flex-row items-start p-4 rounded-2xl mb-3 border ${item.read ? "bg-white border-[#211f1e]/10" : "bg-white border-[#007275]"}`}
+            className={`flex-row items-start p-4 rounded-3xl mb-3 ${item.read ? `bg-white ${CARD_SHADOW}` : "bg-white border-[1.5px] border-[#007275]/40 shadow-[0_6px_20px_rgba(0,114,117,0.12)]"}`}
             onPress={() => handleOpen(item)}
             activeOpacity={0.7}
             accessibilityRole="button"
             accessibilityLabel={`${item.read ? "" : "No leída. "}${item.title}`}
           >
-            <View className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${emergency ? "bg-[#ff7e70]/15" : "bg-[#007275]/10"}`}>
-              <Ionicons
-                name={emergency ? "megaphone-outline" : "paw-outline"}
-                size={20}
-                color={emergency ? "#ff7e70" : "#007275"}
-              />
+            <View className={`w-11 h-11 rounded-2xl items-center justify-center mr-3 ${emergency ? "bg-[#ff7e70]/15" : "bg-[#007275]/10"}`}>
+              <Ionicons name={emergency ? "megaphone" : "paw"} size={20} color={emergency ? "#ff7e70" : "#007275"} />
             </View>
             <View className="flex-1">
-              <Text className={`text-[#211f1e] ${item.read ? "font-medium" : "font-bold"}`}>{item.title}</Text>
-              <Text className="text-gray-600 text-sm mt-1">{item.body}</Text>
-              <Text className="text-gray-500 text-xs mt-2">{formatDate(item.created_at)}</Text>
+              <View className="flex-row items-start">
+                <Text className={`flex-1 text-[15px] text-[#211f1e] ${item.read ? "font-semibold" : "font-bold"}`}>{item.title}</Text>
+                {!item.read && <View className="w-2.5 h-2.5 rounded-full bg-[#ff7e70] mt-1.5 ml-2" />}
+              </View>
+              <Text className="text-gray-600 text-sm mt-1 leading-5">{item.body}</Text>
+              <Text className="text-gray-500 text-xs mt-2">{formatTimeAgo(item.created_at) || formatDate(item.created_at)}</Text>
             </View>
-            {!item.read && <View className="w-2.5 h-2.5 rounded-full bg-[#007275] mt-1.5 ml-2" />}
           </TouchableOpacity>
         );
       }}

@@ -1,5 +1,6 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { Avatar, CARD, Chip, EmptyCard, ListRow, ListSection, PetThumb, PrimaryButton, SectionTitle } from "@/components/kit/Kit";
 import { followsService } from "@/services/follows.service";
 import { messagesService } from "@/services/messages.service";
 import { petsService } from "@/services/pets.service";
@@ -10,7 +11,6 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   Modal,
   RefreshControl,
   ScrollView,
@@ -227,7 +227,7 @@ export default function PublicProfileScreen() {
           <Ionicons name="person-remove-outline" size={32} color="#211f1e" />
         </View>
         <Text className="text-gray-500 text-center">Perfil no encontrado</Text>
-        <TouchableOpacity className="bg-[#211f1e] py-3 px-6 rounded-xl mt-4" onPress={() => router.back()}>
+        <TouchableOpacity className="bg-[#007275] py-2.5 px-6 rounded-full mt-4" onPress={() => router.back()}>
           <Text className="text-white font-semibold">Volver</Text>
         </TouchableOpacity>
       </View>
@@ -256,120 +256,82 @@ export default function PublicProfileScreen() {
         />
       )}
       <ScrollView
+        className="bg-[#faf5e0]"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        contentContainerClassName="p-5 bg-[#faf5e0] grow"
+        contentContainerClassName="p-5 pb-10 grow"
       >
-        <View className="items-center mb-6">
-          {profile.profile_picture_url ? (
-            <Image source={{ uri: profile.profile_picture_url }} className="w-28 h-28 rounded-full border-4 border-[#007275]" />
-          ) : (
-            <View className="w-28 h-28 rounded-full bg-[#007275] items-center justify-center border-4 border-[#007275]/30">
-              <Text className="text-4xl text-white font-bold">{initial}</Text>
-            </View>
-          )}
-          <Text className="text-2xl font-bold mt-3 text-[#211f1e]">
+        {/* Cabecera */}
+        <View className={`${CARD} items-center px-5 pt-6 pb-5 mb-6`}>
+          <Avatar uri={profile.profile_picture_url} name={initial} size={108} />
+          <Text className="text-xl font-bold text-[#211f1e] mt-3 text-center">
             {profile.first_name} {profile.last_name}
           </Text>
-          {profile.city && (
-            <Text className="text-gray-500">{profile.city}</Text>
-          )}
+          <View className="flex-row flex-wrap justify-center gap-1.5 mt-2">
+            {!!profile.city && <Chip icon="location" text={profile.city} tone="teal" />}
+            {userRole && (userRole === "moderator" || userRole === "admin") && (
+              <Chip icon="shield-checkmark" text={userRole === "admin" ? "Administrador" : "Moderador"} tone="dark" />
+            )}
+          </View>
+
+          <View className="flex-row w-full mt-5 pt-4 border-t border-gray-100">
+            <Stat value={pets.length} label="Mascotas" />
+            <Stat value={followersCount} label="Seguidores" onPress={() => router.push(`/seguidores?id=${id}&tab=followers`)} />
+            <Stat value={followingCount} label="Siguiendo" onPress={() => router.push(`/seguidores?id=${id}&tab=following`)} />
+          </View>
+
+          <View className="w-full mt-5">
+            {isOwn ? (
+              <PrimaryButton title="Editar perfil" icon="pencil" onPress={() => router.push("/editar-perfil")} />
+            ) : isBlocked ? (
+              <View className="bg-gray-100 h-[52px] rounded-full flex-row items-center justify-center gap-2">
+                <Ionicons name="ban" size={18} color="#4B5563" />
+                <Text className="text-gray-700 font-semibold">Usuario bloqueado</Text>
+              </View>
+            ) : (
+              <View className="flex-row gap-3">
+                <PrimaryButton
+                  title={isFollowing ? "Siguiendo" : "Seguir"}
+                  icon={isFollowing ? "checkmark" : "person-add"}
+                  variant={isFollowing ? "ghost" : "teal"}
+                  onPress={handleFollow}
+                  loading={followBusy}
+                  className="flex-1"
+                />
+                <PrimaryButton
+                  title="Mensaje"
+                  icon="chatbubble-outline"
+                  variant="ghost"
+                  onPress={handleMessage}
+                  loading={messaging}
+                  className="flex-1"
+                />
+              </View>
+            )}
+          </View>
         </View>
 
-        <View className="flex-row justify-around bg-white p-4 rounded-2xl mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-          <View className="items-center">
-            <Text className="text-xl font-bold text-[#007275]">{pets.length}</Text>
-            <Text className="text-gray-500 text-sm">Mascotas</Text>
-          </View>
-          <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${id}&tab=followers`)}>
-            <Text className="text-xl font-bold text-[#007275]">{followersCount}</Text>
-            <Text className="text-gray-500 text-sm">Seguidores</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="items-center" onPress={() => router.push(`/seguidores?id=${id}&tab=following`)}>
-            <Text className="text-xl font-bold text-[#007275]">{followingCount}</Text>
-            <Text className="text-gray-500 text-sm">Siguiendo</Text>
-          </TouchableOpacity>
-        </View>
-
-        {isOwn ? (
-          <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity
-              className="flex-1 bg-[#007275] py-3 rounded-xl flex-row items-center justify-center"
-              onPress={() => router.push("/editar-perfil")}
-            >
-              <Ionicons name="pencil" size={16} color="white" style={{ marginRight: 6 }} />
-              <Text className="text-white text-center font-bold">Editar perfil</Text>
-            </TouchableOpacity>
-          </View>
-        ) : isBlocked ? (
-          <View className="bg-gray-100 p-4 rounded-xl mb-6 flex-row items-center justify-center gap-2">
-            <Ionicons name="ban" size={18} color="#4B5563" />
-            <Text className="text-gray-700 font-semibold">Usuario bloqueado</Text>
-          </View>
-        ) : (
-          <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity
-              className={`flex-1 py-3 rounded-xl ${isFollowing ? "bg-gray-500" : "bg-[#007275]"} ${followBusy ? "opacity-60" : ""}`}
-              onPress={handleFollow}
-              disabled={followBusy}
-            >
-              <Text className="text-white text-center font-bold">
-                {isFollowing ? "Siguiendo" : "Seguir"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className={`flex-1 bg-[#007275] py-3 rounded-xl ${messaging ? "opacity-60" : ""}`}
-              onPress={handleMessage}
-              disabled={messaging}
-            >
-              <Text className="text-white text-center font-bold">Mensaje</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {userRole && (userRole === "moderator" || userRole === "admin") && (
-          <View className="bg-[#007275] p-3 rounded-xl mb-4 flex-row items-center justify-center gap-1.5">
-            <Ionicons name="shield-checkmark" size={18} color="#fff" />
-            <Text className="text-white text-center font-semibold capitalize">
-              {userRole === "admin" ? "Administrador" : "Moderador"}
-            </Text>
-          </View>
-        )}
-
-        <View className="flex-row items-center gap-1.5 mb-3">
-          <Ionicons name="paw" size={18} color="#211f1e" />
-          <Text className="text-lg font-bold text-[#211f1e]">Mascotas</Text>
-        </View>
+        <SectionTitle icon="paw" title="Mascotas" />
         {pets.length === 0 ? (
-          <View className="bg-white p-6 rounded-2xl items-center mb-6 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-            <Text className="text-gray-500">Sin mascotas registradas</Text>
-          </View>
+          <EmptyCard icon="paw-outline" text="Sin mascotas registradas" />
         ) : (
           pets.map((pet) => (
-            <View key={pet.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)] flex-row">
-              {pet.image_url ? (
-                <Image source={{ uri: pet.image_url }} className="w-16 h-16 rounded-lg mr-3" />
-              ) : (
-                <View className="w-16 h-16 bg-gray-200 rounded-lg mr-3 items-center justify-center">
-                  <MaterialCommunityIcons
-                    name={pet.type === "perro" ? "dog" : "cat"}
-                    size={28}
-                    color="#6B7280"
-                  />
+            <View key={pet.id} className={`${CARD} p-3 mb-3 flex-row items-center`}>
+              <PetThumb uri={pet.image_url} type={pet.type} className="w-[72px] h-[72px] rounded-2xl" iconSize={32} />
+              <View className="flex-1 ml-3">
+                <Text className="font-bold text-lg text-[#211f1e]" numberOfLines={1}>{pet.name}</Text>
+                <View className="flex-row flex-wrap gap-1.5 mt-1.5">
+                  {!!pet.type && <Chip text={pet.type} tone="teal" />}
+                  {!!pet.color && <Chip text={pet.color} />}
+                  {!!pet.size && <Chip text={pet.size} />}
                 </View>
-              )}
-              <View className="flex-1">
-                <Text className="font-bold text-lg">{pet.name}</Text>
-                <Text className="text-gray-600 capitalize">{pet.type} • {pet.color}</Text>
-                <Text className="text-gray-500 text-sm">Tamaño: {pet.size}</Text>
               </View>
             </View>
           ))
         )}
 
-        <View className="bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-          <Text className="font-bold mb-2 text-[#211f1e]">Información</Text>
-          <Text className="text-gray-600">Miembro desde: {formatDate(profile.created_at)}</Text>
-        </View>
+        <ListSection className="mt-3">
+          <ListRow first icon="sparkles-outline" label="Miembro desde" value={formatDate(profile.created_at)} />
+        </ListSection>
       </ScrollView>
 
       {/* Menú ⋯: reportar / bloquear */}
@@ -379,7 +341,8 @@ export default function PublicProfileScreen() {
           activeOpacity={1}
           onPress={() => setShowMenu(false)}
         >
-          <TouchableOpacity activeOpacity={1} onPress={() => {}} className="bg-white rounded-t-2xl p-5 pb-8">
+          <TouchableOpacity activeOpacity={1} onPress={() => {}} className="bg-white rounded-t-[32px] px-5 pt-3 pb-8">
+            <View className="w-10 h-1.5 rounded-full bg-gray-300 self-center mb-3" />
             <TouchableOpacity className="flex-row items-center py-4" onPress={openReport}>
               <Ionicons name="flag-outline" size={22} color="#211f1e" />
               <Text className="ml-3 text-base font-semibold text-[#211f1e]">Reportar usuario</Text>
@@ -390,7 +353,7 @@ export default function PublicProfileScreen() {
                 {isBlocked ? "Desbloquear usuario" : "Bloquear usuario"}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity className="bg-gray-100 py-3 rounded-xl mt-2" onPress={() => setShowMenu(false)}>
+            <TouchableOpacity className="bg-gray-100 h-[52px] justify-center rounded-full mt-2" onPress={() => setShowMenu(false)}>
               <Text className="text-gray-700 text-center font-semibold">Cancelar</Text>
             </TouchableOpacity>
           </TouchableOpacity>
@@ -405,7 +368,8 @@ export default function PublicProfileScreen() {
         onRequestClose={() => { if (!reporting) setShowReport(false); }}
       >
         <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-2xl p-5 pb-8">
+          <View className="bg-white rounded-t-[32px] px-5 pt-3 pb-8">
+            <View className="w-10 h-1.5 rounded-full bg-gray-300 self-center mb-3" />
             <View className="flex-row items-center justify-between mb-2">
               <Text className="text-xl font-bold text-[#211f1e]">Reportar usuario</Text>
               <TouchableOpacity onPress={() => setShowReport(false)} disabled={reporting}>
@@ -418,7 +382,7 @@ export default function PublicProfileScreen() {
               return (
                 <TouchableOpacity
                   key={reason}
-                  className={`flex-row items-center p-3 rounded-xl mb-2 border ${selected ? "border-[#007275] bg-[#007275]/10" : "border-gray-200"}`}
+                  className={`flex-row items-center p-3.5 rounded-2xl mb-2 border-[1.5px] ${selected ? "border-[#007275] bg-[#007275]/10" : "border-gray-200"}`}
                   onPress={() => setReportReason(reason)}
                 >
                   <Ionicons
@@ -431,7 +395,7 @@ export default function PublicProfileScreen() {
               );
             })}
             <TouchableOpacity
-              className={`py-3 rounded-xl mt-3 flex-row items-center justify-center ${!reportReason || reporting ? "bg-gray-300" : "bg-[#007275]"}`}
+              className={`h-[52px] rounded-full mt-3 flex-row items-center justify-center ${!reportReason || reporting ? "bg-gray-300" : "bg-[#007275]"}`}
               onPress={handleReport}
               disabled={!reportReason || reporting}
             >
@@ -449,6 +413,7 @@ export default function PublicProfileScreen() {
 
       <ConfirmModal
         visible={showBlockConfirm}
+        destructive={!isBlocked}
         icon={isBlocked ? "lock-open-outline" : "ban"}
         title={isBlocked ? "Desbloquear usuario" : "Bloquear usuario"}
         message={
@@ -462,5 +427,20 @@ export default function PublicProfileScreen() {
         onCancel={() => setShowBlockConfirm(false)}
       />
     </>
+  );
+}
+
+function Stat({ value, label, onPress }: { value: number; label: string; onPress?: () => void }) {
+  const body = (
+    <>
+      <Text className="text-xl font-bold text-[#211f1e]">{value}</Text>
+      <Text className="text-gray-500 text-xs mt-0.5">{label}</Text>
+    </>
+  );
+  if (!onPress) return <View className="flex-1 items-center">{body}</View>;
+  return (
+    <TouchableOpacity className="flex-1 items-center" activeOpacity={0.6} onPress={onPress} accessibilityRole="button" accessibilityLabel={`Ver ${label.toLowerCase()}`}>
+      {body}
+    </TouchableOpacity>
   );
 }

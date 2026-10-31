@@ -89,3 +89,37 @@ describe("FeedTab infinite scroll", () => {
     expect(onLoadMoreFeed).not.toHaveBeenCalled();
   });
 });
+
+describe("FeedTab post card", () => {
+  it("comments pill toggles comments for that post", async () => {
+    const { onToggleComments } = await setup();
+    await fireEvent.press(screen.getAllByLabelText("Ver comentarios")[0]);
+    expect(onToggleComments).toHaveBeenCalledWith("post", "p1");
+  });
+
+  it("shows the comment box only for the open post and sends", async () => {
+    const { onAddComment } = await setup({ commentTarget: { type: "post", id: "p2" }, commentText: "hola" });
+    expect(screen.getAllByLabelText("Ocultar comentarios")).toHaveLength(1);
+    await fireEvent.press(screen.getByLabelText("Enviar comentario"));
+    expect(onAddComment).toHaveBeenCalled();
+  });
+
+  it("does not send an empty comment", async () => {
+    const { onAddComment } = await setup({ commentTarget: { type: "post", id: "p2" }, commentText: "  " });
+    await fireEvent.press(screen.getByLabelText("Enviar comentario"));
+    expect(onAddComment).not.toHaveBeenCalled();
+  });
+
+  it("shows skeletons while loading", async () => {
+    await setup({ loadingFeed: true });
+    expect(screen.getAllByTestId("feed-skeleton").length).toBeGreaterThan(0);
+  });
+});
+
+describe("FeedTab sections", () => {
+  it("switches to emergencies and shows the empty state", async () => {
+    await setup();
+    await fireEvent.press(screen.getByText("Emergencias"));
+    expect(screen.getByText("No hay alertas de emergencia activas")).toBeTruthy();
+  });
+});

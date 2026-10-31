@@ -1,13 +1,12 @@
+import { AuthScreen, FieldLabel } from "@/components/auth/AuthScreen";
+import { PrimaryButton } from "@/components/kit/Kit";
 import { authErrorMessage, authService, passwordError } from "@/services/auth.service";
 import { PasswordInput } from "@/components/PasswordInput";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -90,69 +89,43 @@ export default function ResetPasswordScreen() {
     }
   };
 
-  return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-[#faf5e0]"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <View className="flex-1 justify-center p-6">
-      {loading ? (
-        <View className="items-center">
-          <ActivityIndicator size="large" color="#007275" />
-          <Text className="mt-4 text-[#211f1e]">Actualizando...</Text>
-        </View>
-      ) : (
-        <>
-          <View className="mb-8">
-            <Text className="text-3xl font-bold text-[#211f1e] mb-2">
-              Nueva contraseña
-            </Text>
-            <Text className="text-[#211f1e] text-lg">
-              Ingresa tu nueva contraseña
-            </Text>
-          </View>
-
-          <View className="mb-4">
-            <Text className="text-[#211f1e] font-semibold mb-2">
-              Nueva contraseña
-            </Text>
-            <PasswordInput
-              placeholder="••••••••"
-              value={password}
-              onChangeText={setPassword}
-              autoCapitalize="none"
-              autoComplete="new-password"
-              accessibilityLabel="Nueva contraseña"
-            />
-          </View>
-
-          <View className="mb-8">
-            <Text className="text-[#211f1e] font-semibold mb-2">
-              Confirmar contraseña
-            </Text>
-            <PasswordInput
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              autoCapitalize="none"
-              autoComplete="new-password"
-              accessibilityLabel="Confirmar contraseña"
-            />
-          </View>
-
-          <TouchableOpacity
-            className="bg-[#007275] py-4 rounded-xl mb-4"
-            onPress={handleUpdate}
-            accessibilityRole="button"
-          >
-            <Text className="text-white text-center font-bold text-lg">
-              Actualizar contraseña
-            </Text>
-          </TouchableOpacity>
-        </>
-      )}
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#faf5e0]">
+        <ActivityIndicator size="large" color="#007275" />
+        <Text className="mt-4 text-gray-600 font-medium">Actualizando...</Text>
       </View>
-    </KeyboardAvoidingView>
+    );
+  }
+
+  return (
+    <AuthScreen headerless title="Nueva contraseña" subtitle="Ingresa tu nueva contraseña">
+      <FieldLabel>Nueva contraseña</FieldLabel>
+      <View className="mb-4">
+        <PasswordInput
+          placeholder="••••••••"
+          value={password}
+          onChangeText={setPassword}
+          autoCapitalize="none"
+          autoComplete="new-password"
+          accessibilityLabel="Nueva contraseña"
+        />
+        <Text className="text-gray-500 text-xs mt-1.5 ml-1">Mínimo 8 caracteres, con letras y números</Text>
+      </View>
+
+      <FieldLabel>Confirmar contraseña</FieldLabel>
+      <View className="mb-5">
+        <PasswordInput
+          placeholder="••••••••"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          autoCapitalize="none"
+          autoComplete="new-password"
+          accessibilityLabel="Confirmar contraseña"
+        />
+      </View>
+
+      <PrimaryButton title="Actualizar contraseña" icon="key-outline" onPress={handleUpdate} />
+    </AuthScreen>
   );
 }

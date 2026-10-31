@@ -1,3 +1,4 @@
+import { Avatar, CARD, Chip, ListSection, PrimaryButton } from "@/components/kit/Kit";
 import { Ionicons } from "@expo/vector-icons";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { groupsService } from "@/services/groups.service";
@@ -6,7 +7,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   RefreshControl,
   ScrollView,
   Text,
@@ -159,7 +159,7 @@ export default function GrupoDetailScreen() {
           <Ionicons name="people-outline" size={32} color="#211f1e" />
         </View>
         <Text className="text-gray-500 text-center">Grupo no encontrado</Text>
-        <TouchableOpacity className="bg-[#211f1e] py-3 px-6 rounded-xl mt-4" onPress={() => router.back()}>
+        <TouchableOpacity className="bg-[#007275] py-2.5 px-6 rounded-full mt-4" onPress={() => router.back()}>
           <Text className="text-white font-semibold">Volver</Text>
         </TouchableOpacity>
       </View>
@@ -169,98 +169,69 @@ export default function GrupoDetailScreen() {
   return (
     <>
       <ScrollView
+        className="bg-[#faf5e0]"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-        contentContainerClassName="p-5 bg-[#faf5e0] grow"
+        contentContainerClassName="p-5 pb-10 grow"
       >
-        <Text className="text-2xl font-bold text-[#211f1e] mb-2">{group.name}</Text>
-        {group.description && (
-          <Text className="text-gray-600 mb-4">{group.description}</Text>
-        )}
-        <View className="flex-row items-center mb-4">
-          <Ionicons name="people" size={15} color="#6B7280" style={{ marginRight: 4 }} />
-          <Text className="text-gray-500 text-sm">{members.length} miembros</Text>
-        </View>
+        <View className={`${CARD} items-center px-5 pt-6 pb-5 mb-6`}>
+          <View className="w-20 h-20 rounded-3xl bg-[#007275]/10 items-center justify-center">
+            <Ionicons name="people" size={38} color="#007275" />
+          </View>
+          <Text className="text-xl font-bold text-[#211f1e] mt-3 text-center">{group.name}</Text>
+          {!!group.description && (
+            <Text className="text-gray-600 text-sm text-center leading-5 mt-1.5">{group.description}</Text>
+          )}
+          <View className="mt-3">
+            <Chip icon="people" text={`${members.length} miembros`} tone="teal" />
+          </View>
 
-        {!isMember ? (
-          <TouchableOpacity
-            className={`bg-[#007275] py-3 rounded-xl mb-6 flex-row items-center justify-center ${busy ? "opacity-60" : ""}`}
-            onPress={handleJoin}
-            disabled={busy}
-          >
-            {busy ? (
-              <ActivityIndicator size="small" color="#fff" />
+          <View className="w-full mt-5">
+            {!isMember ? (
+              <PrimaryButton title="Unirse al grupo" icon="person-add" onPress={handleJoin} loading={busy} />
             ) : (
-              <>
-                <Ionicons name="person-add" size={18} color="white" style={{ marginRight: 8 }} />
-                <Text className="text-white font-semibold">Unirse al grupo</Text>
-              </>
+              <View className="flex-row gap-3">
+                <PrimaryButton title="Chat grupal" icon="chatbubbles" onPress={handleOpenChat} loading={openingChat} className="flex-1" />
+                {!isCreator && (
+                  <PrimaryButton
+                    title="Salir"
+                    icon="exit-outline"
+                    variant="ghost"
+                    onPress={() => setShowLeaveConfirm(true)}
+                    disabled={busy}
+                    className="flex-1"
+                  />
+                )}
+              </View>
             )}
-          </TouchableOpacity>
-        ) : (
-          <View className="flex-row gap-3 mb-6">
-            <TouchableOpacity
-              className={`flex-1 bg-[#007275] py-3 rounded-xl flex-row items-center justify-center ${openingChat ? "opacity-60" : ""}`}
-              onPress={handleOpenChat}
-              disabled={openingChat}
-            >
-              {openingChat ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <>
-                  <Ionicons name="chatbubbles" size={18} color="white" style={{ marginRight: 8 }} />
-                  <Text className="text-white font-semibold">Chat grupal</Text>
-                </>
-              )}
-            </TouchableOpacity>
-            {!isCreator && (
-              <TouchableOpacity
-                className="flex-1 bg-gray-300 py-3 rounded-xl flex-row items-center justify-center"
-                onPress={() => setShowLeaveConfirm(true)}
-                disabled={busy}
-              >
-                <Ionicons name="exit-outline" size={18} color="#4B5563" style={{ marginRight: 8 }} />
-                <Text className="text-gray-700 font-semibold">Salir</Text>
-              </TouchableOpacity>
+            {isCreator && (
+              <PrimaryButton
+                title="Eliminar grupo"
+                icon="trash-outline"
+                variant="danger"
+                onPress={() => setShowDeleteConfirm(true)}
+                className="mt-3"
+              />
             )}
           </View>
-        )}
+        </View>
 
-        {isCreator && (
-          <TouchableOpacity
-            className="bg-[#d93a3a] py-3 rounded-xl mb-6 flex-row items-center justify-center"
-            onPress={() => setShowDeleteConfirm(true)}
-          >
-            <Ionicons name="trash" size={18} color="white" style={{ marginRight: 8 }} />
-            <Text className="text-white font-semibold">Eliminar grupo</Text>
-          </TouchableOpacity>
-        )}
-
-        <Text className="text-lg font-bold text-[#211f1e] mb-3">Miembros</Text>
-        {members.map((m) => (
-          <TouchableOpacity
-            key={m.id}
-            className="flex-row items-center p-3 bg-white rounded-2xl mb-2 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
-            onPress={() => router.push(`/perfil/${m.user_id}`)}
-          >
-            {m.profile_picture_url ? (
-              <Image source={{ uri: m.profile_picture_url }} className="w-10 h-10 rounded-full mr-3" />
-            ) : (
-              <View className="w-10 h-10 bg-[#007275] rounded-full items-center justify-center mr-3">
-                <Text className="text-white font-bold">{m.first_name?.[0]?.toUpperCase() || "U"}</Text>
-              </View>
-            )}
-            <View className="flex-1">
-              <Text className="font-semibold text-[#211f1e]">
+        <ListSection title="Miembros">
+          {members.map((m, i) => (
+            <TouchableOpacity
+              key={m.id}
+              className={`flex-row items-center px-4 py-3 ${i > 0 ? "border-t border-gray-100" : ""}`}
+              activeOpacity={0.7}
+              onPress={() => router.push(`/perfil/${m.user_id}`)}
+            >
+              <Avatar uri={m.profile_picture_url} name={m.first_name} size={44} ring={false} />
+              <Text className="flex-1 ml-3 font-semibold text-[#211f1e] text-[15px]">
                 {m.first_name} {m.last_name}
               </Text>
-            </View>
-            {m.role === "admin" && (
-              <View className="bg-[#211f1e] px-3 py-1 rounded-full">
-                <Text className="text-white text-xs font-semibold">Admin</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        ))}
+              {m.role === "admin" && <Chip icon="star" text="Admin" tone="dark" />}
+              <Ionicons name="chevron-forward" size={18} color="#C4C4C4" style={{ marginLeft: 6 }} />
+            </TouchableOpacity>
+          ))}
+        </ListSection>
       </ScrollView>
 
       <ConfirmModal
@@ -276,6 +247,7 @@ export default function GrupoDetailScreen() {
 
       <ConfirmModal
         visible={showDeleteConfirm}
+        destructive
         icon="trash-outline"
         title="Eliminar grupo"
         message="¿Estás seguro? Esto eliminará el grupo y el chat asociado para todos los miembros."

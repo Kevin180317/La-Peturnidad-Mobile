@@ -1,3 +1,5 @@
+import { AuthScreen } from "@/components/auth/AuthScreen";
+import { PrimaryButton } from "@/components/kit/Kit";
 import { authErrorMessage, authService } from "@/services/auth.service";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -14,9 +16,9 @@ const RESEND_COOLDOWN_SECONDS = 60;
 
 export default function VerifyOtpScreen() {
   const { email } = useLocalSearchParams<{ email: string }>();
+  const [otpFocused, setOtpFocused] = useState(false);
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
-  const [otpFocused, setOtpFocused] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const router = useRouter();
 
@@ -115,73 +117,58 @@ export default function VerifyOtpScreen() {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#faf5e0]">
+        <ActivityIndicator size="large" color="#007275" />
+        <Text className="mt-4 text-gray-600 font-medium">Verificando código...</Text>
+      </View>
+    );
+  }
+
   return (
-    <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
-      {loading ? (
-        <View className="items-center">
-          <ActivityIndicator size="large" color="#007275" />
-          <Text className="mt-4 text-[#211f1e]">Verificando código...</Text>
-        </View>
-      ) : (
+    <AuthScreen
+      headerless
+      onBack={() => (router.canGoBack() ? router.back() : router.replace("/forgot-password"))}
+      title="Verifica tu código"
+      subtitle={
         <>
-          <View className="mb-8">
-            <Text className="text-3xl font-bold text-[#211f1e] mb-2">
-              Verifica tu código
-            </Text>
-            <Text className="text-[#211f1e] text-lg">
-              Ingresa el código de 8 dígitos que enviamos a{" "}
-              <Text className="font-bold">{email}</Text>
-            </Text>
-          </View>
-
-          <View className="mb-6">
-            <Text className="text-[#211f1e] font-semibold mb-2">
-              Código OTP
-            </Text>
-            <TextInput
-              className={`${otpFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e] text-center tracking-[8px]`}
-              placeholder="--------"
-              placeholderTextColor="#9BA1A6"
-              value={otp}
-              onChangeText={handleOtpChange}
-              keyboardType="number-pad"
-              maxLength={8}
-              autoFocus
-              textContentType="oneTimeCode"
-              autoComplete="one-time-code"
-              accessibilityLabel="Código de verificación de 8 dígitos"
-              onFocus={() => setOtpFocused(true)}
-              onBlur={() => setOtpFocused(false)}
-            />
-          </View>
-
-          <TouchableOpacity
-            className="bg-[#007275] py-4 rounded-xl mb-4"
-            onPress={() => handleVerify()}
-            accessibilityRole="button"
-          >
-            <Text className="text-white text-center font-bold text-lg">
-              Verificar código
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="py-2"
-            onPress={handleResend}
-            disabled={cooldown > 0}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: cooldown > 0 }}
-          >
-            <Text
-              className={`text-center font-semibold ${cooldown > 0 ? "text-gray-500" : "text-[#007275]"}`}
-            >
-              {cooldown > 0
-                ? `Reenviar código en ${cooldown} s`
-                : "Reenviar código"}
-            </Text>
-          </TouchableOpacity>
+          Ingresa el código de 8 dígitos que enviamos a{" "}
+          <Text className="font-bold text-[#211f1e]">{email}</Text>
         </>
-      )}
-    </View>
+      }
+    >
+      <View className={`h-16 rounded-2xl border-[1.5px] bg-white justify-center mb-5 ${otpFocused ? "border-[#007275]" : "border-gray-200"}`}>
+        <TextInput
+          className="text-2xl font-bold text-[#211f1e] text-center tracking-[8px]"
+          placeholder="--------"
+          placeholderTextColor="#C4C4C4"
+          value={otp}
+          onChangeText={handleOtpChange}
+          keyboardType="number-pad"
+          maxLength={8}
+          autoFocus
+          textContentType="oneTimeCode"
+          autoComplete="one-time-code"
+          accessibilityLabel="Código de verificación de 8 dígitos"
+          onFocus={() => setOtpFocused(true)}
+          onBlur={() => setOtpFocused(false)}
+        />
+      </View>
+
+      <PrimaryButton title="Verificar código" icon="shield-checkmark-outline" onPress={() => handleVerify()} />
+
+      <TouchableOpacity
+        className="py-3 mt-2"
+        onPress={handleResend}
+        disabled={cooldown > 0}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: cooldown > 0 }}
+      >
+        <Text className={`text-center font-semibold ${cooldown > 0 ? "text-gray-500" : "text-[#007275]"}`}>
+          {cooldown > 0 ? `Reenviar código en ${cooldown} s` : "Reenviar código"}
+        </Text>
+      </TouchableOpacity>
+    </AuthScreen>
   );
 }

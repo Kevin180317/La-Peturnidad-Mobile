@@ -1,4 +1,4 @@
-import { formatDate, parseDate, toLocalDateString } from "@/utils/format";
+import { formatDate, formatShortTime, formatTimeAgo, parseDate, toLocalDateString } from "@/utils/format";
 
 describe("formatDate", () => {
   it("returns fallback for empty values", () => {
@@ -33,5 +33,41 @@ describe("toLocalDateString", () => {
   it("uses local date parts", () => {
     expect(toLocalDateString(new Date(2024, 0, 9, 23, 30))).toBe("2024-01-09");
     expect(toLocalDateString(new Date(2023, 11, 31, 0, 5))).toBe("2023-12-31");
+  });
+});
+
+describe("formatTimeAgo", () => {
+  const now = new Date("2026-10-29T12:00:00Z");
+
+  it("returns empty string for missing or invalid dates", () => {
+    expect(formatTimeAgo(null, now)).toBe("");
+    expect(formatTimeAgo("no es fecha", now)).toBe("");
+  });
+
+  it.each([
+    ["2026-10-29T11:59:30Z", "ahora"],
+    ["2026-10-29T11:55:00Z", "hace 5 min"],
+    ["2026-10-29T09:00:00Z", "hace 3 h"],
+    ["2026-10-27T12:00:00Z", "hace 2 d"],
+  ])("%s -> %s", (date, expected) => {
+    expect(formatTimeAgo(date, now)).toBe(expected);
+  });
+
+  it("falls back to day and short month after a week", () => {
+    expect(formatTimeAgo("2026-10-12T12:00:00Z", now)).toMatch(/^12 oct/);
+  });
+});
+
+describe("formatShortTime", () => {
+  const now = new Date("2026-10-29T12:00:00Z");
+
+  it("returns empty string for missing or invalid dates", () => {
+    expect(formatShortTime(null, now)).toBe("");
+    expect(formatShortTime("x", now)).toBe("");
+  });
+
+  it("shows the time within the last 24 hours and the date otherwise", () => {
+    expect(formatShortTime("2026-10-29T10:00:00Z", now)).toMatch(/\d{1,2}:\d{2}/);
+    expect(formatShortTime("2026-10-12T12:00:00Z", now)).toMatch(/^12 oct/);
   });
 });

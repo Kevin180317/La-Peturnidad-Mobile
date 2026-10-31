@@ -24,19 +24,35 @@
 
 - Expo SDK 58, React Native 0.88, React 19.3
 - TypeScript 6 (strict mode; `tsconfig.json` declara `types: ["jest", "node"]` porque TS 6 ya no carga los `@types/*` solos)
-- Bun as package manager (bun.lockb)
+- Bun as package manager (bun.lockb). Es el ÚNICO lockfile: `package-lock.json` se eliminó el 2026-10-30 (expo-doctor/EAS se confunden con dos). No usar `npm install`
 
 ## Key Files
 
 - `app/` - Expo Router pages (dashboard, register, index)
 - `utils/supabase.ts` - Supabase client
 - `.env.local` - local env vars
+- `components/kit/Kit.tsx` - kit de diseño compartido (ver "Sistema de diseño")
+- `components/auth/AuthScreen.tsx` - marco de las pantallas de acceso
+- `components/messages/ConversationList.tsx` - lista de chats (pestaña Mensajes y `/mensajes`)
+- `components/AnimatedSplash.tsx` - splash animado (continúa el splash nativo)
+- `components/ConfirmDialog.tsx` - `confirmDialog()` + `<ConfirmHost />`: confirmaciones con el diseño de la app (reemplaza `Alert.alert`)
+
+## Sistema de diseño (2026-10-30)
+
+- Toda pantalla nueva o modificada se arma con `components/kit/Kit.tsx`; no duplicar estilos a mano. Piezas: `CARD`/`CARD_SHADOW`/`Card`, `ScreenTitle`, `SectionTitle`, `Avatar` (foto o inicial, aro teal opcional), `RoundIconButton`, `Chip`/`ChipTone`, `EmptyCard`, `PetThumb`, `PrimaryButton` (píldora 52 px: teal/coral/ghost/danger), `Field` (input con etiqueta, ícono y borde teal al enfocar), `ChoiceChips` (reemplaza Pickers con pocas opciones), `ToggleTile`, `ListSection`/`ListRow` (filas tipo ajustes), `Segmented` (pastilla deslizante), `Sheet` (hoja inferior con asa y X)
+- Lenguaje visual: fondo crema `#faf5e0`, tarjetas blancas `rounded-3xl` con sombra suave, botones píldora, íconos en círculos/cuadros tintados (`${color}1A`), títulos de pantalla dentro del contenido (no en la barra)
+- Sin barra de navegación (`headerShown: false`): dashboard y todas las pantallas de acceso (login, register, register-extended, forgot-password, verify-otp, reset-password, email-confirmacion). Usan `useSafeAreaInsets` (en auth: prop `headerless` de `AuthScreen`; `onBack` dibuja el botón de regreso). El resto de pantallas conserva la barra teal con flecha atrás
+- Confirmaciones: NO usar `Alert.alert`. Usar `confirmDialog({ title, message, confirmLabel, destructive, icon, onConfirm })` de `components/ConfirmDialog.tsx` (lo dibuja el único `<ConfirmHost />` de `_layout`; espera a que `onConfirm` termine con spinner). `destructive` = rojo, solo para borrar/bloquear. Para modales con estado propio, `ConfirmModal` (también acepta `destructive`)
+- Toasts: `components/ToastConfig.tsx` (tarjeta blanca, se cierra al tocarla o con la X; `topOffset={56}` en `_layout`). Tipos: `success`, `error`, `info` y `welcome` (teal relleno; login y fin de registro)
+- Animaciones con el `Animated` de RN salvo el splash: reanimated NO está mockeado globalmente en Jest (usar `jest.mock("react-native-reanimated", () => require("../../test/reanimatedMock"))` en el test que lo necesite). `react-native-safe-area-context` sí está mockeado en `test/setup.ts`
+- Textos que usan Maestro y no se deben cambiar: "Inicia sesión para continuar", "Saltar", etiqueta de pestaña "Perfil", "Cerrar Sesión" (ProfileTab) y "Cerrar sesión" (modal), `testID="login-submit"`
 
 ## Uniwind scanning (IMPORTANT)
 
 - El scanner de Tailwind v4 (via uniwind) solo escanea `app/` por defecto (`base = dirname(global.css)`).
 - `app/global.css` declara `@source "../components"` para que las clases usadas en `components/` también se compilen.
 - Si creas UI con `className` fuera de `app/` (p. ej. `components/`, `utils/`), verifica que exista el `@source` correspondiente; si no, esas clases no generan estilo (botones invisibles, imágenes 0x0, sin gaps).
+- Clases NUEVAS (que no existían en ningún archivo, sobre todo valores arbitrarios como `bg-[#dc2626]`) pueden no aplicarse con Metro ya corriendo: el CSS de Uniwind queda en caché. Síntoma: botón con texto blanco "invisible" sobre fondo blanco. Solución: reiniciar con `npx expo start -c` (pasó el 2026-10-30 con el botón rojo de `ConfirmModal`).
 
 ## Progress
 
@@ -93,6 +109,16 @@
 - Cliente tipado: `createClient<Database>` en `utils/supabase.ts`; `types/index.ts` ahora DERIVA de `Tables<>` (no duplicar columnas a mano). Al cambiar el esquema: aplicar migración → regenerar `types/database.ts` (MCP `generate_typescript_types`) → `bun run typecheck` para ver qué rompe. Las uniones de texto (`role`, `status`, `category`, `target_type`) se estrechan con `Override<>` en `types/index.ts` y con `as` en el servicio
 - Íconos (2026-10-24): `icon.png`, `adaptive-icon.png`, `splash-icon.png` y `favicon.png` generados desde `Isotipo_color_Salmon.png` (hexágono salmón sobre crema `#faf5e0`; antes eran los de la plantilla de Expo). `app.json`: fondo del ícono adaptable y del splash en `#faf5e0`. Para la ficha de Play Store: `assets/store/play-store-icon-512.png` (se sube en Play Console, no va en el build). Verificado visualmente en el build del 2026-10-24 (se ve bien). Para regenerarlos: script de PowerShell con System.Drawing (centra el isotipo; adaptable al 620/1024 para respetar la zona segura de Android)
 - Build nuevo generado el 2026-10-24 con todo lo anterior (ícono, bandeja, seguridad, tokens push, términos); el usuario confirmó que se ve bien. Para QA o terceros usar el perfil `preview` (APK, enlace/QR de expo.dev, sin cuenta de Expo); `development` solo sirve con `npx expo start`. El APK viejo (SDK 54) no sirve y las versiones anteriores al esquema nuevo fallan contra el Supabase actual. Pendiente: probar el flujo completo con 2 cuentas en teléfono real
+
+### Rediseño UI y fixes (2026-10-29/30)
+- Splash animado (`components/AnimatedSplash.tsx`, montado en `_layout.tsx` sobre el `<Stack>`): huellas color isotipo `#f08374` caminando → halo + 2 latidos con onda y vibración suave → wordmark → zoom. ~2.2 s; con "reducir movimiento" solo fade. Tiempos como constantes al inicio del archivo
+- Rediseño completo con el kit (ver "Sistema de diseño"): Feed, Emergencia, Inicio (+ PetForm con tamaño en pastillas y PetDetailModal como hoja inferior), Mensajes y chat, Perfil, perfil ajeno, editar perfil, seguidores, bandeja, preferencias, seguridad, todo auth y onboarding, buscar, grupos, comunidad, historias, cómo usar, FAQ, moderación, PostForm, TabBar, ConfirmModal y +not-found. Sin cambios de lógica, servicios ni props
+- Helpers nuevos en `utils/format.ts`: `formatTimeAgo` ("hace 3 h") y `formatShortTime` (hora o "12 oct")
+- Descartado el rediseño "estilo Instagram" (spec/plan del 2026-10-29 y su stash): no retomarlo
+- **Fix subida de imágenes** (`dashboardService.uploadImage`): la imagen local se lee con `new File(uri).arrayBuffer()` de `expo-file-system` (declarado en `package.json`). Antes `fetch("file://...")` no resolvía las rutas con `%25` de Expo Go (`ExperienceData/%2540...`), devolvía el texto "File not found" (14 bytes) y eso se subía como foto (perfil/mascotas/posts quedaban en blanco con "unknown image format"). Si el archivo sale vacío ya no se sube. Archivos dañados previos: `select bucket_id, name from storage.objects where (metadata->>'size')::int < 100;` y volver a subirlos desde la app
+- Confirmaciones: los 12 `Alert.alert` (dashboard, mensajes, comunidad, historias) pasaron a `confirmDialog` (ver "Sistema de diseño"); eliminar cuenta, eliminar grupo y bloquear usuario usan `ConfirmModal` con `destructive`
+- Toast `welcome` y sin barras superiores en dashboard y auth (ver "Sistema de diseño")
+- Tests: 23 suites / 174 tests (kit, ConversationList, ToastConfig, ConfirmDialog, HomeTab/PetForm/PetDetailModal, EmergencyTab, AnimatedSplash, upload con expo-file-system)
 
 ### Legal (páginas web) — REVISIÓN PENDIENTE
 - La app enlaza a `https://luckytracker.com.mx/terms` y `https://luckytracker.com.mx/policy` (constantes en `utils/legal.ts`): checkbox obligatorio en `app/register.tsx` y entradas en Perfil → Ayuda. Las mismas URLs van en Play Console
@@ -154,6 +180,7 @@ Orden sugerido por costo/beneficio. Tokens = estimado aproximado.
 ### Consideraciones futuras
 
 #### Plan de avatares (decidido 2026-10-24: hacerlo DESPUÉS de QA / lanzamiento)
+- **Opción 1 hecha en parte (2026-10-30)**: `Avatar` en `components/kit/Kit.tsx` (foto o inicial sobre teal) ya se usa en todos los sitios listados abajo y reemplazó la imagen remota de gstatic de ProfileTab. Falta solo el color determinista por `user_id` (hoy siempre teal)
 - No bloquea Play Store ni QA. Un cambio nativo obligaría a otro build en pleno QA; por eso se pospone.
 - Opción 1 (recomendada, JS puro, sin build): componente `components/Avatar.tsx` con iniciales sobre círculo de color de la paleta (teal/coral/dark), color determinista por `user_id`. Props: `uri`, `name`, `size`. Usa `uri` si hay foto; si no, iniciales. Recordar el `@source "../components"` (ver Uniwind scanning)
 - Opción 2 (`blobatar`, requiere build nuevo): ver sección siguiente

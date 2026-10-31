@@ -21,3 +21,6 @@ jest.mock("@expo/vector-icons", () => {
   const icon = () => null;
   return new Proxy({ __esModule: true }, { get: (target, key) => (key in target ? target[key as keyof typeof target] : icon) });
 });
+
+// useSafeAreaInsets necesita SafeAreaProvider; el mock oficial devuelve insets fijos
+jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);

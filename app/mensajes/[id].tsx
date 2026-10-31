@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { EmptyState } from "@/components/EmptyState";
+import { EmptyCard } from "@/components/kit/Kit";
 import { messagesService } from "@/services/messages.service";
 import { type Message } from "@/types";
 import { supabase } from "@/utils/supabase";
@@ -190,13 +190,11 @@ export default function ConversationScreen() {
   if (unavailable) {
     return (
       <View className="flex-1 justify-center p-5 bg-[#faf5e0]">
-        <EmptyState
-          icon="lock-closed"
-          title="Conversación no disponible"
-          subtitle="Esta conversación no existe o no tienes acceso a ella."
-          actionLabel="Volver"
-          onAction={goBack}
-        />
+        <EmptyCard icon="lock-closed-outline" title="Conversación no disponible" text="Esta conversación no existe o no tienes acceso a ella.">
+          <TouchableOpacity className="bg-[#007275] py-2.5 px-6 rounded-full mt-4" onPress={goBack}>
+            <Text className="text-white font-semibold">Volver</Text>
+          </TouchableOpacity>
+        </EmptyCard>
       </View>
     );
   }
@@ -211,10 +209,13 @@ export default function ConversationScreen() {
         ref={flatListRef}
         data={messages}
         keyExtractor={(item) => item.id}
-        contentContainerClassName="p-4"
+        contentContainerClassName="px-4 pt-2 pb-4"
         ListEmptyComponent={
           <View className="flex-1 justify-center items-center py-20">
-            <Text className="text-gray-500">No hay mensajes aún</Text>
+            <View className="w-16 h-16 rounded-full bg-[#007275]/10 items-center justify-center mb-3">
+              <Ionicons name="chatbubbles-outline" size={30} color="#007275" />
+            </View>
+            <Text className="font-bold text-[#211f1e] text-base">No hay mensajes aún</Text>
             <Text className="text-gray-500 text-sm mt-1">Envía el primer mensaje</Text>
           </View>
         }
@@ -223,71 +224,79 @@ export default function ConversationScreen() {
           const showDate = index === 0 ||
             new Date(item.created_at ?? 0).toDateString() !==
             new Date(messages[index - 1]?.created_at ?? 0).toDateString();
+          // Agrupa burbujas seguidas del mismo remitente (menos espacio y sin repetir nombre)
+          const sameAsPrev = !showDate && messages[index - 1]?.sender_id === item.sender_id;
 
           return (
             <>
               {showDate && (
-                <Text className="text-center text-gray-500 text-xs my-3">
-                  {formatDate(item.created_at)}
-                </Text>
+                <View className="self-center bg-white/80 px-3 py-1 rounded-full my-3 shadow-[0_1px_4px_rgba(33,31,30,0.06)]">
+                  <Text className="text-gray-600 text-[11px] font-semibold">{formatDate(item.created_at)}</Text>
+                </View>
               )}
-              <View className={`mb-3 max-w-[80%] ${isMine ? "self-end" : "self-start"}`}>
-                {isGroup && !isMine && (
-                  <Text className="text-xs font-semibold text-[#211f1e] mb-0.5 ml-1">
+              <View className={`max-w-[80%] ${sameAsPrev ? "mt-1" : "mt-3"} ${isMine ? "self-end" : "self-start"}`}>
+                {isGroup && !isMine && !sameAsPrev && (
+                  <Text className="text-xs font-bold text-[#007275] mb-1 ml-3">
                     {senderNames[item.sender_id] || "Usuario"}
                   </Text>
                 )}
                 <View
-                  className={`p-3 rounded-2xl ${
+                  className={`px-3.5 pt-2 pb-1.5 rounded-3xl ${
                     isMine
-                      ? "bg-[#007275] rounded-br-md"
-                      : "bg-white rounded-bl-md shadow-sm"
+                      ? "bg-[#007275] rounded-br-lg shadow-[0_4px_12px_rgba(0,114,117,0.2)]"
+                      : "bg-white rounded-bl-lg shadow-[0_2px_8px_rgba(33,31,30,0.06)]"
                   }`}
                 >
-                  <Text className={isMine ? "text-white" : "text-[#211f1e]"}>
+                  <Text className={`text-[15px] leading-5 ${isMine ? "text-white" : "text-[#211f1e]"}`}>
                     {item.content}
                   </Text>
+                  <View className="flex-row items-center justify-end gap-1 mt-0.5">
+                    <Text className={`text-[10px] ${isMine ? "text-white/75" : "text-gray-500"}`}>
+                      {formatTime(item.created_at)}
+                    </Text>
+                    {isMine && (
+                      <Ionicons
+                        name={item.read_at ? "checkmark-done" : "checkmark"}
+                        size={13}
+                        color={item.read_at ? "#ffffff" : "rgba(255,255,255,0.6)"}
+                      />
+                    )}
+                  </View>
                 </View>
-                <Text className={`text-xs mt-1 text-gray-500 ${isMine ? "text-right" : "text-left"}`}>
-                  {formatTime(item.created_at)}
-                  {isMine && item.read_at && (
-                    <Ionicons name="checkmark-done" size={14} color="#9CA3AF" />
-                  )}
-                </Text>
               </View>
             </>
           );
         }}
       />
 
-      <View className="flex-row items-center gap-2 p-3 bg-white border-t border-gray-200">
-        <TextInput
-          className={`flex-1 bg-white rounded-full px-4 py-3 text-[#211f1e] ${inputFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-200"}`}
-          placeholder="Escribe un mensaje..."
-          placeholderTextColor="#9BA1A6"
-          value={input}
-          onChangeText={setInput}
-          multiline
-          onFocus={() => setInputFocused(true)}
-          onBlur={() => setInputFocused(false)}
-        />
-        <TouchableOpacity
-          className={`w-12 h-12 rounded-full items-center justify-center ${sending || !input.trim() ? "bg-gray-300" : "bg-[#007275]"}`}
-          onPress={handleSend}
-          disabled={sending || !input.trim()}
-          accessibilityRole="button"
-          accessibilityLabel="Enviar mensaje"
+      <View className="px-3 pt-2 pb-3 bg-[#faf5e0]">
+        <View
+          className={`flex-row items-end bg-white rounded-[26px] pl-4 pr-1.5 py-1.5 border-[1.5px] shadow-[0_4px_16px_rgba(33,31,30,0.08)] ${inputFocused ? "border-[#007275]" : "border-transparent"}`}
         >
-          {sending ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Ionicons
-              name="send"
-              size={18}
-              color={!input.trim() ? "#9CA3AF" : "white"}
-            />
-          )}
-        </TouchableOpacity>
+          <TextInput
+            className="flex-1 py-2 text-[15px] text-[#211f1e] max-h-28"
+            placeholder="Escribe un mensaje..."
+            placeholderTextColor="#9BA1A6"
+            value={input}
+            onChangeText={setInput}
+            multiline
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+          />
+          <TouchableOpacity
+            className={`w-10 h-10 rounded-full items-center justify-center ml-2 ${sending || !input.trim() ? "bg-gray-200" : "bg-[#007275]"}`}
+            onPress={handleSend}
+            disabled={sending || !input.trim()}
+            accessibilityRole="button"
+            accessibilityLabel="Enviar mensaje"
+          >
+            {sending ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="send" size={17} color={!input.trim() ? "#9BA1A6" : "white"} />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );

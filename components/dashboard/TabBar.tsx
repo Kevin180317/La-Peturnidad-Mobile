@@ -32,76 +32,65 @@ export function TabBar({ activeTab, onSelect, unreadCount = 0 }: TabBarProps) {
   // Animación para el indicador
   const [indicatorPosition] = useState(() => new Animated.Value(0));
 
+  const PILL_WIDTH = 56;
+
   useEffect(() => {
     const activeIndex = TABS.findIndex(t => t.key === activeTab);
     Animated.spring(indicatorPosition, {
-      toValue: activeIndex * tabWidth,
+      toValue: activeIndex * tabWidth + (tabWidth - PILL_WIDTH) / 2,
       useNativeDriver: true,
-      speed: 10,
-      bounciness: 5,
+      speed: 14,
+      bounciness: 6,
     }).start();
   }, [activeTab, tabWidth, indicatorPosition]);
+
+  const activeColor = (key: TabType) => (key === "emergency" ? "#ff7e70" : "#007275");
+  const activeIsEmergency = activeTab === "emergency";
 
   return (
     <View
       style={{ paddingBottom: Math.max(insets.bottom, 8) }}
-      className="bg-white border-t border-[#211f1e]/8"
+      className="bg-white rounded-t-3xl shadow-[0_-4px_24px_rgba(33,31,30,0.08)]"
     >
-      {/* Indicador de tab activo - MD3 Style */}
+      {/* Pastilla que se desliza detrás del ícono activo */}
       <Animated.View
-        style={{
-          transform: [{ translateX: indicatorPosition }],
-          width: tabWidth,
-          height: 3,
-          backgroundColor: "#007275",
-        }}
-        className="absolute top-0"
+        style={{ transform: [{ translateX: indicatorPosition }], width: PILL_WIDTH }}
+        className={`absolute top-2 h-8 rounded-full ${activeIsEmergency ? "bg-[#ff7e70]/15" : "bg-[#007275]/10"}`}
       />
 
-      {/* Container principal - altura estándar MD3: 56dp ≈ 56px */}
-      <View className="flex-row items-center h-14">
-        {TABS.map((tab, index) => {
+      <View className="flex-row items-center pt-2 h-16">
+        {TABS.map((tab) => {
           const isActive = activeTab === tab.key;
           const showBadge = tab.key === "messages" && unreadCount > 0;
+          const color = isActive ? activeColor(tab.key) : tab.key === "emergency" ? "#ff7e70" : "#9BA1A6";
 
           return (
             <TouchableOpacity
               key={tab.key}
-              className="flex-1 items-center justify-center h-full"
+              className="flex-1 items-center justify-start h-full"
               onPress={() => onSelect(tab.key)}
               activeOpacity={0.6}
               accessibilityLabel={tab.label}
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
             >
-              {/* Icon con badge */}
-              <View className="relative mb-1">
-                <Ionicons
-                  name={isActive ? tab.iconActive : tab.icon}
-                  size={24}
-                  color={tab.key === "emergency" ? "#ff7e70" : isActive ? "#007275" : "#9CA3AF"}
-                  style={{ opacity: isActive ? 1 : 0.7 }}
-                />
-
-                {/* Badge para notificaciones - Material Design badge */}
+              <View className="h-8 items-center justify-center">
+                <Ionicons name={isActive ? tab.iconActive : tab.icon} size={22} color={color} />
                 {showBadge && (
-                  <View className="absolute -top-1 -right-1.5 bg-[#ff7e70] rounded-full min-w-5 h-5 items-center justify-center px-1 border-2 border-white">
-                    <Text className="text-white text-xs font-bold leading-none">
+                  <View className="absolute -top-0.5 -right-3 bg-[#ff7e70] rounded-full min-w-5 h-5 items-center justify-center px-1 border-2 border-white">
+                    <Text className="text-white text-[10px] font-bold leading-none">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </Text>
                   </View>
                 )}
               </View>
-
-              {/* Label - solo visible cuando activo (Material Design 3 pattern) */}
-              {isActive && (
-                <Text
-                  className="text-[#007275] text-xs font-semibold leading-3"
-                  numberOfLines={1}
-                >
-                  {tab.label}
-                </Text>
-              )}
+              <Text
+                className={`text-[11px] mt-1 ${isActive ? "font-bold" : "font-medium"}`}
+                style={{ color: isActive ? activeColor(tab.key) : "#6B7280" }}
+                numberOfLines={1}
+              >
+                {tab.label}
+              </Text>
             </TouchableOpacity>
           );
         })}

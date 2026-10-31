@@ -1,4 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { PrimaryButton } from "@/components/kit/Kit";
 import { Image } from "expo-image";
 import { useRouter, type Href } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -25,16 +27,22 @@ const STEPS = [
     id: "1",
     title: "Reporta",
     subtitle: "Reporta mascotas perdidas o encontradas al instante",
+    icon: "megaphone" as const,
+    color: "#ff7e70",
   },
   {
     id: "2",
     title: "Conecta",
     subtitle: "Conecta con la comunidad y ayuda a reunirlas",
+    icon: "people" as const,
+    color: "#007275",
   },
   {
     id: "3",
     title: "Actúa",
     subtitle: "Recibe alertas y activa la red de emergencia",
+    icon: "notifications" as const,
+    color: "#211f1e",
   },
 ];
 
@@ -119,35 +127,42 @@ export default function OnboardingScreen() {
 
   const renderItem = ({ item }: { item: (typeof STEPS)[0] }) => (
     <View style={{ width }} className="flex-1 items-center justify-center px-8">
-      <Image
-        source={require("../assets/images/Isotipo_espacio_positivo.png")}
-        style={{ width: 128, height: 128 }}
-        contentFit="contain"
-        className="mb-12"
-      />
-      <Text className="text-4xl font-bold text-[#211f1e] mt-4 mb-4">
-        Lucky Tracker
-      </Text>
-      <Text className="text-4xl font-bold text-[#211f1e] mb-4">
-        {item.title}
-      </Text>
-      <Text className="text-lg text-[#211f1e] text-center leading-6">
-        {item.subtitle}
-      </Text>
+      <View className="w-56 h-56 rounded-full items-center justify-center mb-10" style={{ backgroundColor: `${item.color}14` }}>
+        <View className="w-40 h-40 rounded-full items-center justify-center" style={{ backgroundColor: `${item.color}1F` }}>
+          <View
+            className="w-24 h-24 rounded-[32px] items-center justify-center"
+            style={{ backgroundColor: item.color, shadowColor: item.color, shadowOpacity: 0.35, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
+          >
+            <Ionicons name={item.icon} size={44} color="#fff" />
+          </View>
+        </View>
+      </View>
+      <Text className="text-4xl font-bold text-[#211f1e] mb-3">{item.title}</Text>
+      <Text className="text-lg text-gray-600 text-center leading-7 px-2">{item.subtitle}</Text>
     </View>
   );
 
   return (
     <View className="flex-1 bg-[#faf5e0]">
-      <TouchableOpacity
-        onPress={finishOnboarding}
-        className="absolute top-16 right-6 z-10"
-        hitSlop={12}
-        accessibilityRole="button"
-        accessibilityLabel="Saltar introducción"
-      >
-        <Text className="text-[#c2402f] font-semibold text-base">Saltar</Text>
-      </TouchableOpacity>
+      <View className="absolute top-14 left-6 right-6 z-10 flex-row items-center justify-between">
+        <View className="flex-row items-center gap-2">
+          <Image
+            source={require("../assets/images/Isotipo_color_Salmon.png")}
+            style={{ width: 28, height: 28 }}
+            contentFit="contain"
+          />
+          <Text className="font-bold text-[#211f1e] text-base">Lucky Tracker</Text>
+        </View>
+        <TouchableOpacity
+          onPress={finishOnboarding}
+          className="bg-white px-4 py-2 rounded-full"
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="Saltar introducción"
+        >
+          <Text className="text-[#211f1e] font-semibold">Saltar</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         ref={flatListRef}
@@ -161,28 +176,22 @@ export default function OnboardingScreen() {
         className="flex-1"
       />
 
-      <View className="items-center pb-12">
-        <View className="flex-row gap-2 mb-10">
+      <View className="items-center px-6 pb-12">
+        <View className="flex-row gap-2 mb-8">
           {STEPS.map((_, index) => (
             <View
               key={index}
-              className={`w-3 h-3 rounded-full ${
-                index === currentIndex ? "bg-[#007275]" : "bg-[#007275]/30"
-              }`}
+              className={`h-2 rounded-full ${index === currentIndex ? "w-7 bg-[#007275]" : "w-2 bg-[#007275]/25"}`}
             />
           ))}
         </View>
 
-        <TouchableOpacity
+        <PrimaryButton
+          title={currentIndex === STEPS.length - 1 ? "Comenzar" : "Siguiente"}
+          icon={currentIndex === STEPS.length - 1 ? "paw" : "arrow-forward"}
           onPress={handleNext}
-          className="bg-[#007275] py-4 px-16 rounded-xl"
-          activeOpacity={0.8}
-          accessibilityRole="button"
-        >
-          <Text className="text-white font-bold text-lg">
-            {currentIndex === STEPS.length - 1 ? "Comenzar" : "Siguiente"}
-          </Text>
-        </TouchableOpacity>
+          className="self-stretch"
+        />
       </View>
     </View>
   );

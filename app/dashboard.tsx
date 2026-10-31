@@ -1,3 +1,6 @@
+import { confirmDialog } from "@/components/ConfirmDialog";
+import { StatusBar } from "expo-status-bar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { EmergencyTab } from "@/components/dashboard/EmergencyTab";
@@ -30,11 +33,12 @@ import { supabase } from "@/utils/supabase";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 import Toast from "react-native-toast-message";
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   // Solo se usan para el deep link (tab / alertId); la identidad sale siempre de la sesión
   const params = useLocalSearchParams();
 
@@ -180,26 +184,21 @@ export default function DashboardScreen() {
   };
 
   const handleDeletePost = (post: { id: string; image_url?: string | null }) => {
-    Alert.alert(
-      "Eliminar publicación",
-      "¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            const result = await postsService.delete(post.id, post.image_url);
-            if (result.success) {
-              showToast("success", "Publicación eliminada");
-              await loadFeed();
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+    confirmDialog({
+      title: "Eliminar publicación",
+      message: "¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await postsService.delete(post.id, post.image_url);
+        if (result.success) {
+          showToast("success", "Publicación eliminada");
+          await loadFeed();
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   const loadComments = async (targetType: string, targetId: string) => {
@@ -239,26 +238,21 @@ export default function DashboardScreen() {
   };
 
   const handleDeleteComment = (commentId: string) => {
-    Alert.alert(
-      "Eliminar comentario",
-      "¿Estás seguro de que quieres eliminar este comentario?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            const result = await commentsService.delete(commentId);
-            if (result.success) {
-              setComments((prev) => prev.filter((c) => c.id !== commentId));
-              await loadFeed();
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+    confirmDialog({
+      title: "Eliminar comentario",
+      message: "¿Estás seguro de que quieres eliminar este comentario?",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await commentsService.delete(commentId);
+        if (result.success) {
+          setComments((prev) => prev.filter((c) => c.id !== commentId));
+          await loadFeed();
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   const registerFcmToken = async (Notifications: any) => {
@@ -444,36 +438,31 @@ export default function DashboardScreen() {
     const hasActiveAlert = myAlerts.some(
       (a) => a.pet_id === petId && a.status === "active",
     );
-    Alert.alert(
-      "Eliminar mascota",
-      hasActiveAlert
+    confirmDialog({
+      title: "Eliminar mascota",
+      message: hasActiveAlert
         ? "Esta mascota tiene una alerta de emergencia activa: se cerrará y dejará de mostrarse a tus vecinos. ¿Eliminar la mascota? Esta acción no se puede deshacer."
         : "¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            const result = await dashboardService.deletePet(petId, pet?.image_url);
-            if (result.success) {
-              showToast(
-                "success",
-                "Mascota eliminada",
-                "La mascota ha sido eliminada",
-              );
-              await loadPets(user?.id);
-              if (hasActiveAlert) {
-                await loadMyAlerts(user?.id);
-                if (profile?.address) await loadEmergencyAlerts(profile.address);
-              }
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await dashboardService.deletePet(petId, pet?.image_url);
+        if (result.success) {
+          showToast(
+            "success",
+            "Mascota eliminada",
+            "La mascota ha sido eliminada",
+          );
+          await loadPets(user?.id);
+          if (hasActiveAlert) {
+            await loadMyAlerts(user?.id);
+            if (profile?.address) await loadEmergencyAlerts(profile.address);
+          }
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   // ============== FUNCIONES DE EMERGENCIA ==============
@@ -524,94 +513,81 @@ export default function DashboardScreen() {
       return;
     }
 
-    Alert.alert(
-      "Crear alerta de emergencia",
-      `¿Estás seguro de que quieres reportar a ${pet.name} como perdido? Esta alerta será visible para todos los vecinos de tu colonia.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, crear alerta",
-          onPress: async () => {
-            const result = await dashboardService.createEmergencyAlert({
-              user_id: user.id,
-              pet_id: pet.id,
-              pet_name: pet.name,
-              type: pet.type,
-              description: `Mascota perdida: ${pet.name}. Color: ${pet.color}, Tamaño: ${pet.size}. ${pet.features || ""}`,
-              last_seen_location: profile.address,
-              disappearance_date: toLocalDateString(),
-              image_url: pet.image_url,
-            });
+    confirmDialog({
+      title: "Crear alerta de emergencia",
+      icon: "megaphone-outline",
+      message: `¿Estás seguro de que quieres reportar a ${pet.name} como perdido? Esta alerta será visible para todos los vecinos de tu colonia.`,
+      confirmLabel: "Sí, crear alerta",
+      onConfirm: async () => {
+        const result = await dashboardService.createEmergencyAlert({
+          user_id: user.id,
+          pet_id: pet.id,
+          pet_name: pet.name,
+          type: pet.type,
+          description: `Mascota perdida: ${pet.name}. Color: ${pet.color}, Tamaño: ${pet.size}. ${pet.features || ""}`,
+          last_seen_location: profile.address,
+          disappearance_date: toLocalDateString(),
+          image_url: pet.image_url,
+        });
 
-            if (result.success) {
-              if (result.notified) {
-                showToast("success", "Alerta creada", "Se ha notificado a los vecinos");
-              } else {
-                showToast("success", "Alerta publicada", "Tus vecinos la verán en la app");
-              }
-              setSelectingPetForAlert(false);
-              await loadMyAlerts(user.id);
-              if (profile?.address) {
-                await loadEmergencyAlerts(profile.address);
-              }
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+        if (result.success) {
+          if (result.notified) {
+            showToast("success", "Alerta creada", "Se ha notificado a los vecinos");
+          } else {
+            showToast("success", "Alerta publicada", "Tus vecinos la verán en la app");
+          }
+          setSelectingPetForAlert(false);
+          await loadMyAlerts(user.id);
+          if (profile?.address) {
+            await loadEmergencyAlerts(profile.address);
+          }
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   const handleDeleteAlert = async (alertId: string) => {
-    Alert.alert(
-      "Eliminar alerta",
-      "¿Estás seguro de que quieres eliminar esta alerta? Tu mascota ya no aparecerá como perdida.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            const result = await dashboardService.deleteEmergencyAlert(alertId);
-            if (result.success) {
-              showToast(
-                "success",
-                "Alerta eliminada",
-                "La alerta ha sido removida",
-              );
-              await loadMyAlerts(user?.id);
-              if (profile?.address) await loadEmergencyAlerts(profile.address);
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+    confirmDialog({
+      title: "Eliminar alerta",
+      message: "¿Estás seguro de que quieres eliminar esta alerta? Tu mascota ya no aparecerá como perdida.",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await dashboardService.deleteEmergencyAlert(alertId);
+        if (result.success) {
+          showToast(
+            "success",
+            "Alerta eliminada",
+            "La alerta ha sido removida",
+          );
+          await loadMyAlerts(user?.id);
+          if (profile?.address) await loadEmergencyAlerts(profile.address);
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   const handleResolveAlert = async (alertId: string) => {
-    Alert.alert(
-      "Mascota encontrada",
-      "¿Ya apareció tu mascota? La alerta dejará de mostrarse a tus vecinos.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, ya apareció",
-          onPress: async () => {
-            const result = await dashboardService.resolveEmergencyAlert(alertId);
-            if (result.success) {
-              showToast("success", "¡Qué alegría!", "La alerta fue cerrada");
-              await loadMyAlerts(user?.id);
-              if (profile?.address) await loadEmergencyAlerts(profile.address);
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+    confirmDialog({
+      title: "Mascota encontrada",
+      icon: "heart-outline",
+      message: "¿Ya apareció tu mascota? La alerta dejará de mostrarse a tus vecinos.",
+      confirmLabel: "Sí, ya apareció",
+      onConfirm: async () => {
+        const result = await dashboardService.resolveEmergencyAlert(alertId);
+        if (result.success) {
+          showToast("success", "¡Qué alegría!", "La alerta fue cerrada");
+          await loadMyAlerts(user?.id);
+          if (profile?.address) await loadEmergencyAlerts(profile.address);
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   const handleFoundPet = async (alert: EmergencyAlertWithOwner) => {
@@ -622,60 +598,51 @@ export default function DashboardScreen() {
       return;
     }
 
-    Alert.alert(
-      "Reportar mascota encontrada",
-      `¿Has encontrado a ${alert.pet_name}? Avisaremos al dueño para que se ponga en contacto contigo.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, lo encontré",
-          onPress: async () => {
-            const result = await dashboardService.reportFoundPet(alert, user.id);
+    confirmDialog({
+      title: "Reportar mascota encontrada",
+      icon: "checkmark-circle-outline",
+      message: `¿Has encontrado a ${alert.pet_name}? Avisaremos al dueño para que se ponga en contacto contigo.`,
+      confirmLabel: "Sí, lo encontré",
+      onConfirm: async () => {
+        const result = await dashboardService.reportFoundPet(alert, user.id);
 
-            if (result.success) {
-              showToast(
-                "success",
-                "¡Gracias!",
-                result.notified
-                  ? `El dueño de ${alert.pet_name} fue notificado`
-                  : "Tu aviso quedó registrado para el dueño",
-              );
-              await loadFoundPets(user.id);
-            } else {
-              showToast("error", "No se pudo reportar", result.error);
-              if (result.error === "La alerta ya no está activa" && profile?.address) {
-                await loadEmergencyAlerts(profile.address);
-              }
-            }
-          },
-        },
-      ],
-    );
+        if (result.success) {
+          showToast(
+            "success",
+            "¡Gracias!",
+            result.notified
+              ? `El dueño de ${alert.pet_name} fue notificado`
+              : "Tu aviso quedó registrado para el dueño",
+          );
+          await loadFoundPets(user.id);
+        } else {
+          showToast("error", "No se pudo reportar", result.error);
+          if (result.error === "La alerta ya no está activa" && profile?.address) {
+            await loadEmergencyAlerts(profile.address);
+          }
+        }
+      },
+    });
   };
 
   // ============== FUNCIONES DE COMUNIDAD ==============
 
   const handleComDelete = (id: string) => {
-    Alert.alert(
-      "Eliminar anuncio",
-      "¿Estás seguro de que quieres eliminar este anuncio? Esta acción no se puede deshacer.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            const r = await announcementsService.delete(id);
-            if (r.success) {
-              showToast("success", "Eliminado");
-              await loadComunidad();
-            } else {
-              showToast("error", "Error", r.error);
-            }
-          },
-        },
-      ],
-    );
+    confirmDialog({
+      title: "Eliminar anuncio",
+      message: "¿Estás seguro de que quieres eliminar este anuncio? Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const r = await announcementsService.delete(id);
+        if (r.success) {
+          showToast("success", "Eliminado");
+          await loadComunidad();
+        } else {
+          showToast("error", "Error", r.error);
+        }
+      },
+    });
   };
 
   // ============== FUNCIONES DE CUENTA ==============
@@ -858,11 +825,16 @@ export default function DashboardScreen() {
   }, [showAlerts, profile, user, activeTab]);
 
   if (loading) {
-    return <DashboardSkeleton />;
+    return (
+      <View className="flex-1 bg-[#faf5e0]" style={{ paddingTop: insets.top }}>
+        <DashboardSkeleton />
+      </View>
+    );
   }
 
   return (
-    <View className="flex-1 bg-[#faf5e0]">
+    <View className="flex-1 bg-[#faf5e0]" style={{ paddingTop: insets.top }}>
+      <StatusBar style="dark" />
       <View className="flex-1">
         {activeTab === "home" && (
           <HomeTab
@@ -989,6 +961,7 @@ export default function DashboardScreen() {
       />
       <ConfirmModal
         visible={deleteAccountVisible}
+        destructive
         title="Eliminar cuenta"
         message="Se borrarán tu perfil, mascotas, alertas, publicaciones y mensajes. Esta acción no se puede deshacer."
         confirmLabel="Eliminar cuenta"

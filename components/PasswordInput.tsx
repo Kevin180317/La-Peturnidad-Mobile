@@ -10,14 +10,13 @@ export function PasswordInput(props: PasswordInputProps) {
 
   return (
     <View
-      className={`flex-row items-center border-2 rounded-lg bg-white ${
-        focused
-          ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
-          : "border-[#211f1e]/20"
+      className={`flex-row items-center h-[52px] border-[1.5px] rounded-2xl bg-white pl-4 ${
+        focused ? "border-[#007275]" : "border-gray-200"
       }`}
     >
+      <Ionicons name="lock-closed-outline" size={18} color={focused ? "#007275" : "#9BA1A6"} style={{ marginRight: 10 }} />
       <TextInput
-        className="flex-1 p-4 text-base text-[#211f1e]"
+        className="flex-1 text-[15px] text-[#211f1e]"
         placeholderTextColor="#9BA1A6"
         secureTextEntry={!visible}
         accessibilityLabel="Contraseña"
@@ -33,12 +32,12 @@ export function PasswordInput(props: PasswordInputProps) {
       />
       <TouchableOpacity
         onPress={() => setVisible(!visible)}
-        className="px-4 py-4"
+        className="px-4 h-full justify-center"
         hitSlop={8}
         accessibilityRole="button"
         accessibilityLabel={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
       >
-        <Ionicons name={visible ? "eye-off" : "eye"} size={22} color="#6b7280" />
+        <Ionicons name={visible ? "eye-off" : "eye"} size={20} color="#6b7280" />
       </TouchableOpacity>
     </View>
   );

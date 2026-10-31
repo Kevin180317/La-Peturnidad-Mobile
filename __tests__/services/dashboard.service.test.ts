@@ -1,6 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { dashboardService, getImageType, getStoragePath } from "@/services/dashboard.service";
+import { File } from "expo-file-system";
 import { calls, mockTable, resetSupabaseMock, storageBucket, supabaseMock } from "../../test/supabaseMock";
+
+// La imagen local se lee con expo-file-system: fetch("file://...") en Expo Go devolvía "File not found"
+// (14 bytes) por la ruta doblemente codificada y se subía como si fuera la foto
+jest.mock("expo-file-system", () => ({ File: jest.fn() }));
+const MockFile = File as unknown as jest.Mock;
 
 const MB = 1024 * 1024;
 type Err = { message: string };
@@ -16,7 +22,7 @@ beforeEach(async () => {
 afterEach(() => jest.restoreAllMocks());
 
 const mockDownload = (bytes: number) => {
-  global.fetch = jest.fn().mockResolvedValue({ arrayBuffer: async () => new ArrayBuffer(bytes) }) as typeof fetch;
+  MockFile.mockImplementation(() => ({ arrayBuffer: async () => new ArrayBuffer(bytes) }));
 };
 
 describe("image helpers", () => {
@@ -52,6 +58,31 @@ describe("dashboardService.uploadImage", () => {
     supabaseMock.auth.getSession.mockResolvedValue({ data: { session: null } });
     const res = await dashboardService.uploadImage("file:///a.jpg", "posts");
     expect(res.success).toBe(false);
+    expect(storageBucket.upload).not.toHaveBeenCalled();
+  });
+
+  it("reads the local file with expo-file-system, not fetch", async () => {
+    mockDownload(1000);
+    global.fetch = jest.fn() as typeof fetch;
+    const uri = "file:///data/user/0/host.exp.exponent/cache/ExperienceData/%2540idarko%252Fapp/ImagePicker/a.jpeg";
+    const res = await dashboardService.uploadImage({ uri }, "profile-pictures");
+    expect(res.success).toBe(true);
+    expect(MockFile).toHaveBeenCalledWith(uri);
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(storageBucket.upload.mock.calls[0][1].byteLength).toBe(1000);
+  });
+
+  it("does not upload when the local file cannot be read", async () => {
+    MockFile.mockImplementation(() => ({ arrayBuffer: async () => { throw new Error("File not found"); } }));
+    const res = await dashboardService.uploadImage({ uri: "file:///missing.jpg" }, "profile-pictures");
+    expect(res.success).toBe(false);
+    expect(storageBucket.upload).not.toHaveBeenCalled();
+  });
+
+  it("does not upload an empty file", async () => {
+    mockDownload(0);
+    const res = await dashboardService.uploadImage({ uri: "file:///empty.jpg" }, "profile-pictures");
+    expect(res).toEqual({ success: false, error: "No se pudo leer la imagen, intenta con otra" });
     expect(storageBucket.upload).not.toHaveBeenCalled();
   });
 

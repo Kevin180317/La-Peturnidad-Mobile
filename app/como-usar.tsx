@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { CARD } from "@/components/kit/Kit";
 import { ScrollView, Text, View } from "react-native";
 
 const STEPS: {
@@ -9,7 +10,7 @@ const STEPS: {
   {
     icon: "home",
     title: "Tu centro de control: el Dashboard",
-    body: "Al iniciar sesión llegas al Dashboard. La barra inferior te lleva por las 5 secciones: Feed, Inicio, Comunidad, Emergencia y Perfil. Desliza hacia abajo para actualizar todo y usa la lupa para buscar mascotas, grupos y usuarios.",
+    body: "Al iniciar sesión llegas al Dashboard. La barra inferior te lleva por las 5 secciones: Inicio, Feed, Emergencia, Mensajes y Perfil. Desliza hacia abajo para actualizar todo y usa la lupa para buscar mascotas, grupos y usuarios.",
   },
   {
     icon: "paw",
@@ -45,43 +46,24 @@ const STEPS: {
 
 export default function ComoUsarScreen() {
   return (
-    <ScrollView
-      className="bg-[#faf5e0]"
-      contentContainerClassName="p-5 pb-10"
-    >
-      <Text className="text-2xl font-bold text-[#211f1e] mb-1">
-        ¿Cómo funciona Lucky Tracker?
-      </Text>
-      <Text className="text-gray-500 mb-6">
-        Aprende en minutos cómo registrar tus mascotas, reportar emergencias y
-        conectar con tu comunidad.
-      </Text>
+    <ScrollView className="bg-[#faf5e0]" contentContainerClassName="p-5 pb-10">
+      <View className="bg-[#007275] rounded-3xl p-5 mb-6 overflow-hidden shadow-[0_8px_24px_rgba(0,114,117,0.3)]">
+        <Ionicons name="paw" size={110} color="rgba(255,255,255,0.1)" style={{ position: "absolute", right: -18, bottom: -24, transform: [{ rotate: "-20deg" }] }} />
+        <Text className="text-white text-2xl font-bold">¿Cómo funciona Lucky Tracker?</Text>
+        <Text className="text-white/85 mt-1.5 leading-5">
+          Aprende en minutos cómo registrar tus mascotas, reportar emergencias y conectar con tu comunidad.
+        </Text>
+      </View>
 
       {STEPS.map((step, index) => (
-        <View
-          key={step.title}
-          className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] p-5 mb-4 flex-row"
-        >
-          <View className="items-center mr-4">
-            <View className="w-11 h-11 rounded-full bg-[#007275] items-center justify-center">
-              <Text className="text-white font-bold">
-                {index + 1}
-              </Text>
-            </View>
-            {index < STEPS.length - 1 && (
-              <View className="flex-1 w-[2px] bg-[#211f1e]/10 mt-2" />
-            )}
+        <View key={step.title} className={`${CARD} p-4 mb-3 flex-row`}>
+          <View className="w-12 h-12 rounded-2xl bg-[#007275]/10 items-center justify-center mr-4">
+            <Ionicons name={step.icon} size={22} color="#007275" />
           </View>
-          <View className="flex-1 pb-2">
-            <View className="flex-row items-center gap-2 mb-2">
-              <Ionicons name={step.icon} size={18} color="#007275" />
-              <Text className="flex-1 font-bold text-[#211f1e] text-base">
-                {step.title}
-              </Text>
-            </View>
-            <Text className="text-gray-500 leading-relaxed">
-              {step.body}
-            </Text>
+          <View className="flex-1">
+            <Text className="text-[11px] font-bold text-[#007275] uppercase tracking-wider">Paso {index + 1}</Text>
+            <Text className="font-bold text-[#211f1e] text-base mt-0.5 mb-1.5">{step.title}</Text>
+            <Text className="text-gray-600 text-sm leading-5">{step.body}</Text>
           </View>
         </View>
       ))}

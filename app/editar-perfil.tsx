@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Avatar, CARD, Field, PrimaryButton } from "@/components/kit/Kit";
 import { dashboardService } from "@/services/dashboard.service";
 import { profileService } from "@/services/profile.service";
 import { supabase } from "@/utils/supabase";
@@ -6,12 +7,10 @@ import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -27,12 +26,6 @@ export default function EditarPerfilScreen() {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [firstNameFocused, setFirstNameFocused] = useState(false);
-  const [lastNameFocused, setLastNameFocused] = useState(false);
-  const [phoneFocused, setPhoneFocused] = useState(false);
-  const [addressFocused, setAddressFocused] = useState(false);
-  const [cityFocused, setCityFocused] = useState(false);
-  const [postalCodeFocused, setPostalCodeFocused] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -137,12 +130,10 @@ export default function EditarPerfilScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >
     <ScrollView
-      contentContainerClassName="p-5 bg-[#faf5e0] grow"
+      contentContainerClassName="p-5 pb-10 bg-[#faf5e0] grow"
       keyboardShouldPersistTaps="handled"
     >
-      <Text className="text-2xl font-bold text-[#211f1e] mb-6">Editar perfil</Text>
-
-      <View className="items-center mb-6">
+      <View className={`${CARD} items-center py-6 mb-6`}>
         <TouchableOpacity
           onPress={handleChangePhoto}
           disabled={uploadingPhoto}
@@ -150,16 +141,8 @@ export default function EditarPerfilScreen() {
           accessibilityRole="button"
           accessibilityLabel="Cambiar foto de perfil"
         >
-          {profilePicture ? (
-            <Image source={{ uri: profilePicture }} className="w-28 h-28 rounded-full" />
-          ) : (
-            <View className="w-28 h-28 rounded-full bg-[#211f1e] items-center justify-center">
-              <Text className="text-4xl text-white font-bold">
-                {firstName?.[0]?.toUpperCase() || "U"}
-              </Text>
-            </View>
-          )}
-          <View className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-[#007275] items-center justify-center border-2 border-white">
+          <Avatar uri={profilePicture} name={firstName} size={108} />
+          <View className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-[#007275] items-center justify-center border-[3px] border-white">
             {uploadingPhoto ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
@@ -167,96 +150,33 @@ export default function EditarPerfilScreen() {
             )}
           </View>
         </TouchableOpacity>
-        <Text className="text-gray-500 text-sm mt-2">
+        <Text className="text-gray-500 text-sm mt-3">
           {uploadingPhoto ? "Subiendo foto..." : "Toca para cambiar tu foto"}
         </Text>
       </View>
 
-      <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-        <Text className="font-semibold mb-2 text-gray-600">Nombre *</Text>
-        <TextInput
-          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${firstNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-          placeholder="Nombre"
-          placeholderTextColor="#9BA1A6"
-          value={firstName}
-          onChangeText={setFirstName}
-          onFocus={() => setFirstNameFocused(true)}
-          onBlur={() => setFirstNameFocused(false)}
-        />
-
-        <Text className="font-semibold mb-2 text-gray-600">Apellido *</Text>
-        <TextInput
-          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${lastNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-          placeholder="Apellido"
-          placeholderTextColor="#9BA1A6"
-          value={lastName}
-          onChangeText={setLastName}
-          onFocus={() => setLastNameFocused(true)}
-          onBlur={() => setLastNameFocused(false)}
-        />
-
-        <Text className="font-semibold mb-2 text-gray-600">Teléfono</Text>
-        <TextInput
-          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${phoneFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-          placeholder="Teléfono"
-          placeholderTextColor="#9BA1A6"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          onFocus={() => setPhoneFocused(true)}
-          onBlur={() => setPhoneFocused(false)}
-        />
-
-        <Text className="font-semibold mb-2 text-gray-600">Dirección / Colonia</Text>
-        <TextInput
-          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${addressFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-          placeholder="Calle y colonia"
-          placeholderTextColor="#9BA1A6"
-          value={address}
-          onChangeText={setAddress}
-          onFocus={() => setAddressFocused(true)}
-          onBlur={() => setAddressFocused(false)}
-        />
-
-        <Text className="font-semibold mb-2 text-gray-600">Ciudad</Text>
-        <TextInput
-          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${cityFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-          placeholder="Ciudad"
-          placeholderTextColor="#9BA1A6"
-          value={city}
-          onChangeText={setCity}
-          onFocus={() => setCityFocused(true)}
-          onBlur={() => setCityFocused(false)}
-        />
-
-        <Text className="font-semibold mb-2 text-gray-600">Código Postal</Text>
-        <TextInput
-          className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${postalCodeFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-          placeholder="C.P."
-          placeholderTextColor="#9BA1A6"
-          value={postalCode}
-          onChangeText={setPostalCode}
-          keyboardType="numeric"
-          onFocus={() => setPostalCodeFocused(true)}
-          onBlur={() => setPostalCodeFocused(false)}
-        />
+      <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Datos personales</Text>
+      <View className={`${CARD} p-4 pb-0 mb-6`}>
+        <Field label="Nombre *" icon="person-outline" placeholder="Nombre" value={firstName} onChangeText={setFirstName} />
+        <Field label="Apellido *" icon="person-outline" placeholder="Apellido" value={lastName} onChangeText={setLastName} />
+        <Field label="Teléfono" icon="call-outline" placeholder="Teléfono" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
       </View>
 
-      <TouchableOpacity
-        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#007275]"}`}
-        onPress={handleSave}
-        disabled={saving}
-      >
-        <Text className={`text-center font-bold ${saving ? "text-gray-700" : "text-white"}`}>
-          {saving ? "Guardando..." : "Guardar cambios"}
-        </Text>
-      </TouchableOpacity>
+      <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Dirección</Text>
+      <View className={`${CARD} p-4 pb-0 mb-6`}>
+        <Field label="Dirección / Colonia" icon="home-outline" placeholder="Calle y colonia" value={address} onChangeText={setAddress} />
+        <Field label="Ciudad" icon="location-outline" placeholder="Ciudad" value={city} onChangeText={setCity} />
+        <Field label="Código Postal" icon="map-outline" placeholder="C.P." value={postalCode} onChangeText={setPostalCode} keyboardType="numeric" />
+      </View>
 
-      <TouchableOpacity
-        className="py-4 rounded-xl mt-3 bg-[#211f1e]"
-        onPress={() => router.back()}
-      >
-        <Text className="text-white text-center font-bold">Cancelar</Text>
+      <PrimaryButton
+        title={saving ? "Guardando..." : "Guardar cambios"}
+        icon="checkmark"
+        onPress={handleSave}
+        loading={saving}
+      />
+      <TouchableOpacity className="py-4 mt-1" onPress={() => router.back()}>
+        <Text className="text-center font-semibold text-gray-600">Cancelar</Text>
       </TouchableOpacity>
     </ScrollView>
     </KeyboardAvoidingView>

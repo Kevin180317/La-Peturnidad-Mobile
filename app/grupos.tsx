@@ -1,6 +1,6 @@
+import { CARD, Chip, EmptyCard, Field, PrimaryButton, ScreenTitle, Sheet } from "@/components/kit/Kit";
 import { Ionicons } from "@expo/vector-icons";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { EmptyState } from "@/components/EmptyState";
 import { ListSkeleton } from "@/components/Skeleton";
 import { groupsService } from "@/services/groups.service";
 import { supabase } from "@/utils/supabase";
@@ -8,11 +8,9 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Modal,
   RefreshControl,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -28,8 +26,6 @@ export default function GruposScreen() {
   const [formName, setFormName] = useState("");
   const [formDesc, setFormDesc] = useState("");
   const [creating, setCreating] = useState(false);
-  const [nameFocused, setNameFocused] = useState(false);
-  const [descFocused, setDescFocused] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [leaveTarget, setLeaveTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -154,46 +150,52 @@ export default function GruposScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerClassName="p-5 pb-10"
       >
-        <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-2xl font-bold text-[#211f1e]">Grupos</Text>
-          <TouchableOpacity
-            className="bg-[#007275] py-2 px-4 rounded-xl flex-row items-center"
-            onPress={() => setShowForm(true)}
-          >
-            <Ionicons name="add" size={20} color="white" style={{ marginRight: 6 }} />
-            <Text className="text-white font-semibold">Crear</Text>
-          </TouchableOpacity>
-        </View>
+        <ScreenTitle
+          title="Grupos"
+          subtitle="Organízate con tu colonia"
+          right={
+            <TouchableOpacity
+              className="bg-[#007275] py-2.5 pl-3 pr-4 rounded-full flex-row items-center gap-1.5 shadow-[0_4px_12px_rgba(0,114,117,0.3)]"
+              activeOpacity={0.85}
+              onPress={() => setShowForm(true)}
+              accessibilityRole="button"
+            >
+              <Ionicons name="add" size={18} color="white" />
+              <Text className="text-white font-semibold">Crear</Text>
+            </TouchableOpacity>
+          }
+        />
 
         {groups.length === 0 ? (
-          <EmptyState
-            icon="people"
-            title="No hay grupos aún"
-            subtitle="¡Crea el primero y reúne a tu colonia!"
-            actionLabel="Crear grupo"
-            onAction={() => setShowForm(true)}
-          />
+          <EmptyCard icon="people-outline" title="No hay grupos aún" text="¡Crea el primero y reúne a tu colonia!">
+            <TouchableOpacity className="bg-[#007275] py-2.5 px-5 rounded-full mt-4" onPress={() => setShowForm(true)}>
+              <Text className="text-white font-semibold">Crear grupo</Text>
+            </TouchableOpacity>
+          </EmptyCard>
         ) : (
           groups.map((group) => (
             <TouchableOpacity
               key={group.id}
-              className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
+              className={`${CARD} p-4 mb-3`}
+              activeOpacity={0.85}
               onPress={() => router.push(`/grupos/${group.id}`)}
             >
-              <View className="flex-row items-center justify-between mb-2">
-                <Text className="font-bold text-lg text-[#211f1e] flex-1 mr-2">{group.name}</Text>
+              <View className="flex-row items-center">
+                <View className="w-12 h-12 rounded-2xl bg-[#007275]/10 items-center justify-center mr-3">
+                  <Ionicons name="people" size={22} color="#007275" />
+                </View>
+                <View className="flex-1 mr-2">
+                  <Text className="font-bold text-base text-[#211f1e]" numberOfLines={1}>{group.name}</Text>
+                  <Text className="text-gray-500 text-xs mt-0.5">{group.memberCount} miembros</Text>
+                </View>
                 {group.created_by === userId ? (
-                  <View className="bg-[#211f1e] px-3 py-1 rounded-full">
-                    <Text className="text-white text-xs font-semibold">Creador</Text>
-                  </View>
+                  <Chip icon="star" text="Creador" tone="dark" />
                 ) : (
                   <TouchableOpacity
-                    className={`px-4 py-2 rounded-xl min-w-[72px] items-center ${group.isMember ? "bg-gray-300" : "bg-[#007275]"} ${pendingId === group.id ? "opacity-60" : ""}`}
+                    className={`px-4 h-9 rounded-full min-w-[80px] items-center justify-center ${group.isMember ? "bg-gray-100" : "bg-[#007275]"} ${pendingId === group.id ? "opacity-60" : ""}`}
                     disabled={!!pendingId}
                     onPress={() =>
-                      group.isMember
-                        ? setLeaveTarget({ id: group.id, name: group.name })
-                        : handleJoin(group.id)
+                      group.isMember ? setLeaveTarget({ id: group.id, name: group.name }) : handleJoin(group.id)
                     }
                   >
                     {pendingId === group.id ? (
@@ -206,13 +208,9 @@ export default function GruposScreen() {
                   </TouchableOpacity>
                 )}
               </View>
-              {group.description && (
-                <Text className="text-gray-600 text-sm mb-2">{group.description}</Text>
+              {!!group.description && (
+                <Text className="text-gray-600 text-sm leading-5 mt-3">{group.description}</Text>
               )}
-              <Text className="text-gray-500 text-xs flex-row items-center">
-                <Ionicons name="people" size={13} color="#6B7280" style={{ marginRight: 3 }} />
-                {group.memberCount} miembros
-              </Text>
             </TouchableOpacity>
           ))
         )}
@@ -229,51 +227,18 @@ export default function GruposScreen() {
         onCancel={() => setLeaveTarget(null)}
       />
 
-      <Modal animationType="slide" transparent visible={showForm} onRequestClose={() => setShowForm(false)}>
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-2xl p-5">
-            <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-xl font-bold text-[#211f1e]">Crear grupo</Text>
-              <TouchableOpacity onPress={() => setShowForm(false)}>
-                <Ionicons name="close" size={24} color="#211f1e" />
-              </TouchableOpacity>
-            </View>
-            <TextInput
-              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${nameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-              placeholder="Nombre del grupo *"
-              placeholderTextColor="#9BA1A6"
-              value={formName}
-              onChangeText={setFormName}
-              onFocus={() => setNameFocused(true)}
-              onBlur={() => setNameFocused(false)}
-            />
-            <TextInput
-              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${descFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-              placeholder="Descripción (opcional)"
-              placeholderTextColor="#9BA1A6"
-              value={formDesc}
-              onChangeText={setFormDesc}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-              onFocus={() => setDescFocused(true)}
-              onBlur={() => setDescFocused(false)}
-            />
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                className={`flex-1 py-3 rounded-xl ${creating ? "bg-gray-400" : "bg-[#007275]"}`}
-                disabled={creating}
-                onPress={handleCreate}
-              >
-                <Text className={`text-center font-bold ${creating ? "text-gray-700" : "text-white"}`}>{creating ? "Creando..." : "Crear"}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-[#211f1e] py-3 rounded-xl" onPress={() => setShowForm(false)}>
-                <Text className="text-white text-center font-bold">Cancelar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      <Sheet visible={showForm} title="Crear grupo" onClose={() => setShowForm(false)} closeDisabled={creating}>
+        <Field label="Nombre *" icon="people-outline" placeholder="Nombre del grupo" value={formName} onChangeText={setFormName} />
+        <Field
+          label="Descripción"
+          placeholder="Descripción (opcional)"
+          value={formDesc}
+          onChangeText={setFormDesc}
+          multiline
+          numberOfLines={3}
+        />
+        <PrimaryButton title={creating ? "Creando..." : "Crear grupo"} icon="add" loading={creating} onPress={handleCreate} />
+      </Sheet>
     </View>
   );
 }

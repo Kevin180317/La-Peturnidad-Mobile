@@ -1,15 +1,12 @@
+import { AuthScreen } from "@/components/auth/AuthScreen";
+import { Field, PrimaryButton } from "@/components/kit/Kit";
 import { supabase } from "@/utils/supabase";
 import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -28,12 +25,6 @@ export default function RegisterExtendedScreen() {
   const [selectedColonia, setSelectedColonia] = useState("");
   const [city] = useState("Tijuana");
   const [loading, setLoading] = useState(false);
-  const [firstNameFocused, setFirstNameFocused] = useState(false);
-  const [lastNameFocused, setLastNameFocused] = useState(false);
-  const [phoneFocused, setPhoneFocused] = useState(false);
-  const [birthDateFocused, setBirthDateFocused] = useState(false);
-  const [postalCodeFocused, setPostalCodeFocused] = useState(false);
-  const [cityFocused, setCityFocused] = useState(false);
   const navigatedRef = useRef(false);
   const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -186,7 +177,7 @@ export default function RegisterExtendedScreen() {
 
       // Se mantiene el spinner hasta navegar (una sola vez: al ocultar el toast o por respaldo)
       Toast.show({
-        type: "success",
+        type: "welcome",
         text1: "¡Perfil completado!",
         text2: "Bienvenido a Lucky Tracker",
         visibilityTime: 1500,
@@ -223,152 +214,81 @@ export default function RegisterExtendedScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-[#faf5e0]"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-    <ScrollView
-      className="flex-1 bg-[#faf5e0]"
-      contentContainerClassName="p-6 pb-10"
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text className="text-2xl font-bold text-[#211f1e] mb-2 text-center">
-        Completa tu perfil
+    <AuthScreen headerless title="Completa tu perfil" subtitle={`Usuario: ${email}`}>
+      <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-1">Datos personales</Text>
+      <Field
+        label="Nombre *"
+        icon="person-outline"
+        placeholder="Tu nombre"
+        accessibilityLabel="Nombre"
+        value={firstName}
+        onChangeText={setFirstName}
+        autoCapitalize="words"
+      />
+      <Field
+        label="Apellido *"
+        icon="person-outline"
+        placeholder="Tu apellido"
+        accessibilityLabel="Apellido"
+        value={lastName}
+        onChangeText={setLastName}
+        autoCapitalize="words"
+      />
+      <Field
+        label="Teléfono *"
+        icon="call-outline"
+        placeholder="Número de teléfono"
+        accessibilityLabel="Teléfono"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+      />
+      <Field
+        label="Fecha de nacimiento"
+        icon="calendar-outline"
+        placeholder="DD/MM/YYYY"
+        accessibilityLabel="Fecha de nacimiento"
+        value={birthDate}
+        onChangeText={(text) => setBirthDate(formatDateInput(text))}
+        keyboardType="numeric"
+      />
+
+      <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 mt-2 ml-1">Tu colonia</Text>
+      <Text className="text-gray-500 text-xs mb-3 ml-1 -mt-1">
+        La usamos para avisarte de mascotas perdidas cerca de ti.
       </Text>
-      <Text className="text-base text-[#211f1e] text-center mb-8">
-        Usuario: {email}
-      </Text>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Nombre <Text className="text-[#c2402f]">*</Text>
-        </Text>
-        <TextInput
-          className={`${firstNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="Tu nombre"
-          accessibilityLabel="Nombre"
-          placeholderTextColor="#9BA1A6"
-          value={firstName}
-          onChangeText={setFirstName}
-          autoCapitalize="words"
-          onFocus={() => setFirstNameFocused(true)}
-          onBlur={() => setFirstNameFocused(false)}
-        />
-      </View>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Apellido <Text className="text-[#c2402f]">*</Text>
-        </Text>
-        <TextInput
-          className={`${lastNameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="Tu apellido"
-          accessibilityLabel="Apellido"
-          placeholderTextColor="#9BA1A6"
-          value={lastName}
-          onChangeText={setLastName}
-          autoCapitalize="words"
-          onFocus={() => setLastNameFocused(true)}
-          onBlur={() => setLastNameFocused(false)}
-        />
-      </View>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Teléfono <Text className="text-[#c2402f]">*</Text>
-        </Text>
-        <TextInput
-          className={`${phoneFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="Número de teléfono"
-          accessibilityLabel="Teléfono"
-          placeholderTextColor="#9BA1A6"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          onFocus={() => setPhoneFocused(true)}
-          onBlur={() => setPhoneFocused(false)}
-        />
-      </View>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Fecha de nacimiento
-        </Text>
-        <TextInput
-          className={`${birthDateFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="DD/MM/YYYY"
-          accessibilityLabel="Fecha de nacimiento"
-          placeholderTextColor="#9BA1A6"
-          value={birthDate}
-          onChangeText={(text) => setBirthDate(formatDateInput(text))}
-          keyboardType="numeric"
-          onFocus={() => setBirthDateFocused(true)}
-          onBlur={() => setBirthDateFocused(false)}
-        />
-      </View>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Código Postal <Text className="text-[#c2402f]">*</Text>
-        </Text>
-        <TextInput
-          className={`${postalCodeFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="Código postal"
-          accessibilityLabel="Código postal"
-          placeholderTextColor="#9BA1A6"
-          value={postalCode}
-          onChangeText={handlePostalCodeChange}
-          keyboardType="numeric"
-          maxLength={5}
-          onFocus={() => setPostalCodeFocused(true)}
-          onBlur={() => setPostalCodeFocused(false)}
-        />
-      </View>
+      <Field
+        label="Código Postal *"
+        icon="map-outline"
+        placeholder="Código postal"
+        accessibilityLabel="Código postal"
+        value={postalCode}
+        onChangeText={handlePostalCodeChange}
+        keyboardType="numeric"
+        maxLength={5}
+      />
 
       {filteredColonias.length > 0 && (
-        <View className="mb-4 border-2 border-[#211f1e]/20 rounded-lg overflow-hidden bg-white">
-          <Picker
-            selectedValue={selectedColonia}
-            onValueChange={(itemValue) => setSelectedColonia(itemValue)}
-            style={{ height: 50, color: "#211f1e", backgroundColor: "#ffffff" }}
-          >
-            <Picker.Item label="Selecciona una colonia *" value="" color="#211f1e" />
-            {filteredColonias.map((item, idx) => (
-              <Picker.Item
-                key={idx}
-                label={item["Asentamiento"]}
-                value={item["Asentamiento"]}
-                color="#211f1e"
-              />
-            ))}
-          </Picker>
+        <View className="mb-4">
+          <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Colonia *</Text>
+          <View className={`border-[1.5px] rounded-2xl overflow-hidden bg-white ${selectedColonia ? "border-[#007275]" : "border-gray-200"}`}>
+            <Picker
+              selectedValue={selectedColonia}
+              onValueChange={(itemValue) => setSelectedColonia(itemValue)}
+              style={{ height: 52, color: "#211f1e", backgroundColor: "#ffffff" }}
+            >
+              <Picker.Item label="Selecciona una colonia *" value="" color="#211f1e" />
+              {filteredColonias.map((item, idx) => (
+                <Picker.Item key={idx} label={item["Asentamiento"]} value={item["Asentamiento"]} color="#211f1e" />
+              ))}
+            </Picker>
+          </View>
         </View>
       )}
 
-      <View className="mb-8">
-        <Text className="text-[#211f1e] font-semibold mb-2">Ciudad</Text>
-        <TextInput
-          className={`${cityFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          value={city}
-          editable={false}
-          accessibilityLabel="Ciudad"
-          onFocus={() => setCityFocused(true)}
-          onBlur={() => setCityFocused(false)}
-        />
-      </View>
+      <Field label="Ciudad" icon="location-outline" value={city} editable={false} accessibilityLabel="Ciudad" placeholder="Se completa con tu código postal" />
 
-      <TouchableOpacity
-        className="bg-[#007275] py-4 rounded-xl mb-4"
-        onPress={handleCompleteProfile}
-        accessibilityRole="button"
-      >
-        <Text className="text-white text-center font-bold text-lg">
-          Completar perfil
-        </Text>
-      </TouchableOpacity>
-
-    </ScrollView>
-    </KeyboardAvoidingView>
+      <PrimaryButton title="Completar perfil" icon="checkmark" onPress={handleCompleteProfile} className="mt-2" />
+    </AuthScreen>
   );
 }

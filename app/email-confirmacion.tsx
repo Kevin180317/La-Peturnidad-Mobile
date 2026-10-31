@@ -1,3 +1,5 @@
+import { AuthScreen } from "@/components/auth/AuthScreen";
+import { PrimaryButton } from "@/components/kit/Kit";
 import { Ionicons } from "@expo/vector-icons";
 import { authErrorMessage, authService } from "@/services/auth.service";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -59,58 +61,49 @@ export default function EmailConfirmacionScreen() {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#faf5e0]">
+        <ActivityIndicator size="large" color="#007275" />
+        <Text className="mt-4 text-gray-600 font-medium">Reenviando...</Text>
+      </View>
+    );
+  }
+
   return (
-    <View className="flex-1 justify-center p-6 bg-[#faf5e0]">
-      {loading ? (
-        <View className="items-center">
-          <ActivityIndicator size="large" color="#007275" />
-          <Text className="mt-4 text-[#211f1e]">Reenviando...</Text>
+    <AuthScreen
+      headerless
+      title="Revisa tu correo electrónico"
+      hero={
+        <View className="w-20 h-20 rounded-3xl bg-white items-center justify-center shadow-[0_8px_24px_rgba(0,114,117,0.2)]">
+          <Ionicons name="mail-unread-outline" size={38} color="#007275" />
         </View>
-      ) : (
+      }
+      subtitle={
         <>
-          <View className="items-center mb-8">
-            <View className="w-20 h-20 rounded-full bg-[#007275]/10 items-center justify-center mb-4">
-              <Ionicons name="mail-outline" size={40} color="#007275" />
-            </View>
-            <Text className="text-3xl font-bold text-[#211f1e] mb-2 text-center">
-              Revisa tu correo electrónico
-            </Text>
-            <Text className="text-[#211f1e] text-base text-center leading-6">
-              Te enviamos un link de confirmación a{" "}
-              <Text className="font-bold">{email}</Text>
-            </Text>
-            <Text className="text-[#211f1e]/60 text-center text-sm mt-4">
-              Confirma tu cuenta desde el correo electrónico y luego inicia sesión
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            className="py-2 mb-4"
-            onPress={handleResend}
-            disabled={cooldown > 0}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: cooldown > 0 }}
-          >
-            <Text
-              className={`text-center font-semibold ${cooldown > 0 ? "text-gray-500" : "text-[#007275]"}`}
-            >
-              {cooldown > 0
-                ? `Reenviar email en ${cooldown} s`
-                : "Reenviar email"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="py-2"
-            onPress={() => router.replace("/login")}
-            accessibilityRole="button"
-          >
-            <Text className="text-[#211f1e]/70 text-center">
-              Volver al inicio
-            </Text>
-          </TouchableOpacity>
+          Te enviamos un link de confirmación a{" "}
+          <Text className="font-bold text-[#211f1e]">{email}</Text>
         </>
-      )}
-    </View>
+      }
+      footer={
+        <TouchableOpacity className="py-2" onPress={() => router.replace("/login")} accessibilityRole="button">
+          <Text className="text-gray-600 text-center font-semibold">Volver al inicio</Text>
+        </TouchableOpacity>
+      }
+    >
+      <View className="flex-row items-start gap-3 bg-[#faf5e0] p-3 rounded-2xl mb-5">
+        <Ionicons name="information-circle" size={20} color="#007275" />
+        <Text className="flex-1 text-[#211f1e] text-sm leading-5">
+          Confirma tu cuenta desde el correo electrónico y luego inicia sesión
+        </Text>
+      </View>
+      <PrimaryButton
+        title={cooldown > 0 ? `Reenviar email en ${cooldown} s` : "Reenviar email"}
+        icon="refresh"
+        variant={cooldown > 0 ? "ghost" : "teal"}
+        onPress={handleResend}
+        disabled={cooldown > 0}
+      />
+    </AuthScreen>
   );
 }

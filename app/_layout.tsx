@@ -11,6 +11,7 @@ import { Platform } from "react-native";
 import { Stack, router, type Href } from "expo-router";
 import Toast from "react-native-toast-message";
 import { AnimatedSplash } from "../components/AnimatedSplash";
+import { ConfirmHost } from "../components/ConfirmDialog";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { toastConfig } from "../components/ToastConfig";
 import { supabase } from "../utils/supabase";
@@ -151,23 +152,24 @@ export default function RootLayout() {
         }}
       >
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="login" options={{ title: "Iniciar Sesión" }} />
-      <Stack.Screen name="register" options={{ title: "Registro" }} />
+      <Stack.Screen name="login" options={{ title: "Iniciar Sesión", headerShown: false }} />
+      <Stack.Screen name="register" options={{ title: "Registro", headerShown: false }} />
       <Stack.Screen
         name="dashboard"
         options={{
+          // Sin barra: cada pestaña trae su propio título
+          headerShown: false,
           title: "Lucky Tracker",
-          headerLeft: () => null,
           gestureEnabled: false,
         }}
       />
       <Stack.Screen
         name="register-extended"
-        options={{ title: "Registro de usuario" }}
+        options={{ title: "Registro de usuario", headerShown: false }}
       />
       <Stack.Screen
         name="email-confirmacion"
-        options={{ title: "Confirmar correo electrónico" }}
+        options={{ title: "Confirmar correo electrónico", headerShown: false }}
       />
       <Stack.Screen
         name="notificaciones"
@@ -227,15 +229,15 @@ export default function RootLayout() {
       />
       <Stack.Screen
         name="forgot-password"
-        options={{ title: "Recuperar contraseña" }}
+        options={{ title: "Recuperar contraseña", headerShown: false }}
       />
       <Stack.Screen
         name="verify-otp"
-        options={{ title: "Verificar código" }}
+        options={{ title: "Verificar código", headerShown: false }}
       />
       <Stack.Screen
         name="reset-password"
-        options={{ title: "Nueva contraseña" }}
+        options={{ title: "Nueva contraseña", headerShown: false }}
       />
       <Stack.Screen
         name="como-usar"
@@ -248,7 +250,8 @@ export default function RootLayout() {
       </Stack>
       </ErrorBoundary>
       {!splashDone && <AnimatedSplash onFinish={() => setSplashDone(true)} />}
-      <Toast config={toastConfig} />
+      <ConfirmHost />
+      <Toast config={toastConfig} topOffset={56} />
     </>
   );
 }

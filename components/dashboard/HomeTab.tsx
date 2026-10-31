@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import type {
   EmergencyAlert,
   FoundPetWithDetails,
@@ -7,14 +7,13 @@ import type {
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { EmptyState } from "@/components/EmptyState";
+import { CARD, Chip, EmptyCard, PetThumb, RoundIconButton, SectionTitle, ToggleTile } from "@/components/kit/Kit";
 import { PetDetailModal } from "./PetDetailModal";
 import { PetForm, type PetFormData } from "./PetForm";
 
@@ -68,151 +67,120 @@ export function HomeTab({
     setShowPetForm(true);
   };
 
+  const openNewPetForm = () => {
+    setEditingPet(null);
+    setShowPetForm(true);
+    setShowPets(false);
+  };
+
+  const today = new Date().toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long" });
+
   return (
     <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       contentContainerClassName="p-5 pb-10"
     >
-      {/* Header de bienvenida */}
-      <View className="mb-6">
-        <View className="flex-row items-center justify-between">
+      {/* Saludo */}
+      <View className="flex-row items-center justify-between mb-5">
+        <View className="flex-1 pr-3">
+          <Text className="text-gray-500 text-sm">{today.charAt(0).toUpperCase() + today.slice(1)}</Text>
+          <Text className="text-2xl font-bold text-[#211f1e] mt-0.5" numberOfLines={1}>
+            Hola, {profileName || "Usuario"}
+          </Text>
+        </View>
+        <RoundIconButton icon="search" tint="white" size={46} onPress={onOpenSearch} label="Buscar" />
+      </View>
+
+      {/* Resumen */}
+      <View className={`${CARD} flex-row p-4 mb-4`}>
+        <Stat icon="paw" color="#007275" value={pets.length} label="Mascotas" />
+        <View className="w-px bg-gray-100 my-1" />
+        <Stat icon="warning" color="#ff7e70" value={myAlerts.length} label="Alertas" />
+        <View className="w-px bg-gray-100 my-1" />
+        <Stat icon="heart" color="#007275" value={foundPets.length} label="Encontradas" />
+      </View>
+
+      {/* Acción principal */}
+      <TouchableOpacity
+        className="bg-[#007275] rounded-3xl p-5 mb-4 overflow-hidden shadow-[0_8px_24px_rgba(0,114,117,0.3)]"
+        activeOpacity={0.9}
+        onPress={openNewPetForm}
+        accessibilityRole="button"
+        accessibilityLabel="Registrar mascota"
+      >
+        <Ionicons name="paw" size={110} color="rgba(255,255,255,0.1)" style={{ position: "absolute", right: -18, bottom: -24, transform: [{ rotate: "-20deg" }] }} />
+        <Ionicons name="paw" size={44} color="rgba(255,255,255,0.1)" style={{ position: "absolute", right: 88, top: 8, transform: [{ rotate: "15deg" }] }} />
+        <View className="flex-row items-center gap-4">
+          <View className="w-14 h-14 rounded-2xl bg-white/20 items-center justify-center">
+            <Ionicons name="add" size={30} color="#fff" />
+          </View>
           <View className="flex-1">
-            <Text className="text-2xl font-bold font-[Inter\_700Bold] text-[#211f1e]">
-              ¡Hola, {profileName || "Usuario"}!
-            </Text>
-            <Text className="text-gray-600 font-[Inter\_400Regular] mt-1">
-              {(() => {
-                const date = new Date().toLocaleDateString("es-MX", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                });
-                return date.charAt(0).toUpperCase() + date.slice(1);
-              })()}
-            </Text>
+            <Text className="text-white font-bold text-lg">Registrar mascota</Text>
+            <Text className="text-white/85 text-sm mt-0.5">Tenla lista por si algún día se pierde</Text>
           </View>
-          <TouchableOpacity
-            onPress={onOpenSearch}
-            className="bg-[#007275] p-3 rounded-xl"
-            activeOpacity={0.8}
-          >
-            <Ionicons name="search" size={22} color="#fff" />
-          </TouchableOpacity>
+          <View className="w-9 h-9 rounded-full bg-white items-center justify-center">
+            <Ionicons name="arrow-forward" size={18} color="#007275" />
+          </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
-      {/* Tarjetas de resumen */}
       <View className="flex-row gap-3 mb-6">
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
-          <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
-            <Ionicons name="paw" size={20} color="#007275" />
-          </View>
-          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#007275]">{pets.length}</Text>
-          <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Mascotas</Text>
-        </View>
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
-          <View className="w-10 h-10 rounded-full bg-[#ff7e70]/10 items-center justify-center mb-2">
-            <Ionicons name="warning" size={20} color="#ff7e70" />
-          </View>
-          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#c2402f]">
-            {myAlerts.length}
-          </Text>
-          <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Alertas</Text>
-        </View>
-        <View className="flex-1 bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] items-center">
-          <View className="w-10 h-10 rounded-full bg-[#007275]/10 items-center justify-center mb-2">
-            <Ionicons name="checkmark-circle" size={20} color="#007275" />
-          </View>
-          <Text className="text-xl font-bold font-[Inter\_700Bold] text-[#007275]">
-            {foundPets.length}
-          </Text>
-          <Text className="text-gray-600 font-[Inter\_400Regular] text-sm">Encontradas</Text>
-        </View>
-      </View>
-
-      {/* Botones de acción rápida */}
-      <View className="flex-row gap-3 mb-6">
-        <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2"
-          onPress={() => {
-            setEditingPet(null);
-            setShowPetForm(true);
-            setShowPets(false);
-          }}
-        >
-          <Ionicons name="add-circle" size={20} color="#fff" />
-          <Text className="text-white text-center font-semibold font-[Inter\_600SemiBold]">
-            Registrar mascota
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex-1 bg-[#007275] py-4 rounded-xl flex-row items-center justify-center gap-2"
+        <ToggleTile
+          icon="paw"
+          title="Mis mascotas"
+          subtitle="Toca para ver sus fichas"
+          count={pets.length}
+          active={showPets}
           onPress={() => {
             onLoadPets();
             setShowPets(!showPets);
             setShowPetForm(false);
           }}
-        >
-          <Ionicons name={showPets ? "eye-off" : "eye"} size={20} color="#fff" />
-          <Text className="text-white text-center font-semibold font-[Inter\_600SemiBold]">
-            {showPets ? "Ocultar" : "Ver"} mascotas
-          </Text>
-        </TouchableOpacity>
+          label={`${showPets ? "Ocultar" : "Ver"} mascotas`}
+        />
       </View>
 
       {/* Lista de mascotas */}
       {showPets && (
-        <View className="mb-6">
-          <Text className="text-lg font-bold font-[Inter\_700Bold] mb-3">Mis mascotas</Text>
+        <View className="mb-2">
+          <SectionTitle icon="paw" title="Mis mascotas" />
           {loadingPets ? (
-            <ActivityIndicator size="large" color="#007275" />
+            <ActivityIndicator className="my-6" size="large" color="#007275" />
           ) : pets.length === 0 ? (
-            <EmptyState
+            <EmptyCard
               icon="paw"
               title="No tienes mascotas registradas"
-              subtitle="Agrega tu primera mascota para empezar a protegerla."
-              actionLabel="Registrar mascota"
-              onAction={() => {
-                setShowPetForm(true);
-                setShowPets(false);
-              }}
-            />
+              text="Agrega tu primera mascota para empezar a protegerla."
+            >
+              <TouchableOpacity className="bg-[#007275] py-2.5 px-5 rounded-full mt-4" onPress={openNewPetForm}>
+                <Text className="text-white font-semibold">Registrar mascota</Text>
+              </TouchableOpacity>
+            </EmptyCard>
           ) : (
             pets.map((pet) => (
               <TouchableOpacity
                 key={pet.id}
-                className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)] flex-row"
+                className={`${CARD} p-3 mb-3 flex-row items-center`}
+                activeOpacity={0.85}
                 onPress={() => {
                   setSelectedPet(pet);
                   setModalVisible(true);
                 }}
+                accessibilityRole="button"
+                accessibilityLabel={`Ver ficha de ${pet.name}`}
               >
-                {pet.image_url ? (
-                  <Image
-                    source={{ uri: pet.image_url }}
-                    className="w-16 h-16 rounded-lg mr-3"
-                  />
-                ) : (
-                  <View className="w-16 h-16 bg-gray-200 rounded-lg mr-3 items-center justify-center">
-                    <MaterialCommunityIcons
-                      name={pet.type === "perro" ? "dog" : "cat"}
-                      size={28}
-                      color="#6B7280"
-                    />
+                <PetThumb uri={pet.image_url} type={pet.type} className="w-[72px] h-[72px] rounded-2xl" iconSize={32} />
+                <View className="flex-1 ml-3">
+                  <Text className="font-bold text-lg text-[#211f1e]" numberOfLines={1}>
+                    {pet.name}
+                  </Text>
+                  <View className="flex-row flex-wrap gap-1.5 mt-1.5">
+                    {!!pet.type && <Chip text={pet.type} tone="teal" />}
+                    {!!pet.color && <Chip text={pet.color} />}
+                    {!!pet.size && <Chip text={pet.size} />}
                   </View>
-                )}
-                <View className="flex-1">
-                  <Text className="font-bold font-[Inter\_700Bold] text-lg">{pet.name}</Text>
-                  <Text className="text-gray-600 font-[Inter\_400Regular] capitalize">
-                    {pet.type} • {pet.color}
-                  </Text>
-                  <Text className="text-gray-500 font-[Inter\_400Regular] text-sm">
-                    Tamaño: {pet.size}
-                  </Text>
                 </View>
+                <Ionicons name="chevron-forward" size={20} color="#9BA1A6" />
               </TouchableOpacity>
             ))
           )}
@@ -240,5 +208,29 @@ export function HomeTab({
         onDelete={onDeletePet}
       />
     </ScrollView>
+  );
+}
+
+function Stat({
+  icon,
+  color,
+  value,
+  label,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  value: number;
+  label: string;
+}) {
+  return (
+    <View className="flex-1 items-center">
+      <View className="w-9 h-9 rounded-full items-center justify-center mb-1.5" style={{ backgroundColor: `${color}1A` }}>
+        <Ionicons name={icon} size={18} color={color} />
+      </View>
+      <Text className="text-xl font-bold text-[#211f1e]">{value}</Text>
+      <Text className="text-gray-500 text-xs" numberOfLines={1}>
+        {label}
+      </Text>
+    </View>
   );
 }

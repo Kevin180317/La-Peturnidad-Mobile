@@ -1,3 +1,4 @@
+import { File } from "expo-file-system";
 import { supabase } from "@/utils/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
@@ -464,8 +465,12 @@ class DashboardService {
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${ext}`;
       const filePath = `${session.user.id}/${fileName}`;
 
-      // En RN, fetch(uri).arrayBuffer() lee el archivo local sin pasar por Blob
-      const body = await fetch(asset.uri).then((res) => res.arrayBuffer());
+      // Se lee con expo-file-system: fetch("file://...") no resuelve las rutas con %25 (p. ej. ExperienceData
+      // de Expo Go) y devolvía el texto "File not found", que se subía como si fuera la foto
+      const body = await new File(asset.uri).arrayBuffer();
+      if (body.byteLength === 0) {
+        return { success: false, error: "No se pudo leer la imagen, intenta con otra" };
+      }
       if (body.byteLength > MAX_IMAGE_BYTES) {
         return { success: false, error: "La imagen supera 5 MB" };
       }

@@ -1,13 +1,12 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import type { Pet } from "@/services/dashboard.service";
 import { dashboardService } from "@/services/dashboard.service";
-import { Picker } from "@react-native-picker/picker";
+import { CARD, ChoiceChips, Field, PrimaryButton, RoundIconButton } from "@/components/kit/Kit";
 import { useState } from "react";
 import {
   ActivityIndicator,
   Image,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -42,9 +41,6 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [uploadingPetImage, setUploadingPetImage] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [nameFocused, setNameFocused] = useState(false);
-  const [colorFocused, setColorFocused] = useState(false);
-  const [featuresFocused, setFeaturesFocused] = useState(false);
 
   const showError = (text2?: string) =>
     Toast.show({
@@ -97,142 +93,104 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
   const shownImage = previewUri ?? petImageUrl;
 
   return (
-    <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-      <Text className="text-xl font-bold mb-4">
-        {editingPet ? "Editar mascota" : "Registrar nueva mascota"}
-      </Text>
+    <View className={`${CARD} p-5 mb-6`}>
+      <View className="flex-row items-center justify-between mb-5">
+        <Text className="text-xl font-bold text-[#211f1e]">
+          {editingPet ? "Editar mascota" : "Registrar nueva mascota"}
+        </Text>
+        <RoundIconButton icon="close" tint="teal" size={34} onPress={onCancel} label="Cerrar formulario" disabled={saving} />
+      </View>
+
+      {/* Foto */}
+      <TouchableOpacity
+        className="self-center mb-5"
+        activeOpacity={0.85}
+        onPress={handleSelectImage}
+        disabled={busy}
+        accessibilityRole="button"
+        accessibilityLabel={petImageUrl ? "Cambiar foto" : "Seleccionar foto"}
+      >
+        {shownImage ? (
+          <Image source={{ uri: shownImage }} className="w-32 h-32 rounded-3xl bg-gray-100" />
+        ) : (
+          <View className="w-32 h-32 rounded-3xl bg-[#faf5e0] border-2 border-dashed border-[#007275]/40 items-center justify-center">
+            <Ionicons name="camera" size={30} color="#007275" />
+            <Text className="text-[#007275] text-xs font-semibold mt-1">Agregar foto</Text>
+          </View>
+        )}
+        <View className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-[#007275] border-[3px] border-white items-center justify-center">
+          {uploadingPetImage ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Ionicons name={shownImage ? "pencil" : "add"} size={18} color="#fff" />
+          )}
+        </View>
+      </TouchableOpacity>
+      {uploadingPetImage && <Text className="text-center text-gray-500 text-xs -mt-2 mb-4">Subiendo...</Text>}
 
       {/* Tipo */}
-      <Text className="font-semibold mb-2">Tipo *</Text>
+      <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Tipo *</Text>
       <View className="flex-row gap-3 mb-4">
-        {["perro", "gato"].map((type) => (
-          <TouchableOpacity
-            key={type}
-            className={`flex-1 py-3 rounded-xl border-2 flex-row items-center justify-center gap-2 ${
-              petType === type
-                ? "border-[#007275] bg-[#007275]"
-                : "border-[#211f1e]/20"
-            }`}
-            onPress={() => setPetType(type as "perro" | "gato")}
-          >
-            <MaterialCommunityIcons
-              name={type === "perro" ? "dog" : "cat"}
-              size={22}
-              color={petType === type ? "#fff" : "#6B7280"}
-            />
-            <Text
-              className={`text-center ${petType === type ? "text-white" : "text-gray-600"}`}
+        {(["perro", "gato"] as const).map((type) => {
+          const active = petType === type;
+          return (
+            <TouchableOpacity
+              key={type}
+              className={`flex-1 py-3.5 rounded-2xl border-[1.5px] flex-row items-center justify-center gap-2 ${
+                active ? "border-[#007275] bg-[#007275]" : "border-gray-200 bg-white"
+              }`}
+              activeOpacity={0.85}
+              onPress={() => setPetType(type)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: active }}
             >
-              {type === "perro" ? "Perro" : "Gato"}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <MaterialCommunityIcons name={type === "perro" ? "dog" : "cat"} size={22} color={active ? "#fff" : "#6B7280"} />
+              <Text className={`font-semibold ${active ? "text-white" : "text-gray-600"}`}>
+                {type === "perro" ? "Perro" : "Gato"}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
-      {/* Nombre */}
-      <Text className="font-semibold mb-2">Nombre *</Text>
-      <TextInput
-        className={`${nameFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
-        placeholder="Nombre de la mascota"
-        placeholderTextColor="#9BA1A6"
-        value={petName}
-        onChangeText={setPetName}
-        onFocus={() => setNameFocused(true)}
-        onBlur={() => setNameFocused(false)}
-      />
-
-      {/* Color */}
-      <Text className="font-semibold mb-2">Color *</Text>
-      <TextInput
-        className={`${colorFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
-        placeholder="Color principal"
-        placeholderTextColor="#9BA1A6"
-        value={petColor}
-        onChangeText={setPetColor}
-        onFocus={() => setColorFocused(true)}
-        onBlur={() => setColorFocused(false)}
-      />
+      <Field label="Nombre *" icon="paw-outline" placeholder="Nombre de la mascota" value={petName} onChangeText={setPetName} />
+      <Field label="Color *" icon="color-palette-outline" placeholder="Color principal" value={petColor} onChangeText={setPetColor} />
 
       {/* Tamaño */}
-      <Text className="font-semibold mb-2">Tamaño *</Text>
-      <View className="mb-4 border border-gray-300 rounded-lg overflow-hidden bg-white">
-        <Picker
-          selectedValue={petSize}
-          onValueChange={(value) => setPetSize(value)}
-          style={{ height: 50, color: "#211f1e", backgroundColor: "#ffffff" }}
-        >
-          <Picker.Item label="Selecciona un tamaño" value="" color="#211f1e" />
-          <Picker.Item label="Pequeño" value="pequeño" color="#211f1e" />
-          <Picker.Item label="Mediano" value="mediano" color="#211f1e" />
-          <Picker.Item label="Grande" value="grande" color="#211f1e" />
-        </Picker>
+      <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Tamaño *</Text>
+      <View className="mb-4">
+        <ChoiceChips
+          options={[
+            { value: "pequeño", label: "Pequeño" },
+            { value: "mediano", label: "Mediano" },
+            { value: "grande", label: "Grande" },
+          ]}
+          value={petSize}
+          onChange={setPetSize}
+        />
       </View>
 
-      {/* Características */}
-      <Text className="font-semibold mb-2">Características especiales</Text>
-      <TextInput
-        className={`${featuresFocused ? "border-[#007275] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"} rounded-lg p-3 mb-4 bg-white text-[#211f1e]`}
+      <Field
+        label="Características especiales"
+        icon="sparkles-outline"
         placeholder="Ej: manchas, cicatrices, comportamiento especial..."
-        placeholderTextColor="#9BA1A6"
         value={petFeatures}
         onChangeText={setPetFeatures}
         multiline
         numberOfLines={3}
-        textAlignVertical="top"
-        onFocus={() => setFeaturesFocused(true)}
-        onBlur={() => setFeaturesFocused(false)}
       />
 
-      {/* Foto */}
-      <Text className="font-semibold mb-2">Foto *</Text>
-      {shownImage && (
-        <Image
-          source={{ uri: shownImage }}
-          className="w-24 h-24 rounded-lg mb-3 self-center"
-        />
-      )}
-      <TouchableOpacity
-        className={`py-3 rounded-xl flex-row items-center justify-center gap-2 mb-4 ${uploadingPetImage ? "bg-gray-400" : "bg-[#007275]"}`}
-        onPress={handleSelectImage}
+      <PrimaryButton
+        title={editingPet ? "Guardar cambios" : "Registrar mascota"}
+        icon={editingPet ? "checkmark" : "paw"}
+        onPress={handleSubmit}
+        loading={saving}
         disabled={busy}
-      >
-        {uploadingPetImage ? (
-          <ActivityIndicator size="small" color="#fff" />
-        ) : (
-          <Ionicons name="camera" size={18} color="#fff" />
-        )}
-        <Text className={`text-center ${uploadingPetImage ? "text-gray-700" : "text-white"}`}>
-          {uploadingPetImage
-            ? "Subiendo..."
-            : petImageUrl
-              ? "Cambiar foto"
-              : "Seleccionar foto"}
-        </Text>
+        className="mt-2"
+      />
+      <TouchableOpacity className="py-3 mt-1" onPress={onCancel} disabled={saving}>
+        <Text className="text-center font-semibold text-gray-600">Cancelar</Text>
       </TouchableOpacity>
-
-      {/* Botones */}
-      <View className="flex-row gap-3">
-        <TouchableOpacity
-          className={`flex-1 py-4 rounded-xl flex-row items-center justify-center ${busy ? "bg-gray-400" : "bg-[#007275]"}`}
-          onPress={handleSubmit}
-          disabled={busy}
-        >
-          {saving ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text className={`text-center font-bold ${busy ? "text-gray-700" : "text-white"}`}>
-              {editingPet ? "Actualizar" : "Registrar"}
-            </Text>
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex-1 bg-[#211f1e] py-4 rounded-xl"
-          onPress={onCancel}
-          disabled={saving}
-        >
-          <Text className="text-white text-center font-bold">Cancelar</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }

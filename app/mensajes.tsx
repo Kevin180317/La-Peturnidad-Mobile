@@ -1,19 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
+import { confirmDialog } from "@/components/ConfirmDialog";
 import { messagesService } from "@/services/messages.service";
 import { supabase } from "@/utils/supabase";
-import { EmptyState } from "@/components/EmptyState";
-import { ListSkeleton } from "@/components/Skeleton";
+import { ScreenTitle } from "@/components/kit/Kit";
+import { ConversationList, ConversationListSkeleton } from "@/components/messages/ConversationList";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Image,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { RefreshControl, ScrollView } from "react-native";
 
 export default function MensajesScreen() {
   const router = useRouter();
@@ -52,20 +44,19 @@ export default function MensajesScreen() {
   );
 
   const handleDelete = (convId: string) => {
-    Alert.alert("Eliminar chat", "¿Eliminar esta conversación?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: async () => {
-          if (!userId) return;
-          const r = await messagesService.deleteConversation(convId, userId);
-          if (r.success) {
-            setConversations((prev) => prev.filter((c) => c.id !== convId));
-          }
-        },
+    confirmDialog({
+      title: "Eliminar chat",
+      message: "¿Eliminar esta conversación?",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        if (!userId) return;
+        const r = await messagesService.deleteConversation(convId, userId);
+        if (r.success) {
+          setConversations((prev) => prev.filter((c) => c.id !== convId));
+        }
       },
-    ]);
+    });
   };
 
   const onRefresh = useCallback(async () => {
@@ -75,17 +66,6 @@ export default function MensajesScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const formatTime = (dateStr: string) => {
-    if (!dateStr) return "";
-    const d = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    if (diff < 86400000) {
-      return d.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
-    }
-    return d.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
-  };
-
   // init corre una sola vez al montar (deps estables intencionales)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
@@ -93,68 +73,21 @@ export default function MensajesScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) {
-    return (
-      <View className="flex-1 bg-[#faf5e0]">
-        <ListSkeleton />
-      </View>
-    );
-  }
-
   return (
     <ScrollView
+      className="bg-[#faf5e0]"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      contentContainerClassName="p-5 bg-[#faf5e0] grow"
+      contentContainerClassName="p-5 pb-10"
     >
-      <Text className="text-2xl font-bold text-[#211f1e] mb-6">Mensajes</Text>
-
-      {conversations.length === 0 ? (
-        <View className="flex-1 justify-center">
-          <EmptyState
-            icon="chatbubbles"
-            title="No tienes conversaciones aún"
-            subtitle="Visita un perfil público y envía un mensaje para iniciar una conversación"
-          />
-        </View>
+      <ScreenTitle title="Mensajes" subtitle="Mantén presionado un chat para eliminarlo" />
+      {loading ? (
+        <ConversationListSkeleton />
       ) : (
-        conversations.map((conv) => (
-          <TouchableOpacity
-            key={conv.id}
-            className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)] flex-row items-center"
-            onPress={() => router.push(`/mensajes/${conv.id}`)}
-            onLongPress={() => handleDelete(conv.id)}
-          >
-            {conv.is_group ? (
-              <View className="w-14 h-14 rounded-full bg-[#007275] items-center justify-center mr-3">
-                <Ionicons name="people" size={26} color="white" />
-              </View>
-            ) : conv.other_user_picture ? (
-              <Image source={{ uri: conv.other_user_picture }} className="w-14 h-14 rounded-full mr-3" />
-            ) : (
-              <View className="w-14 h-14 rounded-full bg-[#211f1e] items-center justify-center mr-3">
-                <Text className="text-xl text-white font-bold">
-                  {conv.other_user_name?.[0]?.toUpperCase() || "U"}
-                </Text>
-              </View>
-            )}
-            <View className="flex-1">
-              <View className="flex-row items-center justify-between">
-                <Text className="font-bold text-[#211f1e]">{conv.other_user_name}</Text>
-                {conv.last_message_at && (
-                  <Text className="text-gray-500 text-xs">{formatTime(conv.last_message_at)}</Text>
-                )}
-              </View>
-              <Text className="text-gray-500 text-sm mt-1" numberOfLines={1}>
-                {conv.last_message || "Sin mensajes aún"}
-              </Text>
-            </View>
-            {conv.unread_count > 0 && (
-              <View className="bg-[#ff7e70] rounded-full min-w-6 h-6 px-1.5 items-center justify-center ml-2">
-                <Text className="text-white text-xs font-bold">{conv.unread_count}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        ))
+        <ConversationList
+          conversations={conversations}
+          onOpen={(conv) => router.push(`/mensajes/${conv.id}`)}
+          onDelete={(conv) => handleDelete(conv.id)}
+        />
       )}
     </ScrollView>
   );

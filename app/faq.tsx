@@ -1,3 +1,4 @@
+import { CARD_SHADOW, ScreenTitle } from "@/components/kit/Kit";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { LayoutAnimation, Platform, ScrollView, Text, TouchableOpacity, UIManager, View } from "react-native";
@@ -55,16 +56,8 @@ export default function FaqScreen() {
   };
 
   return (
-    <ScrollView
-      className="bg-[#faf5e0]"
-      contentContainerClassName="p-5 pb-10"
-    >
-      <Text className="text-2xl font-bold text-[#211f1e] mb-1">
-        Preguntas frecuentes
-      </Text>
-      <Text className="text-gray-500 mb-6">
-        Todo lo que necesitas saber sobre Lucky Tracker.
-      </Text>
+    <ScrollView className="bg-[#faf5e0]" contentContainerClassName="p-5 pb-10">
+      <ScreenTitle title="Preguntas frecuentes" subtitle="Todo lo que necesitas saber sobre Lucky Tracker." />
 
       {FAQS.map((faq, index) => {
         const open = openIndex === index;
@@ -73,23 +66,18 @@ export default function FaqScreen() {
             key={faq.question}
             activeOpacity={0.8}
             onPress={() => toggle(index)}
-            className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] p-5 mb-4"
+            className={`bg-white rounded-3xl p-4 mb-3 border-[1.5px] ${open ? "border-[#007275]/40" : `border-transparent ${CARD_SHADOW}`}`}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: open }}
           >
-            <View className="flex-row items-center justify-between">
-              <Text className="flex-1 font-semibold text-[#211f1e] pr-3">
-                {faq.question}
-              </Text>
-              <Ionicons
-                name={open ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#007275"
-              />
+            <View className="flex-row items-center">
+              <View className={`w-9 h-9 rounded-xl items-center justify-center mr-3 ${open ? "bg-[#007275]" : "bg-[#007275]/10"}`}>
+                <Ionicons name="help" size={18} color={open ? "#fff" : "#007275"} />
+              </View>
+              <Text className="flex-1 font-bold text-[#211f1e] text-[15px] pr-3">{faq.question}</Text>
+              <Ionicons name={open ? "chevron-up" : "chevron-down"} size={18} color="#007275" />
             </View>
-            {open && (
-              <Text className="text-gray-500 mt-3 leading-relaxed">
-                {faq.answer}
-              </Text>
-            )}
+            {open && <Text className="text-gray-600 text-sm mt-3 leading-6 ml-12">{faq.answer}</Text>}
           </TouchableOpacity>
         );
       })}

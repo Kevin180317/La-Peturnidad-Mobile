@@ -1,5 +1,6 @@
+import { CARD, Chip, EmptyCard, ScreenTitle, type ChipTone } from "@/components/kit/Kit";
+import { formatTimeAgo } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
-import { EmptyState } from "@/components/EmptyState";
 import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "expo-router";
@@ -91,14 +92,7 @@ export default function PanelModeracionScreen() {
     }
   };
 
-  const statusColor = (s: string) => {
-    switch (s) {
-      case "pending": return "bg-[#e8a93b]/15 text-[#8a5a15]";
-      case "reviewed": return "bg-[#007275]/10 text-[#007275]";
-      case "dismissed": return "bg-gray-100 text-gray-500";
-      default: return "bg-gray-100 text-gray-500";
-    }
-  };
+  const statusTone = (s: string): ChipTone => (s === "pending" ? "coral" : s === "reviewed" ? "teal" : "neutral");
   const statusLabel = (s: string) => {
     switch (s) {
       case "pending": return "Pendiente";
@@ -125,64 +119,64 @@ export default function PanelModeracionScreen() {
 
   return (
     <ScrollView
+      className="bg-[#faf5e0]"
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-      contentContainerClassName="p-5 bg-[#faf5e0] grow"
+      contentContainerClassName="p-5 pb-10 grow"
     >
-      <View className="flex-row items-center justify-between mb-6">
-        <Text className="text-2xl font-bold text-[#211f1e]">Panel de moderación</Text>
-        <Text className="text-gray-500 text-sm capitalize">{userRole}</Text>
-      </View>
+      <ScreenTitle
+        title="Panel de moderación"
+        subtitle={`${reports.filter((r) => r.status === "pending").length} reportes pendientes`}
+        right={userRole ? <Chip icon="shield-checkmark" text={userRole} tone="dark" /> : null}
+      />
 
       {reports.length === 0 ? (
-        <EmptyState
-          icon="shield-checkmark"
-          title="No hay reportes"
-          subtitle="Los reportes de la comunidad aparecerán aquí"
-        />
+        <EmptyCard icon="shield-checkmark-outline" title="No hay reportes" text="Los reportes de la comunidad aparecerán aquí" />
       ) : (
         reports.map((report) => (
-          <View key={report.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className="font-bold text-[#211f1e]">Reporte a {report.target_name}</Text>
-              <View className={`px-2 py-1 rounded-full ${statusColor(report.status)}`}>
-                <Text className="text-xs font-medium">{statusLabel(report.status)}</Text>
+          <View key={report.id} className={`${CARD} p-4 mb-3`}>
+            <View className="flex-row items-start mb-3">
+              <View className="w-10 h-10 rounded-2xl bg-[#ff7e70]/10 items-center justify-center mr-3">
+                <Ionicons name="flag" size={18} color="#c2402f" />
               </View>
+              <View className="flex-1 mr-2">
+                <Text className="font-bold text-[#211f1e] text-[15px]">Reporte a {report.target_name}</Text>
+                <Text className="text-gray-500 text-xs mt-0.5">
+                  Por {report.reporter_name} · {formatTimeAgo(report.created_at)}
+                </Text>
+              </View>
+              <Chip text={statusLabel(report.status)} tone={statusTone(report.status)} />
             </View>
-            <Text className="text-gray-500 text-sm mb-1">
-              Reportado por: {report.reporter_name}
-            </Text>
-            <Text className="text-gray-500 text-sm mb-1">Razón: {report.reason}</Text>
-            <Text className="text-gray-500 text-xs mb-3">
-              {new Date(report.created_at).toLocaleDateString("es-MX", {
-                day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-              })}
-            </Text>
+            <View className="bg-[#faf5e0] rounded-2xl p-3 mb-3">
+              <Text className="text-xs text-gray-500">Razón</Text>
+              <Text className="text-[#211f1e] text-sm font-semibold mt-0.5">{report.reason}</Text>
+            </View>
 
-            <TouchableOpacity
-              className="flex-row items-center justify-center border border-[#007275] py-2 rounded-xl mb-3"
-              onPress={() => router.push(`/perfil/${report.target_user_id}`)}
-            >
-              <Ionicons name="person-circle-outline" size={16} color="#007275" style={{ marginRight: 4 }} />
-              <Text className="text-[#007275] text-sm font-semibold">Ver perfil</Text>
-            </TouchableOpacity>
-
-            {report.status === "pending" && (
-              <View className="flex-row gap-3">
-                <TouchableOpacity
-                  className="flex-1 bg-[#007275] py-2 rounded-xl flex-row items-center justify-center"
-                  onPress={() => handleReview(report.id, "reviewed")}
-                >
-                  <Ionicons name="checkmark-circle" size={16} color="white" style={{ marginRight: 4 }} />
-                  <Text className="text-white text-center text-sm font-semibold">Revisado</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="flex-1 bg-gray-500 py-2 rounded-xl"
-                  onPress={() => handleReview(report.id, "dismissed")}
-                >
-                  <Text className="text-white text-center text-sm font-semibold">Descartar</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+            <View className="flex-row gap-2">
+              <TouchableOpacity
+                className="flex-1 flex-row items-center justify-center gap-1.5 bg-[#007275]/10 h-10 rounded-full"
+                onPress={() => router.push(`/perfil/${report.target_user_id}`)}
+              >
+                <Ionicons name="person-circle-outline" size={16} color="#007275" />
+                <Text className="text-[#007275] text-sm font-semibold">Ver perfil</Text>
+              </TouchableOpacity>
+              {report.status === "pending" && (
+                <>
+                  <TouchableOpacity
+                    className="flex-1 bg-[#007275] h-10 rounded-full flex-row items-center justify-center gap-1.5"
+                    onPress={() => handleReview(report.id, "reviewed")}
+                  >
+                    <Ionicons name="checkmark-circle" size={16} color="white" />
+                    <Text className="text-white text-sm font-semibold">Revisado</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex-1 bg-gray-100 h-10 rounded-full items-center justify-center"
+                    onPress={() => handleReview(report.id, "dismissed")}
+                  >
+                    <Text className="text-gray-700 text-sm font-semibold">Descartar</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
           </View>
         ))
       )}
