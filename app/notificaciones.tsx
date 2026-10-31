@@ -1,6 +1,6 @@
 import { ListRow, ListSection, PrimaryButton, ScreenTitle } from "@/components/kit/Kit";
 import { notificationsService } from "@/services/notifications.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -21,7 +21,7 @@ export default function NotificacionesScreen() {
   const [foundPetAlerts, setFoundPetAlerts] = useState(true);
 
   const loadPreferences = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) {
       router.replace("/");
       return;
@@ -38,7 +38,7 @@ export default function NotificacionesScreen() {
 
   const handleSave = async () => {
     setSaving(true);
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) {
       setSaving(false);
       router.replace("/");

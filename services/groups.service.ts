@@ -118,6 +118,23 @@ class GroupsService {
 
   async leave(groupId: string, userId: string): Promise<ServiceResult> {
     try {
+      // Primero el chat: si esto falla, sigue siendo miembro y nada queda a medias
+      const { data: conv, error: convError } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("group_id", groupId)
+        .maybeSingle();
+      if (convError) throw convError;
+
+      if (conv) {
+        const { error: chatError } = await supabase
+          .from("conversation_participants")
+          .delete()
+          .eq("conversation_id", conv.id)
+          .eq("user_id", userId);
+        if (chatError) throw chatError;
+      }
+
       const { error } = await supabase
         .from("group_members")
         .delete()

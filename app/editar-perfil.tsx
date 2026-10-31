@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
+import { ColoniaPicker, coloniasForPostalCode } from "@/components/ColoniaPicker";
 import { Avatar, CARD, Field, PrimaryButton } from "@/components/kit/Kit";
 import { dashboardService } from "@/services/dashboard.service";
 import { profileService } from "@/services/profile.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -23,7 +24,9 @@ export default function EditarPerfilScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
+  const [colonia, setColonia] = useState("");
+  // Dirección guardada que no coincide con el catálogo: no recibiría alertas de vecinos
+  const [invalidAddress, setInvalidAddress] = useState("");
   const [city, setCity] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
@@ -31,21 +34,36 @@ export default function EditarPerfilScreen() {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   const loadProfile = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) { router.replace("/"); return; }
 
     setUserId(user.user.id);
     const result = await profileService.getByUserId(user.user.id);
-    if (result.success && result.data) {
+    if (!result.success) {
+      // Sin datos cargados, guardar sobrescribiría el perfil con campos vacíos
+      Toast.show({ type: "error", text1: "No pudimos cargar tu perfil", text2: "Revisa tu conexión e intenta de nuevo", position: "top" });
+      router.back();
+      return;
+    }
+    if (result.data) {
       setProfilePicture(result.data.profile_picture_url || null);
       setFirstName(result.data.first_name || "");
       setLastName(result.data.last_name || "");
       setPhone(result.data.phone || "");
-      setAddress(result.data.address || "");
       setCity(result.data.city || "");
-      setPostalCode(result.data.postal_code || "");
+      const savedCode = result.data.postal_code || "";
+      const savedAddress = (result.data.address || "").trim();
+      setPostalCode(savedCode);
+      const match = coloniasForPostalCode(savedCode).find((c) => c.toLowerCase() === savedAddress.toLowerCase());
+      setColonia(match ?? "");
+      setInvalidAddress(match ? "" : savedAddress);
     }
     setLoading(false);
+  };
+
+  const handlePostalCodeChange = (text: string) => {
+    setPostalCode(text.replace(/\D/g, "").slice(0, 5));
+    setColonia("");
   };
 
   const handleSave = async () => {
@@ -54,8 +72,13 @@ export default function EditarPerfilScreen() {
       return;
     }
 
+    if (!colonia) {
+      Toast.show({ type: "error", text1: "Colonia requerida", text2: "Ingresa tu código postal y selecciona tu colonia", position: "top" });
+      return;
+    }
+
     setSaving(true);
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) {
       setSaving(false);
       router.replace("/");
@@ -66,9 +89,9 @@ export default function EditarPerfilScreen() {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
       phone: phone.trim(),
-      address: address.trim(),
-      city: city.trim(),
-      postal_code: postalCode.trim(),
+      address: colonia,
+      city: city.trim() || "Tijuana",
+      postal_code: postalCode,
     });
 
     if (result.success) {
@@ -114,6 +137,8 @@ export default function EditarPerfilScreen() {
     loadProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const coloniaOptions = postalCode.length === 5 ? coloniasForPostalCode(postalCode) : [];
 
   if (loading) {
     return (
@@ -162,11 +187,25 @@ export default function EditarPerfilScreen() {
         <Field label="Teléfono" icon="call-outline" placeholder="Teléfono" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
       </View>
 
-      <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Dirección</Text>
+      <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Tu colonia</Text>
       <View className={`${CARD} p-4 pb-0 mb-6`}>
-        <Field label="Dirección / Colonia" icon="home-outline" placeholder="Calle y colonia" value={address} onChangeText={setAddress} />
-        <Field label="Ciudad" icon="location-outline" placeholder="Ciudad" value={city} onChangeText={setCity} />
-        <Field label="Código Postal" icon="map-outline" placeholder="C.P." value={postalCode} onChangeText={setPostalCode} keyboardType="numeric" />
+        <Text className="text-gray-500 text-xs mb-3 ml-1">
+          La usamos para avisarte de mascotas perdidas cerca de ti.
+        </Text>
+        {!!invalidAddress && !colonia && (
+          <Text className="text-red-600 text-xs mb-3 ml-1">
+            Tu dirección guardada ({invalidAddress}) no coincide con una colonia. Selecciónala para recibir alertas de tus vecinos.
+          </Text>
+        )}
+        <Field label="Código Postal *" icon="map-outline" placeholder="Código postal" value={postalCode} onChangeText={handlePostalCodeChange} keyboardType="numeric" maxLength={5} />
+        {coloniaOptions.length > 0 ? (
+          <ColoniaPicker options={coloniaOptions} value={colonia} onChange={setColonia} />
+        ) : (
+          postalCode.length === 5 && (
+            <Text className="text-red-600 text-xs mb-3 ml-1">No encontramos colonias para este código postal.</Text>
+          )
+        )}
+        <Field label="Ciudad" icon="location-outline" placeholder="Ciudad" value={city || "Tijuana"} editable={false} />
       </View>
 
       <PrimaryButton

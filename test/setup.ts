@@ -24,3 +24,6 @@ jest.mock("@expo/vector-icons", () => {
 
 // useSafeAreaInsets necesita SafeAreaProvider; el mock oficial devuelve insets fijos
 jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
+
+// El chat solo lee la altura del header; sin Stack en los tests es 0
+jest.mock("expo-router/react-navigation", () => ({ HeaderHeightContext: require("react").createContext(undefined) }));

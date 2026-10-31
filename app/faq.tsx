@@ -1,14 +1,7 @@
 import { CARD_SHADOW, ScreenTitle } from "@/components/kit/Kit";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { LayoutAnimation, Platform, ScrollView, Text, TouchableOpacity, UIManager, View } from "react-native";
-
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+import { LayoutAnimation, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const FAQS = [
   {

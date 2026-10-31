@@ -9,7 +9,7 @@ import {
   successStoriesService,
   type SuccessStoryWithOwner,
 } from "@/services/success-stories.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -47,7 +47,7 @@ export default function HistoriasScreen() {
   };
 
   const init = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) { router.replace("/"); return; }
     setUserId(user.user.id);
     const [blocked] = await Promise.all([

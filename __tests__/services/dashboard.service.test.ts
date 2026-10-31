@@ -199,3 +199,23 @@ describe("push token for this device", () => {
     expect(calls).toContainEqual({ table: "device_tokens", method: "eq", args: ["token", "tok-3"] });
   });
 });
+
+describe("dashboardService.signOut", () => {
+  it("only closes this device's session", async () => {
+    supabaseMock.auth.signOut.mockResolvedValue({ error: null });
+    expect(await dashboardService.signOut()).toEqual({ success: true });
+    expect(supabaseMock.auth.signOut).toHaveBeenCalledWith({ scope: "local" });
+  });
+
+  it("succeeds offline, when the local session was removed despite the error", async () => {
+    supabaseMock.auth.signOut.mockResolvedValue({ error: { message: "offline" } });
+    supabaseMock.auth.getSession.mockResolvedValue({ data: { session: null } });
+    expect(await dashboardService.signOut()).toEqual({ success: true });
+  });
+
+  it("fails if the session is still there", async () => {
+    supabaseMock.auth.signOut.mockResolvedValue({ error: { message: "fallo" } });
+    supabaseMock.auth.getSession.mockResolvedValue({ data: { session: { user: {} } } });
+    expect(await dashboardService.signOut()).toEqual({ success: false, error: "fallo" });
+  });
+});

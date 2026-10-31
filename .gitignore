@@ -45,3 +45,6 @@ coverage/
 
 # local secrets
 .env
+
+# supabase cli
+supabase/.temp/

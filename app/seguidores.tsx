@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { followsService } from "@/services/follows.service";
 import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { Avatar, CARD, EmptyCard, Segmented } from "@/components/kit/Kit";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -32,7 +33,7 @@ export default function SeguidoresScreen() {
       return;
     }
 
-    const { data: auth } = await supabase.auth.getUser();
+    const { data: auth } = await getCurrentUser();
     const me = auth?.user?.id;
 
     const [followersRes, followingRes, blockedRes] = await Promise.all([

@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { PasswordInput } from "@/components/PasswordInput";
 import { CARD, Field, PrimaryButton } from "@/components/kit/Kit";
 import { authErrorMessage, authService, passwordError } from "@/services/auth.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -31,7 +31,7 @@ export default function SeguridadScreen() {
     Toast.show({ type: "error", text1: "No se pudo guardar", text2, position: "top" });
 
   const loadUser = async () => {
-    const { data } = await supabase.auth.getUser();
+    const { data } = await getCurrentUser();
     if (!data?.user) {
       router.replace("/login");
       return;

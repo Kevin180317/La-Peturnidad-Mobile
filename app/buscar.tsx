@@ -8,7 +8,7 @@ import {
   type PetSearchResult,
   type UserSearchResult,
 } from "@/services/search.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -48,7 +48,7 @@ export default function BuscarScreen() {
   const requestId = useRef(0);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
+    getCurrentUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace("/");
         return;

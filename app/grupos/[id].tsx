@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { groupsService } from "@/services/groups.service";
 import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -68,7 +69,7 @@ export default function GrupoDetailScreen() {
       setLoading(false);
       return;
     }
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) { router.replace("/"); return; }
     setCurrentUserId(user.user.id);
     await loadGroup();

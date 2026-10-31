@@ -66,6 +66,16 @@ describe("messagesService.markAsRead / deleteConversation", () => {
   });
 });
 
+describe("messagesService.getMessages", () => {
+  it("asks for the newest messages and returns them oldest first", async () => {
+    mockTable("messages", { data: [{ id: "m2" }, { id: "m1" }] });
+    const res = await messagesService.getMessages("c1");
+    expect(calls).toContainEqual({ table: "messages", method: "order", args: ["created_at", { ascending: false }] });
+    expect(calls).toContainEqual({ table: "messages", method: "limit", args: [500] });
+    expect(res.data?.map((m) => m.id)).toEqual(["m1", "m2"]);
+  });
+});
+
 describe("messagesService.getConversations", () => {
   it("returns [] when the user has no conversations", async () => {
     mockTable("conversation_participants", { data: [] });
@@ -110,5 +120,14 @@ describe("messagesService.getConversations", () => {
       is_group: false,
     });
     expect(rows[1]).toMatchObject({ is_group: true, group_name: "Vecinos", other_user_id: "", unread_count: 0 });
+  });
+
+  it("labels a 1:1 chat whose other participant is gone", async () => {
+    mockTable("conversation_participants", { data: [{ conversation_id: "c1" }] }, { data: [] });
+    mockTable("conversations", { data: [{ id: "c1", group_id: null, created_at: "t", updated_at: "t" }] });
+    mockTable("blocks", { data: [] });
+    mockTable("messages", { data: [] });
+    const res = await messagesService.getConversations("u1");
+    expect(res.data?.[0]).toMatchObject({ other_user_id: "", other_user_name: "Conversación cerrada" });
   });
 });

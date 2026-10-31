@@ -1,7 +1,7 @@
 import { AuthScreen } from "@/components/auth/AuthScreen";
+import { ColoniaPicker, coloniasForPostalCode } from "@/components/ColoniaPicker";
 import { Field, PrimaryButton } from "@/components/kit/Kit";
 import { supabase } from "@/utils/supabase";
-import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -10,7 +10,6 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
-import colonias from "../assets/colonias.json";
 
 export default function RegisterExtendedScreen() {
   const router = useRouter();
@@ -21,7 +20,7 @@ export default function RegisterExtendedScreen() {
   const [phone, setPhone] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [filteredColonias, setFilteredColonias] = useState<typeof colonias>([]);
+  const [filteredColonias, setFilteredColonias] = useState<string[]>([]);
   const [selectedColonia, setSelectedColonia] = useState("");
   const [city] = useState("Tijuana");
   const [loading, setLoading] = useState(false);
@@ -33,9 +32,7 @@ export default function RegisterExtendedScreen() {
     setPostalCode(cleaned);
 
     if (cleaned.length === 5) {
-      const filtered = colonias.filter(
-        (item) => String(item["Código Postal"]) === cleaned,
-      );
+      const filtered = coloniasForPostalCode(cleaned);
       setFilteredColonias(filtered);
       if (filtered.length === 0) {
         Toast.show({
@@ -269,21 +266,7 @@ export default function RegisterExtendedScreen() {
       />
 
       {filteredColonias.length > 0 && (
-        <View className="mb-4">
-          <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Colonia *</Text>
-          <View className={`border-[1.5px] rounded-2xl overflow-hidden bg-white ${selectedColonia ? "border-[#007275]" : "border-gray-200"}`}>
-            <Picker
-              selectedValue={selectedColonia}
-              onValueChange={(itemValue) => setSelectedColonia(itemValue)}
-              style={{ height: 52, color: "#211f1e", backgroundColor: "#ffffff" }}
-            >
-              <Picker.Item label="Selecciona una colonia *" value="" color="#211f1e" />
-              {filteredColonias.map((item, idx) => (
-                <Picker.Item key={idx} label={item["Asentamiento"]} value={item["Asentamiento"]} color="#211f1e" />
-              ))}
-            </Picker>
-          </View>
-        </View>
+        <ColoniaPicker options={filteredColonias} value={selectedColonia} onChange={setSelectedColonia} />
       )}
 
       <Field label="Ciudad" icon="location-outline" value={city} editable={false} accessibilityLabel="Ciudad" placeholder="Se completa con tu código postal" />

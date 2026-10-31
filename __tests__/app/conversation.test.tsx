@@ -87,6 +87,19 @@ describe("ConversationScreen", () => {
     expect(screen.queryByDisplayValue("mi respuesta")).toBeNull();
   });
 
+  it("replaces the composer when the other person left the 1:1 chat", async () => {
+    mockTable("conversation_participants", { data: [] });
+    await openChat();
+    expect(screen.getByText(/ya no está en el chat/)).toBeTruthy();
+    expect(screen.queryByPlaceholderText("Escribe un mensaje...")).toBeNull();
+  });
+
+  it("keeps the composer when the other person is still in the chat", async () => {
+    mockTable("conversation_participants", { data: [{ user_id: "other" }] });
+    await openChat();
+    expect(screen.getByPlaceholderText("Escribe un mensaje...")).toBeTruthy();
+  });
+
   it("shows 'no disponible' when the conversation is not accessible", async () => {
     mockTable("conversations", { data: null });
     await render(<ConversationScreen />);

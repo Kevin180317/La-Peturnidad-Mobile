@@ -30,7 +30,10 @@
 
 - `app/` - Expo Router pages (dashboard, register, index)
 - `utils/supabase.ts` - Supabase client
-- `.env.local` - local env vars
+- `.env` - local env vars (ignorado por git; `.env.local` también funciona)
+- `utils/session.ts` - `getCurrentUser()`: usarlo en vez de `supabase.auth.getUser()` en pantallas (sin red conserva la sesión guardada)
+- `components/ColoniaPicker.tsx` - catálogo y selector de colonia (registro y editar perfil)
+- `docs/SUPABASE_IMPLEMENTACION_SEMANA_2026-11-02.md` - plan de lo pendiente en Supabase (fecha límite 2026-11-07, prioridad alta)
 - `components/kit/Kit.tsx` - kit de diseño compartido (ver "Sistema de diseño")
 - `components/auth/AuthScreen.tsx` - marco de las pantallas de acceso
 - `components/messages/ConversationList.tsx` - lista de chats (pestaña Mensajes y `/mensajes`)
@@ -120,6 +123,16 @@
 - Toast `welcome` y sin barras superiores en dashboard y auth (ver "Sistema de diseño")
 - Tests: 23 suites / 174 tests (kit, ConversationList, ToastConfig, ConfirmDialog, HomeTab/PetForm/PetDetailModal, EmergencyTab, AnimatedSplash, upload con expo-file-system)
 
+### Correcciones de la auditoría local (2026-10-31)
+Solo app, sin cambios en Supabase ni build generado todavía. Tests: 26 suites / 194 tests. No probado en teléfono.
+- **Sin red:** `getCurrentUser()` conserva la sesión guardada; el dashboard ya no muestra "Perfil incompleto" si falla la carga (`profileLoadFailed`, botón Reintentar) y editar perfil regresa en vez de mostrar el formulario vacío
+- **Cerrar sesión:** solo este dispositivo (`scope: "local"`) y también sin red (Supabase borra la sesión local aunque devuelva error)
+- **Colonia:** editar perfil usa código postal + `ColoniaPicker`, igual que el registro. Las alertas comparan con igualdad exacta: no volver a texto libre
+- **Chat:** carga los últimos 500 mensajes (sin paginar los anteriores); "Hoy/Ayer" por día de calendario; safe area inferior y teclado con `behavior="padding"` + altura real del header (`HeaderHeightContext` de `expo-router/react-navigation`, no de `@react-navigation/elements`: expo-router trae su propia copia)
+- **Parciales hasta aplicar el plan de Supabase:** salir de un grupo también borra `conversation_participants` desde el cliente; si la otra persona salió de un chat 1:1 se muestra "Conversación cerrada" y se desactiva el envío
+- **Eliminado:** `EmptyState`, `ThemedText`, `ThemedView`, `hooks/`, `constants/Colors.ts`, `utils/theme.ts` (las menciones anteriores en este archivo son historial), script `reset-project`, `supabase/.temp/` de git y las dependencias `axios`, `expo-blur`, `expo-image-manipulator`, `expo-location`, `expo-symbols`, `react-native-webview`, `@react-navigation/drawer`, `react-native-url-polyfill`. Varias son nativas: el cambio llega con el próximo build
+- **`ajv` se conserva a propósito:** no tiene imports, pero es un `ajv` 8 en la raíz junto a `ajv` 6 de ESLint; quitarlo cambia cómo se resuelven paquetes y no se pudo descartar que rompa algo
+
 ### Legal (páginas web) — REVISIÓN PENDIENTE
 - La app enlaza a `https://luckytracker.com.mx/terms` y `https://luckytracker.com.mx/policy` (constantes en `utils/legal.ts`): checkbox obligatorio en `app/register.tsx` y entradas en Perfil → Ayuda. Las mismas URLs van en Play Console
 - **Semana del 2026-10-26 (próxima semana): revisar esas 2 páginas** una vez que el equipo web aplique los cambios documentados en Todoist. Al revisar, verificar con WebFetch que existan estos puntos (al 2026-10-24 NO estaban: eran textos genéricos de sitio web):
@@ -168,7 +181,7 @@ Orden sugerido por costo/beneficio. Tokens = estimado aproximado.
 - Ver también: "Plan de avatares" y "Cambios OPCIONALES de mantenimiento" más abajo
 
 ### Edge Functions
-- `send-push-notification` (v5) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS
+- `send-push-notification` (v8) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS
 ### SDK 58 (actualizado desde SDK 54)
 - `expo@58.0.19`, dependencias alineadas con `expo install --fix`; `expo-doctor` sin problemas
 - `app.json`: eliminados `newArchEnabled`, `edgeToEdgeEnabled` y `navigationBar` (SDK 58 ya no los acepta); agregados plugins `expo-image` y `expo-status-bar`. La barra de navegación de Android ya no se oculta por configuración

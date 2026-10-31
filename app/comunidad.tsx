@@ -3,7 +3,7 @@ import { Avatar, CARD, Chip, ChoiceChips, EmptyCard, Field, PrimaryButton, Round
 import { formatTimeAgo } from "@/utils/format";
 import { announcementsService } from "@/services/announcements.service";
 import { reportsService } from "@/services/reports.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -38,7 +38,7 @@ export default function ComunidadScreen() {
   const [blockedIds, setBlockedIds] = useState<string[]>([]);
 
   const init = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) {
       router.replace("/");
       return;

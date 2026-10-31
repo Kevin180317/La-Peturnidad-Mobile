@@ -1,4 +1,4 @@
-import { formatDate, formatShortTime, formatTimeAgo, parseDate, toLocalDateString } from "@/utils/format";
+import { formatChatDay, formatDate, formatShortTime, formatTimeAgo, parseDate, toLocalDateString } from "@/utils/format";
 
 describe("formatDate", () => {
   it("returns fallback for empty values", () => {
@@ -69,5 +69,26 @@ describe("formatShortTime", () => {
   it("shows the time within the last 24 hours and the date otherwise", () => {
     expect(formatShortTime("2026-10-29T10:00:00Z", now)).toMatch(/\d{1,2}:\d{2}/);
     expect(formatShortTime("2026-10-12T12:00:00Z", now)).toMatch(/^12 oct/);
+  });
+});
+
+describe("formatChatDay", () => {
+  const now = new Date(2026, 9, 31, 8, 0);
+
+  it("uses calendar days, not 24-hour windows", () => {
+    expect(formatChatDay(new Date(2026, 9, 31, 0, 5).toISOString(), now)).toBe("Hoy");
+    // Hace 9 horas, pero fue ayer
+    expect(formatChatDay(new Date(2026, 9, 30, 23, 0).toISOString(), now)).toBe("Ayer");
+    expect(formatChatDay(new Date(2026, 9, 30, 0, 5).toISOString(), now)).toBe("Ayer");
+  });
+
+  it("uses a short date for older days and handles the month boundary", () => {
+    expect(formatChatDay(new Date(2026, 9, 29, 12, 0).toISOString(), now)).toContain("29");
+    expect(formatChatDay(new Date(2026, 9, 31, 12, 0).toISOString(), new Date(2026, 10, 1, 8, 0))).toBe("Ayer");
+  });
+
+  it("returns empty for missing or invalid values", () => {
+    expect(formatChatDay(null)).toBe("");
+    expect(formatChatDay("no es fecha")).toBe("");
   });
 });

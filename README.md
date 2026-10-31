@@ -6,7 +6,7 @@ Community app for finding lost pets. Users register their pets, publish emergenc
 
 - **Client**: [Expo](https://expo.dev) (React Native) + [Expo Router](https://docs.expo.dev/router/introduction) (file-based routing) — `app/` directory
 - **Backend**: [Supabase](https://supabase.com) — Auth, Postgres (with RLS), Storage, Edge Functions
-- **Navigation**: React Navigation (bottom tabs, native stack, drawer)
+- **Navigation**: Expo Router (native stack) with a custom tab bar in the dashboard
 - Legacy: an older Express/MySQL backend exists in the codebase but is **not used** — Supabase is the current and only backend.
 
 ## Project status
@@ -16,7 +16,7 @@ Actively evolving, 9 development phases completed (backend foundation through UI
 ## Getting started
 
 ```bash
-npm install
+bun install
 npx expo start
 ```
 

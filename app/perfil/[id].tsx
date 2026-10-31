@@ -6,7 +6,7 @@ import { messagesService } from "@/services/messages.service";
 import { petsService } from "@/services/pets.service";
 import { profileService } from "@/services/profile.service";
 import { reportsService } from "@/services/reports.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -79,7 +79,7 @@ export default function PublicProfileScreen() {
       setLoading(false);
       return;
     }
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) { router.replace("/"); return; }
     setCurrentUserId(user.user.id);
     await loadProfile(user.user.id);

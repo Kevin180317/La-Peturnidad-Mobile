@@ -3,6 +3,7 @@ import { formatTimeAgo } from "@/utils/format";
 import { Ionicons } from "@expo/vector-icons";
 import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -54,7 +55,7 @@ export default function PanelModeracionScreen() {
   };
 
   const init = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) { router.replace("/"); return; }
 
     const { data: profile } = await supabase

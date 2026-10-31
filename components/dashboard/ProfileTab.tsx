@@ -16,6 +16,7 @@ import Toast from "react-native-toast-message";
 
 interface ProfileTabProps {
   profile: any;
+  profileLoadFailed?: boolean;
   email: string;
   userId: string;
   petsCount: number;
@@ -31,6 +32,7 @@ interface ProfileTabProps {
 
 export function ProfileTab({
   profile,
+  profileLoadFailed,
   email,
   userId,
   petsCount,
@@ -318,7 +320,7 @@ export function ProfileTab({
           <ListSection title="Información personal">
             <ListRow first icon="call-outline" label="Teléfono" value={profile.phone} />
             <ListRow icon="calendar-outline" label="Cumpleaños" value={formatDate(profile.birth_date)} />
-            <ListRow icon="home-outline" label="Calle / colonia" value={profile.address} />
+            <ListRow icon="home-outline" label="Colonia" value={profile.address} />
             <ListRow icon="location-outline" label="Ciudad" value={profile.city} />
             <ListRow icon="map-outline" label="Código postal" value={profile.postal_code} />
           </ListSection>
@@ -344,6 +346,12 @@ export function ProfileTab({
             <ListRow icon="refresh-outline" label="Última actualización" value={formatDate(profile.updated_at)} />
           </ListSection>
         </>
+      ) : profileLoadFailed ? (
+        <EmptyCard icon="cloud-offline-outline" color="#211f1e" title="No pudimos cargar tu perfil" text="Revisa tu conexión e intenta de nuevo.">
+          <TouchableOpacity className="bg-[#007275] py-2.5 px-5 rounded-full mt-4" onPress={onRefresh}>
+            <Text className="text-white font-semibold">Reintentar</Text>
+          </TouchableOpacity>
+        </EmptyCard>
       ) : (
         <EmptyCard icon="alert-circle-outline" color="#211f1e" title="Perfil incompleto" text="No se encontró información de perfil. Completa tu registro.">
           <TouchableOpacity

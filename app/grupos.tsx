@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { ListSkeleton } from "@/components/Skeleton";
 import { groupsService } from "@/services/groups.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -30,7 +30,7 @@ export default function GruposScreen() {
   const [leaveTarget, setLeaveTarget] = useState<{ id: string; name: string } | null>(null);
 
   const init = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) { router.replace("/"); return; }
     setUserId(user.user.id);
     await loadGroups(user.user.id);

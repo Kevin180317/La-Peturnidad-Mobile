@@ -3,6 +3,7 @@ import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
 
 const BLOCKED_MESSAGE = "No puedes enviar mensajes a este usuario";
+const MESSAGES_LIMIT = 500;
 
 // Traduce errores del backend (bloqueo / RLS) a mensajes legibles
 function friendlyError(error: any, fallback = "Ocurrió un error, intenta de nuevo"): string {
@@ -150,7 +151,10 @@ class MessagesService {
           otherName = groupName;
         } else {
           const profile = profileMap[otherId] || {};
-          otherName = `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Usuario";
+          // Sin otro participante: la otra persona eliminó el chat o su cuenta
+          otherName = otherId
+            ? `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Usuario"
+            : "Conversación cerrada";
           otherPicture = profile.profile_picture_url || null;
         }
 
@@ -178,14 +182,16 @@ class MessagesService {
 
   async getMessages(conversationId: string): Promise<ServiceResult<Message[]>> {
     try {
+      // Los más recientes primero: en orden ascendente, el tope de filas dejaba fuera los mensajes nuevos
       const { data, error } = await supabase
         .from("messages")
         .select("*")
         .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: false })
+        .limit(MESSAGES_LIMIT);
 
       if (error) throw error;
-      return { success: true, data: data || [] };
+      return { success: true, data: (data ?? []).reverse() };
     } catch (error: any) {
       return { success: false, error: friendlyError(error), data: [] };
     }

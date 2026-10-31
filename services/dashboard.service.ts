@@ -596,8 +596,13 @@ class DashboardService {
 
   async signOut() {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Solo este dispositivo: los demás conservan su sesión y su token push
+      const { error } = await supabase.auth.signOut({ scope: "local" });
+      if (error) {
+        // Sin red, Supabase borra la sesión local pero devuelve el error: ya quedó cerrada aquí
+        const { data } = await supabase.auth.getSession();
+        if (data.session) throw error;
+      }
       return { success: true };
     } catch (error: any) {
       console.error("Error signing out:", error);

@@ -1,5 +1,7 @@
 # End-to-End Audit - Lucky Tracker App 2026
 
+> **Documento histórico (2026-10-17).** Ya no refleja la app: hoy hay 5 pestañas. La auditoría vigente y lo pendiente están en `AGENTS.md` y `docs/SUPABASE_IMPLEMENTACION_SEMANA_2026-11-02.md`.
+
 ## Fecha: 2026-10-17
 ## Estado: VERIFICADO Y ESTABLECIDO
 

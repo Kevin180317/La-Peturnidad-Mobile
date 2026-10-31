@@ -2,7 +2,7 @@ import { notificationsService } from "@/services/notifications.service";
 import type { Tables } from "@/types/database";
 import { formatDate, formatTimeAgo } from "@/utils/format";
 import { CARD_SHADOW, EmptyCard, ScreenTitle } from "@/components/kit/Kit";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
@@ -20,7 +20,7 @@ export default function BandejaScreen() {
   const [items, setItems] = useState<Notification[]>([]);
 
   const load = async () => {
-    const { data } = await supabase.auth.getUser();
+    const { data } = await getCurrentUser();
     if (!data?.user) {
       router.replace("/login");
       return;

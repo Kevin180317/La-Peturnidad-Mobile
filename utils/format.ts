@@ -33,6 +33,17 @@ export const formatTimeAgo = (dateString: string | null | undefined, now: Date =
   return date.toLocaleDateString("es-MX", { day: "numeric", month: "short" }).replace(".", "");
 };
 
+// Separador de día del chat: "Hoy" y "Ayer" por día de calendario, no por horas transcurridas
+export const formatChatDay = (dateString: string | null | undefined, now: Date = new Date()) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "";
+  if (date.toDateString() === now.toDateString()) return "Hoy";
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  if (date.toDateString() === yesterday.toDateString()) return "Ayer";
+  return date.toLocaleDateString("es-MX", { day: "numeric", month: "short" }).replace(".", "");
+};
+
 // Hora si fue en las últimas 24 h; si no, "12 oct" (lista de chats)
 export const formatShortTime = (dateString: string | null | undefined, now: Date = new Date()) => {
   if (!dateString) return "";

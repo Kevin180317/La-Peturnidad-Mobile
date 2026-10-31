@@ -1,6 +1,6 @@
 import { confirmDialog } from "@/components/ConfirmDialog";
 import { messagesService } from "@/services/messages.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { ScreenTitle } from "@/components/kit/Kit";
 import { ConversationList, ConversationListSkeleton } from "@/components/messages/ConversationList";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -15,14 +15,14 @@ export default function MensajesScreen() {
   const [userId, setUserId] = useState<string | null>(null);
 
   const init = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) { router.replace("/"); return; }
     setUserId(user.user.id);
     await loadConversations();
   };
 
   const loadConversations = useCallback(async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) return;
 
     const result = await messagesService.getConversations(user.user.id);

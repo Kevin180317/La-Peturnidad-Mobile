@@ -29,8 +29,8 @@ import { notificationsService } from "@/services/notifications.service";
 import { FEED_PAGE_SIZE, postsService } from "@/services/posts.service";
 import { reportsService } from "@/services/reports.service";
 import { toLocalDateString } from "@/utils/format";
-import { supabase } from "@/utils/supabase";
-import Constants, { ExecutionEnvironment } from "expo-constants";
+import { getCurrentUser } from "@/utils/session";
+import { isRunningInExpoGo } from "expo";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { View } from "react-native";
@@ -45,6 +45,7 @@ export default function DashboardScreen() {
   // Estados generales
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("home");
@@ -273,7 +274,7 @@ export default function DashboardScreen() {
     try {
       const {
         data: { user: currentUser },
-      } = await supabase.auth.getUser();
+      } = await getCurrentUser();
 
       if (!currentUser) {
         router.replace("/");
@@ -287,6 +288,7 @@ export default function DashboardScreen() {
         currentUser.id,
       );
 
+      setProfileLoadFailed(!profileResult.success);
       if (profileResult.success && profileResult.data) {
         const [followersRes, followingRes] = await Promise.all([
           followsService.getFollowers(currentUser.id),
@@ -308,8 +310,11 @@ export default function DashboardScreen() {
           reportsService.getBlockedUsers(currentUser.id),
         ]);
         if (blockedRes.success) setBlockedUserIds(blockedRes.data ?? []);
-      } else {
+      } else if (profileResult.success) {
         setProfile(null);
+      } else {
+        // Fallo de red: se conserva lo ya cargado; no significa que el perfil no exista
+        showToast("error", "Sin conexión", "No pudimos actualizar tus datos");
       }
     } catch (error) {
       console.error("Error cargando datos:", error);
@@ -503,6 +508,11 @@ export default function DashboardScreen() {
   };
 
   const handleCreateEmergencyAlert = async (pet: Pet) => {
+    if (!profile && profileLoadFailed) {
+      showToast("error", "Sin conexión", "Revisa tu conexión e intenta de nuevo");
+      return;
+    }
+
     if (!profile?.address || !user?.id) {
       showToast("error", "Error", "Completa tu perfil primero");
       return;
@@ -753,7 +763,7 @@ export default function DashboardScreen() {
   useEffect(() => {
     const initNotifications = async () => {
       // Expo Go (SDK 53+) no soporta push remotas en Android: requiere build de desarrollo
-      if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) return;
+      if (isRunningInExpoGo()) return;
       try {
         const Notifications = await import("expo-notifications");
 
@@ -926,6 +936,7 @@ export default function DashboardScreen() {
         {activeTab === "profile" && (
           <ProfileTab
             profile={profile}
+            profileLoadFailed={profileLoadFailed}
             email={user?.email ?? ""}
             userId={user?.id}
             petsCount={pets.length}

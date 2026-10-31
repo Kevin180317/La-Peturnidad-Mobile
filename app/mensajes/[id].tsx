@@ -2,19 +2,22 @@ import { Ionicons } from "@expo/vector-icons";
 import { EmptyCard } from "@/components/kit/Kit";
 import { messagesService } from "@/services/messages.service";
 import { type Message } from "@/types";
+import { formatChatDay } from "@/utils/format";
 import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { HeaderHeightContext } from "expo-router/react-navigation";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
-  Platform,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 
 // Agrega o reemplaza un mensaje por id (evita duplicados entre envío propio y realtime)
@@ -38,7 +41,10 @@ export default function ConversationScreen() {
   const [isGroup, setIsGroup] = useState(false);
   const [senderNames, setSenderNames] = useState<Record<string, string>>({});
   const [inputFocused, setInputFocused] = useState(false);
+  const [otherLeft, setOtherLeft] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const insets = useSafeAreaInsets();
+  const headerHeight = useContext(HeaderHeightContext) ?? 0;
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -47,7 +53,7 @@ export default function ConversationScreen() {
   }, [messages]);
 
   const init = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) { router.replace("/"); return; }
     const uid = user.user.id;
     if (!id) { setUnavailable(true); setLoading(false); return; }
@@ -65,6 +71,15 @@ export default function ConversationScreen() {
     }
 
     setIsGroup(!!conv.group_id);
+    if (!conv.group_id) {
+      // Si la otra persona eliminó el chat o su cuenta, lo que se envíe aquí no le llegaría a nadie
+      const { data: others } = await supabase
+        .from("conversation_participants")
+        .select("user_id")
+        .eq("conversation_id", id)
+        .neq("user_id", uid);
+      setOtherLeft(others?.length === 0);
+    }
     const result = await messagesService.getMessages(id);
     if (result.success) {
       setMessages(result.data ?? []);
@@ -103,15 +118,6 @@ export default function ConversationScreen() {
   const formatTime = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
-  };
-
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    if (diff < 86400000) return "Hoy";
-    if (diff < 172800000) return "Ayer";
-    return d.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
   };
 
   // init corre al montar o cambiar id (recarga intencional)
@@ -202,8 +208,8 @@ export default function ConversationScreen() {
   return (
     <KeyboardAvoidingView
       className="flex-1 bg-[#faf5e0]"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+      behavior="padding"
+      keyboardVerticalOffset={headerHeight}
     >
       <FlatList
         ref={flatListRef}
@@ -231,7 +237,7 @@ export default function ConversationScreen() {
             <>
               {showDate && (
                 <View className="self-center bg-white/80 px-3 py-1 rounded-full my-3 shadow-[0_1px_4px_rgba(33,31,30,0.06)]">
-                  <Text className="text-gray-600 text-[11px] font-semibold">{formatDate(item.created_at)}</Text>
+                  <Text className="text-gray-600 text-[11px] font-semibold">{formatChatDay(item.created_at)}</Text>
                 </View>
               )}
               <View className={`max-w-[80%] ${sameAsPrev ? "mt-1" : "mt-3"} ${isMine ? "self-end" : "self-start"}`}>
@@ -269,7 +275,14 @@ export default function ConversationScreen() {
         }}
       />
 
-      <View className="px-3 pt-2 pb-3 bg-[#faf5e0]">
+      {otherLeft ? (
+        <View className="px-5 pt-3 bg-[#faf5e0]" style={{ paddingBottom: Math.max(insets.bottom, 12) }}>
+          <Text className="text-gray-500 text-sm text-center">
+            Esta persona ya no está en el chat. Para escribirle, abre su perfil y envía un mensaje nuevo.
+          </Text>
+        </View>
+      ) : (
+      <View className="px-3 pt-2 bg-[#faf5e0]" style={{ paddingBottom: Math.max(insets.bottom, 12) }}>
         <View
           className={`flex-row items-end bg-white rounded-[26px] pl-4 pr-1.5 py-1.5 border-[1.5px] shadow-[0_4px_16px_rgba(33,31,30,0.08)] ${inputFocused ? "border-[#007275]" : "border-transparent"}`}
         >
@@ -298,6 +311,7 @@ export default function ConversationScreen() {
           </TouchableOpacity>
         </View>
       </View>
+      )}
     </KeyboardAvoidingView>
   );
 }
