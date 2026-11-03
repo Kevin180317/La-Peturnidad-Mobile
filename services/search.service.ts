@@ -58,7 +58,7 @@ class SearchService {
 
       const userIds = [...new Set(pets.map((p) => p.user_id))];
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name")
         .in("user_id", userIds);
 
@@ -144,7 +144,7 @@ class SearchService {
       if (!q) return { success: true, data: [] };
 
       const { data: users, error } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name, profile_picture_url, city")
         .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%`)
         .order("created_at", { ascending: false })

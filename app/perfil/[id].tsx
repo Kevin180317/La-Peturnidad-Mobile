@@ -53,7 +53,7 @@ export default function PublicProfileScreen() {
   const loadProfile = async (uid: string) => {
     if (!id) return;
     const [profileResult, petsResult, following, countsRes, blockedRes] = await Promise.all([
-      profileService.getByUserId(id),
+      profileService.getPublicByUserId(id),
       petsService.getAll(id),
       uid !== id ? followsService.isFollowing(uid, id) : Promise.resolve(false),
       followsService.getCounts(id),

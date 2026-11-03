@@ -17,7 +17,7 @@ class SuccessStoriesService {
 
       const userIds = [...new Set(data.map((s) => s.user_id))];
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name")
         .in("user_id", userIds);
 

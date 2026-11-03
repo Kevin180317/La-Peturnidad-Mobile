@@ -14,6 +14,13 @@ export type UserProfile = Override<
   { role: "user" | "moderator" | "admin" }
 >;
 
+// Columnas que cualquier usuario puede ver de otro (vista public_profiles). Sin phone, address ni birth_date.
+// Las columnas de una vista salen como opcionales en los tipos generados: se estrechan aquí.
+export type PublicProfile = Override<
+  Tables<"public_profiles">,
+  { user_id: string; role: "user" | "moderator" | "admin" }
+>;
+
 export type Pet = Tables<"pets">;
 
 export type EmergencyAlert = Override<

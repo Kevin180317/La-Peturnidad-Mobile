@@ -19,7 +19,7 @@ class AnnouncementsService {
       const userIds = [...new Set(announcements.map((a) => a.user_id))];
 
       const { data: profiles, error: profilesError } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name, profile_picture_url")
         .in("user_id", userIds);
 
@@ -69,7 +69,7 @@ class AnnouncementsService {
       }
 
       const { data: profile } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("first_name, last_name, profile_picture_url")
         .eq("user_id", userId)
         .single();

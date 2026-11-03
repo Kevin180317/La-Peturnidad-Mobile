@@ -20,7 +20,7 @@ class MessagesService {
     try {
       const { data: participations, error: partError } = await supabase
         .from("conversation_participants")
-        .select("conversation_id")
+        .select("conversation_id, cleared_at")
         .eq("user_id", userId);
       if (partError) throw partError;
 
@@ -29,6 +29,11 @@ class MessagesService {
       }
 
       const convIds = participations.map((p) => p.conversation_id);
+      // Momento en que vacié cada chat ("eliminar" = vaciar para mí)
+      const clearedAt: Record<string, string> = {};
+      participations.forEach((p) => {
+        if (p.cleared_at) clearedAt[p.conversation_id] = p.cleared_at;
+      });
 
       const { data: conversations, error: convError } = await supabase
         .from("conversations")
@@ -85,7 +90,7 @@ class MessagesService {
       const [profilesRes, recentRes, unreadRes] = await Promise.all([
         otherUserIds.length > 0
           ? supabase
-            .from("user_profiles")
+            .from("public_profiles")
             .select("user_id, first_name, last_name, profile_picture_url")
             .in("user_id", otherUserIds)
           : Promise.resolve({ data: [] as any[], error: null }),
@@ -139,7 +144,15 @@ class MessagesService {
         unread[m.conversation_id] = (unread[m.conversation_id] ?? 0) + 1;
       });
 
-      const transformedData: ConversationWithParticipant[] = visible.map((conv) => {
+      // Un chat vaciado reaparece solo cuando llega un mensaje posterior a cleared_at
+      const shown = visible.filter((conv) => {
+        const cleared = clearedAt[conv.id];
+        if (!cleared) return true;
+        const last = lastMsg[conv.id]?.created_at;
+        return !!last && new Date(last).getTime() > new Date(cleared).getTime();
+      });
+
+      const transformedData: ConversationWithParticipant[] = shown.map((conv) => {
         const isGroup = !!conv.group_id;
         let groupName: string | null = null;
         const otherId = isGroup ? "" : convOtherUser[conv.id] ?? "";
@@ -180,13 +193,24 @@ class MessagesService {
     }
   }
 
-  async getMessages(conversationId: string): Promise<ServiceResult<Message[]>> {
+  async getMessages(conversationId: string, userId: string): Promise<ServiceResult<Message[]>> {
     try {
+      // Si vacié el chat, solo se muestran los mensajes posteriores
+      const { data: participation } = await supabase
+        .from("conversation_participants")
+        .select("cleared_at")
+        .eq("conversation_id", conversationId)
+        .eq("user_id", userId)
+        .maybeSingle();
+      const clearedAt = participation?.cleared_at ?? null;
+
       // Los más recientes primero: en orden ascendente, el tope de filas dejaba fuera los mensajes nuevos
-      const { data, error } = await supabase
+      let query = supabase
         .from("messages")
         .select("*")
-        .eq("conversation_id", conversationId)
+        .eq("conversation_id", conversationId);
+      if (clearedAt) query = query.gt("created_at", clearedAt);
+      const { data, error } = await query
         .order("created_at", { ascending: false })
         .limit(MESSAGES_LIMIT);
 
@@ -240,13 +264,12 @@ class MessagesService {
     if (error && __DEV__) console.error("markAsRead:", error.message);
   }
 
-  async deleteConversation(conversationId: string, userId: string): Promise<ServiceResult> {
+  // "Eliminar chat" = vaciarlo para mí: sigo como participante, así el otro no escribe al vacío
+  async deleteConversation(conversationId: string): Promise<ServiceResult> {
     try {
-      const { error } = await supabase
-        .from("conversation_participants")
-        .delete()
-        .eq("conversation_id", conversationId)
-        .eq("user_id", userId);
+      const { error } = await supabase.rpc("clear_conversation", {
+        p_conversation_id: conversationId,
+      });
 
       if (error) throw error;
       return { success: true };

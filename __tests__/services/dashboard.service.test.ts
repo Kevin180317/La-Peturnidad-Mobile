@@ -219,3 +219,67 @@ describe("dashboardService.signOut", () => {
     expect(await dashboardService.signOut()).toEqual({ success: false, error: "fallo" });
   });
 });
+
+describe("dashboardService.getEmergencyAlertsByLocation", () => {
+  it("takes owner name and phone from get_alert_contacts, never from user_profiles", async () => {
+    mockTable("emergency_alerts", {
+      data: [
+        { id: "a1", user_id: "o1", status: "active" },
+        { id: "a2", user_id: "o2", status: "active" },
+      ],
+    });
+    supabaseMock.rpc.mockResolvedValueOnce({
+      data: [{ alert_id: "a1", owner_name: "Ana Gómez", owner_phone: "5551234567" }],
+      error: null,
+    });
+
+    const res = await dashboardService.getEmergencyAlertsByLocation("Col. Centro");
+
+    expect(supabaseMock.rpc).toHaveBeenCalledWith("get_alert_contacts", { p_alert_ids: ["a1", "a2"] });
+    expect(calls.filter((c) => c.table === "user_profiles")).toEqual([]);
+    expect(res.data?.[0]).toMatchObject({ id: "a1", owner_name: "Ana Gómez", owner_phone: "5551234567" });
+    // Alerta que el RPC no devuelve (otra colonia o ya resuelta): sin datos, sin romper
+    expect(res.data?.[1]).toMatchObject({ id: "a2", owner_name: "Usuario", owner_phone: "No disponible" });
+    expect(res.data?.[0]).not.toHaveProperty("owner_address");
+  });
+
+  it("keeps the alerts when the contacts RPC fails", async () => {
+    mockTable("emergency_alerts", { data: [{ id: "a1", user_id: "o1", status: "active" }] });
+    supabaseMock.rpc.mockResolvedValueOnce({ data: null, error: { message: "boom" } });
+    const res = await dashboardService.getEmergencyAlertsByLocation("Col. Centro");
+    expect(res.success).toBe(true);
+    expect(res.data?.[0]).toMatchObject({ owner_name: "Usuario", owner_phone: "No disponible" });
+  });
+});
+
+describe("dashboardService.getUserEmergencyAlerts", () => {
+  it("joins finders with get_finder_contacts by found_id", async () => {
+    mockTable("emergency_alerts", { data: [{ id: "a1", user_id: "u1" }] });
+    mockTable("found_pets", {
+      data: [
+        { id: "f1", alert_id: "a1", user_id: "x1", created_at: "t1" },
+        { id: "f2", alert_id: "a1", user_id: "x2", created_at: "t2" },
+      ],
+    });
+    supabaseMock.rpc.mockResolvedValueOnce({
+      data: [{ found_id: "f1", finder_name: "Beto Ruiz", finder_phone: "5557654321" }],
+      error: null,
+    });
+
+    const res = await dashboardService.getUserEmergencyAlerts("u1");
+
+    expect(supabaseMock.rpc).toHaveBeenCalledWith("get_finder_contacts");
+    expect(calls.filter((c) => c.table === "user_profiles")).toEqual([]);
+    const finders = res.data?.[0].finders ?? [];
+    expect(finders[0]).toMatchObject({ id: "f1", finder_name: "Beto Ruiz", finder_phone: "5557654321" });
+    expect(finders[1]).toMatchObject({ id: "f2", finder_name: "Un vecino", finder_phone: "No disponible" });
+  });
+
+  it("does not call the RPC when nobody reported finding the pet", async () => {
+    mockTable("emergency_alerts", { data: [{ id: "a1", user_id: "u1" }] });
+    mockTable("found_pets", { data: [] });
+    const res = await dashboardService.getUserEmergencyAlerts("u1");
+    expect(supabaseMock.rpc).not.toHaveBeenCalled();
+    expect(res.data?.[0].finders).toEqual([]);
+  });
+});

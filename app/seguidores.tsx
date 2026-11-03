@@ -62,7 +62,7 @@ export default function SeguidoresScreen() {
     const profileMap: Record<string, any> = {};
     if (allIds.length > 0) {
       const { data: profiles, error } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name, profile_picture_url, city")
         .in("user_id", allIds);
 

@@ -38,7 +38,7 @@ export default function PanelModeracionScreen() {
     const names: Record<string, string> = {};
     if (ids.length > 0) {
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name")
         .in("user_id", ids);
       profiles?.forEach((p) => {

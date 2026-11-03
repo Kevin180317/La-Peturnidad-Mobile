@@ -51,7 +51,7 @@ export default function MensajesScreen() {
       destructive: true,
       onConfirm: async () => {
         if (!userId) return;
-        const r = await messagesService.deleteConversation(convId, userId);
+        const r = await messagesService.deleteConversation(convId);
         if (r.success) {
           setConversations((prev) => prev.filter((c) => c.id !== convId));
         }

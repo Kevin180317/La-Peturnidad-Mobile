@@ -80,7 +80,7 @@ export default function ConversationScreen() {
         .neq("user_id", uid);
       setOtherLeft(others?.length === 0);
     }
-    const result = await messagesService.getMessages(id);
+    const result = await messagesService.getMessages(id, uid);
     if (result.success) {
       setMessages(result.data ?? []);
     } else {
@@ -168,7 +168,7 @@ export default function ConversationScreen() {
     let cancelled = false;
     (async () => {
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name")
         .in("user_id", missing);
       if (cancelled) return;

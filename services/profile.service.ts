@@ -1,4 +1,4 @@
-import { type UserProfile, type ServiceResult } from "@/types";
+import { type PublicProfile, type UserProfile, type ServiceResult } from "@/types";
 import { supabase } from "@/utils/supabase";
 
 class ProfileService {
@@ -12,6 +12,22 @@ class ProfileService {
 
       if (error) throw error;
       return { success: true, data: (data ?? undefined) as UserProfile | undefined };
+    } catch (error: any) {
+      return { success: false, error: error.message, data: undefined };
+    }
+  }
+
+  // Perfil de otra persona: solo las columnas públicas (sin teléfono, dirección ni fecha de nacimiento)
+  async getPublicByUserId(userId: string): Promise<ServiceResult<PublicProfile>> {
+    try {
+      const { data, error } = await supabase
+        .from("public_profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return { success: true, data: (data ?? undefined) as PublicProfile | undefined };
     } catch (error: any) {
       return { success: false, error: error.message, data: undefined };
     }

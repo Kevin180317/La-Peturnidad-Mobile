@@ -352,7 +352,7 @@ export default function DashboardScreen() {
 
   const handleDeleteConversation = async (convId: string) => {
     if (!user?.id) return;
-    const result = await messagesService.deleteConversation(convId, user.id);
+    const result = await messagesService.deleteConversation(convId);
     if (result.success) {
       setConversations((prev) => prev.filter((c) => c.id !== convId));
       showToast("success", "Chat eliminado");

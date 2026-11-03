@@ -22,7 +22,7 @@ class CommentsService {
 
       const userIds = [...new Set(comments.map((c) => c.user_id))];
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name, profile_picture_url")
         .in("user_id", userIds);
 
@@ -72,7 +72,7 @@ class CommentsService {
       if (error) throw error;
 
       const { data: profile } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("first_name, last_name, profile_picture_url")
         .eq("user_id", data.user_id)
         .single();

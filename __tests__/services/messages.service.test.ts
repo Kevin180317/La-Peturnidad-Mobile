@@ -60,19 +60,40 @@ describe("messagesService.markAsRead / deleteConversation", () => {
     expect(calls).toContainEqual({ table: "messages", method: "is", args: ["read_at", null] });
   });
 
-  it("leaving a conversation only removes my participation", async () => {
-    expect(await messagesService.deleteConversation("c1", "u1")).toEqual({ success: true });
-    expect(calls).toContainEqual({ table: "conversation_participants", method: "eq", args: ["user_id", "u1"] });
+  it("deleting a chat only clears it for me through the clear_conversation RPC", async () => {
+    expect(await messagesService.deleteConversation("c1")).toEqual({ success: true });
+    expect(supabaseMock.rpc).toHaveBeenCalledWith("clear_conversation", { p_conversation_id: "c1" });
+    expect(calls.filter((c) => c.table === "conversation_participants" && c.method === "delete")).toEqual([]);
+  });
+
+  it("surfaces an RPC failure", async () => {
+    supabaseMock.rpc.mockResolvedValueOnce({ data: null, error: { message: "No autorizado" } });
+    expect(await messagesService.deleteConversation("c1")).toEqual({ success: false, error: "No autorizado" });
   });
 });
 
 describe("messagesService.getMessages", () => {
   it("asks for the newest messages and returns them oldest first", async () => {
     mockTable("messages", { data: [{ id: "m2" }, { id: "m1" }] });
-    const res = await messagesService.getMessages("c1");
+    const res = await messagesService.getMessages("c1", "u1");
     expect(calls).toContainEqual({ table: "messages", method: "order", args: ["created_at", { ascending: false }] });
     expect(calls).toContainEqual({ table: "messages", method: "limit", args: [500] });
     expect(res.data?.map((m) => m.id)).toEqual(["m1", "m2"]);
+  });
+
+  it("returns everything when I never cleared the chat (cleared_at is null)", async () => {
+    mockTable("conversation_participants", { data: { cleared_at: null } });
+    mockTable("messages", { data: [{ id: "m1" }] });
+    await messagesService.getMessages("c1", "u1");
+    expect(calls).toContainEqual({ table: "conversation_participants", method: "eq", args: ["user_id", "u1"] });
+    expect(calls.filter((c) => c.table === "messages" && c.method === "gt")).toEqual([]);
+  });
+
+  it("only returns messages after the moment I cleared the chat", async () => {
+    mockTable("conversation_participants", { data: { cleared_at: "2026-10-24T10:00:00Z" } });
+    mockTable("messages", { data: [] });
+    await messagesService.getMessages("c1", "u1");
+    expect(calls).toContainEqual({ table: "messages", method: "gt", args: ["created_at", "2026-10-24T10:00:00Z"] });
   });
 });
 
@@ -97,7 +118,7 @@ describe("messagesService.getConversations", () => {
     });
     mockTable("groups", { data: [{ id: "g1", name: "Vecinos" }] });
     mockTable("blocks", { data: [{ blocked_id: "u3" }] });
-    mockTable("user_profiles", {
+    mockTable("public_profiles", {
       data: [{ user_id: "u2", first_name: "Ana", last_name: "Pérez", profile_picture_url: null }],
     });
     // 1ª consulta a messages = recientes, 2ª = no leídos
@@ -129,5 +150,44 @@ describe("messagesService.getConversations", () => {
     mockTable("messages", { data: [] });
     const res = await messagesService.getConversations("u1");
     expect(res.data?.[0]).toMatchObject({ other_user_id: "", other_user_name: "Conversación cerrada" });
+  });
+
+  it("hides a chat I cleared until someone writes again, and shows it with only the new message", async () => {
+    mockTable(
+      "conversation_participants",
+      {
+        data: [
+          { conversation_id: "c1", cleared_at: "2026-10-24T10:00:00Z" },
+          { conversation_id: "c2", cleared_at: "2026-10-24T10:00:00Z" },
+          { conversation_id: "c3", cleared_at: null },
+        ],
+      },
+      { data: [{ conversation_id: "c2", user_id: "u2" }] },
+    );
+    mockTable("conversations", {
+      data: [
+        { id: "c1", group_id: null, created_at: "t", updated_at: "t" },
+        { id: "c2", group_id: null, created_at: "t", updated_at: "t" },
+        { id: "c3", group_id: null, created_at: "t", updated_at: "t" },
+      ],
+    });
+    mockTable("blocks", { data: [] });
+    mockTable("public_profiles", { data: [] });
+    mockTable(
+      "messages",
+      {
+        data: [
+          { conversation_id: "c2", content: "nuevo", created_at: "2026-10-24T11:00:00Z" },
+          { conversation_id: "c1", content: "viejo", created_at: "2026-10-24T09:00:00Z" },
+        ],
+      },
+      { data: [] },
+    );
+
+    const res = await messagesService.getConversations("u1");
+
+    // c1: vaciado sin mensajes posteriores → oculto. c3: nunca vaciado y sin mensajes → visible
+    expect((res.data ?? []).map((r) => r.id).sort()).toEqual(["c2", "c3"]);
+    expect(res.data?.find((r) => r.id === "c2")?.last_message).toBe("nuevo");
   });
 });

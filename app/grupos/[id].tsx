@@ -47,7 +47,7 @@ export default function GrupoDetailScreen() {
       const profileMap: Record<string, any> = {};
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
-          .from("user_profiles")
+          .from("public_profiles")
           .select("user_id, first_name, last_name, profile_picture_url")
           .in("user_id", userIds);
         profiles?.forEach((p) => { profileMap[p.user_id] = p; });

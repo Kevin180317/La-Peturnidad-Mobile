@@ -59,7 +59,6 @@ export type FoundPet = FoundPetRow;
 export interface EmergencyAlertWithOwner extends EmergencyAlert {
   owner_name: string;
   owner_phone: string;
-  owner_address: string;
 }
 
 export interface AlertFinder {
@@ -268,26 +267,19 @@ class DashboardService {
         return { success: true, data: [] };
       }
 
-      const userIds = [...new Set(alerts.map((a) => a.user_id))];
-
-      const { data: profiles, error: profilesError } = await supabase
-        .from("user_profiles")
-        .select("user_id, first_name, last_name, phone, address")
-        .in("user_id", userIds);
-
-      if (profilesError) throw profilesError;
-
-      const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+      // Nombre y teléfono del dueño solo salen por RPC: únicamente de alertas activas de mi colonia
+      const { data: contacts, error: contactsError } = await supabase.rpc("get_alert_contacts", {
+        p_alert_ids: alerts.map((a) => a.id),
+      });
+      if (contactsError) console.error("get_alert_contacts:", contactsError.message);
+      const contactMap = new Map((contacts ?? []).map((c) => [c.alert_id, c]));
 
       const transformedData: EmergencyAlertWithOwner[] = alerts.map((alert) => {
-        const owner = profileMap.get(alert.user_id);
+        const contact = contactMap.get(alert.id);
         return {
           ...alert,
-          owner_name:
-            `${owner?.first_name || ""} ${owner?.last_name || ""}`.trim() ||
-            "Usuario",
-          owner_phone: owner?.phone || "No disponible",
-          owner_address: owner?.address || "No disponible",
+          owner_name: contact?.owner_name?.trim() || "Usuario",
+          owner_phone: contact?.owner_phone || "No disponible",
         };
       });
 
@@ -321,28 +313,25 @@ class DashboardService {
 
       if (findsError) throw findsError;
 
-      const finderIds = [...new Set((finds ?? []).map((f) => f.user_id))];
-      const { data: profiles } = finderIds.length
-        ? await supabase
-            .from("user_profiles")
-            .select("user_id, first_name, last_name, phone")
-            .in("user_id", finderIds)
-        : { data: [] };
-      const profileMap = new Map((profiles ?? []).map((p) => [p.user_id, p]));
+      // Nombre y teléfono de quien encontró la mascota: solo el dueño de la alerta los obtiene, por RPC
+      let contactMap = new Map<string, { finder_name: string; finder_phone: string }>();
+      if ((finds ?? []).length > 0) {
+        const { data: contacts, error: contactsError } = await supabase.rpc("get_finder_contacts");
+        if (contactsError) console.error("get_finder_contacts:", contactsError.message);
+        contactMap = new Map((contacts ?? []).map((c) => [c.found_id, c]));
+      }
 
       const result: MyEmergencyAlert[] = alerts.map((alert) => ({
         ...alert,
         finders: (finds ?? [])
           .filter((f) => f.alert_id === alert.id)
           .map((f) => {
-            const finder = profileMap.get(f.user_id);
+            const contact = contactMap.get(f.id);
             return {
               id: f.id,
               finder_id: f.user_id,
-              finder_name:
-                `${finder?.first_name || ""} ${finder?.last_name || ""}`.trim() ||
-                "Un vecino",
-              finder_phone: finder?.phone || "No disponible",
+              finder_name: contact?.finder_name?.trim() || "Un vecino",
+              finder_phone: contact?.finder_phone || "No disponible",
               created_at: f.created_at,
             };
           }),

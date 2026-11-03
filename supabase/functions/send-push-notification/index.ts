@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
       message = {
         recipients,
         tokens,
-        title: `⚠️ ${ownerName} reportó a ${alert.pet_name} perdida`,
+        title: `⚠️ ${ownerName} busca a ${alert.pet_name}`,
         body: `Vista por última vez en ${location || "tu colonia"}.`,
         image: alert.image_url,
         data: {

@@ -30,7 +30,7 @@ class PostsService {
 
       const userIds = [...new Set(posts.map((p) => p.user_id))];
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name, profile_picture_url")
         .in("user_id", userIds);
 
@@ -90,7 +90,7 @@ class PostsService {
 
       const userIds = [...new Set(posts.map((p) => p.user_id))];
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name, profile_picture_url")
         .in("user_id", userIds);
 

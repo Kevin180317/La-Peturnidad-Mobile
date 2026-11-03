@@ -105,18 +105,21 @@ export type Database = {
       }
       conversation_participants: {
         Row: {
+          cleared_at: string | null
           conversation_id: string
           created_at: string | null
           id: string
           user_id: string
         }
         Insert: {
+          cleared_at?: string | null
           conversation_id: string
           created_at?: string | null
           id?: string
           user_id: string
         }
         Update: {
+          cleared_at?: string | null
           conversation_id?: string
           created_at?: string | null
           id?: string
@@ -622,9 +625,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          first_name: string | null
+          last_name: string | null
+          profile_picture_url: string | null
+          role: string | null
+          // Estrechado a mano: el generador marca toda columna de una vista como null, pero viene de
+          // user_profiles.user_id (NOT NULL). Al regenerar este archivo hay que volver a quitar el "| null".
+          user_id: string
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      clear_conversation: {
+        Args: { p_conversation_id: string }
+        Returns: undefined
+      }
+      get_alert_contacts: {
+        Args: { p_alert_ids: string[] }
+        Returns: {
+          alert_id: string
+          owner_name: string
+          owner_phone: string
+        }[]
+      }
+      get_finder_contacts: {
+        Args: never
+        Returns: {
+          finder_name: string
+          finder_phone: string
+          found_id: string
+        }[]
+      }
       create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
