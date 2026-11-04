@@ -1,6 +1,7 @@
 import { AuthScreen } from "@/components/auth/AuthScreen";
 import { ColoniaPicker, coloniasForPostalCode } from "@/components/ColoniaPicker";
 import { Field, PrimaryButton } from "@/components/kit/Kit";
+import { PhoneField } from "@/components/PhoneField";
 import { supabase } from "@/utils/supabase";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -11,6 +12,8 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { isAdult, MIN_AGE } from "../utils/age";
+import { normalizePhone, type CountryKey } from "../utils/phone";
+import { LIMITS } from "@/utils/limits";
 
 export default function RegisterExtendedScreen() {
   const router = useRouter();
@@ -19,6 +22,8 @@ export default function RegisterExtendedScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState<CountryKey>("MX");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [birthDate, setBirthDate] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [filteredColonias, setFilteredColonias] = useState<string[]>([]);
@@ -116,6 +121,14 @@ export default function RegisterExtendedScreen() {
       return;
     }
 
+    const phoneResult = normalizePhone(phoneCountry, phone);
+    if ("error" in phoneResult) {
+      setPhoneError(phoneResult.error);
+      Toast.show({ type: "error", text1: "Teléfono inválido", text2: phoneResult.error, visibilityTime: 3000 });
+      return;
+    }
+    setPhoneError(null);
+
     if (!postalCode || postalCode.length !== 5) {
       Toast.show({
         type: "error",
@@ -163,7 +176,7 @@ export default function RegisterExtendedScreen() {
         user_id: finalUserId,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
-        phone: phone.trim(),
+        phone: phoneResult.value,
         birth_date: birth.value,
         postal_code: postalCode,
         address: selectedColonia,
@@ -225,6 +238,7 @@ export default function RegisterExtendedScreen() {
         accessibilityLabel="Nombre"
         value={firstName}
         onChangeText={setFirstName}
+        maxLength={LIMITS.name}
         autoCapitalize="words"
       />
       <Field
@@ -234,16 +248,21 @@ export default function RegisterExtendedScreen() {
         accessibilityLabel="Apellido"
         value={lastName}
         onChangeText={setLastName}
+        maxLength={LIMITS.name}
         autoCapitalize="words"
       />
-      <Field
-        label="Teléfono *"
-        icon="call-outline"
-        placeholder="Número de teléfono"
-        accessibilityLabel="Teléfono"
+      <PhoneField
+        country={phoneCountry}
+        onCountryChange={(key) => {
+          setPhoneCountry(key);
+          setPhoneError(null);
+        }}
         value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
+        onChangeText={(text) => {
+          setPhone(text);
+          setPhoneError(null);
+        }}
+        error={phoneError}
       />
       <Field
         label="Fecha de nacimiento"

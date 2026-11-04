@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 // Las alertas de emergencia se crean desde la pestaña Emergencia
 export type PostType = "social" | "announcements";
@@ -126,7 +127,7 @@ export function PostForm({
           <View className={`${CARD} p-4 mb-4`}>
             {postType === "announcements" && (
               <>
-                <Field label="Título" icon="text-outline" placeholder="Título de la publicación" value={title} onChangeText={setTitle} />
+                <Field label="Título" icon="text-outline" placeholder="Título de la publicación" value={title} onChangeText={setTitle} maxLength={LIMITS.title} />
                 <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Categoría</Text>
                 <View className="mb-4">
                   <ChoiceChips
@@ -143,6 +144,7 @@ export function PostForm({
               placeholder="Cuéntale a tu comunidad..."
               value={content}
               onChangeText={setContent}
+              maxLength={LIMITS.description}
               multiline
               numberOfLines={4}
             />

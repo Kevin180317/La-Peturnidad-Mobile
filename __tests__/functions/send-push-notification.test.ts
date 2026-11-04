@@ -134,7 +134,7 @@ describe("send-push-notification: emergency", () => {
     expect(inboxInserts()).toHaveLength(1);
     const rows = inboxInserts()[0].args[0] as { user_id: string; title: string; data: { alertId: string } }[];
     expect(rows.map((r) => r.user_id)).toEqual(["n1"]);
-    expect(rows[0].title).toBe("⚠️ Ana Gómez busca a Luna");
+    expect(rows[0].title).toBe("Ana Gómez busca a Luna");
     expect(rows[0].data.alertId).toBe("a1");
   });
 

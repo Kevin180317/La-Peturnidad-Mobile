@@ -65,6 +65,35 @@ describe("EditarPerfilScreen", () => {
     expect(update).not.toHaveBeenCalled();
   });
 
+  it("saves the phone in international format, upgrading a legacy 10-digit number", async () => {
+    mockLoad({ phone: "6641234567" });
+    const update = jest.spyOn(profileService, "update").mockResolvedValue({ success: true });
+    await render(<EditarPerfilScreen />);
+    await fireEvent.press(await screen.findByText("Guardar cambios"));
+    await waitFor(() => expect(update).toHaveBeenCalled());
+    expect(update.mock.calls[0][1]).toMatchObject({ phone: "+526641234567" });
+  });
+
+  it("keeps a US number and its country when editing", async () => {
+    mockLoad({ phone: "+16195550123" });
+    const update = jest.spyOn(profileService, "update").mockResolvedValue({ success: true });
+    await render(<EditarPerfilScreen />);
+    expect(await screen.findByText("+1")).toBeTruthy();
+    await fireEvent.press(screen.getByText("Guardar cambios"));
+    await waitFor(() => expect(update).toHaveBeenCalled());
+    expect(update.mock.calls[0][1]).toMatchObject({ phone: "+16195550123" });
+  });
+
+  it("does not save an invalid phone", async () => {
+    mockLoad({});
+    const update = jest.spyOn(profileService, "update").mockResolvedValue({ success: true });
+    await render(<EditarPerfilScreen />);
+    await fireEvent.changeText(await screen.findByLabelText("Teléfono"), "123");
+    await fireEvent.press(screen.getByText("Guardar cambios"));
+    await waitFor(() => expect(toast).toHaveBeenCalledWith(expect.objectContaining({ text1: "Teléfono inválido" })));
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it("leaves the screen instead of showing an empty form when loading fails", async () => {
     jest.spyOn(profileService, "getByUserId").mockResolvedValue({ success: false, error: "offline" });
     await render(<EditarPerfilScreen />);

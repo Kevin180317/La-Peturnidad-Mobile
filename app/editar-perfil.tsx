@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { ColoniaPicker, coloniasForPostalCode } from "@/components/ColoniaPicker";
+import { PhoneField } from "@/components/PhoneField";
 import { Avatar, CARD, Field, PrimaryButton } from "@/components/kit/Kit";
 import { dashboardService } from "@/services/dashboard.service";
 import { profileService } from "@/services/profile.service";
+import { normalizePhone, splitPhone, type CountryKey } from "@/utils/phone";
 import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -16,6 +18,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export default function EditarPerfilScreen() {
   const router = useRouter();
@@ -24,6 +27,8 @@ export default function EditarPerfilScreen() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState<CountryKey>("MX");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [colonia, setColonia] = useState("");
   // Dirección guardada que no coincide con el catálogo: no recibiría alertas de vecinos
   const [invalidAddress, setInvalidAddress] = useState("");
@@ -49,7 +54,9 @@ export default function EditarPerfilScreen() {
       setProfilePicture(result.data.profile_picture_url || null);
       setFirstName(result.data.first_name || "");
       setLastName(result.data.last_name || "");
-      setPhone(result.data.phone || "");
+      const savedPhone = splitPhone(result.data.phone);
+      setPhoneCountry(savedPhone.country);
+      setPhone(savedPhone.number);
       setCity(result.data.city || "");
       const savedCode = result.data.postal_code || "";
       const savedAddress = (result.data.address || "").trim();
@@ -77,6 +84,18 @@ export default function EditarPerfilScreen() {
       return;
     }
 
+    let phoneValue = "";
+    if (phone.trim()) {
+      const phoneResult = normalizePhone(phoneCountry, phone);
+      if ("error" in phoneResult) {
+        setPhoneError(phoneResult.error);
+        Toast.show({ type: "error", text1: "Teléfono inválido", text2: phoneResult.error, position: "top" });
+        return;
+      }
+      phoneValue = phoneResult.value;
+    }
+    setPhoneError(null);
+
     setSaving(true);
     const { data: user } = await getCurrentUser();
     if (!user?.user) {
@@ -88,7 +107,7 @@ export default function EditarPerfilScreen() {
     const result = await profileService.update(user.user.id, {
       first_name: firstName.trim(),
       last_name: lastName.trim(),
-      phone: phone.trim(),
+      phone: phoneValue,
       address: colonia,
       city: city.trim() || "Tijuana",
       postal_code: postalCode,
@@ -182,9 +201,22 @@ export default function EditarPerfilScreen() {
 
       <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Datos personales</Text>
       <View className={`${CARD} p-4 pb-0 mb-6`}>
-        <Field label="Nombre *" icon="person-outline" placeholder="Nombre" value={firstName} onChangeText={setFirstName} />
-        <Field label="Apellido *" icon="person-outline" placeholder="Apellido" value={lastName} onChangeText={setLastName} />
-        <Field label="Teléfono" icon="call-outline" placeholder="Teléfono" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+        <Field label="Nombre *" icon="person-outline" placeholder="Nombre" value={firstName} onChangeText={setFirstName} maxLength={LIMITS.name} />
+        <Field label="Apellido *" icon="person-outline" placeholder="Apellido" value={lastName} onChangeText={setLastName} maxLength={LIMITS.name} />
+        <PhoneField
+          label="Teléfono"
+          country={phoneCountry}
+          onCountryChange={(key) => {
+            setPhoneCountry(key);
+            setPhoneError(null);
+          }}
+          value={phone}
+          onChangeText={(text) => {
+            setPhone(text);
+            setPhoneError(null);
+          }}
+          error={phoneError}
+        />
       </View>
 
       <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Tu colonia</Text>

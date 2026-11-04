@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
@@ -104,6 +105,7 @@ export default function ForgotPasswordScreen() {
         placeholder="ejemplo@correo.com"
         value={email}
         onChangeText={setEmail}
+        maxLength={LIMITS.email}
         autoCapitalize="none"
         keyboardType="email-address"
         autoComplete="email"

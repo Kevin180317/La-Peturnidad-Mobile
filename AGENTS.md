@@ -186,13 +186,17 @@ Orden sugerido por costo/beneficio. Tokens = estimado aproximado.
 - La app lee perfiles AJENOS solo de `public_profiles` (`profileService.getPublicByUserId`, `PublicProfile` en `types/index.ts`); `user_profiles` queda para el propio usuario y moderación. Contactos de alertas/hallazgos solo por RPC. Borrar un chat = `messagesService.deleteConversation` (RPC `clear_conversation`), no borrar filas
 - `types/database.ts` tiene un ajuste A MANO: `public_profiles.Row.user_id` es `string` (la vista lo genera `string | null`). Si se regenera con MCP, reaplicar el ajuste o `bun run typecheck` falla (TS2538)
 - Edad mínima 18 años: `MIN_AGE` en `utils/age.ts` (`isAdult`), obligatoria en `register-extended` y trigger `enforce_min_age` (migración `20261104000001`; solo valida perfiles nuevos o con fecha cambiada). Si cambia: tres sitios (constante, trigger, textos legales)
+- SIN EMOJIS en la app: ni en pantallas ni en notificaciones (usar `Ionicons`); aplica también a textos de push y de la bandeja
+- Límites de texto: `utils/limits.ts` (`LIMITS`) con `maxLength` en cada campo; el teléfono se limpia con `sanitizePhoneInput` (solo dígitos, 10 en MX/US). Sin límites en la base de datos (solo en la app)
+- Teléfono: formato E.164 (`+52XXXXXXXXXX`) con selector de país (`utils/phone.ts`: `normalizePhone`, `splitPhone`; `components/PhoneField.tsx`; países MX, US/CA y "Otro" con +código). Los teléfonos viejos de 10 dígitos se leen como México y se actualizan al guardar el perfil. Trigger `enforce_phone_format` (migración `20261104000002`): NO aplicar hasta que el build con `PhoneField` esté instalado (el build viejo manda 10 dígitos y fallaría el registro)
+- Selectores largos: usar `OptionSheet` (hoja blanca legible), no `@react-native-picker/picker` (en Android se ve oscuro e ilegible)
 - Bucket `alternate`: límite 5 MB, solo imágenes
 - Storage: no se puede borrar con SQL (`storage.protect_delete()`); usar el panel o la API de Storage
 - NO probado: el push FCM de punta a punta con el build SDK 58 (el token sí se registra en `device_tokens`; falta un segundo dispositivo). La bandeja sí funciona
 - Pendiente en panel: SMTP (Resend), "Secure email change", OTP 8 dígitos, URL permitida `https://luckytracker.com.mx/email-confirmed`, plan Pro o respaldos manuales. Sin migración baseline todavía (las migraciones antiguas se aplicaron desde el panel)
 
 ### Edge Functions
-- `send-push-notification` (v9) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS; título de emergencia neutro: `⚠️ {dueño} busca a {mascota}`
+- `send-push-notification` (v10) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS; títulos SIN emojis: `{dueño} busca a {mascota}` y `{quien} dice que encontró a {mascota}`
 - `delete-account` (v2) - borra filas, chats 1:1 propios, comentarios ajenos en sus publicaciones, `reports.reviewed_by` a null, y archivos de Storage paginados
 ### SDK 58 (actualizado desde SDK 54)
 - `expo@58.0.19`, dependencias alineadas con `expo install --fix`; `expo-doctor` sin problemas

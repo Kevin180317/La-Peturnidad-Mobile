@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export interface PetFormData {
   type: "perro" | "gato";
@@ -153,8 +154,8 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
         })}
       </View>
 
-      <Field label="Nombre *" icon="paw-outline" placeholder="Nombre de la mascota" value={petName} onChangeText={setPetName} />
-      <Field label="Color *" icon="color-palette-outline" placeholder="Color principal" value={petColor} onChangeText={setPetColor} />
+      <Field label="Nombre *" icon="paw-outline" placeholder="Nombre de la mascota" value={petName} onChangeText={setPetName} maxLength={LIMITS.petName} />
+      <Field label="Color *" icon="color-palette-outline" placeholder="Color principal" value={petColor} onChangeText={setPetColor} maxLength={LIMITS.petColor} />
 
       {/* Tamaño */}
       <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Tamaño *</Text>
@@ -176,6 +177,7 @@ export function PetForm({ editingPet, onSubmit, onCancel }: PetFormProps) {
         placeholder="Ej: manchas, cicatrices, comportamiento especial..."
         value={petFeatures}
         onChangeText={setPetFeatures}
+        maxLength={LIMITS.petFeatures}
         multiline
         numberOfLines={3}
       />

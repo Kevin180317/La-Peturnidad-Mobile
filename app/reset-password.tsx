@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState("");
@@ -106,6 +107,7 @@ export default function ResetPasswordScreen() {
           placeholder="••••••••"
           value={password}
           onChangeText={setPassword}
+          maxLength={LIMITS.password}
           autoCapitalize="none"
           autoComplete="new-password"
           accessibilityLabel="Nueva contraseña"
@@ -119,6 +121,7 @@ export default function ResetPasswordScreen() {
           placeholder="••••••••"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          maxLength={LIMITS.password}
           autoCapitalize="none"
           autoComplete="new-password"
           accessibilityLabel="Confirmar contraseña"

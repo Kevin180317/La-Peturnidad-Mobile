@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 // Agrega o reemplaza un mensaje por id (evita duplicados entre envío propio y realtime)
 function upsertMessage(list: Message[], msg: Message): Message[] {
@@ -292,6 +293,7 @@ export default function ConversationScreen() {
             placeholderTextColor="#9BA1A6"
             value={input}
             onChangeText={setInput}
+            maxLength={LIMITS.message}
             multiline
             onFocus={() => setInputFocused(true)}
             onBlur={() => setInputFocused(false)}

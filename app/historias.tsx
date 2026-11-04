@@ -21,6 +21,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export default function HistoriasScreen() {
   const router = useRouter();
@@ -219,12 +220,13 @@ export default function HistoriasScreen() {
       />
 
       <Sheet visible={showForm} title="Nueva historia" onClose={() => setShowForm(false)} closeDisabled={posting}>
-        <Field label="Nombre de tu mascota *" icon="paw-outline" placeholder="Nombre" value={petName} onChangeText={setPetName} />
+        <Field label="Nombre de tu mascota *" icon="paw-outline" placeholder="Nombre" value={petName} onChangeText={setPetName} maxLength={LIMITS.petName} />
         <Field
           label="Tu historia *"
           placeholder="Cuenta tu historia de reencuentro..."
           value={story}
           onChangeText={setStory}
+          maxLength={LIMITS.description}
           multiline
           numberOfLines={6}
         />

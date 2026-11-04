@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export interface CommentTarget {
   type: string;
@@ -430,6 +431,7 @@ function CommentsSection({
           placeholderTextColor="#9BA1A6"
           value={text}
           onChangeText={onChangeText}
+          maxLength={LIMITS.comment}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         />

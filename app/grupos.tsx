@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export default function GruposScreen() {
   const router = useRouter();
@@ -228,12 +229,13 @@ export default function GruposScreen() {
       />
 
       <Sheet visible={showForm} title="Crear grupo" onClose={() => setShowForm(false)} closeDisabled={creating}>
-        <Field label="Nombre *" icon="people-outline" placeholder="Nombre del grupo" value={formName} onChangeText={setFormName} />
+        <Field label="Nombre *" icon="people-outline" placeholder="Nombre del grupo" value={formName} onChangeText={setFormName} maxLength={LIMITS.groupName} />
         <Field
           label="Descripción"
           placeholder="Descripción (opcional)"
           value={formDesc}
           onChangeText={setFormDesc}
+          maxLength={LIMITS.description}
           multiline
           numberOfLines={3}
         />

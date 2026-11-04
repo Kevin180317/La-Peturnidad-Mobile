@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -164,6 +165,7 @@ export default function RegisterScreen() {
         placeholder="ejemplo@correo.com"
         value={email}
         onChangeText={setEmail}
+        maxLength={LIMITS.email}
         autoCapitalize="none"
         keyboardType="email-address"
         autoComplete="email"
@@ -176,6 +178,7 @@ export default function RegisterScreen() {
           placeholder="••••••••"
           value={password}
           onChangeText={setPassword}
+          maxLength={LIMITS.password}
           autoComplete="new-password"
           accessibilityLabel="Contraseña"
         />
@@ -188,6 +191,7 @@ export default function RegisterScreen() {
           placeholder="••••••••"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          maxLength={LIMITS.password}
           autoComplete="new-password"
           accessibilityLabel="Confirmar contraseña"
         />

@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 type Busy = "password" | "email" | null;
 
@@ -140,6 +141,7 @@ export default function SeguridadScreen() {
             placeholder="••••••••"
             value={currentPassword}
             onChangeText={setCurrentPassword}
+            maxLength={LIMITS.password}
             autoCapitalize="none"
             autoComplete="current-password"
             accessibilityLabel="Contraseña actual"
@@ -155,6 +157,7 @@ export default function SeguridadScreen() {
               placeholder="Mínimo 8, con letras y números"
               value={newPassword}
               onChangeText={setNewPassword}
+              maxLength={LIMITS.password}
               autoCapitalize="none"
               autoComplete="new-password"
               accessibilityLabel="Nueva contraseña"
@@ -166,6 +169,7 @@ export default function SeguridadScreen() {
               placeholder="••••••••"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
+              maxLength={LIMITS.password}
               autoCapitalize="none"
               autoComplete="new-password"
               accessibilityLabel="Confirmar nueva contraseña"
@@ -188,6 +192,7 @@ export default function SeguridadScreen() {
             placeholder="nuevo@correo.com"
             value={newEmail}
             onChangeText={setNewEmail}
+            maxLength={LIMITS.email}
             autoCapitalize="none"
             keyboardType="email-address"
             autoComplete="email"

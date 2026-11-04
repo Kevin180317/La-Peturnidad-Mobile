@@ -19,6 +19,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 type SearchTab = "pets" | "groups" | "users";
 
@@ -183,6 +184,7 @@ export default function BuscarScreen() {
           placeholderTextColor="#9BA1A6"
           value={query}
           onChangeText={setQuery}
+          maxLength={LIMITS.search}
           autoFocus
           returnKeyType="search"
           onSubmitEditing={performSearch}

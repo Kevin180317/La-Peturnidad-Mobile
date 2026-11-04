@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 const categories = [
   { key: "general", label: "General", icon: "chatbubbles" as const },
@@ -209,12 +210,13 @@ export default function ComunidadScreen() {
             onChange={setFormCategory}
           />
         </View>
-        <Field label="Título *" icon="text-outline" placeholder="Título" value={formTitle} onChangeText={setFormTitle} />
+        <Field label="Título *" icon="text-outline" placeholder="Título" value={formTitle} onChangeText={setFormTitle} maxLength={LIMITS.title} />
         <Field
           label="Mensaje *"
           placeholder="Escribe tu mensaje..."
           value={formContent}
           onChangeText={setFormContent}
+          maxLength={LIMITS.description}
           multiline
           numberOfLines={5}
         />
