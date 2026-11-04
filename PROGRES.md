@@ -1,6 +1,25 @@
 # PROGRES — Lucky Tracker
 
-> Estado actual del proyecto. Última actualización: 29/08/2026. Log vivo, detalle línea por línea — fuente de verdad. Para un resumen condensado en inglés por fase (más el origen del diseño y próximos pasos), ver [`docs/MILESTONES.md`](docs/MILESTONES.md).
+> Estado actual del proyecto. Última actualización: 03/11/2026 (Fase 11). Log vivo, detalle línea por línea — fuente de verdad. Para un resumen condensado en inglés por fase (más el origen del diseño y próximos pasos), ver [`docs/MILESTONES.md`](docs/MILESTONES.md).
+
+---
+
+## ✅ Fase 11 — Supabase pendientes, privacidad y formularios (2026-11-03, Completada)
+
+Detalle técnico y reversiones en `AGENTS.md` (sección "Supabase pendientes cerrados"). Plan: `docs/superpowers/plans/2026-11-03-supabase-pendientes.md`.
+
+| Item | Notas |
+|---|---|
+| **Migración A** `20261103190025_alert_guards_group_chat` | Triggers `protect_emergency_alert`, `on_group_member_removed`, `trim_profile_address`; vista `public_profiles` (sin teléfono/dirección/fecha de nacimiento); RPC `get_alert_contacts`, `get_finder_contacts`, `clear_conversation`; columna `cleared_at`. Aplicada y verificada. |
+| **Migración B** `20261105000001_close_profile_access` | `user_profiles` solo la lee el dueño o un moderador; se elimina `cp_delete`; reparación de chats 1:1; 6 chats vacíos borrados. Aplicada y verificada con SQL (1 fila propia vs 7 en la vista). La app lee perfiles ajenos de `public_profiles` y contactos por RPC. |
+| **Edge functions** | `delete-account` v2 (chats 1:1 propios, `reviewed_by` a null, comentarios ajenos, Storage paginado). `send-push-notification` v10: títulos sin emojis. |
+| **Edad mínima 18** | `utils/age.ts` + fecha de nacimiento obligatoria en registro + trigger `enforce_min_age` (`20261104000001`). |
+| **Teléfono internacional** | Selector de país (México, EE. UU./Canadá, otro), formato E.164, `sanitizePhoneInput`, `PhoneField`, trigger `enforce_phone_format` (`20261104000002`). Teléfonos viejos se actualizan al editar el perfil. |
+| **UI** | `OptionSheet` reemplaza el Picker nativo (era ilegible en Android); sin emojis en la app ni en notificaciones; `maxLength` en todos los campos (`utils/limits.ts`). |
+| **Correo / auth** | Redirect de confirmación a `https://luckytracker.com.mx/email-confirmed`; SMTP con Resend funcionando; OTP de 8 dígitos; "Secure email change" activo. |
+| **Storage** | Bucket `alternate` limitado a 5 MB e imágenes; 4 archivos dañados de 14 bytes borrados (el SQL directo está bloqueado por `storage.protect_delete()`). |
+| **Textos legales** | Borradores en `docs/LEGAL_POLITICA_PRIVACIDAD.md` y `docs/LEGAL_TERMINOS_CONDICIONES.md`, ya enviados al equipo web; se publican el sábado 2026-11-07. |
+| **Verificación** | 31 suites / 238 tests, lint y typecheck limpios. QA en teléfono con APK `preview` (cuentas A, B, C) OK en la ronda anterior; falta repetir con el build nuevo. |
 
 ---
 
@@ -203,8 +222,8 @@
 
 | Item | Notas |
 |---|---|
-| **Tests** | No hay ningún test (unit, integration, e2e) |
-| **Eliminar cuenta** | No hay opción para que un usuario elimine su cuenta |
+| **Tests** | ✅ 31 suites / 238 tests (Jest); falta e2e completo y `app/dashboard.tsx` |
+| **Eliminar cuenta** | ✅ Perfil → Eliminar cuenta (edge function `delete-account` v2) |
 
 ### 🟡 Media prioridad
 
