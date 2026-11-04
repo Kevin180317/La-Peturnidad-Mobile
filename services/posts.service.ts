@@ -60,6 +60,10 @@ class PostsService {
         user_id: p.user_id,
         content: p.content,
         image_url: p.image_url,
+        image_urls: p.image_urls,
+        location: p.location,
+        tags: p.tags,
+        links: p.links,
         created_at: p.created_at,
         updated_at: p.updated_at,
         owner_name:
@@ -76,10 +80,11 @@ class PostsService {
   }
 
   // Paginación por cursor: pasa el created_at del último post cargado para pedir la página siguiente
-  async getAllPosts(before?: string | null, limit = FEED_PAGE_SIZE): Promise<ServiceResult<PostWithOwner[]>> {
+  async getAllPosts(before?: string | null, limit = FEED_PAGE_SIZE, tag?: string | null): Promise<ServiceResult<PostWithOwner[]>> {
     try {
       let query = supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(limit);
       if (before) query = query.lt("created_at", before);
+      if (tag) query = query.contains("tags", [tag]);
       const { data: posts, error } = await query;
 
       if (error) throw error;
@@ -120,6 +125,10 @@ class PostsService {
         user_id: p.user_id,
         content: p.content,
         image_url: p.image_url,
+        image_urls: p.image_urls,
+        location: p.location,
+        tags: p.tags,
+        links: p.links,
         created_at: p.created_at,
         updated_at: p.updated_at,
         owner_name:
@@ -173,6 +182,10 @@ class PostsService {
         user_id: p.user_id,
         content: p.content,
         image_url: p.image_url,
+        image_urls: p.image_urls,
+        location: p.location,
+        tags: p.tags,
+        links: p.links,
         created_at: p.created_at,
         updated_at: p.updated_at,
         owner_name:
@@ -187,14 +200,26 @@ class PostsService {
     }
   }
 
-  async create(data: { user_id: string; content: string; image_url?: string | null }) {
+  async create(data: {
+    user_id: string;
+    content: string;
+    /** Galería (máx. 5); la primera también va en image_url por compatibilidad */
+    image_urls?: string[];
+    location?: string | null;
+    tags?: string[];
+    links?: string[];
+  }) {
     try {
       const { data: post, error } = await supabase
         .from("posts")
         .insert([{
           user_id: data.user_id,
           content: data.content,
-          image_url: data.image_url ?? null,
+          image_url: data.image_urls?.[0] ?? null,
+          image_urls: data.image_urls ?? [],
+          location: data.location?.trim() || null,
+          tags: data.tags ?? [],
+          links: data.links ?? [],
         }])
         .select()
         .single();
@@ -206,12 +231,13 @@ class PostsService {
     }
   }
 
-  // Borra el post y, si tenía, su imagen del bucket "posts"
-  async delete(postId: string, imageUrl?: string | null): Promise<ServiceResult> {
+  // Borra el post y, si tenía, sus imágenes del bucket "posts"
+  async delete(postId: string, imageUrls?: (string | null | undefined)[] | string | null): Promise<ServiceResult> {
     try {
       const { error } = await supabase.from("posts").delete().eq("id", postId);
       if (error) throw error;
-      await dashboardService.removeImageByUrl(imageUrl, "posts");
+      const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
+      await Promise.all([...new Set(urls)].map((u) => dashboardService.removeImageByUrl(u, "posts")));
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };

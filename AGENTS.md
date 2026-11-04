@@ -195,6 +195,13 @@ Orden sugerido por costo/beneficio. Tokens = estimado aproximado.
 - NO probado: el push FCM de punta a punta con el build SDK 58 (el token sí se registra en `device_tokens`; falta un segundo dispositivo). La bandeja sí funciona
 - Pendiente en panel: SMTP (Resend), "Secure email change", OTP 8 dígitos, URL permitida `https://luckytracker.com.mx/email-confirmed`, plan Pro o respaldos manuales. Sin migración baseline todavía (las migraciones antiguas se aplicaron desde el panel)
 
+### Tareas de QA de Todoist (2026-11-04, sin commit ni build)
+- **Contadores de seguidores:** el perfil usa `followsService.getCounts` y se recargan al enfocar el dashboard (antes quedaban viejos tras seguir a alguien: perfil decía 1 y la lista mostraba 2)
+- **Publicación social ampliada** (`components/PostForm.tsx`): hasta 5 imágenes (galería múltiple + cámara trasera/frontal), ubicación en texto libre (botón "Mi zona" = colonia y ciudad del perfil), etiquetas (también se extraen los `#hashtags` del texto) y hasta 3 enlaces http(s). Migración `posts_media_location_tags_links` (aplicada): `posts.image_urls`, `location`, `tags`, `links` con CHECK de máximos e índice GIN en `tags`; `image_url` sigue guardando la primera imagen por compatibilidad. Helpers en `utils/postMeta.ts`, máximos en `POST_MAX` (`utils/limits.ts`)
+- **Feed:** carrusel de imágenes, ubicación, etiquetas tocables (filtran el feed en servidor con `contains("tags")`, banner "Mostrando #x" para quitar el filtro) y enlaces que abren con `Linking`
+- **Requiere build nuevo:** `app.json` ahora declara `cameraPermission` (antes `false`). La ubicación NO usa GPS a propósito (seguiría bloqueado `ACCESS_FINE_LOCATION` y habría que actualizar Data safety); si se quiere GPS: `expo-location` + quitar el bloqueo + build
+- `types/database.ts` editado a mano en `posts` (mismos campos que la migración)
+
 ### Edge Functions
 - `send-push-notification` (v10) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS; títulos SIN emojis: `{dueño} busca a {mascota}` y `{quien} dice que encontró a {mascota}`
 - `delete-account` (v2) - borra filas, chats 1:1 propios, comentarios ajenos en sus publicaciones, `reports.reviewed_by` a null, y archivos de Storage paginados

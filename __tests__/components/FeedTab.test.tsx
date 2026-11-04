@@ -123,3 +123,35 @@ describe("FeedTab sections", () => {
     expect(screen.getByText("No hay alertas de emergencia activas")).toBeTruthy();
   });
 });
+
+describe("FeedTab post extras", () => {
+  const rich = {
+    ...post("p9", "other", "Rich"),
+    image_urls: ["https://x.test/1.jpg", "https://x.test/2.jpg"],
+    location: "Centro, Tijuana",
+    tags: ["perro", "adopcion"],
+    links: ["https://sitio.com/pagina"],
+  };
+
+  it("shows location, tags and links", async () => {
+    await setup({ feedPosts: [rich] });
+    expect(screen.getByText("Centro, Tijuana")).toBeTruthy();
+    expect(screen.getByText("#perro")).toBeTruthy();
+    expect(screen.getByText("sitio.com/pagina")).toBeTruthy();
+  });
+
+  it("tapping a tag asks to filter by it", async () => {
+    const onFilterTag = jest.fn();
+    await setup({ feedPosts: [rich], onFilterTag });
+    await fireEvent.press(screen.getByLabelText("Ver publicaciones con #perro"));
+    expect(onFilterTag).toHaveBeenCalledWith("perro");
+  });
+
+  it("active tag shows a banner that clears the filter", async () => {
+    const onFilterTag = jest.fn();
+    await setup({ feedPosts: [rich], feedTag: "perro", onFilterTag });
+    expect(screen.getByText("Mostrando #perro")).toBeTruthy();
+    await fireEvent.press(screen.getByLabelText("Quitar filtro"));
+    expect(onFilterTag).toHaveBeenCalledWith(null);
+  });
+});

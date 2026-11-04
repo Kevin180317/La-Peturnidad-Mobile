@@ -12,4 +12,10 @@ export const LIMITS = {
   message: 2000,
   comment: 500,
   search: 60,
+  location: 100,
+  tag: 30,
+  link: 200,
 } as const;
+
+// Publicaciones sociales (coinciden con los CHECK de la tabla posts)
+export const POST_MAX = { images: 5, tags: 10, links: 3 } as const;

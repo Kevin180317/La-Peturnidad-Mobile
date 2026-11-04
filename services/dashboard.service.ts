@@ -533,6 +533,73 @@ class DashboardService {
     }
   }
 
+  // Varias imágenes de la galería (publicaciones). Sin recorte: el selector no permite editar en modo múltiple
+  async selectImages(
+    limit: number,
+  ): Promise<{ success: true; images: PickedImage[] } | { success: false; error: string }> {
+    try {
+      if (limit < 1) return { success: false, error: "Ya alcanzaste el máximo de imágenes" };
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        return { success: false, error: "Permiso denegado para acceder a la galería" };
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: "images",
+        allowsMultipleSelection: true,
+        selectionLimit: limit,
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets?.length) {
+        return { success: false, error: "Selección cancelada" };
+      }
+
+      return {
+        success: true,
+        images: result.assets.slice(0, limit).map((asset) => ({
+          uri: asset.uri,
+          mimeType: asset.mimeType ?? null,
+          fileSize: asset.fileSize ?? null,
+        })),
+      };
+    } catch (error: any) {
+      console.error("Error selecting images:", error);
+      return { success: false, error: error.message ?? "No se pudo abrir la galería" };
+    }
+  }
+
+  // Foto con la cámara frontal o trasera (en Android la cámara es una sugerencia al sistema)
+  async takePhoto(
+    facing: "front" | "back",
+  ): Promise<{ success: true; image: PickedImage } | { success: false; error: string }> {
+    try {
+      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+      if (!permissionResult.granted) {
+        return { success: false, error: "Permiso denegado para usar la cámara" };
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: "images",
+        cameraType: facing === "front" ? ImagePicker.CameraType.front : ImagePicker.CameraType.back,
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets?.[0]) {
+        return { success: false, error: "Selección cancelada" };
+      }
+
+      const asset = result.assets[0];
+      return {
+        success: true,
+        image: { uri: asset.uri, mimeType: asset.mimeType ?? null, fileSize: asset.fileSize ?? null },
+      };
+    } catch (error: any) {
+      console.error("Error taking photo:", error);
+      return { success: false, error: error.message ?? "No se pudo abrir la cámara" };
+    }
+  }
+
   // ============== TOKENS Y AUTENTICACIÓN ==============
 
   // Registra el token de ESTE dispositivo para auth.uid() (varios dispositivos por usuario)

@@ -24,3 +24,43 @@ describe("postsService.getAllPosts pagination", () => {
     expect(await postsService.getAllPosts()).toEqual({ success: false, error: "rls", data: [] });
   });
 });
+
+describe("postsService.getAllPosts tag filter", () => {
+  it("filters by tag with contains on the tags array", async () => {
+    mockTable("posts", { data: [post] });
+    await postsService.getAllPosts(null, FEED_PAGE_SIZE, "perro");
+    expect(calls).toContainEqual({ table: "posts", method: "contains", args: ["tags", ["perro"]] });
+  });
+
+  it("no tag: no contains filter", async () => {
+    mockTable("posts", { data: [post] });
+    await postsService.getAllPosts();
+    expect(calls.some((c) => c.method === "contains")).toBe(false);
+  });
+});
+
+describe("postsService.create", () => {
+  it("saves gallery, location, tags and links; image_url is the first image", async () => {
+    mockTable("posts", { data: { id: "p9" } });
+    await postsService.create({
+      user_id: "u1",
+      content: "hola",
+      image_urls: ["a.jpg", "b.jpg"],
+      location: "  Centro  ",
+      tags: ["perro"],
+      links: ["https://sitio.com/"],
+    });
+    const insert = calls.find((c) => c.table === "posts" && c.method === "insert");
+    expect(insert?.args[0]).toEqual([
+      {
+        user_id: "u1",
+        content: "hola",
+        image_url: "a.jpg",
+        image_urls: ["a.jpg", "b.jpg"],
+        location: "Centro",
+        tags: ["perro"],
+        links: ["https://sitio.com/"],
+      },
+    ]);
+  });
+});

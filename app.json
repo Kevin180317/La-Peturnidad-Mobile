@@ -50,7 +50,7 @@
         "expo-image-picker",
         {
           "photosPermission": "Lucky Tracker necesita acceso a tus fotos para subir imágenes de tus mascotas y publicaciones.",
-          "cameraPermission": false,
+          "cameraPermission": "Lucky Tracker necesita la cámara para que tomes fotos para tus publicaciones.",
           "microphonePermission": false
         }
       ]

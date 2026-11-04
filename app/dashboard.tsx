@@ -85,6 +85,8 @@ export default function DashboardScreen() {
   const [feedPosts, setFeedPosts] = useState<any[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(false);
   const [feedHasMore, setFeedHasMore] = useState(false);
+  // Etiqueta activa en el filtro del feed (null = todo)
+  const [feedTag, setFeedTag] = useState<string | null>(null);
   const [loadingMoreFeed, setLoadingMoreFeed] = useState(false);
   const loadingMoreFeedRef = useRef(false);
 
@@ -114,13 +116,13 @@ export default function DashboardScreen() {
   const loadFeed = useCallback(async () => {
     if (!user?.id) return;
     setLoadingFeed(true);
-    const result = await postsService.getAllPosts();
+    const result = await postsService.getAllPosts(null, FEED_PAGE_SIZE, feedTag);
     if (result.success) {
       setFeedPosts(result.data ?? []);
       setFeedHasMore((result.data?.length ?? 0) >= FEED_PAGE_SIZE);
     }
     setLoadingFeed(false);
-  }, [user?.id]);
+  }, [user?.id, feedTag]);
 
   // Siguiente página del feed (scroll infinito); la ref evita pedir la misma página dos veces seguidas
   const loadMoreFeed = async () => {
@@ -128,7 +130,7 @@ export default function DashboardScreen() {
     if (!feedHasMore || loadingMoreFeedRef.current || !last) return;
     loadingMoreFeedRef.current = true;
     setLoadingMoreFeed(true);
-    const result = await postsService.getAllPosts(last.created_at);
+    const result = await postsService.getAllPosts(last.created_at, FEED_PAGE_SIZE, feedTag);
     if (result.success) {
       const page = result.data ?? [];
       setFeedPosts((current) => [...current, ...page.filter((p) => !current.some((c) => c.id === p.id))]);
@@ -157,41 +159,45 @@ export default function DashboardScreen() {
       return false;
     }
 
-    // Social: la imagen se sube primero; si falla no se crea el post
-    let imageUrl: string | null = null;
-    if (data.image) {
-      const upload = await dashboardService.uploadImage(data.image, "posts");
+    // Social: las imágenes se suben primero; si alguna falla no se crea el post y se borran las ya subidas
+    const uploaded: string[] = [];
+    for (const image of data.images ?? []) {
+      const upload = await dashboardService.uploadImage(image, "posts");
       if (!upload.success || !upload.url) {
+        await Promise.all(uploaded.map((u) => dashboardService.removeImageByUrl(u, "posts")));
         showToast("error", "No se pudo subir la imagen", upload.error);
         return false;
       }
-      imageUrl = upload.url;
+      uploaded.push(upload.url);
     }
 
     const result = await postsService.create({
       user_id: user.id,
       content: data.content,
-      image_url: imageUrl,
+      image_urls: uploaded,
+      location: data.location,
+      tags: data.tags,
+      links: data.links,
     });
 
     if (result.success) {
       await loadFeed();
       return true;
     }
-    // El post no se creó: la imagen ya subida queda huérfana, se borra
-    await dashboardService.removeImageByUrl(imageUrl, "posts");
+    // El post no se creó: las imágenes ya subidas quedan huérfanas, se borran
+    await Promise.all(uploaded.map((u) => dashboardService.removeImageByUrl(u, "posts")));
     showToast("error", "Error", result.error);
     return false;
   };
 
-  const handleDeletePost = (post: { id: string; image_url?: string | null }) => {
+  const handleDeletePost = (post: { id: string; image_url?: string | null; image_urls?: string[] | null }) => {
     confirmDialog({
       title: "Eliminar publicación",
       message: "¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.",
       confirmLabel: "Eliminar",
       destructive: true,
       onConfirm: async () => {
-        const result = await postsService.delete(post.id, post.image_url);
+        const result = await postsService.delete(post.id, [post.image_url, ...(post.image_urls ?? [])]);
         if (result.success) {
           showToast("success", "Publicación eliminada");
           await loadFeed();
@@ -290,15 +296,12 @@ export default function DashboardScreen() {
 
       setProfileLoadFailed(!profileResult.success);
       if (profileResult.success && profileResult.data) {
-        const [followersRes, followingRes] = await Promise.all([
-          followsService.getFollowers(currentUser.id),
-          followsService.getFollowing(currentUser.id),
-        ]);
+        const countsRes = await followsService.getCounts(currentUser.id);
 
         setProfile({
           ...profileResult.data,
-          followers_count: followersRes.data?.length ?? 0,
-          following_count: followingRes.data?.length ?? 0,
+          followers_count: countsRes.data?.followers ?? 0,
+          following_count: countsRes.data?.following ?? 0,
         });
 
         const [, , , , , blockedRes] = await Promise.all([
@@ -778,12 +781,18 @@ export default function DashboardScreen() {
     initNotifications();
   }, [user?.id]);
 
-  // Recargar mensajes no leídos al volver a la pantalla
+  // Recargar mensajes no leídos y contadores de seguidores al volver a la pantalla
+  // (seguir/dejar de seguir en otras pantallas cambia los conteos)
   useFocusEffect(
     useCallback(() => {
       if (user?.id) {
         loadUnreadCount(user.id);
         loadNotificationsUnread(user.id);
+        followsService.getCounts(user.id).then((res) => {
+          if (!res.success || !res.data) return;
+          const { followers, following } = res.data;
+          setProfile((p: any) => (p ? { ...p, followers_count: followers, following_count: following } : p));
+        });
       }
     }, [user?.id]),
   );
@@ -796,6 +805,17 @@ export default function DashboardScreen() {
     if (activeTab === "messages") { loadConversations(); }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar de pestaña
   }, [activeTab]);
+
+  // Al elegir o quitar una etiqueta se vuelve a pedir el feed (la primera carga la hace la pestaña)
+  const firstTagRun = useRef(true);
+  useEffect(() => {
+    if (firstTagRun.current) {
+      firstTagRun.current = false;
+      return;
+    }
+    loadFeed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar la etiqueta
+  }, [feedTag]);
 
   // Deep link de notificaciones: abre Emergencia y muestra la alerta (mía o de un vecino)
   const handledAlertRef = useRef<string | null>(null);
@@ -889,6 +909,9 @@ export default function DashboardScreen() {
             onCreatePost={handleCreatePost}
             onDeletePost={handleDeletePost}
             onDeleteAnnouncement={handleComDelete}
+            feedTag={feedTag}
+            onFilterTag={setFeedTag}
+            defaultLocation={[profile?.address, profile?.city].filter(Boolean).join(", ")}
           />
         )}
         {activeTab === "emergency" && (

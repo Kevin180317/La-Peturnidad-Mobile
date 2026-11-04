@@ -9,6 +9,7 @@ import { useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Image,
+  Linking,
   RefreshControl,
   ScrollView,
   Text,
@@ -18,6 +19,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { LIMITS } from "@/utils/limits";
+import { displayLink, normalizeLink } from "@/utils/postMeta";
 
 export interface CommentTarget {
   type: string;
@@ -54,6 +56,11 @@ interface FeedTabProps {
   onCreatePost: (data: PostFormData) => Promise<boolean>;
   onDeletePost: (post: any) => void;
   onDeleteAnnouncement?: (id: string) => void;
+  /** Etiqueta con la que se filtra el feed social (null = sin filtro) */
+  feedTag?: string | null;
+  onFilterTag?: (tag: string | null) => void;
+  /** Colonia y ciudad del perfil, sugeridas como ubicación al publicar */
+  defaultLocation?: string;
 }
 
 type MainTab = "emergencies" | "announcements" | "social";
@@ -92,6 +99,9 @@ export function FeedTab({
   onCreatePost,
   onDeletePost,
   onDeleteAnnouncement = () => {},
+  feedTag = null,
+  onFilterTag = () => {},
+  defaultLocation = "",
 }: FeedTabProps) {
   const router = useRouter();
   const [mainTab, setMainTab] = useState<MainTab>("social");
@@ -160,6 +170,7 @@ export function FeedTab({
         onClose={() => setShowPostForm(false)}
         onSubmit={handleCreatePost}
         loading={posting}
+        defaultLocation={defaultLocation}
       />
 
       {/* EMERGENCIAS */}
@@ -212,11 +223,19 @@ export function FeedTab({
         ))}
 
       {/* SOCIAL */}
+      {mainTab === "social" && !!feedTag && (
+        <View className="flex-row items-center justify-between bg-[#007275]/10 rounded-2xl px-4 py-2.5 mb-4">
+          <Text className="text-[#007275] font-semibold">Mostrando #{feedTag}</Text>
+          <TouchableOpacity onPress={() => onFilterTag(null)} accessibilityRole="button" accessibilityLabel="Quitar filtro">
+            <Ionicons name="close-circle" size={22} color="#007275" />
+          </TouchableOpacity>
+        </View>
+      )}
       {mainTab === "social" &&
         (loadingFeed ? (
           <FeedSkeleton />
         ) : visiblePosts.length === 0 ? (
-          <EmptyCard icon="images-outline" color="#007275" title="Aún no hay publicaciones" text="Sé el primero en compartir algo con tu comunidad" />
+          <EmptyCard icon="images-outline" color="#007275" title={feedTag ? "Sin resultados" : "Aún no hay publicaciones"} text={feedTag ? `Nadie ha publicado con #${feedTag}` : "Sé el primero en compartir algo con tu comunidad"} />
         ) : (
           visiblePosts.map((post) => {
             const isMine = post.user_id === userId;
@@ -247,20 +266,53 @@ export function FeedTab({
 
                 {!!post.content && (
                   <Text
-                    className={`px-4 text-[#211f1e] ${post.image_url ? "text-[15px] leading-6 pb-3" : "text-lg leading-7 pb-2"}`}
+                    className={`px-4 text-[#211f1e] ${postImages(post).length ? "text-[15px] leading-6 pb-3" : "text-lg leading-7 pb-2"}`}
                   >
                     {post.content}
                   </Text>
                 )}
 
-                {post.image_url && (
-                  <View className="px-3">
-                    <Image
-                      source={{ uri: post.image_url }}
-                      resizeMode="cover"
-                      className="w-full rounded-2xl bg-gray-100"
-                      style={{ aspectRatio: 4 / 5 }}
-                    />
+                <PostImages urls={postImages(post)} />
+
+                {!!post.location && (
+                  <View className="flex-row items-center gap-1 px-4 pt-3">
+                    <Ionicons name="location" size={14} color="#007275" />
+                    <Text className="text-[13px] text-gray-600 flex-1" numberOfLines={1}>{post.location}</Text>
+                  </View>
+                )}
+
+                {!!post.tags?.length && (
+                  <View className="flex-row flex-wrap gap-2 px-4 pt-3">
+                    {post.tags.map((tag: string) => (
+                      <TouchableOpacity
+                        key={tag}
+                        onPress={() => onFilterTag(tag)}
+                        activeOpacity={0.7}
+                        className="bg-[#007275]/10 rounded-full px-3 py-1"
+                        accessibilityRole="button"
+                        accessibilityLabel={`Ver publicaciones con #${tag}`}
+                      >
+                        <Text className="text-[13px] font-semibold text-[#007275]">#{tag}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+
+                {!!post.links?.length && (
+                  <View className="gap-1.5 px-4 pt-3">
+                    {post.links.map((url: string) => (
+                      <TouchableOpacity
+                        key={url}
+                        onPress={() => openLink(url)}
+                        activeOpacity={0.7}
+                        className="flex-row items-center gap-1.5"
+                        accessibilityRole="link"
+                        accessibilityLabel={`Abrir enlace ${displayLink(url)}`}
+                      >
+                        <Ionicons name="link" size={14} color="#007275" />
+                        <Text className="text-[13px] text-[#007275] underline flex-1" numberOfLines={1}>{displayLink(url)}</Text>
+                      </TouchableOpacity>
+                    ))}
                   </View>
                 )}
 
@@ -303,6 +355,61 @@ export function FeedTab({
   );
 }
 
+
+// Imágenes de un post: la galería nueva o, en posts viejos, la imagen única
+function postImages(post: { image_url?: string | null; image_urls?: string[] | null }): string[] {
+  if (post.image_urls?.length) return post.image_urls;
+  return post.image_url ? [post.image_url] : [];
+}
+
+// Solo se abren enlaces http(s) (el texto viene de otros usuarios)
+async function openLink(url: string) {
+  const safe = normalizeLink(url);
+  if (!safe) return;
+  try {
+    await Linking.openURL(safe);
+  } catch {
+    Toast.show({ type: "error", text1: "No se pudo abrir el enlace", position: "top" });
+  }
+}
+
+// Carrusel horizontal con puntos; una sola imagen se muestra sin controles
+function PostImages({ urls }: { urls: string[] }) {
+  const [width, setWidth] = useState(0);
+  const [index, setIndex] = useState(0);
+  if (!urls.length) return null;
+  return (
+    <View className="px-3" onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      {width > 0 && (
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          scrollEnabled={urls.length > 1}
+          onMomentumScrollEnd={(e) => setIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
+          testID="post-images"
+        >
+          {urls.map((url) => (
+            <Image
+              key={url}
+              source={{ uri: url }}
+              resizeMode="cover"
+              className="rounded-2xl bg-gray-100"
+              style={{ width, aspectRatio: 4 / 5 }}
+            />
+          ))}
+        </ScrollView>
+      )}
+      {urls.length > 1 && (
+        <View className="flex-row justify-center gap-1.5 mt-2">
+          {urls.map((url, i) => (
+            <View key={url} className={`h-1.5 rounded-full ${i === index ? "w-4 bg-[#007275]" : "w-1.5 bg-gray-300"}`} />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
 
 function AuthorRow({
   name,
