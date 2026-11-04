@@ -1,5 +1,7 @@
 # Supabase Schema — La Peturnidad
 
+> **HISTÓRICO**: foto del 2026-06-20 (19 migraciones). Ya no refleja el estado actual: faltan las migraciones de 2026-10-24 y 2026-11-03/05 (vista `public_profiles`, RPC de contactos, `clear_conversation`, `user_profiles` cerrada). Fuente de verdad: la base remota (`list_migrations`) y `types/database.ts`.
+>
 > Generated on 2026-06-20. 19 migrations applied.
 
 ---

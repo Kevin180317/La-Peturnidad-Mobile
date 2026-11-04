@@ -133,7 +133,7 @@ where not exists (
 - [ ] **Auth → Email:** SMTP propio (el correo por defecto tiene un límite bajo por hora).
 - [ ] **Auth → Email:** "Secure email change" activo.
 - [ ] **Auth → Email:** el código OTP debe ser de 8 dígitos; `app/verify-otp.tsx` asume ese largo.
-- [ ] **Auth → URL Configuration:** `https://la-peturnidad.vercel.app/email-confirmed` debe estar permitida y responder. Si ya no se usa ese dominio, cambia `EMAIL_CONFIRMATION_REDIRECT_URL` en `services/auth.service.ts`.
+- [ ] **Auth → URL Configuration:** `https://luckytracker.com.mx/email-confirmed` debe estar permitida y responder. Si ya no se usa ese dominio, cambia `EMAIL_CONFIRMATION_REDIRECT_URL` en `services/auth.service.ts`.
 - [ ] **Storage:** límite de 5 MB y solo imágenes en `pet-images`, `profile-pictures` y `posts`. Hoy el límite de 5 MB solo se valida en la app.
 - [ ] **Plan:** decidir entre Pro o respaldos manuales. El plan free pausa el proyecto y no tiene respaldos.
 - [ ] **Auth (solo Pro):** activar la protección contra contraseñas filtradas.

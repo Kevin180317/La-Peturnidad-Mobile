@@ -30,7 +30,7 @@ From the Expo CLI output you can open the app in a development build, Android em
 | [`PROGRES.md`](PROGRES.md) | **Living dev log** (Spanish) — line-by-line record of every phase, bug, and fix as it happens. Source of truth for current state |
 | [`docs/MILESTONES.md`](docs/MILESTONES.md) | **Point-in-time summary** (English) of `PROGRES.md` by phase, plus the design-proposal origin story and open next steps. Not auto-synced with `PROGRES.md` — re-check both if it's been a while |
 | [`docs/SCREENS.md`](docs/SCREENS.md) | Every screen in the app: route, purpose, and what each user interaction triggers |
-| [`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md) | Current Supabase schema: tables, RLS policies, storage buckets, migration history |
+| [`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md) | Historical (2026-06-20) Supabase schema snapshot — outdated; source of truth is the remote DB and `types/database.ts` |
 | [`docs/SUPABASE_PENDING_CODE.md`](docs/SUPABASE_PENDING_CODE.md) | Older planning snapshot — mostly superseded by `PROGRES.md`, see `MILESTONES.md`'s discrepancy note |
 | [`docs/images/`](docs/images/) | Screenshots per app area (`AUTH`, `Dashboard`), used as reference for the docs above |
 | `docs/old/` | Original Spanish versions of the docs above, kept for reference |

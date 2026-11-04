@@ -14,6 +14,12 @@ auth.resend = jest.fn();
 
 beforeEach(resetSupabaseMock);
 
+describe("EMAIL_CONFIRMATION_REDIRECT_URL", () => {
+  it("uses the official luckytracker.com.mx domain", () => {
+    expect(EMAIL_CONFIRMATION_REDIRECT_URL).toBe("https://luckytracker.com.mx/email-confirmed");
+  });
+});
+
 describe("authService", () => {
   it("signIn trims email and password", async () => {
     await authService.signIn("  a@b.com ", " pw ");

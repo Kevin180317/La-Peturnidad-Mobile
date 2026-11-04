@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { isAdult, MIN_AGE } from "../utils/age";
 
 export default function RegisterExtendedScreen() {
   const router = useRouter();
@@ -64,8 +65,8 @@ export default function RegisterExtendedScreen() {
   // Convierte DD/MM/YYYY a YYYY-MM-DD validando que sea una fecha real, no futura y desde 1900
   const parseBirthDate = (
     ddmmyyyy: string,
-  ): { value: string | null } | { error: string } => {
-    if (!ddmmyyyy) return { value: null };
+  ): { value: string } | { error: string } => {
+    if (!ddmmyyyy) return { error: "La fecha de nacimiento es obligatoria" };
     const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(ddmmyyyy);
     if (!match) {
       return { error: "Completa la fecha con el formato DD/MM/AAAA" };
@@ -88,7 +89,11 @@ export default function RegisterExtendedScreen() {
     if (date.getTime() > Date.now()) {
       return { error: "La fecha de nacimiento no puede ser futura" };
     }
-    return { value: `${yyyy}-${mm}-${dd}` };
+    const value = `${yyyy}-${mm}-${dd}`;
+    if (!isAdult(value)) {
+      return { error: `Debes ser mayor de ${MIN_AGE} años para usar Lucky Tracker` };
+    }
+    return { value };
   };
 
   const goToDashboard = () => {
@@ -243,7 +248,7 @@ export default function RegisterExtendedScreen() {
       <Field
         label="Fecha de nacimiento"
         icon="calendar-outline"
-        placeholder="DD/MM/YYYY"
+        placeholder={`DD/MM/AAAA (mayores de ${MIN_AGE})`}
         accessibilityLabel="Fecha de nacimiento"
         value={birthDate}
         onChangeText={(text) => setBirthDate(formatDateInput(text))}

@@ -1,7 +1,7 @@
 import { type ServiceResult } from "@/types";
 import { supabase } from "@/utils/supabase";
 
-export const EMAIL_CONFIRMATION_REDIRECT_URL = "https://la-peturnidad.vercel.app/email-confirmed";
+export const EMAIL_CONFIRMATION_REDIRECT_URL = "https://luckytracker.com.mx/email-confirmed";
 
 type AuthErrorLike = { code?: string; status?: number; message?: string } | null | undefined;
 

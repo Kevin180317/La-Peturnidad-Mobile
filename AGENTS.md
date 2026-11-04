@@ -33,7 +33,7 @@
 - `.env` - local env vars (ignorado por git; `.env.local` también funciona)
 - `utils/session.ts` - `getCurrentUser()`: usarlo en vez de `supabase.auth.getUser()` en pantallas (sin red conserva la sesión guardada)
 - `components/ColoniaPicker.tsx` - catálogo y selector de colonia (registro y editar perfil)
-- `docs/SUPABASE_IMPLEMENTACION_SEMANA_2026-11-02.md` - plan de lo pendiente en Supabase (fecha límite 2026-11-07, prioridad alta)
+- `docs/SUPABASE_IMPLEMENTACION_SEMANA_2026-11-02.md` - plan de Supabase (HECHO el 2026-11-03, ver sección "Supabase pendientes cerrados")
 - `components/kit/Kit.tsx` - kit de diseño compartido (ver "Sistema de diseño")
 - `components/auth/AuthScreen.tsx` - marco de las pantallas de acceso
 - `components/messages/ConversationList.tsx` - lista de chats (pestaña Mensajes y `/mensajes`)
@@ -180,8 +180,20 @@ Orden sugerido por costo/beneficio. Tokens = estimado aproximado.
 - Antes de producción también (no son código de la app): SMTP propio en Supabase (el correo por defecto tiene límite bajo por hora), plan Pro o respaldos manuales (el free pausa el proyecto tras ~7 días sin actividad y no tiene respaldos), reporte de caídas (Sentry), fichas de Play Console y pruebas en teléfono real
 - Ver también: "Plan de avatares" y "Cambios OPCIONALES de mantenimiento" más abajo
 
+### Supabase pendientes cerrados (2026-11-03)
+- Migración A `20261103190025_alert_guards_group_chat` (aplicada): triggers `protect_emergency_alert`, `on_group_member_removed`, `trim_profile_address`; vista `public_profiles` (`security_invoker = false`, sin teléfono/dirección/fecha de nacimiento); RPC `get_alert_contacts(uuid[])`, `get_finder_contacts()`, `clear_conversation(uuid)`; columna `conversation_participants.cleared_at`
+- Migración B `20261105000001_close_profile_access` (aplicada 2026-11-03, verificada por SQL): `user_profiles` solo lo lee el dueño o un moderador; se elimina `cp_delete`; se repararon chats 1:1 y se borraron 6 chats vacíos. Reversión: `drop policy "Owner or moderator can view profile" on public.user_profiles;` + recrear `"Authenticated can view profiles"` con `using (true)`
+- La app lee perfiles AJENOS solo de `public_profiles` (`profileService.getPublicByUserId`, `PublicProfile` en `types/index.ts`); `user_profiles` queda para el propio usuario y moderación. Contactos de alertas/hallazgos solo por RPC. Borrar un chat = `messagesService.deleteConversation` (RPC `clear_conversation`), no borrar filas
+- `types/database.ts` tiene un ajuste A MANO: `public_profiles.Row.user_id` es `string` (la vista lo genera `string | null`). Si se regenera con MCP, reaplicar el ajuste o `bun run typecheck` falla (TS2538)
+- Edad mínima 18 años: `MIN_AGE` en `utils/age.ts` (`isAdult`), obligatoria en `register-extended` y trigger `enforce_min_age` (migración `20261104000001`; solo valida perfiles nuevos o con fecha cambiada). Si cambia: tres sitios (constante, trigger, textos legales)
+- Bucket `alternate`: límite 5 MB, solo imágenes
+- Storage: no se puede borrar con SQL (`storage.protect_delete()`); usar el panel o la API de Storage
+- NO probado: el push FCM de punta a punta con el build SDK 58 (el token sí se registra en `device_tokens`; falta un segundo dispositivo). La bandeja sí funciona
+- Pendiente en panel: SMTP (Resend), "Secure email change", OTP 8 dígitos, URL permitida `https://luckytracker.com.mx/email-confirmed`, plan Pro o respaldos manuales. Sin migración baseline todavía (las migraciones antiguas se aplicaron desde el panel)
+
 ### Edge Functions
-- `send-push-notification` (v8) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS
+- `send-push-notification` (v9) - envía notificaciones FCM v1 con soporte para imagen, canal Android, badge iOS; título de emergencia neutro: `⚠️ {dueño} busca a {mascota}`
+- `delete-account` (v2) - borra filas, chats 1:1 propios, comentarios ajenos en sus publicaciones, `reports.reviewed_by` a null, y archivos de Storage paginados
 ### SDK 58 (actualizado desde SDK 54)
 - `expo@58.0.19`, dependencias alineadas con `expo install --fix`; `expo-doctor` sin problemas
 - `app.json`: eliminados `newArchEnabled`, `edgeToEdgeEnabled` y `navigationBar` (SDK 58 ya no los acepta); agregados plugins `expo-image` y `expo-status-bar`. La barra de navegación de Android ya no se oculta por configuración
