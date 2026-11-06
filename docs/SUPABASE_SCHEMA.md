@@ -1,6 +1,6 @@
-# Supabase Schema — La Peturnidad
+# Supabase Schema — Lucky Tracker
 
-> Generated on 2026-06-20. 19 migrations applied.
+> Base snapshot generated from the hosted project on 2026-06-20 (20 migrations). Later changes (marked **added later**) come from [`PROGRESS.md`](../PROGRESS.md) and the generated types in `types/database.ts`; they have not been re-checked against the live project. To refresh this file, regenerate it from the project and update `types/database.ts` at the same time.
 
 ---
 
@@ -23,6 +23,17 @@ AS $$
 $$;
 ```
 
+### RPC functions (added later)
+
+All are `SECURITY DEFINER`, so they can do what the caller's RLS would block. Signatures from `types/database.ts`:
+
+| Function | Args | Returns | Purpose |
+|---|---|---|---|
+| `is_participant` | `conv_id uuid, uid uuid` | `boolean` | Used by the `messages` and `conversation_participants` policies; replaced correlated subqueries that caused 500 errors |
+| `create_conversation` | `user1_id uuid, user2_id uuid` | `uuid` | Creates a 1:1 conversation and adds both participants |
+| `create_group_conversation` | `group_id_param uuid, member_ids uuid[]` | `uuid` | Creates a group chat (`conversations.group_id`) with all members |
+| `delete_group` | `group_id_param uuid` | — | Deletes a group, its members, its chat, the chat's messages and participants |
+
 ---
 
 ## Tables
@@ -42,6 +53,7 @@ CREATE TABLE user_profiles (
   postal_code   varchar,
   profile_picture_url text,
   push_token    text,
+  fcm_token     text,          -- added later: FCM device token used for push
   role          text NOT NULL DEFAULT 'user'
                 CHECK (role IN ('user', 'moderator', 'admin')),
   created_at    timestamptz DEFAULT now(),
@@ -77,6 +89,7 @@ CREATE TABLE pets (
 | Policy | Command | Rule |
 |---|---|---|
 | Users can view their own pets | SELECT | `auth.uid() = user_id` |
+| Authenticated users can view all pets (added later) | SELECT | authenticated users — needed by the pet search in `/buscar` |
 | Users can insert their own pets | INSERT | `auth.uid() = user_id` (with check) |
 | Users can update their own pets | UPDATE | `auth.uid() = user_id` (using) |
 | Users can delete their own pets | DELETE | `auth.uid() = user_id` (using) |
@@ -241,6 +254,7 @@ CREATE TABLE follows (
 ```sql
 CREATE TABLE conversations (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  group_id      uuid REFERENCES groups(id),  -- added later: set for group chats
   created_at    timestamptz DEFAULT now(),
   updated_at    timestamptz DEFAULT now()
 );
@@ -248,8 +262,11 @@ CREATE TABLE conversations (
 
 | Policy | Command | Rule |
 |---|---|---|
-| Participants can view conversations | SELECT | `auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = id)` |
+| Participants can view conversations | SELECT | `auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = conversations.id)` — originally compared the wrong `id` and was fixed later |
 | Users can create conversations | INSERT | `true` (with check) |
+| Participants can update conversations (added later) | UPDATE | participant only — lets `sendMessage` bump `updated_at` |
+
+Conversations are created through the `create_conversation` / `create_group_conversation` RPCs, because the INSERT policy on `conversation_participants` doesn't allow adding the other user.
 
 ---
 
@@ -266,8 +283,9 @@ CREATE TABLE conversation_participants (
 
 | Policy | Command | Rule |
 |---|---|---|
-| Participants can view participants | SELECT | `auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = conversation_id)` |
+| Participants can view participants | SELECT | Originally `... WHERE conversation_id = conversation_id` (always true); later replaced with `is_participant(conversation_id, auth.uid())` |
 | Users can add themselves to conversations | INSERT | `auth.uid() = user_id` (with check) |
+| Users can leave conversations (added later) | DELETE | own row — used by "delete chat" |
 
 ---
 
@@ -288,6 +306,9 @@ CREATE TABLE messages (
 |---|---|---|
 | Participants can view messages | SELECT | `auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = messages.conversation_id)` |
 | Participants can insert messages | INSERT | `auth.uid() = sender_id AND auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = messages.conversation_id)` (with check) |
+| Participants can update messages (added later) | UPDATE | participant only — lets `markAsRead` set `read_at` |
+
+> The subquery rules above caused 500 errors and were later rewritten to use `is_participant()`.
 
 ---
 
@@ -308,6 +329,7 @@ CREATE TABLE groups (
 | Anyone can view groups | SELECT | `true` |
 | Authenticated users can create groups | INSERT | `auth.role() = 'authenticated'` (with check) |
 | Group admins can update their groups | UPDATE | `auth.uid() = created_by OR auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = id AND role = 'admin')` (using) |
+| Creator can delete group (added later) | DELETE | creator only — the app deletes through `delete_group()` |
 
 ---
 
@@ -395,6 +417,24 @@ CREATE TABLE blocks (
 
 ---
 
+### `notifications` (added later)
+
+Push notification history. Columns from `types/database.ts`; policies weren't recorded.
+
+```sql
+CREATE TABLE notifications (
+  id            uuid PRIMARY KEY,
+  user_id       uuid NOT NULL,
+  title         text NOT NULL,
+  body          text NOT NULL,
+  data          jsonb,
+  read          boolean NOT NULL,
+  created_at    timestamptz
+);
+```
+
+---
+
 ## Storage
 
 ### Buckets
@@ -405,6 +445,7 @@ CREATE TABLE blocks (
 | `profile-pictures` | ✅ |
 | `public` | ✅ |
 | `alternate` | ✅ |
+| `posts` (added later) | ✅ — Feed post images |
 
 ### Policies on `storage.objects`
 
@@ -448,7 +489,9 @@ auth.users
   │   └── conversations      (via conversation_id)
   │       └── messages       (via conversation_id)
   ├── groups (created_by)    (1:N)
+  │   └── conversations      (0..1 group chat, via group_id)
   ├── group_members          (N:M, via user_id)
+  ├── notifications          (1:N, via user_id)
   ├── success_stories        (1:N, via user_id)
   ├── reports (reporter_id)  (1:N)
   ├── reports (target_user_id) (1:N)
@@ -482,3 +525,5 @@ auth.users
 | 18 | 20260620193541 | create_reports_and_blocks |
 | 19 | 20260620195713 | fix_rls_recursion_moderators |
 | 20 | 20260621000001 | fix_profiles_select_for_community |
+
+Migrations applied after 2026-06-20 (messaging RLS fixes, RPC functions, `conversations.group_id`, `notifications`, `fcm_token`, the `posts` bucket, the pet search policy) were made in the hosted project and aren't listed here. The repo has no `supabase/migrations/` folder — see "Versioned migrations" in `PROGRESS.md`.

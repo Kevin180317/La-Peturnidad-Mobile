@@ -12,6 +12,7 @@ Newest first. Status: ✅ pass · ❌ fail · ⚠️ flaky · ⏳ not run.
 
 | Date | Where | Commit | Flows run | Passed | Failed | Notes |
 |---|---|---|---|---|---|---|
+| 2026-10-21 | Local (Jest, not Maestro) | `e2bce33` | 65 unit tests | 64 first run; 65 on rerun | 0 | `bun install --frozen-lockfile`, `bun run lint` and `bun run typecheck` clean. `ConfirmModal` › "renders title, message and default labels" timed out (5 s) once on a cold full run (suite took 21 s) and passed in isolation (555 ms) — cold-start flake, watch for repeats. Maestro not run yet. |
 | 2026-10-20 | — | `8c47c90` | 0 | — | — | Baseline written. Nothing re-run: this machine has no Maestro, adb or gh. Status below is the last known result from commit history. |
 | 2026-10-17 | Local (emulator) | `7ed6857` | 5 | 5* | 0 | *Inferred from the commit: flow 05 expectation fixed (logout → onboarding) and profile bootstrap subflow added. No report saved. |
 

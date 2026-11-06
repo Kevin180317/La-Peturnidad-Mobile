@@ -1,60 +1,56 @@
-# Lucky Tracker — App Documentation
+# Lucky Tracker — App Overview
 
-> General flow, functionality, and process documentation for the app. Built from `docs/SCREENS.md`, `docs/SUPABASE_SCHEMA.md`, `docs/SUPABASE_PENDING_CODE.md`, and screenshot review in `docs/images/`. Scope: AUTH + Dashboard areas only (see [Scope note](#scope-note)).
+> Entry point for the product docs: general flow, functionality, and where to find each area. Built from [`SCREENS.md`](SCREENS.md), [`SUPABASE_SCHEMA.md`](SUPABASE_SCHEMA.md) and the screenshots in `images/`.
 
 ## What the app does
 
-Community app for finding lost pets. Users register pets, publish emergency alerts when one goes missing, and the community (neighbors, groups, followers) helps spot and reunite them — a lightweight social network layered on a lost & found core.
+Community app for finding lost pets. Users register pets, publish emergency alerts when one goes missing, and the community (neighbors, groups, followers) helps spot and reunite them — a lightweight social network on top of a lost & found core.
 
 ## Tech stack
 
-- **Client**: Expo (React Native) + Expo Router (file-based routing, `app/`)
+- **Client**: Expo SDK 54 (React Native) + Expo Router (file-based routing, `app/`)
 - **Backend**: Supabase — Auth, Postgres (RLS), Storage, Edge Functions
-- **Navigation**: React Navigation (bottom tabs, native stack, drawer)
-- Legacy Express/MySQL backend exists in the codebase but is unused.
+- **Navigation**: Expo Router stack; the dashboard uses its own 5-tab bar (`components/dashboard/TabBar.tsx`)
+- A legacy Express/MySQL backend is kept in `legacy/` but is unused.
 
 ## Global session flow
 
-- **Automatic entry**: on open, checks active session — no session → welcome/login; unconfirmed email → Confirm Email; confirmed + profile → Dashboard; confirmed, no profile → Complete Profile.
-- **Screen protection**: all non-auth screens re-check session on open; no user → redirect to start.
-- **Notices**: temporary success/error toast per action. Destructive actions (delete, log out) require confirmation first.
-- **Data freshness**: screens refresh on focus or pull-to-refresh; no live/websocket channel. The only "live" surface is push notifications — tapping one opens the relevant screen (e.g. an emergency alert).
+- **Automatic entry**: on open, the app checks for an active session — no session → welcome/login; unconfirmed email → Confirm Email; confirmed with profile → Dashboard; confirmed without profile → Complete Profile.
+- **Screen protection**: every non-auth screen re-checks the session on open; with no user it redirects to the start.
+- **Feedback**: each action shows a temporary success/error toast. Destructive actions (delete, log out) ask for confirmation first.
+- **Data freshness**: screens refresh on focus or pull-to-refresh; there's no live/websocket channel. The only "live" surface is push notifications — tapping one opens the relevant screen (e.g. an emergency alert).
 
 ## Areas
 
 | Area doc | Covers | Screens | Images reviewed |
 |---|---|---|---|
-| [`AUTH.md`](AUTH.md) | Onboarding, login, registration, password recovery, email confirmation | §1-8 of `SCREENS.md` | 12/12 |
-| [`DASHBOARD.md`](DASHBOARD.md) | Main app: 5-tab dashboard (Feed/Inicio/Comunidad/Emergencia/Perfil), messages, groups, notifications, edit profile | §9-29 of `SCREENS.md` (partial — see scope note) | 31/31 |
+| [`AUTH.md`](AUTH.md) | Onboarding, login, registration, password recovery, email confirmation | §1–8 of `SCREENS.md` | 12/12 |
+| [`DASHBOARD.md`](DASHBOARD.md) | Main app: 5-tab dashboard (Feed/Inicio/Comunidad/Emergencia/Perfil), messages, groups, stories, notifications, edit profile | §9–29 of `SCREENS.md` (partial — see scope note) | 29/29 |
 
 ## Reference docs
 
 | Doc | Purpose |
 |---|---|
 | [`SCREENS.md`](SCREENS.md) | Full screen-by-screen catalog: route, purpose, every user event and what it triggers |
-| [`SUPABASE_SCHEMA.md`](SUPABASE_SCHEMA.md) | Current DB schema: tables, RLS policies, storage buckets, migration history |
-| [`SUPABASE_PENDING_CODE.md`](SUPABASE_PENDING_CODE.md) | Gaps between code and Supabase, feature backlog, architecture issues, implementation checklist — **note: largely superseded, see [`MILESTONES.md`](MILESTONES.md#known-discrepancy-to-reconcile)** |
-| [`MILESTONES.md`](MILESTONES.md) | History of what's shipped by phase (from `PROGRES.md` + this doc pass) and the actual open next steps |
-| `images/AUTH/`, `images/Dashboard/` | Screenshots backing the area docs above |
-| `old/` | Original Spanish versions of the 3 reference docs |
-| [`FLOW_DIAGRAM.html`](FLOW_DIAGRAM.html) | Interactive navigation graph (AUTH + Dashboard), click a node for its route/purpose/events |
-| [`FLOW_DIAGRAM_SCREENS.html`](FLOW_DIAGRAM_SCREENS.html) | Same graph, but click a node to see its actual screenshot(s) — for debugging flow vs. real UI |
+| [`SUPABASE_SCHEMA.md`](SUPABASE_SCHEMA.md) | DB schema: tables, RPC functions, RLS policies, storage buckets, migration history |
+| [`MILESTONES.md`](MILESTONES.md) | Condensed history by phase and the original design proposal |
+| [`BRANDING.md`](BRANDING.md) | Brand colors and their roles |
+| [`FLOW_DIAGRAM.html`](FLOW_DIAGRAM.html) | Interactive navigation graph (AUTH + Dashboard); click a node for its route/purpose/events |
+| [`FLOW_DIAGRAM_SCREENS.html`](FLOW_DIAGRAM_SCREENS.html) | Same graph; click a node to see its screenshot(s) |
+| `images/AUTH/`, `images/Dashboard/` | Screenshots backing the area docs |
 
 ## Scope note
 
-This documentation pass covers **AUTH** and **Dashboard** areas only — the two with screenshot coverage (`docs/images/`). Screens 16-28 in `SCREENS.md` (Buscar, Comunidad full-page, Historias, Grupos detail, Mensajes/Chat, Seguidores, Perfil público, Panel de Moderación, standalone Notificaciones/Editar Perfil) have no image folder yet and their flow isn't fully confirmed, so they're intentionally left text-only in `SCREENS.md` for now rather than given area docs.
+The area docs cover **AUTH** and **Dashboard** only — the two areas with screenshots. These screens have no screenshots yet and are documented as text only in `SCREENS.md`: Search detail flows, Community (full page), Group Detail, Chat, Followers, public Profile, Moderation Panel, FAQ and How to use.
 
-## Known issues / flags found during review
+Screenshots were taken before Phase 10/11, so colors differ from the current app (e.g. the active tab was red/coral; it's now teal, except Emergency).
 
-- **Branding leftover**: push notifications still show the old app name **"La-Peturnidad"** instead of "Lucky Tracker" — see [`DASHBOARD.md`](DASHBOARD.md#observations--flags).
-- **Undocumented transient state**: a brief "processing registration" loading state appears between Register submit and Confirm Email — see [`AUTH.md`](AUTH.md#observations--flags).
-- **Undocumented modal**: Delete Pet confirmation ("Eliminar mascota... esta acción no se puede deshacer") wasn't called out as its own state until img 31 surfaced it — see [`DASHBOARD.md`](DASHBOARD.md#observations--flags).
-- Supabase backend gaps (missing tables, missing Edge Function, key inconsistency) — see [`SUPABASE_PENDING_CODE.md`](SUPABASE_PENDING_CODE.md).
+## Known issues
 
-## Resolved gaps
+- **Push sender label**: an older build showed the notification sender as **"La-Peturnidad"** (see [`DASHBOARD.md`](DASHBOARD.md#observations)). `app.json` now uses "Lucky Tracker"; confirm on a fresh build.
+- **Post fields not saved**: the post form collects location, tags, URLs and multiple images, but only the text and first image are stored — see [`BACKLOG.md`](../BACKLOG.md).
+- Open technical debt: [`PROGRESS.md`](../PROGRESS.md#-open-work--technical-debt).
 
-- Pet Detail window previously had no screenshot; closed by img 29 (`docs/images/Dashboard/29.jpeg`).
+## Future work
 
-## Parked / future work
-
-- Expand coverage to screens 16-28 (no image folder yet) once screenshots/flow are confirmed for Buscar, full Comunidad, Historias, Grupos detail, Mensajes/Chat, Seguidores, public Perfil, Panel de Moderación.
+- Add screenshots for the text-only screens listed in the scope note, then extend the area docs and flow diagrams to cover them.

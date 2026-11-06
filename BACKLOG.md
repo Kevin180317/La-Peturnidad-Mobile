@@ -1,65 +1,61 @@
-# 📋 Backlog - Lucky Tracker
+# Backlog — Lucky Tracker
 
-## Próxima Semana (Image Upload Integration)
+> Short-term task list. Created 2026-10-03, last reviewed 2026-10-21. Longer-term debt lives in [`PROGRESS.md`](PROGRESS.md#-open-work--technical-debt); E2E work in [`docs/E2E_SESSION_STATUS.md`](docs/E2E_SESSION_STATUS.md).
 
-### ✅ Completado (Esta Semana)
-- [x] Auditoría completa de UI/UX (24 pantallas + componentes)
-- [x] Corrección de colores de navegación (links de rojo a teal)
-- [x] Limpieza de clases de fuente inválidas (font-[Inter_*])
-- [x] Redesign de ProfileTab (estilo menu consistente)
-- [x] Implementación de subida de imágenes para posts (Feed)
+## ✅ Done (week of 2026-10-03)
 
-### ⏳ Backlog - Integración de Subida de Imágenes
+- [x] Full UI/UX audit (24 screens + components)
+- [x] Navigation link colors fixed (red → teal)
+- [x] Invalid font classes removed (`font-[Inter_*]`)
+- [x] ProfileTab redesign (consistent menu style)
+- [x] Image upload for Feed posts (`posts` bucket)
 
-#### 1. **Emergencia - Mascotas Perdidas** (PRIORITY: HIGH)
-- **Archivo:** `app/dashboard.tsx` → `handleReportMissing` / EmergencyTab
-- **Tarea:** Implementar subida de foto de mascota perdida a bucket `emergency-alerts`
-- **Contexto:** Cuando usuario reporta mascota perdida, debe subir foto a Storage
-- **Código necesario:** Similar a `handleCreatePost` pero para emergencies
-- **Estimado:** 30 min
+## ⏳ Image upload integration
 
-#### 2. **Emergencia - Mascotas Encontradas** (PRIORITY: HIGH)
-- **Archivo:** `app/dashboard.tsx` → `handleReportFound` / EmergencyTab
-- **Tarea:** Implementar subida de foto de mascota encontrada a bucket `found-pets`
-- **Contexto:** Cuando usuario marca mascota encontrada, debe subir foto
-- **Estimado:** 30 min
+### 1. Emergency — lost pets (priority: HIGH)
+- **Where:** `app/dashboard.tsx` → `handleReportMissing` / `EmergencyTab`
+- **Task:** upload the lost pet's photo to the `emergency-alerts` bucket.
+- **Context:** when a user reports a lost pet, the photo should go to Storage. Same pattern as `handleCreatePost`.
+- **Estimate:** 30 min
 
-#### 3. **Historias de Éxito** (PRIORITY: MEDIUM)
-- **Archivo:** `app/historias.tsx` → `handleCreate`
-- **Tarea:** Implementar subida de imagen de historia a bucket `success-stories`
-- **Contexto:** Las reuniones exitosas pueden tener foto adjunta
-- **Estimado:** 30 min
+### 2. Emergency — found pets (priority: HIGH)
+- **Where:** `app/dashboard.tsx` → `handleReportFound` / `EmergencyTab`
+- **Task:** upload the found pet's photo to the `found-pets` bucket.
+- **Estimate:** 30 min
 
-#### 4. **Perfil - Foto de Mascota** (PRIORITY: MEDIUM)
-- **Archivo:** `components/dashboard/PetForm.tsx` / PetDetailModal
-- **Tarea:** Verificar que subida de foto de mascota funcione correctamente
-- **Contexto:** Cuando registras/editas mascota, foto debe ir a Storage
-- **Estimado:** 20 min
+### 3. Success stories (priority: MEDIUM)
+- **Where:** `app/historias.tsx` → `handleCreate`
+- **Task:** upload the story image to the `success-stories` bucket.
+- **Estimate:** 30 min
 
-#### 5. **Validación y Testing** (PRIORITY: HIGH)
-- [ ] Probar creación de posts con múltiples imágenes
-- [ ] Probar creación de alertas de emergencia con foto
-- [ ] Verificar que URLs persistan después de reload
-- [ ] Probar visualización de imágenes en feed
-- [ ] Validar RLS policies en Storage buckets
-- **Estimado:** 1 hora
+### 4. Pet photo (priority: MEDIUM)
+- **Where:** `components/dashboard/PetForm.tsx` / `PetDetailModal`
+- **Task:** confirm the pet photo upload works when creating and editing a pet (the preview bug was fixed in `12ac61c`).
+- **Estimate:** 20 min
 
-### 📊 Resumen
-- **Total tareas:** 5 + Testing
-- **Tiempo estimado:** 2-3 horas
-- **Buckets necesarios:** `posts`, `emergency-alerts`, `found-pets`, `success-stories`, `pet-images`
-- **Riesgo:** Bajo (patrón idéntico a posts)
+### 5. Post fields that aren't saved (priority: MEDIUM)
+- **Where:** `components/PostForm.tsx`, `services/posts.service.ts`
+- **Task:** `PostForm` collects multiple images, location, tags and URLs, but `createPost` only stores `content` and the first image. Add the columns to `posts` and persist them, or remove the fields from the form.
+- **Estimate:** 1 hour
 
----
+### 6. Validation and testing (priority: HIGH)
+- [ ] Create posts with multiple images
+- [ ] Create emergency alerts with a photo
+- [ ] Check that URLs persist after a reload
+- [ ] Check images render in the feed
+- [ ] Validate the RLS policies on the Storage buckets
+- **Estimate:** 1 hour
 
-## Notas Técnicas
-- Usar `dashboardService.uploadImage(uri, bucketName)` para todas las subidas
-- Siempre guardar URLs públicas en BD, NO URIs locales
-- Validar que el bucket exista antes de subir (fallback a `public` si no existe)
-- Mostrar toast de error si alguna subida falla
+## Summary
 
----
+- **Tasks:** 5 + testing
+- **Estimate:** 3–4 hours
+- **Buckets:** `posts`, `pet-images` and `profile-pictures` are in use; `emergency-alerts`, `found-pets` and `success-stories` aren't in the documented schema ([`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md)) and probably need to be created
+- **Risk:** low (same pattern as posts)
 
-**Asignado a:** Developer  
-**Target:** Próxima semana  
-**Creado:** 2026-10-03
+## Technical notes
+
+- Use `dashboardService.uploadImage(uri, bucketName)` for every upload.
+- Always store public URLs in the database, never local URIs.
+- On a 404, `uploadImage` only falls back for known buckets (`posts`/`pet-images` → `public`, `profile-pictures` → `alternate`). New buckets need their own fallback entry or must exist before release.
+- Show an error toast if any upload fails.

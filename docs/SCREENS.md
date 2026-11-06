@@ -31,6 +31,8 @@ Documentation of **all app screens**: what each one does and **what event each u
 | Moderation Panel | `/panel-moderacion` | Report management (admin/moderator only) |
 | Notifications | `/notificaciones` | Notification preferences |
 | Edit Profile | `/editar-perfil` | Edit personal data |
+| How to Use | `/como-usar` | Step-by-step guide to the app |
+| FAQ | `/faq` | Frequently asked questions |
 | Not Found | — | 404 screen |
 
 ---
@@ -86,7 +88,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 **User events**:
 | Event | What it triggers |
 |---|---|
-| "Register" button | Validates fields, password match, and a minimum of 6 characters → creates the account. Success: shows "Confirm your email" and goes to Confirm Email |
+| "Register" button | Validates fields, password match, and a minimum of 6 characters → creates the account. While it runs, a "Procesando registro..." spinner shows. Success: shows "Confirm your email" and goes to Confirm Email |
 
 ---
 
@@ -203,7 +205,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 | Tap a pet | Opens its detail card in a window |
 | Save the form | Registers or updates the pet depending on the mode |
 | "Edit" on the detail card | Opens the form with the pet's data |
-| "Delete" on the detail card | Asks for confirmation to delete |
+| "Delete" on the detail card | Confirmation modal ("This action can't be undone") → deletes the pet |
 
 ---
 
@@ -232,9 +234,9 @@ Documentation of **all app screens**: what each one does and **what event each u
 **User events**:
 | Event | What it triggers |
 |---|---|
-| "Post" (header) | Opens the form |
+| "Post" (header) | Opens the post form (modal): text, images from the gallery or camera, location, `@user` tags, and URLs |
 | Feed / My posts sub-sections | Toggles the shown list |
-| "Post" on the form | Publishes and clears the text |
+| "Post" on the form | Uploads the image to the `posts` bucket, then publishes the post. Only the text and the first image are saved today (see `BACKLOG.md`) |
 | Tap a post | Opens the comments section |
 | Tap the author | Opens their Profile |
 | Trash icon (own post) | Deletes the post |
@@ -256,6 +258,22 @@ Documentation of **all app screens**: what each one does and **what event each u
 | "Comment" / "Hide" | Shows or hides comments |
 | Choose category | Selects the notice's category |
 | "Publish" | Validates title and content → publishes and closes the window |
+
+---
+
+### 14b. Profile Section
+
+**What it does**: own profile — photo, personal data, address, stats (pets, followers, following), action menu, account info, and log out.
+
+**User events**:
+| Event | What it triggers |
+|---|---|
+| Camera icon on the avatar | Picks a photo and uploads it to `profile-pictures` |
+| Followers / Following | Opens Followers on that list |
+| Menu: Edit profile, Notification settings, Messages (with unread badge), Groups, Successful reunions, How the app works, FAQ | Opens the matching screen |
+| Menu: Go to the community | Switches to the Community section |
+| Menu: Moderation panel (moderators/admins only) | Opens the Moderation Panel |
+| "Log out" | Confirmation modal → logs out and returns to start |
 
 ---
 
@@ -455,7 +473,24 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 30. Not Found
+### 30. How to Use — Route `/como-usar`
+
+**What it shows**: static guide in sections (the Dashboard, registering pets, reporting a lost pet, etc.). Opened from the Profile menu. No interactions besides scrolling.
+
+---
+
+### 31. FAQ — Route `/faq`
+
+**What it shows**: accordion of frequently asked questions (what Lucky Tracker is, alerts, reporting lost and found pets, fees). Opened from the Profile menu.
+
+**User events**:
+| Event | What it triggers |
+|---|---|
+| Tap a question | Expands or collapses its answer (animated) |
+
+---
+
+### 32. Not Found
 
 **What it shows**: "this screen doesn't exist" and a link to the start.
 

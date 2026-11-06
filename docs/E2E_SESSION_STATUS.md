@@ -18,8 +18,8 @@
 ## Next steps (in order)
 
 1. **Verify the baseline**
-   - [ ] Install tooling, or run on a machine that has it: `bun`, Maestro CLI, Android SDK (`adb`), `gh`.
-   - [ ] `bun install --frozen-lockfile`, then `bun run test` (Jest), and log the result.
+   - [x] Tooling installed 2026-10-21: `bun` 1.4.3, Maestro 2.11.0, `adb` 36.0.0 (Android Studio SDK, `ANDROID_HOME` set). `gh` still missing. Maestro needs Java 17+: the `PATH` java is 1.8, so use Android Studio's JBR (`C:\Program Files\Android\Android Studio\jbr`) via `JAVA_HOME`.
+   - [x] `bun install --frozen-lockfile` + `bun run test`: 64/65, then 65/65 (one cold-start timeout in `ConfirmModal`). Logged in `E2E_TEST_RESULTS.md`.
    - [ ] `gh run list --workflow e2e.yml` and log the nightly result in `E2E_TEST_RESULTS.md` → Run log.
    - [ ] Or run locally: `maestro test -e TEST_EMAIL=... -e TEST_PASSWORD=... --format junit --output maestro-report.xml .maestro/flows/`
 2. **Groundwork before new flows**

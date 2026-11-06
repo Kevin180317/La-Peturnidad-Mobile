@@ -1,6 +1,6 @@
 # DASHBOARD — Main App Area
 
-> Area doc. Source screens: `docs/images/Dashboard/1.jpeg`–`31.jpeg` (29-31 added later to fill the Pet Detail gap). Cross-checked against `docs/SCREENS.md` §9-29. 29/31 images matched an existing documented screen/state; 2 images (29, 31) surfaced 1 previously-undocumented modal (Delete Pet confirm) — see [Observations](#observations--flags).
+> Area doc. Source screens: `docs/images/Dashboard/` — 29 images, numbered 1–26 and 29–31 (there are no images 27 and 28). Cross-checked against `docs/SCREENS.md` §9–29. The screenshots predate the Phase 10/11 color changes.
 
 ## Screens covered
 
@@ -24,7 +24,7 @@
 
 ## Bottom bar
 
-5 fixed tabs: **Feed · Inicio · Comunidad · Emergencia · Perfil**. Active tab highlighted (red icon/underline in captures).
+5 fixed tabs: **Feed · Inicio · Comunidad · Emergencia · Perfil**. The active tab is highlighted in teal (the captures show the older red/coral highlight); the Emergency icon is always coral.
 
 ## Screen details
 
@@ -40,10 +40,10 @@ Modal/screen: Tipo (Perro/Gato toggle), Nombre, Color, Tamaño (dropdown), Carac
 - **Edit mode** (img 30): pre-filled w/ existing pet data, title "Editar mascota", photo field shows a "✓ Foto lista para usar" confirmation state instead of the picker, button reads "Actualizar" instead of "Registrar".
 
 ### Ficha de Mascota — Pet Detail window (img 29)
-Modal opened by tapping a pet from Sección Inicio. Shows photo, name (header), Tipo, Color, Tamaño, Características, Registrada (date). Three actions: **Editar** (→ Pet Form in edit mode), **Eliminar** (→ Confirm: Eliminar mascota), **Cerrar**. Previously had no screenshot — gap now closed.
+Modal opened by tapping a pet from Sección Inicio. Shows photo, name (header), Tipo, Color, Tamaño, Características, Registrada (date). Three actions: **Editar** (→ Pet Form in edit mode), **Eliminar** (→ Confirm: Eliminar mascota), **Cerrar**.
 
 ### Confirm: Eliminar mascota (img 31)
-Modal triggered from Pet Detail → Eliminar. Copy: *"¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer."* Cancelar / Eliminar buttons. **Not previously documented as a distinct state** in `SCREENS.md` (§11 only says "Pide confirmación para eliminar" without detail) — now captured.
+Modal triggered from Pet Detail → Eliminar. Copy: *"¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer."* Cancelar / Eliminar buttons.
 
 ### Sección Comunidad (img 6)
 Tabs "Comunidad" / "Mis avisos", "+ Nuevo" button top right. Post card: author, date, category badge (e.g. "Aviso"), title, body, comment count.
@@ -60,12 +60,12 @@ Tabs "Comunidad" / "Mis avisos", "+ Nuevo" button top right. Post card: author, 
 
 ### Perfil — own profile (imgs 8, 9, 10, 26)
 - Img 8: "Mi Perfil" header, avatar (editable via camera icon overlay), Información personal card (Nombre, Email, Teléfono, Cumpleaños), Dirección card (Calle/Colonia, Ciudad, C.P.).
-- Img 9: Estadísticas (Mascotas/Seguidores/Siguiendo counts) + Acciones list (Editar perfil, Configurar notificaciones, Ir a la comunidad, Mensajes, Grupos, Reuniones exitosas).
+- Img 9: Estadísticas (Mascotas/Seguidores/Siguiendo counts) + Acciones list (Editar perfil, Configurar notificaciones, Ir a la comunidad, Mensajes, Grupos, Reuniones exitosas). The current menu also has **Cómo funciona la app** (`/como-usar`) and **Preguntas frecuentes** (FAQ), plus **Panel de moderación** for moderators/admins — none of these are in the captures.
 - Img 10: scrolled further — Cuenta card (Miembro desde, Última actualización) + "Cerrar Sesión" button.
 - Img 26: "Cerrar sesión" confirm modal — Cancelar / Cerrar sesión.
 
 ### Sección Feed (imgs 11, 12)
-Tabs "Feed" / "Mis posts", "Publicar" button opens inline composer (text field + Publicar/Cancelar). Post card: author avatar/name, date, text, comment count + "Ver comentarios" link. Empty state on "Mis posts": "No has publicado nada aún."
+Tabs "Feed" / "Mis posts". The captures show the older inline composer (text field + Publicar/Cancelar); "Publicar" now opens the `PostForm` modal (text, images, location, tags, URLs). Post card: author avatar/name, date, text, comment count + "Ver comentarios" link. Empty state on "Mis posts": "No has publicado nada aún."
 
 ### Mensajes (img 19)
 Empty state: "No tienes conversaciones aún. Visita un perfil público y envía un mensaje para iniciar una conversación."
@@ -85,9 +85,7 @@ Pre-filled form: Nombre, Apellido, Teléfono, Dirección/Colonia, Ciudad, Códig
 ### OS push notification (img 16)
 External evidence (Android notification shade) confirming the emergency-alert push actually fires: *"Kevin Ortega reportó a Naranja perdida — Vista por última vez en El Pípila."*
 
-## Observations / flags
+## Observations
 
-- **Branding leftover**: the push notification (img 16) shows the sender label as **"La-Peturnidad"**, the old app name — app UI elsewhere consistently shows "Lucky Tracker". Likely a leftover in the push notification payload / Expo project name config. Worth a fix ticket.
-- Img 21 group named literally `"2"` appears to be test/seed data, not a UI issue.
-- **Resolved**: Pet Detail window gap (previously "no screenshot") closed by img 29.
-- **New finding**: the Delete Pet confirm modal (img 31) wasn't previously called out as its own state — minor doc gap, not a bug.
+- **Push sender label**: the push notification (img 16) shows the sender as **"La-Peturnidad"**, the old app name. `app.json` now sets the name to "Lucky Tracker", so this was likely an older build — confirm on a fresh build.
+- Img 21: the group named `"2"` is test data, not a UI issue.

@@ -1,6 +1,6 @@
 # AUTH — Onboarding, Login & Account Flows
 
-> Area doc. Source screens: `docs/images/AUTH/1.jpeg`–`12.jpeg`. Cross-checked against `docs/SCREENS.md` §1-8. All 12 images matched to a documented screen or state — no undocumented screens found.
+> Area doc. Source screens: `docs/images/AUTH/1.jpeg`–`12.jpeg`. Cross-checked against `docs/SCREENS.md` §1–8. All 12 images match a documented screen or state.
 
 ## Screens covered
 
@@ -37,7 +37,7 @@ Onboarding (1→2→3, "Saltar"/"Comenzar" at any point)
 Email + password fields, "Iniciar sesión" primary button, "¿Olvidaste tu contraseña?" link, "Regístrate" link at bottom.
 
 ### Register (imgs 5-6)
-Fields: email, password, confirm password. Img 6 shows the post-submit transient state — a "Registro exitoso" toast overlaying a "Procesando registro..." spinner — before redirecting to Confirm Email. **Not currently listed as a distinct row in SCREENS.md §3; worth a one-line addition noting this transient/processing state.**
+Fields: email, password, confirm password. Img 6 shows the post-submit transient state — a "Registro exitoso" toast overlaying a "Procesando registro..." spinner — before redirecting to Confirm Email.
 
 ### Confirm Email (img 7, evidence img 8)
 Shows the account email, "Reenviar email" and "Volver al inicio" actions. Img 8 confirms the actual Supabase Auth email template ("Confirm your signup" / "Confirm your mail" link) — useful reference if the email template itself ever needs debugging or restyling.
@@ -54,7 +54,6 @@ Single email field, "Enviar código" button, "Inicia sesión" link back.
 ### New/Reset Password (img 12)
 "Nueva contraseña" + "Confirmar contraseña" fields, "Actualizar contraseña" button.
 
-## Observations / flags
+## Observations
 
-- **Transient loading state** (img 6) not documented as its own row — low priority doc gap, not a bug.
-- No visual mismatches or missing states found otherwise; AUTH area matches `SCREENS.md` fully.
+- No visual mismatches or missing states; the AUTH area matches `SCREENS.md`.
