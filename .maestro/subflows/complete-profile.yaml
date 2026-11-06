@@ -5,15 +5,18 @@ appId: com.idarko.lapeturnidad
 - inputText: "Test"
 - tapOn: "Tu apellido"
 - inputText: "User"
-- tapOn: "Número de teléfono"
+- tapOn: "10 dígitos"
 - inputText: "6641234567"
+- hideKeyboard
+- tapOn: "Fecha de nacimiento"
+- inputText: "01011990"
 - hideKeyboard
 - scrollUntilVisible:
     element: "Código postal"
 - tapOn: "Código postal"
 - inputText: "22220"
 - hideKeyboard
-- tapOn: "Selecciona una colonia *"
+- tapOn: "Selecciona una colonia"
 - tapOn: "Hacienda el Colorado"
 - scrollUntilVisible:
     element: "Completar perfil"

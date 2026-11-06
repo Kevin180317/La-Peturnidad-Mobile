@@ -1,6 +1,6 @@
 # Backlog - Lucky Tracker
 
-> Actualizado 2026-11-03. Estado detallado de lo hecho: `PROGRES.md` (Fase 11) y `AGENTS.md`.
+> Actualizado 2026-11-03. Estado detallado de lo hecho: `PROGRESS.md` (Fase 11) y `AGENTS.md`.
 
 ## Siguiente (esta semana)
 
@@ -28,7 +28,7 @@
 - [ ] Color de avatar determinista por `user_id` (hoy siempre teal)
 - [ ] Si alguien te bloqueó, su contenido sigue visible para ti; pets y listas de grupos no se filtran por bloqueo
 - [ ] Guardar la fecha de aceptación de términos en el perfil
-- [ ] Soporte offline, i18n, analítica, servir `colonias.json` desde API (ver "Baja prioridad" en `PROGRES.md`)
+- [ ] Soporte offline, i18n, analítica, servir `colonias.json` desde API (ver "Baja prioridad" en `PROGRESS.md`)
 - [ ] Más países fijos en el selector de teléfono (hoy México, EE. UU./Canadá y otro)
 
 ## Decisiones tomadas
