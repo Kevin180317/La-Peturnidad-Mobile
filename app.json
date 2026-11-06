@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "lapeturnidad",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.idarko.lapeturnidad",
       "supportsTablet": true
@@ -15,12 +14,16 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#faf5e0"
       },
-      "edgeToEdgeEnabled": true,
-      "navigationBar": "immersive",
       "package": "com.idarko.lapeturnidad",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -36,11 +39,21 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#faf5e0"
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-image",
+      "expo-status-bar",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Lucky Tracker necesita acceso a tus fotos para subir imágenes de tus mascotas y publicaciones.",
+          "cameraPermission": "Lucky Tracker necesita la cámara para que tomes fotos para tus publicaciones.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

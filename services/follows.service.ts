@@ -45,6 +45,33 @@ class FollowsService {
     }
   }
 
+  /** Conteos sin traer filas: head + count exact. Consultas en paralelo. */
+  async getCounts(
+    userId: string,
+  ): Promise<ServiceResult<{ followers: number; following: number }>> {
+    try {
+      const [followersRes, followingRes] = await Promise.all([
+        supabase
+          .from("follows")
+          .select("id", { count: "exact", head: true })
+          .eq("following_id", userId),
+        supabase
+          .from("follows")
+          .select("id", { count: "exact", head: true })
+          .eq("follower_id", userId),
+      ]);
+
+      if (followersRes.error) throw followersRes.error;
+      if (followingRes.error) throw followingRes.error;
+      return {
+        success: true,
+        data: { followers: followersRes.count ?? 0, following: followingRes.count ?? 0 },
+      };
+    } catch (error: any) {
+      return { success: false, error: error.message, data: { followers: 0, following: 0 } };
+    }
+  }
+
   async getFollowers(userId: string): Promise<ServiceResult<{ follower_id: string }[]>> {
     try {
       const { data, error } = await supabase

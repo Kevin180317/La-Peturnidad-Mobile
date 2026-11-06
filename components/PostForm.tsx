@@ -1,23 +1,42 @@
-import { dashboardService } from "@/services/dashboard.service";
+import { dashboardService, type PickedImage } from "@/services/dashboard.service";
 import { Ionicons } from "@expo/vector-icons";
+import { CARD, ChoiceChips, Field, PrimaryButton, RoundIconButton, Segmented } from "@/components/kit/Kit";
 import React, { useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   Image,
   Modal,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS, POST_MAX } from "@/utils/limits";
+import { displayLink, extractHashtags, mergeTags, normalizeLink, normalizeTag } from "@/utils/postMeta";
+
+// Las alertas de emergencia se crean desde la pestaña Emergencia
+export type PostType = "social" | "announcements";
+
+export type AnnouncementCategory = "general" | "aviso" | "evento" | "pregunta";
+
+const CATEGORIES: AnnouncementCategory[] = ["general", "aviso", "evento", "pregunta"];
 
 export interface PostFormData {
+  type: PostType;
   content: string;
-  image_urls?: string[];
+  /** Solo "social": hasta POST_MAX.images imágenes (galería y/o cámara) */
+  images?: PickedImage[];
+  /** Solo "social": lugar en texto libre */
   location?: string;
+  /** Solo "social": etiquetas sin "#" (las escritas en el texto se agregan solas) */
   tags?: string[];
-  urls?: string[];
+  /** Solo "social": enlaces http(s) */
+  links?: string[];
+  /** Solo "announcements" */
+  title?: string;
+  category?: AnnouncementCategory;
 }
 
 interface PostFormProps {
@@ -25,6 +44,8 @@ interface PostFormProps {
   onClose: () => void;
   onSubmit: (data: PostFormData) => Promise<boolean>;
   loading?: boolean;
+  /** Ubicación sugerida (colonia y ciudad del perfil) para el botón "Usar mi zona" */
+  defaultLocation?: string;
 }
 
 export function PostForm({
@@ -32,274 +53,330 @@ export function PostForm({
   onClose,
   onSubmit,
   loading = false,
+  defaultLocation = "",
 }: PostFormProps) {
+  const [postType, setPostType] = useState<PostType>("social");
   const [content, setContent] = useState("");
-  const [images, setImages] = useState<{ uri: string }[]>([]);
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<AnnouncementCategory>("general");
+  const [images, setImages] = useState<PickedImage[]>([]);
   const [location, setLocation] = useState("");
-  const [tagText, setTagText] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [urlText, setUrlText] = useState("");
-  const [urls, setUrls] = useState<string[]>([]);
-  const [contentFocused, setContentFocused] = useState(false);
+  const [tagInput, setTagInput] = useState("");
+  const [links, setLinks] = useState<string[]>([]);
+  const [linkInput, setLinkInput] = useState("");
 
-  const handleAddImage = async () => {
-    const result = await dashboardService.selectImage();
-    if (result.success && result.image) {
-      setImages([...images, result.image]);
+  const showError = (text2: string) =>
+    Toast.show({ type: "error", text1: "Error", text2, position: "top" });
+
+  const remaining = POST_MAX.images - images.length;
+
+  const handleAddFromGallery = async () => {
+    const result = await dashboardService.selectImages(remaining);
+    if (result.success) {
+      setImages((current) => [...current, ...result.images].slice(0, POST_MAX.images));
     } else if (result.error !== "Selección cancelada") {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: result.error,
-        position: "top",
-      });
+      showError(result.error);
     }
   };
 
-  const handleRemoveImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
-
-  const handleGetLocation = async () => {
-    Toast.show({
-      type: "info",
-      text1: "Ingresa la ubicación",
-      text2: "Escribe tu ciudad o ubicación manualmente",
-      position: "top",
-    });
+  const handleTakePhoto = async (facing: "front" | "back") => {
+    if (remaining < 1) return;
+    const result = await dashboardService.takePhoto(facing);
+    if (result.success) {
+      setImages((current) => [...current, result.image].slice(0, POST_MAX.images));
+    } else if (result.error !== "Selección cancelada") {
+      showError(result.error);
+    }
   };
 
   const handleAddTag = () => {
-    if (tagText.trim() && !tags.includes(tagText.trim())) {
-      setTags([...tags, tagText.trim()]);
-      setTagText("");
+    // Acepta varias separadas por espacio o coma: "#perro, gato"
+    const parts = tagInput.split(/[\s,]+/).map(normalizeTag).filter(Boolean);
+    if (!parts.length) {
+      setTagInput("");
+      return;
     }
-  };
-
-  const handleRemoveTag = (index: number) => {
-    setTags(tags.filter((_, i) => i !== index));
-  };
-
-  const handleAddUrl = () => {
-    if (urlText.trim() && !urls.includes(urlText.trim())) {
-      setUrls([...urls, urlText.trim()]);
-      setUrlText("");
+    const merged = mergeTags(tags, parts);
+    if (merged.length === tags.length && merged.length >= POST_MAX.tags) {
+      showError(`Máximo ${POST_MAX.tags} etiquetas`);
+      return;
     }
+    setTags(merged);
+    setTagInput("");
   };
 
-  const handleRemoveUrl = (index: number) => {
-    setUrls(urls.filter((_, i) => i !== index));
+  const handleAddLink = () => {
+    if (!linkInput.trim()) return;
+    if (links.length >= POST_MAX.links) {
+      showError(`Máximo ${POST_MAX.links} enlaces`);
+      return;
+    }
+    const url = normalizeLink(linkInput);
+    if (!url) {
+      showError("Escribe un enlace válido, por ejemplo sitio.com");
+      return;
+    }
+    if (!links.includes(url)) setLinks([...links, url]);
+    setLinkInput("");
   };
 
   const handleSubmit = async () => {
+    if (loading) return;
     if (!content.trim()) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Escribe algo para compartir",
-        position: "top",
-      });
+      showError("Escribe el contenido");
       return;
     }
 
-    const imageUrls = images.map((img) => img.uri);
-    const success = await onSubmit({
-      content: content.trim(),
-      image_urls: imageUrls.length > 0 ? imageUrls : undefined,
-      location: location.trim() || undefined,
-      tags: tags.length > 0 ? tags : undefined,
-      urls: urls.length > 0 ? urls : undefined,
-    });
+    if (postType === "announcements" && !title.trim()) {
+      showError("Agrega un titulo");
+      return;
+    }
+
+    if (postType === "social" && images.length === 0) {
+      showError("Agrega al menos una imagen");
+      return;
+    }
+
+    // Lo que quedó escrito sin confirmar en etiquetas/enlaces también cuenta
+    const pendingTags = tagInput.split(/[\s,]+/).map(normalizeTag).filter(Boolean);
+    const pendingLink = linkInput.trim() ? normalizeLink(linkInput) : null;
+    if (postType === "social" && linkInput.trim() && !pendingLink) {
+      showError("Revisa el enlace: no es una URL válida");
+      return;
+    }
+    const finalLinks = pendingLink && !links.includes(pendingLink) ? [...links, pendingLink].slice(0, POST_MAX.links) : links;
+
+    const success = await onSubmit(
+      postType === "social"
+        ? {
+            type: "social",
+            content: content.trim(),
+            images,
+            location: location.trim() || undefined,
+            tags: mergeTags(tags, pendingTags, extractHashtags(content)),
+            links: finalLinks,
+          }
+        : {
+            type: "announcements",
+            content: content.trim(),
+            title: title.trim(),
+            category,
+          },
+    );
 
     if (success) {
       setContent("");
+      setTitle("");
+      setCategory("general");
       setImages([]);
       setLocation("");
       setTags([]);
-      setUrls([]);
+      setTagInput("");
+      setLinks([]);
+      setLinkInput("");
+      setPostType("social");
       onClose();
     }
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent
-    >
-      <View className="flex-1 bg-[#faf5e0]">
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose} transparent>
+      <KeyboardAvoidingView
+        className="flex-1 bg-[#faf5e0]"
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         {/* Header */}
-        <View className="bg-[#005e66] px-4 py-4 flex-row items-center justify-between shadow-lg">
-          <TouchableOpacity onPress={onClose} className="active:opacity-70">
-            <Ionicons name="chevron-back" size={28} color="#fff" />
-          </TouchableOpacity>
-          <Text className="text-white text-lg font-bold">Nuevo post</Text>
-          <TouchableOpacity
-            onPress={handleSubmit}
-            disabled={loading}
-            className="active:opacity-70"
-          >
-            <Text className={`font-semibold ${loading ? "text-gray-300" : "text-white"}`}>
-              {loading ? "..." : "Compartir"}
-            </Text>
-          </TouchableOpacity>
+        <View className="px-4 pt-12 pb-3 flex-row items-center justify-between">
+          <RoundIconButton icon="close" tint="white" onPress={onClose} label="Cerrar" />
+          <Text className="text-[#211f1e] text-lg font-bold">Crear publicación</Text>
+          <View className="w-9" />
         </View>
 
-        <ScrollView className="flex-1 p-4">
-          {/* Contenido */}
-          <Text className="font-semibold text-[#211f1e] mb-2">
-            ¿Qué quieres compartir?
-          </Text>
-          <TextInput
-            className={`bg-white p-4 rounded-lg mb-4 ${
-              contentFocused
-                ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]"
-                : "border border-gray-300"
-            } text-[#211f1e]`}
-            placeholder="Cuéntale a tu comunidad..."
-            placeholderTextColor="#9BA1A6"
-            value={content}
-            onChangeText={setContent}
-            multiline
-            numberOfLines={4}
-            textAlignVertical="top"
-            onFocus={() => setContentFocused(true)}
-            onBlur={() => setContentFocused(false)}
+        <ScrollView className="flex-1" contentContainerClassName="p-5 pb-8" keyboardShouldPersistTaps="handled">
+          <Segmented
+            options={[
+              { key: "social", label: "Social · con imagen", icon: "images" },
+              { key: "announcements", label: "Anuncio", icon: "megaphone" },
+            ]}
+            value={postType}
+            onChange={setPostType}
           />
 
-          {/* Imágenes */}
-          <Text className="font-semibold text-[#211f1e] mb-2">Imágenes</Text>
-          <View className="flex-row gap-2 mb-4 flex-wrap">
-            <TouchableOpacity
-              onPress={handleAddImage}
-              className="w-24 h-24 bg-[#005e66]/5 rounded-xl border-2 border-dashed border-[#005e66] items-center justify-center active:bg-[#005e66]/10"
-            >
-              <Ionicons name="image-outline" size={32} color="#005e66" />
-              <Text className="text-xs text-[#005e66] mt-1 font-semibold">Agregar</Text>
-            </TouchableOpacity>
-            {images.map((img, idx) => (
-              <View key={idx} className="relative">
-                <Image
-                  source={{ uri: img.uri }}
-                  className="w-24 h-24 rounded-xl"
-                />
-                <TouchableOpacity
-                  onPress={() => handleRemoveImage(idx)}
-                  className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1.5 shadow-lg"
-                >
-                  <Ionicons name="close" size={16} color="#fff" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
+          <View className={`${CARD} p-4 mb-4`}>
+            {postType === "announcements" && (
+              <>
+                <Field label="Título" icon="text-outline" placeholder="Título de la publicación" value={title} onChangeText={setTitle} maxLength={LIMITS.title} />
+                <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Categoría</Text>
+                <View className="mb-4">
+                  <ChoiceChips
+                    options={CATEGORIES.map((cat) => ({ value: cat, label: cat.charAt(0).toUpperCase() + cat.slice(1) }))}
+                    value={category}
+                    onChange={setCategory}
+                  />
+                </View>
+              </>
+            )}
 
-          {/* Localización */}
-          <Text className="font-semibold text-[#211f1e] mb-2">Ubicación</Text>
-          <View className="flex-row gap-2 mb-4">
-            <TextInput
-              className="flex-1 bg-white p-3 rounded-lg border border-gray-300 text-[#211f1e]"
-              placeholder="Ej: Tijuana, México"
-              placeholderTextColor="#9BA1A6"
-              value={location}
-              onChangeText={setLocation}
+            <Field
+              label={postType === "social" ? "Escribe tu historia" : "Descripción"}
+              placeholder="Cuéntale a tu comunidad..."
+              value={content}
+              onChangeText={setContent}
+              maxLength={LIMITS.description}
+              multiline
+              numberOfLines={4}
             />
-            <TouchableOpacity
-              onPress={handleGetLocation}
-              className="bg-[#005e66] px-4 rounded-lg items-center justify-center"
-            >
-              <Ionicons name="location" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
 
-          {/* Tags */}
-          <Text className="font-semibold text-[#211f1e] mb-2">Mencionar personas</Text>
-          <View className="flex-row gap-2 mb-3">
-            <TextInput
-              className="flex-1 bg-white p-3 rounded-xl border border-gray-200 text-[#211f1e]"
-              placeholder="@usuario"
-              placeholderTextColor="#9BA1A6"
-              value={tagText}
-              onChangeText={setTagText}
-            />
-            <TouchableOpacity
-              onPress={handleAddTag}
-              className="bg-[#005e66] px-4 rounded-xl items-center justify-center active:bg-[#004052]"
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          <View className="flex-row flex-wrap gap-2 mb-4">
-            {tags.map((tag, idx) => (
-              <View
-                key={idx}
-                className="bg-[#005e66] px-3 py-1.5 rounded-full flex-row items-center gap-2"
-              >
-                <Text className="text-white font-semibold text-sm">@{tag}</Text>
-                <TouchableOpacity onPress={() => handleRemoveTag(idx)}>
-                  <Ionicons name="close" size={14} color="#fff" />
-                </TouchableOpacity>
-              </View>
-            ))}
-          </View>
-
-          {/* URLs */}
-          <Text className="font-semibold text-[#211f1e] mb-2">Agregar links</Text>
-          <View className="flex-row gap-2 mb-3">
-            <TextInput
-              className="flex-1 bg-white p-3 rounded-xl border border-gray-200 text-[#211f1e]"
-              placeholder="https://ejemplo.com"
-              placeholderTextColor="#9BA1A6"
-              value={urlText}
-              onChangeText={setUrlText}
-            />
-            <TouchableOpacity
-              onPress={handleAddUrl}
-              className="bg-[#005e66] px-4 rounded-xl items-center justify-center active:bg-[#004052]"
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          <View className="gap-2 mb-4">
-            {urls.map((url, idx) => (
-              <View
-                key={idx}
-                className="bg-blue-50 p-3 rounded-xl border border-blue-200 flex-row items-center justify-between"
-              >
-                <Text className="text-blue-600 flex-1 text-sm font-semibold" numberOfLines={1}>
-                  {url}
+            {postType === "social" && (
+              <>
+                {/* Imágenes: galería y cámara (frontal/trasera), hasta POST_MAX.images */}
+                <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">
+                  Imágenes ({images.length}/{POST_MAX.images}, mínimo 1)
                 </Text>
-                <TouchableOpacity onPress={() => handleRemoveUrl(idx)} className="ml-2">
-                  <Ionicons name="close-circle" size={18} color="#3b82f6" />
-                </TouchableOpacity>
-              </View>
-            ))}
+                {images.length > 0 && (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3" contentContainerClassName="gap-3">
+                    {images.map((img, index) => (
+                      <View key={`${img.uri}-${index}`}>
+                        <Image source={{ uri: img.uri }} className="rounded-2xl bg-gray-100" style={{ width: 120, height: 150 }} />
+                        <View className="absolute top-2 right-2">
+                          <RoundIconButton
+                            icon="close"
+                            tint="white"
+                            onPress={() => setImages((current) => current.filter((_, i) => i !== index))}
+                            label="Quitar imagen"
+                          />
+                        </View>
+                      </View>
+                    ))}
+                  </ScrollView>
+                )}
+                <View className="flex-row gap-2 mb-4">
+                  <SourceButton icon="images-outline" label="Galería" onPress={handleAddFromGallery} disabled={remaining < 1} />
+                  <SourceButton icon="camera-outline" label="Cámara" onPress={() => handleTakePhoto("back")} disabled={remaining < 1} />
+                  <SourceButton icon="camera-reverse-outline" label="Selfie" onPress={() => handleTakePhoto("front")} disabled={remaining < 1} />
+                </View>
+
+                {/* Ubicación */}
+                <Field
+                  label="Ubicación (opcional)"
+                  icon="location-outline"
+                  placeholder="Ej. Colonia Centro, Tijuana"
+                  value={location}
+                  onChangeText={setLocation}
+                  maxLength={LIMITS.location}
+                  right={
+                    !!defaultLocation && location !== defaultLocation ? (
+                      <TouchableOpacity onPress={() => setLocation(defaultLocation.slice(0, LIMITS.location))} accessibilityRole="button" accessibilityLabel="Usar mi zona">
+                        <Text className="text-xs font-semibold text-[#007275]">Mi zona</Text>
+                      </TouchableOpacity>
+                    ) : undefined
+                  }
+                />
+
+                {/* Etiquetas */}
+                <Field
+                  label="Etiquetas (opcional)"
+                  icon="pricetag-outline"
+                  placeholder="perro, adopcion"
+                  value={tagInput}
+                  onChangeText={setTagInput}
+                  onSubmitEditing={handleAddTag}
+                  returnKeyType="done"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  maxLength={LIMITS.tag * 2}
+                  right={
+                    <TouchableOpacity onPress={handleAddTag} accessibilityRole="button" accessibilityLabel="Agregar etiqueta">
+                      <Ionicons name="add-circle" size={26} color="#007275" />
+                    </TouchableOpacity>
+                  }
+                />
+                {tags.length > 0 && (
+                  <View className="flex-row flex-wrap gap-2 -mt-2 mb-4">
+                    {tags.map((tag) => (
+                      <RemovableChip key={tag} text={`#${tag}`} onRemove={() => setTags(tags.filter((t) => t !== tag))} />
+                    ))}
+                  </View>
+                )}
+
+                {/* Enlaces */}
+                <Field
+                  label="Enlaces (opcional)"
+                  icon="link-outline"
+                  placeholder="sitio.com/pagina"
+                  value={linkInput}
+                  onChangeText={setLinkInput}
+                  onSubmitEditing={handleAddLink}
+                  returnKeyType="done"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="url"
+                  maxLength={LIMITS.link}
+                  right={
+                    <TouchableOpacity onPress={handleAddLink} accessibilityRole="button" accessibilityLabel="Agregar enlace">
+                      <Ionicons name="add-circle" size={26} color="#007275" />
+                    </TouchableOpacity>
+                  }
+                />
+                {links.length > 0 && (
+                  <View className="flex-row flex-wrap gap-2 -mt-2">
+                    {links.map((url) => (
+                      <RemovableChip key={url} text={displayLink(url)} onRemove={() => setLinks(links.filter((l) => l !== url))} />
+                    ))}
+                  </View>
+                )}
+              </>
+            )}
           </View>
         </ScrollView>
 
-        {/* Botones */}
-        <View className="bg-white border-t border-gray-200 px-4 py-3 flex-row gap-3 shadow-lg">
-          <TouchableOpacity
-            onPress={onClose}
-            className="flex-1 py-3 rounded-xl bg-gray-100 active:bg-gray-200"
-          >
-            <Text className="text-center font-semibold text-[#211f1e]">
-              Cancelar
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+        <View className="px-5 pt-3 pb-8 bg-[#faf5e0]">
+          <PrimaryButton
+            title={loading ? "Publicando..." : "Publicar"}
+            icon="paper-plane"
             onPress={handleSubmit}
-            disabled={loading}
-            className={`flex-1 py-3 rounded-xl ${
-              loading ? "bg-gray-400" : "bg-[#005e66] active:bg-[#004052]"
-            }`}
-          >
-            <Text className="text-center font-semibold text-white">
-              {loading ? "Publicando..." : "Publicar"}
-            </Text>
-          </TouchableOpacity>
+            loading={loading}
+          />
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
+  );
+}
+
+function SourceButton({
+  icon,
+  label,
+  onPress,
+  disabled,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.8}
+      className={`flex-1 h-20 rounded-2xl border-2 border-dashed border-[#007275]/40 bg-[#faf5e0] items-center justify-center ${disabled ? "opacity-40" : ""}`}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <Ionicons name={icon} size={24} color="#007275" />
+      <Text className="text-xs text-[#007275] font-semibold mt-1">{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function RemovableChip({ text, onRemove }: { text: string; onRemove: () => void }) {
+  return (
+    <View className="flex-row items-center gap-1 bg-[#007275]/10 rounded-full pl-3 pr-1.5 py-1">
+      <Text className="text-[13px] font-semibold text-[#007275]">{text}</Text>
+      <TouchableOpacity onPress={onRemove} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Quitar ${text}`}>
+        <Ionicons name="close-circle" size={18} color="#007275" />
+      </TouchableOpacity>
+    </View>
   );
 }

@@ -1,5 +1,8 @@
 import { type PostWithOwner, type ServiceResult } from "@/types";
+import { dashboardService } from "@/services/dashboard.service";
 import { supabase } from "@/utils/supabase";
+
+export const FEED_PAGE_SIZE = 20;
 
 class PostsService {
   async getFeed(userId: string): Promise<ServiceResult<PostWithOwner[]>> {
@@ -27,7 +30,7 @@ class PostsService {
 
       const userIds = [...new Set(posts.map((p) => p.user_id))];
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name, profile_picture_url")
         .in("user_id", userIds);
 
@@ -57,6 +60,10 @@ class PostsService {
         user_id: p.user_id,
         content: p.content,
         image_url: p.image_url,
+        image_urls: p.image_urls,
+        location: p.location,
+        tags: p.tags,
+        links: p.links,
         created_at: p.created_at,
         updated_at: p.updated_at,
         owner_name:
@@ -72,13 +79,13 @@ class PostsService {
     }
   }
 
-  async getAllPosts(): Promise<ServiceResult<PostWithOwner[]>> {
+  // Paginación por cursor: pasa el created_at del último post cargado para pedir la página siguiente
+  async getAllPosts(before?: string | null, limit = FEED_PAGE_SIZE, tag?: string | null): Promise<ServiceResult<PostWithOwner[]>> {
     try {
-      const { data: posts, error } = await supabase
-        .from("posts")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50);
+      let query = supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(limit);
+      if (before) query = query.lt("created_at", before);
+      if (tag) query = query.contains("tags", [tag]);
+      const { data: posts, error } = await query;
 
       if (error) throw error;
 
@@ -88,7 +95,7 @@ class PostsService {
 
       const userIds = [...new Set(posts.map((p) => p.user_id))];
       const { data: profiles } = await supabase
-        .from("user_profiles")
+        .from("public_profiles")
         .select("user_id, first_name, last_name, profile_picture_url")
         .in("user_id", userIds);
 
@@ -118,6 +125,10 @@ class PostsService {
         user_id: p.user_id,
         content: p.content,
         image_url: p.image_url,
+        image_urls: p.image_urls,
+        location: p.location,
+        tags: p.tags,
+        links: p.links,
         created_at: p.created_at,
         updated_at: p.updated_at,
         owner_name:
@@ -171,6 +182,10 @@ class PostsService {
         user_id: p.user_id,
         content: p.content,
         image_url: p.image_url,
+        image_urls: p.image_urls,
+        location: p.location,
+        tags: p.tags,
+        links: p.links,
         created_at: p.created_at,
         updated_at: p.updated_at,
         owner_name:
@@ -186,24 +201,25 @@ class PostsService {
   }
 
   async create(data: {
-    user_id: string
-    content: string
-    image_url?: string
-    image_urls?: string[]
-    location?: string
-    tags?: string[]
-    urls?: string[]
+    user_id: string;
+    content: string;
+    /** Galería (máx. 5); la primera también va en image_url por compatibilidad */
+    image_urls?: string[];
+    location?: string | null;
+    tags?: string[];
+    links?: string[];
   }) {
     try {
-      // Usar la primera imagen de image_urls si está disponible
-      const imageUrl = data.image_urls?.[0] || data.image_url;
-
       const { data: post, error } = await supabase
         .from("posts")
         .insert([{
           user_id: data.user_id,
           content: data.content,
-          image_url: imageUrl,
+          image_url: data.image_urls?.[0] ?? null,
+          image_urls: data.image_urls ?? [],
+          location: data.location?.trim() || null,
+          tags: data.tags ?? [],
+          links: data.links ?? [],
         }])
         .select()
         .single();
@@ -215,10 +231,13 @@ class PostsService {
     }
   }
 
-  async delete(postId: string): Promise<ServiceResult> {
+  // Borra el post y, si tenía, sus imágenes del bucket "posts"
+  async delete(postId: string, imageUrls?: (string | null | undefined)[] | string | null): Promise<ServiceResult> {
     try {
       const { error } = await supabase.from("posts").delete().eq("id", postId);
       if (error) throw error;
+      const urls = Array.isArray(imageUrls) ? imageUrls : [imageUrls];
+      await Promise.all([...new Set(urls)].map((u) => dashboardService.removeImageByUrl(u, "posts")));
       return { success: true };
     } catch (error: any) {
       return { success: false, error: error.message };

@@ -1,22 +1,22 @@
-import { EmptyState } from "@/components/EmptyState";
+import { confirmDialog } from "@/components/ConfirmDialog";
+import { Avatar, CARD, Chip, ChoiceChips, EmptyCard, Field, PrimaryButton, RoundIconButton, ScreenTitle, Sheet } from "@/components/kit/Kit";
+import { formatTimeAgo } from "@/utils/format";
 import { announcementsService } from "@/services/announcements.service";
-import { supabase } from "@/utils/supabase";
+import { reportsService } from "@/services/reports.service";
+import { getCurrentUser } from "@/utils/session";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
-  Image,
-  Modal,
+  FlatList,
   RefreshControl,
-  ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 const categories = [
   { key: "general", label: "General", icon: "chatbubbles" as const },
@@ -36,23 +36,20 @@ export default function ComunidadScreen() {
   const [formContent, setFormContent] = useState("");
   const [formCategory, setFormCategory] = useState<string>("general");
   const [posting, setPosting] = useState(false);
-  const [titleFocused, setTitleFocused] = useState(false);
-  const [contentFocused, setContentFocused] = useState(false);
-
-  // init corre una sola vez al montar (deps estables intencionales)
-  useEffect(() => {
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
 
   const init = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) {
       router.replace("/");
       return;
     }
     setUserId(user.user.id);
-    await loadAnnouncements();
+    const [blocked] = await Promise.all([
+      reportsService.getBlockedUsers(user.user.id),
+      loadAnnouncements(),
+    ]);
+    setBlockedIds(blocked.data ?? []);
   };
 
   const loadAnnouncements = useCallback(async () => {
@@ -111,187 +108,120 @@ export default function ComunidadScreen() {
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert("Eliminar", "¿Eliminar este aviso?", [
-      { text: "Cancelar", style: "cancel" },
-      {
-        text: "Eliminar",
-        style: "destructive",
-        onPress: async () => {
-          const result = await announcementsService.delete(id);
-          if (result.success) {
-            Toast.show({ type: "success", text1: "Eliminado", position: "top", visibilityTime: 2000 });
-            await loadAnnouncements();
-          } else {
-            Toast.show({ type: "error", text1: "Error", text2: result.error, position: "top", visibilityTime: 3000 });
-          }
-        },
+    confirmDialog({
+      title: "Eliminar",
+      message: "¿Eliminar este aviso?",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await announcementsService.delete(id);
+        if (result.success) {
+          Toast.show({ type: "success", text1: "Eliminado", position: "top", visibilityTime: 2000 });
+          await loadAnnouncements();
+        } else {
+          Toast.show({ type: "error", text1: "Error", text2: result.error, position: "top", visibilityTime: 3000 });
+        }
       },
-    ]);
+    });
   };
 
-  const categoryIcon = (cat: string): keyof typeof Ionicons.glyphMap => {
-    const found = categories.find((c) => c.key === cat);
-    return (found?.icon as keyof typeof Ionicons.glyphMap) || "chatbubbles";
-  };
+  // init corre una sola vez al montar (deps estables intencionales)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const categoryColor = (cat: string) => {
-    switch (cat) {
-      case "aviso": return "bg-gray-100 text-gray-600";
-      case "evento": return "bg-[#005e66]/10 text-[#005e66]";
-      case "pregunta": return "bg-[#211f1e]/10 text-[#211f1e]";
-      default: return "bg-gray-100 text-gray-600";
-    }
-  };
+  const blockedSet = new Set(blockedIds);
+  const visibleAnnouncements = announcements.filter((a) => !blockedSet.has(a.user_id));
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
 
   return (
     <View className="flex-1 bg-[#faf5e0]">
-      <ScrollView
+      <FlatList
+        data={visibleAnnouncements}
+        keyExtractor={(item) => item.id}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         contentContainerClassName="p-5 pb-10"
-      >
-        <View className="flex-row items-center justify-between mb-6">
-          <Text className="text-2xl font-bold text-[#211f1e]">Comunidad</Text>
-          <TouchableOpacity
-            className="bg-[#005e66] py-2 px-4 rounded-xl flex-row items-center gap-1"
-            onPress={() => setShowForm(true)}
-          >
-            <Ionicons name="add" size={18} color="white" />
-            <Text className="text-white font-semibold">Nuevo</Text>
-          </TouchableOpacity>
-        </View>
-
-        {announcements.length === 0 ? (
-          <EmptyState
-            icon="chatbubbles-outline"
-            title="No hay avisos en la comunidad todavía"
-            subtitle="¡Sé el primero en publicar!"
-            actionLabel="Publicar aviso"
-            onAction={() => setShowForm(true)}
+        ListHeaderComponent={
+          <ScreenTitle
+            title="Comunidad"
+            subtitle="Avisos de tus vecinos"
+            right={
+              <TouchableOpacity
+                className="bg-[#007275] py-2.5 pl-3 pr-4 rounded-full flex-row items-center gap-1.5 shadow-[0_4px_12px_rgba(0,114,117,0.3)]"
+                activeOpacity={0.85}
+                onPress={() => setShowForm(true)}
+                accessibilityRole="button"
+              >
+                <Ionicons name="add" size={18} color="white" />
+                <Text className="text-white font-semibold">Nuevo</Text>
+              </TouchableOpacity>
+            }
           />
-        ) : (
-          announcements.map((item) => {
-            const isOwner = item.user_id === userId;
-            return (
-              <View key={item.id} className="bg-white p-4 rounded-2xl mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]">
-                <View className="flex-row items-start gap-3 mb-2">
-                  {item.owner_profile_picture ? (
-                    <Image source={{ uri: item.owner_profile_picture }} className="w-10 h-10 rounded-full" />
-                  ) : (
-                    <View className="w-10 h-10 bg-[#005e66] rounded-full items-center justify-center">
-                      <Text className="text-white font-bold">
-                        {item.owner_name?.[0]?.toUpperCase() || "U"}
-                      </Text>
-                    </View>
-                  )}
+        }
+        ListEmptyComponent={
+          <EmptyCard icon="chatbubbles-outline" title="No hay avisos en la comunidad todavía" text="¡Sé el primero en publicar!">
+            <TouchableOpacity className="bg-[#007275] py-2.5 px-5 rounded-full mt-4" onPress={() => setShowForm(true)}>
+              <Text className="text-white font-semibold">Publicar aviso</Text>
+            </TouchableOpacity>
+          </EmptyCard>
+        }
+        renderItem={({ item }) => {
+          const isOwner = item.user_id === userId;
+          const cat = categories.find((c) => c.key === item.category);
+          return (
+            <View className={`${CARD} mb-4 overflow-hidden`}>
+              <View className="flex-row items-center gap-3 p-4">
+                <TouchableOpacity className="flex-row items-center gap-3 flex-1" activeOpacity={0.7} onPress={() => router.push(`/perfil/${item.user_id}`)}>
+                  <Avatar uri={item.owner_profile_picture} name={item.owner_name} />
                   <View className="flex-1">
-                    <Text className="font-semibold text-[#211f1e]">{item.owner_name}</Text>
-                    <Text className="text-gray-500 text-xs">
-                      {new Date(item.created_at).toLocaleDateString("es-MX", {
-                        day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-                      })}
-                    </Text>
+                    <Text className="font-bold text-[#211f1e] text-[15px]" numberOfLines={1}>{item.owner_name}</Text>
+                    <Text className="text-gray-500 text-xs mt-0.5">{formatTimeAgo(item.created_at)}</Text>
                   </View>
-                  {isOwner && (
-                    <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                      <Ionicons name="trash-outline" size={18} color="#d93a3a" />
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                <View className="mb-2">
-                  <View className={`self-start px-2.5 py-1 rounded-full mb-1 flex-row items-center gap-1 ${categoryColor(item.category)}`}>
-                    <Ionicons name={categoryIcon(item.category)} size={12} />
-                    <Text className="text-xs font-medium">
-                      {categories.find((c) => c.key === item.category)?.label || item.category}
-                    </Text>
-                  </View>
-                  <Text className="font-bold text-lg text-[#211f1e]">{item.title}</Text>
-                </View>
-
-                <Text className="text-gray-600 leading-5">{item.content}</Text>
-              </View>
-            );
-          })
-        )}
-      </ScrollView>
-
-      <Modal animationType="slide" transparent visible={showForm} onRequestClose={() => setShowForm(false)}>
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-white rounded-t-2xl p-5 max-h-[90%]">
-            <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-xl font-bold text-[#211f1e]">Nuevo aviso</Text>
-              <TouchableOpacity onPress={() => setShowForm(false)}>
-                <Ionicons name="close" size={24} color="#211f1e" />
-              </TouchableOpacity>
-            </View>
-
-            <Text className="font-semibold mb-2 text-gray-600">Categoría</Text>
-            <View className="flex-row gap-2 mb-4 flex-wrap">
-              {categories.map((cat) => (
-                <TouchableOpacity
-                  key={cat.key}
-                  className={`py-2 px-4 rounded-full border-2 ${
-                    formCategory === cat.key ? "border-[#005e66] bg-[#005e66]" : "border-gray-200 bg-[#faf5e0]"
-                  }`}
-                  onPress={() => setFormCategory(cat.key)}
-                >
-                  <Text className={`font-medium ${formCategory === cat.key ? "text-white" : "text-gray-600"}`}>
-                    {cat.icon} {cat.label}
-                  </Text>
                 </TouchableOpacity>
-              ))}
+                {isOwner && <RoundIconButton icon="trash-outline" tint="red" onPress={() => handleDelete(item.id)} label="Eliminar aviso" />}
+              </View>
+              <View className="px-4 pb-4">
+                <View className="self-start mb-2.5">
+                  <Chip icon={cat?.icon} text={cat?.label || item.category} tone={item.category === "evento" ? "teal" : item.category === "pregunta" ? "dark" : "neutral"} />
+                </View>
+                <Text className="font-bold text-lg text-[#211f1e] mb-1">{item.title}</Text>
+                <Text className="text-gray-700 leading-6 text-[15px]">{item.content}</Text>
+              </View>
             </View>
+          );
+        }}
+      />
 
-            <TextInput
-              className={`bg-white p-3 rounded-lg mb-3 text-[#211f1e] ${titleFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-              placeholder="Título *"
-              placeholderTextColor="#9BA1A6"
-              value={formTitle}
-              onChangeText={setFormTitle}
-              onFocus={() => setTitleFocused(true)}
-              onBlur={() => setTitleFocused(false)}
-            />
-            <TextInput
-              className={`bg-white p-3 rounded-lg mb-4 text-[#211f1e] ${contentFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-gray-300"}`}
-              placeholder="Escribe tu mensaje... *"
-              placeholderTextColor="#9BA1A6"
-              value={formContent}
-              onChangeText={setFormContent}
-              multiline
-              numberOfLines={5}
-              textAlignVertical="top"
-              onFocus={() => setContentFocused(true)}
-              onBlur={() => setContentFocused(false)}
-            />
-
-            <View className="flex-row gap-3">
-              <TouchableOpacity
-                className={`flex-1 py-3 rounded-xl ${posting ? "bg-gray-400" : "bg-[#005e66]"}`}
-                onPress={handlePost}
-                disabled={posting}
-              >
-                <Text className={`text-center font-bold ${posting ? "text-gray-700" : "text-white"}`}>
-                  {posting ? "Publicando..." : "Publicar"}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-[#211f1e] py-3 rounded-xl"
-                onPress={() => setShowForm(false)}
-              >
-                <Text className="text-white text-center font-bold">Cancelar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+      <Sheet visible={showForm} title="Nuevo aviso" onClose={() => setShowForm(false)} closeDisabled={posting}>
+        <Text className="text-[13px] font-semibold text-[#211f1e] mb-1.5 ml-1">Categoría</Text>
+        <View className="mb-4">
+          <ChoiceChips
+            options={categories.map((c) => ({ value: c.key, label: c.label, icon: c.icon }))}
+            value={formCategory}
+            onChange={setFormCategory}
+          />
         </View>
-      </Modal>
+        <Field label="Título *" icon="text-outline" placeholder="Título" value={formTitle} onChangeText={setFormTitle} maxLength={LIMITS.title} />
+        <Field
+          label="Mensaje *"
+          placeholder="Escribe tu mensaje..."
+          value={formContent}
+          onChangeText={setFormContent}
+          maxLength={LIMITS.description}
+          multiline
+          numberOfLines={5}
+        />
+        <PrimaryButton title={posting ? "Publicando..." : "Publicar"} icon="paper-plane" loading={posting} onPress={handlePost} />
+      </Sheet>
     </View>
   );
 }

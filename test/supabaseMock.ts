@@ -11,6 +11,12 @@ export function resetSupabaseMock() {
   results.clear();
   calls.length = 0;
   supabaseMock.from.mockClear();
+  supabaseMock.rpc.mockReset().mockResolvedValue({ data: null, error: null });
+  supabaseMock.functions.invoke.mockReset().mockResolvedValue({ data: {}, error: null });
+  supabaseMock.storage.from.mockClear();
+  storageBucket.upload.mockReset().mockResolvedValue({ data: {}, error: null });
+  storageBucket.getPublicUrl.mockReset().mockReturnValue({ data: { publicUrl: "https://x.supabase.co/storage/v1/object/public/bucket/u1/file.jpg" } });
+  storageBucket.remove.mockReset().mockResolvedValue({ data: [], error: null });
   Object.values(supabaseMock.auth).forEach((fn) => {
     fn.mockReset();
     fn.mockResolvedValue({ data: {}, error: null });
@@ -44,8 +50,17 @@ function builder(table: string) {
   return chain;
 }
 
+export const storageBucket = {
+  upload: jest.fn(),
+  getPublicUrl: jest.fn(),
+  remove: jest.fn(),
+};
+
 export const supabaseMock = {
   from: jest.fn((table: string) => builder(table)),
+  rpc: jest.fn(),
+  functions: { invoke: jest.fn() },
+  storage: { from: jest.fn(() => storageBucket) },
   auth: {
     getSession: jest.fn(),
     getUser: jest.fn(),

@@ -1,16 +1,16 @@
-import { authService } from "@/services/auth.service";
+import { AuthScreen, FieldLabel } from "@/components/auth/AuthScreen";
+import { PrimaryButton } from "@/components/kit/Kit";
+import { authErrorMessage, authService, passwordError } from "@/services/auth.service";
 import { PasswordInput } from "@/components/PasswordInput";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 export default function ResetPasswordScreen() {
   const [password, setPassword] = useState("");
@@ -19,7 +19,9 @@ export default function ResetPasswordScreen() {
   const router = useRouter();
 
   const handleUpdate = async () => {
-    if (!password || !confirmPassword) {
+    const trimmedPassword = password.trim();
+
+    if (!trimmedPassword || !confirmPassword.trim()) {
       Toast.show({
         type: "error",
         text1: "Campos requeridos",
@@ -29,7 +31,7 @@ export default function ResetPasswordScreen() {
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (trimmedPassword !== confirmPassword.trim()) {
       Toast.show({
         type: "error",
         text1: "Error de validación",
@@ -39,11 +41,12 @@ export default function ResetPasswordScreen() {
       return;
     }
 
-    if (password.length < 6) {
+    const weakPassword = passwordError(trimmedPassword);
+    if (weakPassword) {
       Toast.show({
         type: "error",
         text1: "Error de validación",
-        text2: "La contraseña debe tener al menos 6 caracteres",
+        text2: weakPassword,
         visibilityTime: 3000,
       });
       return;
@@ -51,13 +54,13 @@ export default function ResetPasswordScreen() {
 
     setLoading(true);
     try {
-      const { error } = await authService.updatePassword(password);
+      const { error } = await authService.updatePassword(trimmedPassword);
 
       if (error) {
         Toast.show({
           type: "error",
           text1: "Error",
-          text2: error.message,
+          text2: authErrorMessage(error),
           visibilityTime: 3000,
         });
         setLoading(false);
@@ -67,82 +70,65 @@ export default function ResetPasswordScreen() {
       Toast.show({
         type: "success",
         text1: "Contraseña actualizada",
-        text2: "Ya puedes iniciar sesión con tu nueva contraseña",
+        text2: "Tu nueva contraseña ya está activa",
         visibilityTime: 2000,
         onHide: () => {
+          // La verificación OTP dejó una sesión activa: index decide (dashboard o perfil)
+          // y se limpia el historial de recuperación para que "atrás" no regrese aquí.
+          if (router.canDismiss()) router.dismissAll();
           router.replace("/");
         },
       });
-    } catch (error: any) {
+    } catch {
       Toast.show({
         type: "error",
         text1: "Error inesperado",
-        text2: error.message || "Intenta de nuevo más tarde",
+        text2: "Intenta de nuevo más tarde",
         visibilityTime: 3000,
       });
       setLoading(false);
     }
   };
 
-  return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-[#faf5e0]"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <View className="flex-1 justify-center p-6">
-      {loading ? (
-        <View className="items-center">
-          <ActivityIndicator size="large" color="#005e66" />
-          <Text className="mt-4 text-[#211f1e]">Actualizando...</Text>
-        </View>
-      ) : (
-        <>
-          <View className="mb-8">
-            <Text className="text-3xl font-bold text-[#211f1e] mb-2">
-              Nueva contraseña
-            </Text>
-            <Text className="text-[#211f1e] text-lg">
-              Ingresa tu nueva contraseña
-            </Text>
-          </View>
-
-          <View className="mb-4">
-            <Text className="text-[#211f1e] font-semibold mb-2">
-              Nueva contraseña
-            </Text>
-            <PasswordInput
-              placeholder="••••••••"
-              value={password}
-              onChangeText={setPassword}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View className="mb-8">
-            <Text className="text-[#211f1e] font-semibold mb-2">
-              Confirmar contraseña
-            </Text>
-            <PasswordInput
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <TouchableOpacity
-            className="bg-[#005e66] py-4 rounded-xl mb-4"
-            onPress={handleUpdate}
-          >
-            <Text className="text-white text-center font-bold text-lg">
-              Actualizar contraseña
-            </Text>
-          </TouchableOpacity>
-        </>
-      )}
-      <Toast />
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#faf5e0]">
+        <ActivityIndicator size="large" color="#007275" />
+        <Text className="mt-4 text-gray-600 font-medium">Actualizando...</Text>
       </View>
-    </KeyboardAvoidingView>
+    );
+  }
+
+  return (
+    <AuthScreen headerless title="Nueva contraseña" subtitle="Ingresa tu nueva contraseña">
+      <FieldLabel>Nueva contraseña</FieldLabel>
+      <View className="mb-4">
+        <PasswordInput
+          placeholder="••••••••"
+          value={password}
+          onChangeText={setPassword}
+          maxLength={LIMITS.password}
+          autoCapitalize="none"
+          autoComplete="new-password"
+          accessibilityLabel="Nueva contraseña"
+        />
+        <Text className="text-gray-500 text-xs mt-1.5 ml-1">Mínimo 8 caracteres, con letras y números</Text>
+      </View>
+
+      <FieldLabel>Confirmar contraseña</FieldLabel>
+      <View className="mb-5">
+        <PasswordInput
+          placeholder="••••••••"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          maxLength={LIMITS.password}
+          autoCapitalize="none"
+          autoComplete="new-password"
+          accessibilityLabel="Confirmar contraseña"
+        />
+      </View>
+
+      <PrimaryButton title="Actualizar contraseña" icon="key-outline" onPress={handleUpdate} />
+    </AuthScreen>
   );
 }

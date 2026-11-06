@@ -1,23 +1,25 @@
-import { EmptyState } from "@/components/EmptyState";
+import { Avatar, CARD, CARD_SHADOW, Chip, EmptyCard, PetThumb, Segmented } from "@/components/kit/Kit";
 import { ListSkeleton } from "@/components/Skeleton";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { reportsService } from "@/services/reports.service";
+import { Ionicons } from "@expo/vector-icons";
 import {
   searchService,
   type GroupSearchResult,
   type PetSearchResult,
   type UserSearchResult,
 } from "@/services/search.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Image,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
+import { LIMITS } from "@/utils/limits";
 
 type SearchTab = "pets" | "groups" | "users";
 
@@ -41,15 +43,120 @@ export default function BuscarScreen() {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const [blockedIds, setBlockedIds] = useState<string[]>([]);
   const firstRun = useRef(true);
+  // Id incremental por búsqueda: las respuestas de búsquedas viejas se ignoran
+  const requestId = useRef(0);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    getCurrentUser().then(async ({ data }) => {
       if (!data.user) {
         router.replace("/");
+        return;
       }
+      const blocked = await reportsService.getBlockedUsers(data.user.id);
+      setBlockedIds(blocked.data ?? []);
     });
   }, [router]);
+
+  const performSearch = async () => {
+    const reqId = ++requestId.current;
+    const q = query.trim();
+    if (!q) {
+      setPets([]);
+      setGroups([]);
+      setUsers([]);
+      setSearched(false);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const tab = activeTab;
+    const res =
+      tab === "pets"
+        ? await searchService.searchPets(q)
+        : tab === "groups"
+          ? await searchService.searchGroups(q)
+          : await searchService.searchUsers(q);
+
+    if (reqId !== requestId.current) return; // respuesta obsoleta
+
+    if (res.success) {
+      if (tab === "pets") setPets((res.data ?? []) as PetSearchResult[]);
+      else if (tab === "groups") setGroups((res.data ?? []) as GroupSearchResult[]);
+      else setUsers((res.data ?? []) as UserSearchResult[]);
+    } else {
+      Toast.show({ type: "error", text1: "Error al buscar", text2: res.error, position: "top" });
+    }
+    setSearched(true);
+    setLoading(false);
+  };
+
+  const blocked = new Set(blockedIds);
+  const visiblePets = pets.filter((p) => !blocked.has(p.user_id));
+  const visibleGroups = groups.filter((g) => !g.created_by || !blocked.has(g.created_by));
+  const visibleUsers = users.filter((u) => !blocked.has(u.user_id));
+
+  const ROW = `${CARD} flex-row items-center p-3 mb-3`;
+
+  const renderPet = (pet: PetSearchResult) => (
+    <TouchableOpacity key={pet.id} className={ROW} onPress={() => router.push(`/perfil/${pet.user_id}`)} activeOpacity={0.8}>
+      <PetThumb uri={pet.image_url} type={pet.type} className="w-14 h-14 rounded-2xl" iconSize={26} />
+      <View className="flex-1 ml-3">
+        <Text className="text-[#211f1e] font-bold text-[15px]">{pet.name || "Mascota"}</Text>
+        <View className="flex-row flex-wrap gap-1.5 mt-1">
+          <Chip text={pet.type === "gato" ? "Gato" : "Perro"} tone="teal" />
+          {!!pet.color && <Chip text={pet.color} />}
+          {!!pet.size && <Chip text={pet.size} />}
+        </View>
+        <Text className="text-gray-500 text-xs mt-1">Dueño: {pet.owner_name}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color="#C4C4C4" />
+    </TouchableOpacity>
+  );
+
+  const renderGroup = (group: GroupSearchResult) => (
+    <TouchableOpacity key={group.id} className={ROW} onPress={() => router.push(`/grupos/${group.id}`)} activeOpacity={0.8}>
+      <View className="w-14 h-14 rounded-2xl bg-[#007275]/10 items-center justify-center">
+        <Ionicons name="people" size={24} color="#007275" />
+      </View>
+      <View className="flex-1 ml-3">
+        <Text className="text-[#211f1e] font-bold text-[15px]">{group.name}</Text>
+        <Text className="text-gray-500 text-sm" numberOfLines={1}>
+          {group.description || "Sin descripción"}
+        </Text>
+        <Text className="text-gray-500 text-xs mt-0.5">
+          {group.member_count} miembro{group.member_count === 1 ? "" : "s"}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color="#C4C4C4" />
+    </TouchableOpacity>
+  );
+
+  const renderUser = (user: UserSearchResult) => (
+    <TouchableOpacity key={user.user_id} className={ROW} onPress={() => router.push(`/perfil/${user.user_id}`)} activeOpacity={0.8}>
+      <Avatar uri={user.profile_picture_url} name={user.first_name} size={52} ring={false} />
+      <View className="flex-1 ml-3">
+        <Text className="text-[#211f1e] font-bold text-[15px]">
+          {[user.first_name, user.last_name].filter(Boolean).join(" ") || "Usuario"}
+        </Text>
+        <View className="flex-row items-center gap-1 mt-0.5">
+          <Ionicons name="location-outline" size={12} color="#6B7280" />
+          <Text className="text-gray-500 text-xs">{user.city || "Sin ubicación"}</Text>
+        </View>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color="#C4C4C4" />
+    </TouchableOpacity>
+  );
+
+  const isEmpty =
+    !loading &&
+    searched &&
+    (activeTab === "pets"
+      ? visiblePets.length === 0
+      : activeTab === "groups"
+        ? visibleGroups.length === 0
+        : visibleUsers.length === 0);
 
   // Búsqueda con debounce de 300ms (primer render no dispara búsqueda)
   useEffect(() => {
@@ -64,138 +171,20 @@ export default function BuscarScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, activeTab]);
 
-  const performSearch = async () => {
-    const q = query.trim();
-    if (!q) {
-      setPets([]);
-      setGroups([]);
-      setUsers([]);
-      setSearched(false);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    if (activeTab === "pets") {
-      const res = await searchService.searchPets(q);
-      if (res.success) setPets(res.data ?? []);
-      setSearched(true);
-    } else if (activeTab === "groups") {
-      const res = await searchService.searchGroups(q);
-      if (res.success) setGroups(res.data ?? []);
-      setSearched(true);
-    } else {
-      const res = await searchService.searchUsers(q);
-      if (res.success) setUsers(res.data ?? []);
-      setSearched(true);
-    }
-    setLoading(false);
-  };
-
-  const renderPet = (pet: PetSearchResult) => (
-    <TouchableOpacity
-      key={pet.id}
-      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
-      onPress={() => router.push(`/perfil/${pet.user_id}`)}
-      activeOpacity={0.8}
-    >
-      {pet.image_url ? (
-        <Image
-          source={{ uri: pet.image_url }}
-          className="w-12 h-12 rounded-xl"
-        />
-      ) : (
-        <View className="w-12 h-12 rounded-xl bg-[#faf5e0] items-center justify-center">
-          <MaterialCommunityIcons
-            name={pet.type === "gato" ? "cat" : "dog"}
-            size={24}
-            color="#6B7280"
-          />
-        </View>
-      )}
-      <View className="flex-1 ml-3">
-        <Text className="text-[#211f1e] font-bold">{pet.name || "Mascota"}</Text>
-        <Text className="text-gray-500 text-sm">
-          {pet.type === "gato" ? "Gato" : "Perro"}
-          {pet.color ? ` · ${pet.color}` : ""}
-          {pet.size ? ` · ${pet.size}` : ""}
-        </Text>
-        <Text className="text-gray-500 text-xs">Dueño: {pet.owner_name}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderGroup = (group: GroupSearchResult) => (
-    <TouchableOpacity
-      key={group.id}
-      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
-      onPress={() => router.push(`/grupos/${group.id}`)}
-      activeOpacity={0.8}
-    >
-      <View className="w-12 h-12 rounded-xl bg-[#faf5e0] items-center justify-center">
-        <Ionicons name="people-outline" size={24} color="#6B7280" />
-      </View>
-      <View className="flex-1 ml-3">
-        <Text className="text-[#211f1e] font-bold">{group.name}</Text>
-        <Text className="text-gray-500 text-sm" numberOfLines={1}>
-          {group.description || "Sin descripción"}
-        </Text>
-        <Text className="text-gray-500 text-xs">
-          {group.member_count} miembro{group.member_count === 1 ? "" : "s"}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderUser = (user: UserSearchResult) => (
-    <TouchableOpacity
-      key={user.user_id}
-      className="flex-row items-center bg-white p-4 rounded-2xl border border-[#211f1e]/10 mb-3 shadow-[0_4px_24px_rgba(33,31,30,0.08)]"
-      onPress={() => router.push(`/perfil/${user.user_id}`)}
-      activeOpacity={0.8}
-    >
-      {user.profile_picture_url ? (
-        <Image
-          source={{ uri: user.profile_picture_url }}
-          className="w-12 h-12 rounded-full"
-        />
-      ) : (
-        <View className="w-12 h-12 rounded-full bg-[#005e66] items-center justify-center">
-          <Text className="text-white font-bold text-lg">
-            {(user.first_name || "U").charAt(0).toUpperCase()}
-          </Text>
-        </View>
-      )}
-      <View className="flex-1 ml-3">
-        <Text className="text-[#211f1e] font-bold">
-          {[user.first_name, user.last_name].filter(Boolean).join(" ") || "Usuario"}
-        </Text>
-        <Text className="text-gray-500 text-sm">{user.city || "Sin ubicación"}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const isEmpty =
-    !loading &&
-    searched &&
-    (activeTab === "pets"
-      ? pets.length === 0
-      : activeTab === "groups"
-        ? groups.length === 0
-        : users.length === 0);
-
   return (
-    <View className="flex-1 bg-[#faf5e0] p-4">
+    <View className="flex-1 bg-[#faf5e0] px-5 pt-4">
       {/* Input de búsqueda */}
       <View
-        className={`flex-row items-center bg-white rounded-lg px-4 ${searchFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border border-[#211f1e]/10"}`}
+        className={`flex-row items-center bg-white rounded-full h-[52px] px-4 border-[1.5px] ${searchFocused ? "border-[#007275]" : "border-transparent"} ${CARD_SHADOW}`}
       >
-        <Ionicons name="search" size={18} color="#6B7280" style={{ marginRight: 8 }} />
+        <Ionicons name="search" size={18} color={searchFocused ? "#007275" : "#9BA1A6"} style={{ marginRight: 10 }} />
         <TextInput
-          className="flex-1 py-3 text-[#211f1e]"
+          className="flex-1 text-[15px] text-[#211f1e]"
           placeholder="Buscar mascotas, grupos, usuarios..."
           placeholderTextColor="#9BA1A6"
           value={query}
           onChangeText={setQuery}
+          maxLength={LIMITS.search}
           autoFocus
           returnKeyType="search"
           onSubmitEditing={performSearch}
@@ -203,51 +192,28 @@ export default function BuscarScreen() {
           onBlur={() => setSearchFocused(false)}
         />
         {query.length > 0 && (
-          <TouchableOpacity onPress={() => setQuery("")} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => setQuery("")} activeOpacity={0.7} accessibilityLabel="Borrar búsqueda">
             <Ionicons name="close-circle" size={20} color="#9CA3AF" />
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Tabs */}
-      <View className="flex-row gap-2 mt-4 mb-4">
-        {TABS.map((tab) => {
-          const isActive = activeTab === tab.key;
-          return (
-            <TouchableOpacity
-              key={tab.key}
-              onPress={() => setActiveTab(tab.key)}
-              className={`flex-1 py-2.5 rounded-xl flex-row items-center justify-center gap-1.5 ${
-                isActive ? "bg-[#005e66]" : "bg-white"
-              }`}
-              activeOpacity={0.8}
-            >
-              <Ionicons name={tab.icon} size={16} color={isActive ? "#fff" : "#4B5563"} />
-              <Text className={`font-semibold ${isActive ? "text-white" : "text-gray-600"}`}>
-                {tab.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+      <Segmented options={TABS} value={activeTab} onChange={setActiveTab} className="mt-4 mb-4" />
 
       {/* Resultados */}
       {loading ? (
         <ListSkeleton count={4} />
       ) : isEmpty ? (
-        <EmptyState
+        <EmptyCard
           icon="search"
           title="Sin resultados"
-          subtitle={`No encontramos ${activeTab === "pets" ? "mascotas" : activeTab === "groups" ? "grupos" : "usuarios"} con "${query.trim()}"`}
+          text={`No encontramos ${activeTab === "pets" ? "mascotas" : activeTab === "groups" ? "grupos" : "usuarios"} con "${query.trim()}"`}
         />
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-10">
-          {activeTab === "pets" &&
-            pets.map((p) => renderPet(p))}
-          {activeTab === "groups" &&
-            groups.map((g) => renderGroup(g))}
-          {activeTab === "users" &&
-            users.map((u) => renderUser(u))}
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled">
+          {activeTab === "pets" && visiblePets.map((p) => renderPet(p))}
+          {activeTab === "groups" && visibleGroups.map((g) => renderGroup(g))}
+          {activeTab === "users" && visibleUsers.map((u) => renderUser(u))}
         </ScrollView>
       )}
     </View>

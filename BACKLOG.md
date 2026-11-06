@@ -1,61 +1,107 @@
-# Backlog — Lucky Tracker
+# Backlog - Lucky Tracker
 
-> Short-term task list. Created 2026-10-03, last reviewed 2026-10-21. Longer-term debt lives in [`PROGRESS.md`](PROGRESS.md#-open-work--technical-debt); E2E work in [`docs/E2E_SESSION_STATUS.md`](docs/E2E_SESSION_STATUS.md).
+> Actualizado 2026-11-03. Estado detallado de lo hecho: `PROGRES.md` (Fase 11) y `AGENTS.md`.
 
-## ✅ Done (week of 2026-10-03)
+## Siguiente (esta semana)
 
-- [x] Full UI/UX audit (24 screens + components)
-- [x] Navigation link colors fixed (red → teal)
-- [x] Invalid font classes removed (`font-[Inter_*]`)
-- [x] ProfileTab redesign (consistent menu style)
-- [x] Image upload for Feed posts (`posts` bucket)
+### Bloquea el lanzamiento
+- [ ] **QA en teléfono con el build nuevo** (APK `preview`): registro con edad y teléfono por país, colonias legibles, editar perfil con teléfono viejo, correo de confirmación a `luckytracker.com.mx`, bandeja sin emoji, límites de texto
+- [ ] **Publicar `/policy` y `/terms`** (sábado 2026-11-07) y revisarlas con la lista de `docs/LEGAL_*.md`: ancla `#eliminar-cuenta`, correo en texto plano, domicilio ARCO, proveedores, edad 18
+- [ ] **Completar los marcadores** de los textos legales: `[RESPONSABLE]`, `[DOMICILIO]`, `[CORREO]`, `[REGIÓN]`, `[FECHA]`
+- [ ] **Corregir el certificado en okhuysen.dev**: el PDF dice "Claude Code in Action" (mayo 2026), la página dice "Claude AI Developer Certification" (2025)
+- [ ] **Play Console**: fichas, público objetivo solo adultos (18+), clasificación de contenido (contenido de usuarios y chat), formulario Data safety coherente con la política, URL de eliminación de cuenta
+- [ ] **Build `production`** (AAB) cuando todo lo anterior esté probado
 
-## ⏳ Image upload integration
+### Pruebas pendientes
+- [ ] **Push FCM de punta a punta** con el build SDK 58 (necesita un segundo dispositivo; el token ya se registra)
+- [ ] Probar en el build nuevo: borrar cuenta, moderación y chats después de la migración B
 
-### 1. Emergency — lost pets (priority: HIGH)
-- **Where:** `app/dashboard.tsx` → `handleReportMissing` / `EmergencyTab`
-- **Task:** upload the lost pet's photo to the `emergency-alerts` bucket.
-- **Context:** when a user reports a lost pet, the photo should go to Storage. Same pattern as `handleCreatePost`.
-- **Estimate:** 30 min
+### Infra (plan free)
+- [ ] Respaldo manual semanal (`supabase db dump`) y entrar al panel cada semana: el plan free no tiene respaldos y pausa el proyecto tras ~7 días sin actividad
+- [ ] Decidir plan Pro antes de tener clientes reales
+- [ ] Reporte de caídas (Sentry) antes de producción
 
-### 2. Emergency — found pets (priority: HIGH)
-- **Where:** `app/dashboard.tsx` → `handleReportFound` / `EmergencyTab`
-- **Task:** upload the found pet's photo to the `found-pets` bucket.
-- **Estimate:** 30 min
+## Después (sin fecha)
+- [ ] Migración baseline (#8) para poder recrear la base desde cero
+- [ ] Límites de largo en la base de datos (hoy solo `maxLength` en la app)
+- [ ] Quitar el paquete `@react-native-picker/picker` (ya no se usa; es nativo, entra con un build) y su mock en `__tests__/app/editar-perfil.test.tsx`
+- [ ] Color de avatar determinista por `user_id` (hoy siempre teal)
+- [ ] Si alguien te bloqueó, su contenido sigue visible para ti; pets y listas de grupos no se filtran por bloqueo
+- [ ] Guardar la fecha de aceptación de términos en el perfil
+- [ ] Soporte offline, i18n, analítica, servir `colonias.json` desde API (ver "Baja prioridad" en `PROGRES.md`)
+- [ ] Más países fijos en el selector de teléfono (hoy México, EE. UU./Canadá y otro)
 
-### 3. Success stories (priority: MEDIUM)
-- **Where:** `app/historias.tsx` → `handleCreate`
-- **Task:** upload the story image to the `success-stories` bucket.
-- **Estimate:** 30 min
+## Decisiones tomadas
+- Edad mínima **18 años** (app + trigger `enforce_min_age` + textos legales). Si cambia: `MIN_AGE` en `utils/age.ts`, el trigger y los textos.
+- Plan Supabase **free** por ahora.
+- Sin emojis en la app ni en notificaciones.
+- Los commits y los builds los hace el usuario.
 
-### 4. Pet photo (priority: MEDIUM)
-- **Where:** `components/dashboard/PetForm.tsx` / `PetDetailModal`
-- **Task:** confirm the pet photo upload works when creating and editing a pet (the preview bug was fixed in `12ac61c`).
-- **Estimate:** 20 min
+---
 
-### 5. Post fields that aren't saved (priority: MEDIUM)
-- **Where:** `components/PostForm.tsx`, `services/posts.service.ts`
-- **Task:** `PostForm` collects multiple images, location, tags and URLs, but `createPost` only stores `content` and the first image. Add the columns to `posts` and persist them, or remove the fields from the form.
-- **Estimate:** 1 hour
+## Histórico (2026-10-03): integración de subida de imágenes
+> Sin verificar contra el estado actual. La subida se corrigió con `expo-file-system` el 2026-10-30; revisar cada punto antes de retomarlo.
 
-### 6. Validation and testing (priority: HIGH)
-- [ ] Create posts with multiple images
-- [ ] Create emergency alerts with a photo
-- [ ] Check that URLs persist after a reload
-- [ ] Check images render in the feed
-- [ ] Validate the RLS policies on the Storage buckets
-- **Estimate:** 1 hour
+## Próxima Semana (Image Upload Integration)
 
-## Summary
+### ✅ Completado (Esta Semana)
+- [x] Auditoría completa de UI/UX (24 pantallas + componentes)
+- [x] Corrección de colores de navegación (links de rojo a teal)
+- [x] Limpieza de clases de fuente inválidas (font-[Inter_*])
+- [x] Redesign de ProfileTab (estilo menu consistente)
+- [x] Implementación de subida de imágenes para posts (Feed)
 
-- **Tasks:** 5 + testing
-- **Estimate:** 3–4 hours
-- **Buckets:** `posts`, `pet-images` and `profile-pictures` are in use; `emergency-alerts`, `found-pets` and `success-stories` aren't in the documented schema ([`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md)) and probably need to be created
-- **Risk:** low (same pattern as posts)
+### ⏳ Backlog - Integración de Subida de Imágenes
 
-## Technical notes
+#### 1. **Emergencia - Mascotas Perdidas** (PRIORITY: HIGH)
+- **Archivo:** `app/dashboard.tsx` → `handleReportMissing` / EmergencyTab
+- **Tarea:** Implementar subida de foto de mascota perdida a bucket `emergency-alerts`
+- **Contexto:** Cuando usuario reporta mascota perdida, debe subir foto a Storage
+- **Código necesario:** Similar a `handleCreatePost` pero para emergencies
+- **Estimado:** 30 min
 
-- Use `dashboardService.uploadImage(uri, bucketName)` for every upload.
-- Always store public URLs in the database, never local URIs.
-- On a 404, `uploadImage` only falls back for known buckets (`posts`/`pet-images` → `public`, `profile-pictures` → `alternate`). New buckets need their own fallback entry or must exist before release.
-- Show an error toast if any upload fails.
+#### 2. **Emergencia - Mascotas Encontradas** (PRIORITY: HIGH)
+- **Archivo:** `app/dashboard.tsx` → `handleReportFound` / EmergencyTab
+- **Tarea:** Implementar subida de foto de mascota encontrada a bucket `found-pets`
+- **Contexto:** Cuando usuario marca mascota encontrada, debe subir foto
+- **Estimado:** 30 min
+
+#### 3. **Historias de Éxito** (PRIORITY: MEDIUM)
+- **Archivo:** `app/historias.tsx` → `handleCreate`
+- **Tarea:** Implementar subida de imagen de historia a bucket `success-stories`
+- **Contexto:** Las reuniones exitosas pueden tener foto adjunta
+- **Estimado:** 30 min
+
+#### 4. **Perfil - Foto de Mascota** (PRIORITY: MEDIUM)
+- **Archivo:** `components/dashboard/PetForm.tsx` / PetDetailModal
+- **Tarea:** Verificar que subida de foto de mascota funcione correctamente
+- **Contexto:** Cuando registras/editas mascota, foto debe ir a Storage
+- **Estimado:** 20 min
+
+#### 5. **Validación y Testing** (PRIORITY: HIGH)
+- [ ] Probar creación de posts con múltiples imágenes
+- [ ] Probar creación de alertas de emergencia con foto
+- [ ] Verificar que URLs persistan después de reload
+- [ ] Probar visualización de imágenes en feed
+- [ ] Validar RLS policies en Storage buckets
+- **Estimado:** 1 hora
+
+### 📊 Resumen
+- **Total tareas:** 5 + Testing
+- **Tiempo estimado:** 2-3 horas
+- **Buckets necesarios:** `posts`, `emergency-alerts`, `found-pets`, `success-stories`, `pet-images`
+- **Riesgo:** Bajo (patrón idéntico a posts)
+
+---
+
+## Notas Técnicas
+- Usar `dashboardService.uploadImage(uri, bucketName)` para todas las subidas
+- Siempre guardar URLs públicas en BD, NO URIs locales
+- Validar que el bucket exista antes de subir (fallback a `public` si no existe)
+- Mostrar toast de error si alguna subida falla
+
+---
+
+**Asignado a:** Developer  
+**Target:** Próxima semana  
+**Creado:** 2026-10-03

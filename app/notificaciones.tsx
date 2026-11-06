@@ -1,5 +1,6 @@
+import { ListRow, ListSection, PrimaryButton, ScreenTitle } from "@/components/kit/Kit";
 import { notificationsService } from "@/services/notifications.service";
-import { supabase } from "@/utils/supabase";
+import { getCurrentUser } from "@/utils/session";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -7,7 +8,6 @@ import {
   ScrollView,
   Switch,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -19,16 +19,9 @@ export default function NotificacionesScreen() {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [lostPetAlerts, setLostPetAlerts] = useState(true);
   const [foundPetAlerts, setFoundPetAlerts] = useState(true);
-  const [communityAnnouncements, setCommunityAnnouncements] = useState(true);
-
-  // loadPreferences corre una sola vez al montar (deps estables intencionales)
-  useEffect(() => {
-    loadPreferences();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const loadPreferences = async () => {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: user } = await getCurrentUser();
     if (!user?.user) {
       router.replace("/");
       return;
@@ -36,24 +29,26 @@ export default function NotificacionesScreen() {
 
     const result = await notificationsService.getPreferences(user.user.id);
     if (result.success && result.data) {
-      setPushEnabled(result.data.push_enabled);
-      setLostPetAlerts(result.data.lost_pet_alerts);
-      setFoundPetAlerts(result.data.found_pet_alerts);
-      setCommunityAnnouncements(result.data.community_announcements);
+      setPushEnabled(result.data.push_enabled ?? true);
+      setLostPetAlerts(result.data.lost_pet_alerts ?? true);
+      setFoundPetAlerts(result.data.found_pet_alerts ?? true);
     }
     setLoading(false);
   };
 
   const handleSave = async () => {
     setSaving(true);
-    const { data: user } = await supabase.auth.getUser();
-    if (!user?.user) return;
+    const { data: user } = await getCurrentUser();
+    if (!user?.user) {
+      setSaving(false);
+      router.replace("/");
+      return;
+    }
 
     const result = await notificationsService.update(user.user.id, {
       push_enabled: pushEnabled,
       lost_pet_alerts: lostPetAlerts,
       found_pet_alerts: foundPetAlerts,
-      community_announcements: communityAnnouncements,
     });
 
     if (result.success) {
@@ -64,97 +59,71 @@ export default function NotificacionesScreen() {
     setSaving(false);
   };
 
+  // loadPreferences corre una sola vez al montar (deps estables intencionales)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    loadPreferences();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
       </View>
     );
   }
 
+  const sw = (value: boolean) => ({
+    trackColor: { false: "#D1D5DB", true: "#007275" },
+    thumbColor: "#ffffff",
+    ios_backgroundColor: "#D1D5DB",
+    value,
+  });
+
   return (
-    <ScrollView contentContainerClassName="p-5 bg-[#faf5e0] flex-1">
-      <Text className="text-2xl font-bold text-[#211f1e] mb-6">
-        Configuración de notificaciones
-      </Text>
+    <ScrollView className="bg-[#faf5e0]" contentContainerClassName="p-5 pb-10 grow">
+      <ScreenTitle title="Preferencias" subtitle="Elige qué avisos quieres recibir" />
 
-      <View className="bg-white p-5 rounded-2xl shadow-[0_4px_24px_rgba(33,31,30,0.08)] mb-6">
-        <Text className="text-lg font-bold mb-4">Preferencias</Text>
+      <ListSection title="General">
+        <ListRow
+          first
+          icon="notifications-outline"
+          label="Notificaciones push"
+          right={<Switch {...sw(pushEnabled)} onValueChange={setPushEnabled} accessibilityLabel="Notificaciones push" />}
+        />
+      </ListSection>
 
-        <View className="space-y-4">
-          <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
-            <View className="flex-1 mr-4">
-              <Text className="font-semibold text-[#211f1e]">Notificaciones push</Text>
-              <Text className="text-gray-500 text-sm">Recibir notificaciones en general</Text>
-            </View>
-            <Switch
-              value={pushEnabled}
-              onValueChange={setPushEnabled}
-              trackColor={{ false: "#ccc", true: "#005e66" }}
-              thumbColor={pushEnabled ? "#fff" : "#f4f3f4"}
-            />
-          </View>
-
-          <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
-            <View className="flex-1 mr-4">
-              <Text className="font-semibold text-[#211f1e]">Alertas de mascotas perdidas</Text>
-              <Text className="text-gray-500 text-sm">Cuando alguien reporte una mascota perdida en tu colonia</Text>
-            </View>
-            <Switch
-              value={lostPetAlerts}
-              onValueChange={setLostPetAlerts}
-              trackColor={{ false: "#ccc", true: "#005e66" }}
-              thumbColor={lostPetAlerts ? "#fff" : "#f4f3f4"}
-              disabled={!pushEnabled}
-            />
-          </View>
-
-          <View className="flex-row items-center justify-between py-3 border-b border-gray-100">
-            <View className="flex-1 mr-4">
-              <Text className="font-semibold text-[#211f1e]">Mascotas encontradas</Text>
-              <Text className="text-gray-500 text-sm">Cuando alguien encuentre a tu mascota</Text>
-            </View>
-            <Switch
-              value={foundPetAlerts}
-              onValueChange={setFoundPetAlerts}
-              trackColor={{ false: "#ccc", true: "#005e66" }}
-              thumbColor={foundPetAlerts ? "#fff" : "#f4f3f4"}
-              disabled={!pushEnabled}
-            />
-          </View>
-
-          <View className="flex-row items-center justify-between py-3">
-            <View className="flex-1 mr-4">
-              <Text className="font-semibold text-[#211f1e]">Avisos de la comunidad</Text>
-              <Text className="text-gray-500 text-sm">Nuevos avisos y eventos en tu colonia</Text>
-            </View>
-            <Switch
-              value={communityAnnouncements}
-              onValueChange={setCommunityAnnouncements}
-              trackColor={{ false: "#ccc", true: "#005e66" }}
-              thumbColor={communityAnnouncements ? "#fff" : "#f4f3f4"}
-              disabled={!pushEnabled}
-            />
-          </View>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        className={`py-4 rounded-xl ${saving ? "bg-gray-400" : "bg-[#005e66]"}`}
-        onPress={handleSave}
-        disabled={saving}
-      >
-        <Text className={`text-center font-bold ${saving ? "text-gray-700" : "text-white"}`}>
-          {saving ? "Guardando..." : "Guardar preferencias"}
+      <ListSection title="Alertas">
+        <ListRow
+          first
+          icon="megaphone-outline"
+          color="#ff7e70"
+          label="Mascotas perdidas en tu colonia"
+          right={
+            <Switch {...sw(lostPetAlerts)} onValueChange={setLostPetAlerts} disabled={!pushEnabled} accessibilityLabel="Alertas de mascotas perdidas" />
+          }
+        />
+        <ListRow
+          icon="heart-outline"
+          label="Alguien encontró a tu mascota"
+          right={
+            <Switch {...sw(foundPetAlerts)} onValueChange={setFoundPetAlerts} disabled={!pushEnabled} accessibilityLabel="Mascotas encontradas" />
+          }
+        />
+      </ListSection>
+      {!pushEnabled && (
+        <Text className="text-gray-500 text-xs -mt-3 mb-6 ml-2">
+          Activa las notificaciones push para recibir alertas.
         </Text>
-      </TouchableOpacity>
+      )}
 
-      <TouchableOpacity
-        className="py-4 rounded-xl mt-3 bg-[#211f1e]"
-        onPress={() => router.back()}
-      >
-        <Text className="text-white text-center font-bold">Volver</Text>
-      </TouchableOpacity>
+      <PrimaryButton
+        title={saving ? "Guardando..." : "Guardar preferencias"}
+        icon="checkmark"
+        onPress={handleSave}
+        loading={saving}
+      />
     </ScrollView>
   );
 }

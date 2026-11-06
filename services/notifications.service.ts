@@ -1,4 +1,5 @@
 import { type NotificationPreference, type ServiceResult } from "@/types";
+import type { Tables } from "@/types/database";
 import { supabase } from "@/utils/supabase";
 
 class NotificationsService {
@@ -27,6 +28,40 @@ class NotificationsService {
     } catch (error: any) {
       return { success: false, error: error.message, data: undefined };
     }
+  }
+
+  // Bandeja: los avisos los inserta la edge function (service role); el usuario solo lee y marca como leído
+  async getInbox(userId: string): Promise<ServiceResult<Tables<"notifications">[]>> {
+    try {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return { success: true, data: data ?? [] };
+    } catch (error: any) {
+      return { success: false, error: error.message, data: [] };
+    }
+  }
+
+  async getUnreadCount(userId: string): Promise<number> {
+    const { count } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("read", false);
+    return count ?? 0;
+  }
+
+  async markRead(id: string): Promise<void> {
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
+  }
+
+  async markAllRead(userId: string): Promise<void> {
+    await supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
   }
 
   async update(

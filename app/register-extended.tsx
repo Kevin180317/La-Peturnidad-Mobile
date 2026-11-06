@@ -1,51 +1,44 @@
+import { AuthScreen } from "@/components/auth/AuthScreen";
+import { ColoniaPicker, coloniasForPostalCode } from "@/components/ColoniaPicker";
+import { Field, PrimaryButton } from "@/components/kit/Kit";
+import { PhoneField } from "@/components/PhoneField";
 import { supabase } from "@/utils/supabase";
-import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   Text,
-  TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
-import colonias from "../assets/colonias.json";
+import { isAdult, MIN_AGE } from "../utils/age";
+import { normalizePhone, type CountryKey } from "../utils/phone";
+import { LIMITS } from "@/utils/limits";
 
 export default function RegisterExtendedScreen() {
   const router = useRouter();
-  const { email } = useLocalSearchParams<{
-    email: string;
-    userId: string;
-  }>();
+  const { email } = useLocalSearchParams<{ email: string }>();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneCountry, setPhoneCountry] = useState<CountryKey>("MX");
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [birthDate, setBirthDate] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [filteredColonias, setFilteredColonias] = useState<typeof colonias>([]);
+  const [filteredColonias, setFilteredColonias] = useState<string[]>([]);
   const [selectedColonia, setSelectedColonia] = useState("");
   const [city] = useState("Tijuana");
   const [loading, setLoading] = useState(false);
-  const [firstNameFocused, setFirstNameFocused] = useState(false);
-  const [lastNameFocused, setLastNameFocused] = useState(false);
-  const [phoneFocused, setPhoneFocused] = useState(false);
-  const [birthDateFocused, setBirthDateFocused] = useState(false);
-  const [postalCodeFocused, setPostalCodeFocused] = useState(false);
-  const [cityFocused, setCityFocused] = useState(false);
+  const navigatedRef = useRef(false);
+  const navTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handlePostalCodeChange = (text: string) => {
     const cleaned = text.replace(/\D/g, "").slice(0, 5);
     setPostalCode(cleaned);
 
     if (cleaned.length === 5) {
-      const filtered = colonias.filter(
-        (item) => String(item["Código Postal"]) === cleaned,
-      );
+      const filtered = coloniasForPostalCode(cleaned);
       setFilteredColonias(filtered);
       if (filtered.length === 0) {
         Toast.show({
@@ -74,13 +67,46 @@ export default function RegisterExtendedScreen() {
     return formatted;
   };
 
-  const toPostgresDate = (ddmmyyyy: string): string | null => {
-    if (!ddmmyyyy) return null;
-    const parts = ddmmyyyy.split("/");
-    if (parts.length !== 3) return null;
-    const [dd, mm, yyyy] = parts;
-    if (dd.length !== 2 || mm.length !== 2 || yyyy.length !== 4) return null;
-    return `${yyyy}-${mm}-${dd}`;
+  // Convierte DD/MM/YYYY a YYYY-MM-DD validando que sea una fecha real, no futura y desde 1900
+  const parseBirthDate = (
+    ddmmyyyy: string,
+  ): { value: string } | { error: string } => {
+    if (!ddmmyyyy) return { error: "La fecha de nacimiento es obligatoria" };
+    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(ddmmyyyy);
+    if (!match) {
+      return { error: "Completa la fecha con el formato DD/MM/AAAA" };
+    }
+    const [, dd, mm, yyyy] = match;
+    const day = Number(dd);
+    const month = Number(mm);
+    const year = Number(yyyy);
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() !== year ||
+      date.getMonth() !== month - 1 ||
+      date.getDate() !== day
+    ) {
+      return { error: "La fecha de nacimiento no es válida" };
+    }
+    if (year < 1900) {
+      return { error: "El año debe ser 1900 o posterior" };
+    }
+    if (date.getTime() > Date.now()) {
+      return { error: "La fecha de nacimiento no puede ser futura" };
+    }
+    const value = `${yyyy}-${mm}-${dd}`;
+    if (!isAdult(value)) {
+      return { error: `Debes ser mayor de ${MIN_AGE} años para usar Lucky Tracker` };
+    }
+    return { value };
+  };
+
+  const goToDashboard = () => {
+    if (navigatedRef.current) return;
+    navigatedRef.current = true;
+    if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+    if (router.canDismiss()) router.dismissAll();
+    router.replace("/dashboard");
   };
 
   const handleCompleteProfile = async () => {
@@ -94,6 +120,14 @@ export default function RegisterExtendedScreen() {
       });
       return;
     }
+
+    const phoneResult = normalizePhone(phoneCountry, phone);
+    if ("error" in phoneResult) {
+      setPhoneError(phoneResult.error);
+      Toast.show({ type: "error", text1: "Teléfono inválido", text2: phoneResult.error, visibilityTime: 3000 });
+      return;
+    }
+    setPhoneError(null);
 
     if (!postalCode || postalCode.length !== 5) {
       Toast.show({
@@ -115,6 +149,17 @@ export default function RegisterExtendedScreen() {
       return;
     }
 
+    const birth = parseBirthDate(birthDate);
+    if ("error" in birth) {
+      Toast.show({
+        type: "error",
+        text1: "Fecha inválida",
+        text2: birth.error,
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -127,14 +172,12 @@ export default function RegisterExtendedScreen() {
       }
       const finalUserId = user.id;
 
-      console.log("Creando perfil para user_id:", finalUserId);
-
       const payload = {
         user_id: finalUserId,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
-        phone: phone.trim(),
-        birth_date: toPostgresDate(birthDate),
+        phone: phoneResult.value,
+        birth_date: birth.value,
         postal_code: postalCode,
         address: selectedColonia,
         city: city,
@@ -145,202 +188,114 @@ export default function RegisterExtendedScreen() {
         .from("user_profiles")
         .upsert(payload, { onConflict: "user_id", ignoreDuplicates: false });
 
-      if (error) {
-        console.error("Upsert error details:", JSON.stringify(error));
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log("Perfil guardado exitosamente");
-
+      // Se mantiene el spinner hasta navegar (una sola vez: al ocultar el toast o por respaldo)
       Toast.show({
-        type: "success",
+        type: "welcome",
         text1: "¡Perfil completado!",
         text2: "Bienvenido a Lucky Tracker",
         visibilityTime: 1500,
+        onHide: goToDashboard,
       });
-
-      // Navegar después de un breve delay para que se vea el toast
-      setTimeout(() => {
-        router.replace({
-          pathname: "/dashboard",
-          params: { email: email ?? user.email ?? "" },
-        });
-      }, 1600);
-    } catch (error: any) {
-      console.error("Error al guardar perfil:", error);
+      navTimeoutRef.current = setTimeout(goToDashboard, 2500);
+    } catch (error) {
+      if (__DEV__) console.error("Error al guardar perfil:", error);
       Toast.show({
         type: "error",
         text1: "Error al guardar",
-        text2: error.message || "Intenta de nuevo más tarde",
+        text2: "No se pudo guardar tu perfil. Intenta de nuevo más tarde",
         visibilityTime: 3000,
       });
-    } finally {
       setLoading(false);
     }
   };
 
-  const handleSkip = () => {
-    router.replace({
-      pathname: "/",
-    });
-  };
+  useEffect(() => {
+    return () => {
+      // Evita navegar tras desmontar la pantalla
+      navigatedRef.current = true;
+      if (navTimeoutRef.current) clearTimeout(navTimeoutRef.current);
+    };
+  }, []);
 
   if (loading) {
     return (
       <View className="flex-1 justify-center items-center bg-[#faf5e0]">
-        <ActivityIndicator size="large" color="#005e66" />
+        <ActivityIndicator size="large" color="#007275" />
         <Text className="mt-4 text-[#211f1e]">Guardando información...</Text>
       </View>
     );
   }
 
   return (
-    <KeyboardAvoidingView
-      className="flex-1 bg-[#faf5e0]"
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-    <ScrollView
-      className="flex-1 bg-[#faf5e0]"
-      contentContainerClassName="p-6 pb-10"
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text className="text-2xl font-bold text-[#211f1e] mb-2 text-center">
-        Completa tu perfil
+    <AuthScreen headerless title="Completa tu perfil" subtitle={`Usuario: ${email}`}>
+      <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-1">Datos personales</Text>
+      <Field
+        label="Nombre *"
+        icon="person-outline"
+        placeholder="Tu nombre"
+        accessibilityLabel="Nombre"
+        value={firstName}
+        onChangeText={setFirstName}
+        maxLength={LIMITS.name}
+        autoCapitalize="words"
+      />
+      <Field
+        label="Apellido *"
+        icon="person-outline"
+        placeholder="Tu apellido"
+        accessibilityLabel="Apellido"
+        value={lastName}
+        onChangeText={setLastName}
+        maxLength={LIMITS.name}
+        autoCapitalize="words"
+      />
+      <PhoneField
+        country={phoneCountry}
+        onCountryChange={(key) => {
+          setPhoneCountry(key);
+          setPhoneError(null);
+        }}
+        value={phone}
+        onChangeText={(text) => {
+          setPhone(text);
+          setPhoneError(null);
+        }}
+        error={phoneError}
+      />
+      <Field
+        label="Fecha de nacimiento"
+        icon="calendar-outline"
+        placeholder={`DD/MM/AAAA (mayores de ${MIN_AGE})`}
+        accessibilityLabel="Fecha de nacimiento"
+        value={birthDate}
+        onChangeText={(text) => setBirthDate(formatDateInput(text))}
+        keyboardType="numeric"
+      />
+
+      <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 mt-2 ml-1">Tu colonia</Text>
+      <Text className="text-gray-500 text-xs mb-3 ml-1 -mt-1">
+        La usamos para avisarte de mascotas perdidas cerca de ti.
       </Text>
-      <Text className="text-base text-[#211f1e] text-center mb-8">
-        Usuario: {email}
-      </Text>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Nombre <Text className="text-[#c2402f]">*</Text>
-        </Text>
-        <TextInput
-          className={`${firstNameFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="Tu nombre"
-          placeholderTextColor="#9BA1A6"
-          value={firstName}
-          onChangeText={setFirstName}
-          autoCapitalize="words"
-          onFocus={() => setFirstNameFocused(true)}
-          onBlur={() => setFirstNameFocused(false)}
-        />
-      </View>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Apellido <Text className="text-[#c2402f]">*</Text>
-        </Text>
-        <TextInput
-          className={`${lastNameFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="Tu apellido"
-          placeholderTextColor="#9BA1A6"
-          value={lastName}
-          onChangeText={setLastName}
-          autoCapitalize="words"
-          onFocus={() => setLastNameFocused(true)}
-          onBlur={() => setLastNameFocused(false)}
-        />
-      </View>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Teléfono <Text className="text-[#c2402f]">*</Text>
-        </Text>
-        <TextInput
-          className={`${phoneFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="Número de teléfono"
-          placeholderTextColor="#9BA1A6"
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          onFocus={() => setPhoneFocused(true)}
-          onBlur={() => setPhoneFocused(false)}
-        />
-      </View>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Fecha de nacimiento
-        </Text>
-        <TextInput
-          className={`${birthDateFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="DD/MM/YYYY"
-          placeholderTextColor="#9BA1A6"
-          value={birthDate}
-          onChangeText={(text) => setBirthDate(formatDateInput(text))}
-          keyboardType="numeric"
-          onFocus={() => setBirthDateFocused(true)}
-          onBlur={() => setBirthDateFocused(false)}
-        />
-      </View>
-
-      <View className="mb-4">
-        <Text className="text-[#211f1e] font-semibold mb-2">
-          Código Postal <Text className="text-[#c2402f]">*</Text>
-        </Text>
-        <TextInput
-          className={`${postalCodeFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          placeholder="Código postal"
-          placeholderTextColor="#9BA1A6"
-          value={postalCode}
-          onChangeText={handlePostalCodeChange}
-          keyboardType="numeric"
-          maxLength={5}
-          onFocus={() => setPostalCodeFocused(true)}
-          onBlur={() => setPostalCodeFocused(false)}
-        />
-      </View>
+      <Field
+        label="Código Postal *"
+        icon="map-outline"
+        placeholder="Código postal"
+        accessibilityLabel="Código postal"
+        value={postalCode}
+        onChangeText={handlePostalCodeChange}
+        keyboardType="numeric"
+        maxLength={5}
+      />
 
       {filteredColonias.length > 0 && (
-        <View className="mb-4 border-2 border-[#211f1e]/20 rounded-lg overflow-hidden bg-white">
-          <Picker
-            selectedValue={selectedColonia}
-            onValueChange={(itemValue) => setSelectedColonia(itemValue)}
-            style={{ height: 50, color: "#211f1e", backgroundColor: "#ffffff" }}
-          >
-            <Picker.Item label="Selecciona una colonia *" value="" color="#211f1e" />
-            {filteredColonias.map((item, idx) => (
-              <Picker.Item
-                key={idx}
-                label={item["Asentamiento"]}
-                value={item["Asentamiento"]}
-                color="#211f1e"
-              />
-            ))}
-          </Picker>
-        </View>
+        <ColoniaPicker options={filteredColonias} value={selectedColonia} onChange={setSelectedColonia} />
       )}
 
-      <View className="mb-8">
-        <Text className="text-[#211f1e] font-semibold mb-2">Ciudad</Text>
-        <TextInput
-          className={`${cityFocused ? "border-[#005e66] shadow-[0_0_0_3px_rgba(0,114,117,0.14)]" : "border-2 border-[#211f1e]/20"} rounded-lg p-4 text-base bg-white text-[#211f1e]`}
-          value={city}
-          editable={false}
-          onFocus={() => setCityFocused(true)}
-          onBlur={() => setCityFocused(false)}
-        />
-      </View>
+      <Field label="Ciudad" icon="location-outline" value={city} editable={false} accessibilityLabel="Ciudad" placeholder="Se completa con tu código postal" />
 
-      <TouchableOpacity
-        className="bg-[#005e66] py-4 rounded-xl mb-4"
-        onPress={handleCompleteProfile}
-      >
-        <Text className="text-white text-center font-bold text-lg">
-          Completar perfil
-        </Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity className="py-4" onPress={handleSkip}>
-        <Text className="text-[#211f1e]/60 text-center font-semibold">
-          Omitir por ahora
-        </Text>
-      </TouchableOpacity>
-
-      <Toast />
-    </ScrollView>
-    </KeyboardAvoidingView>
+      <PrimaryButton title="Completar perfil" icon="checkmark" onPress={handleCompleteProfile} className="mt-2" />
+    </AuthScreen>
   );
 }

@@ -105,18 +105,21 @@ export type Database = {
       }
       conversation_participants: {
         Row: {
+          cleared_at: string | null
           conversation_id: string
           created_at: string | null
           id: string
           user_id: string
         }
         Insert: {
+          cleared_at?: string | null
           conversation_id: string
           created_at?: string | null
           id?: string
           user_id: string
         }
         Update: {
+          cleared_at?: string | null
           conversation_id?: string
           created_at?: string | null
           id?: string
@@ -161,6 +164,24 @@ export type Database = {
           },
         ]
       }
+      device_tokens: {
+        Row: {
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       emergency_alerts: {
         Row: {
           created_at: string | null
@@ -169,7 +190,11 @@ export type Database = {
           id: string
           image_url: string | null
           last_seen_location: string | null
+          notified_at: string | null
+          pet_id: string | null
           pet_name: string | null
+          resolved_at: string | null
+          status: string
           type: string | null
           user_id: string
         }
@@ -180,7 +205,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           last_seen_location?: string | null
+          notified_at?: string | null
+          pet_id?: string | null
           pet_name?: string | null
+          resolved_at?: string | null
+          status?: string
           type?: string | null
           user_id: string
         }
@@ -191,7 +220,11 @@ export type Database = {
           id?: string
           image_url?: string | null
           last_seen_location?: string | null
+          notified_at?: string | null
+          pet_id?: string | null
           pet_name?: string | null
+          resolved_at?: string | null
+          status?: string
           type?: string | null
           user_id?: string
         }
@@ -220,21 +253,39 @@ export type Database = {
       }
       found_pets: {
         Row: {
+          alert_id: string | null
+          alert_owner_id: string | null
           created_at: string | null
           id: string
-          pet_id: string
+          image_url: string | null
+          note: string | null
+          notified_at: string | null
+          pet_id: string | null
+          pet_name: string | null
           user_id: string
         }
         Insert: {
+          alert_id?: string | null
+          alert_owner_id?: string | null
           created_at?: string | null
           id?: string
-          pet_id: string
+          image_url?: string | null
+          note?: string | null
+          notified_at?: string | null
+          pet_id?: string | null
+          pet_name?: string | null
           user_id: string
         }
         Update: {
+          alert_id?: string | null
+          alert_owner_id?: string | null
           created_at?: string | null
           id?: string
-          pet_id?: string
+          image_url?: string | null
+          note?: string | null
+          notified_at?: string | null
+          pet_id?: string | null
+          pet_name?: string | null
           user_id?: string
         }
         Relationships: [
@@ -443,6 +494,10 @@ export type Database = {
           created_at: string | null
           id: string
           image_url: string | null
+          image_urls: string[]
+          links: string[]
+          location: string | null
+          tags: string[]
           updated_at: string | null
           user_id: string
         }
@@ -451,6 +506,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
+          links?: string[]
+          location?: string | null
+          tags?: string[]
           updated_at?: string | null
           user_id: string
         }
@@ -459,6 +518,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_url?: string | null
+          image_urls?: string[]
+          links?: string[]
+          location?: string | null
+          tags?: string[]
           updated_at?: string | null
           user_id?: string
         }
@@ -530,14 +593,12 @@ export type Database = {
           birth_date: string | null
           city: string | null
           created_at: string | null
-          fcm_token: string | null
           first_name: string | null
           id: string
           last_name: string | null
           phone: string | null
           postal_code: string | null
           profile_picture_url: string | null
-          push_token: string | null
           role: string
           updated_at: string | null
           user_id: string
@@ -547,14 +608,12 @@ export type Database = {
           birth_date?: string | null
           city?: string | null
           created_at?: string | null
-          fcm_token?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
           postal_code?: string | null
           profile_picture_url?: string | null
-          push_token?: string | null
           role?: string
           updated_at?: string | null
           user_id: string
@@ -564,14 +623,12 @@ export type Database = {
           birth_date?: string | null
           city?: string | null
           created_at?: string | null
-          fcm_token?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
           postal_code?: string | null
           profile_picture_url?: string | null
-          push_token?: string | null
           role?: string
           updated_at?: string | null
           user_id?: string
@@ -580,9 +637,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          first_name: string | null
+          last_name: string | null
+          profile_picture_url: string | null
+          role: string | null
+          // Estrechado a mano: el generador marca toda columna de una vista como null, pero viene de
+          // user_profiles.user_id (NOT NULL). Al regenerar este archivo hay que volver a quitar el "| null".
+          user_id: string
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      clear_conversation: {
+        Args: { p_conversation_id: string }
+        Returns: undefined
+      }
+      get_alert_contacts: {
+        Args: { p_alert_ids: string[] }
+        Returns: {
+          alert_id: string
+          owner_name: string
+          owner_phone: string
+        }[]
+      }
+      get_finder_contacts: {
+        Args: never
+        Returns: {
+          finder_name: string
+          finder_phone: string
+          found_id: string
+        }[]
+      }
       create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
@@ -592,11 +682,21 @@ export type Database = {
         Returns: string
       }
       delete_group: { Args: { group_id_param: string }; Returns: undefined }
+      is_blocked_between: { Args: { a: string; b: string }; Returns: boolean }
+      is_blocked_in_conversation: {
+        Args: { conv_id: string; uid: string }
+        Returns: boolean
+      }
       is_moderator_or_admin: { Args: never; Returns: boolean }
       is_participant: {
         Args: { conv_id: string; uid: string }
         Returns: boolean
       }
+      join_group_conversation: {
+        Args: { group_id_param: string }
+        Returns: string
+      }
+      register_device_token: { Args: { p_token: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

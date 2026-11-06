@@ -1,45 +1,65 @@
+import { confirmDialog } from "@/components/ConfirmDialog";
+import { StatusBar } from "expo-status-bar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ComunidadTab } from "@/components/dashboard/ComunidadTab";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 import { EmergencyTab } from "@/components/dashboard/EmergencyTab";
 import { FeedTab } from "@/components/dashboard/FeedTab";
 import { HomeTab } from "@/components/dashboard/HomeTab";
+import { MessagesTab } from "@/components/dashboard/MessagesTab";
 import type { PetFormData } from "@/components/dashboard/PetForm";
 import { ProfileTab } from "@/components/dashboard/ProfileTab";
 import { TabBar, type TabType } from "@/components/dashboard/TabBar";
+import { FAB } from "@/components/FAB";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import type { PostFormData } from "@/components/PostForm";
 import { announcementsService } from "@/services/announcements.service";
+import { authService } from "@/services/auth.service";
 import { commentsService } from "@/services/comments.service";
 import {
   dashboardService,
-  type EmergencyAlert,
   type EmergencyAlertWithOwner,
   type FoundPetWithDetails,
+  type MyEmergencyAlert,
   type Pet,
 } from "@/services/dashboard.service";
+import { followsService } from "@/services/follows.service";
 import { messagesService } from "@/services/messages.service";
-import { postsService } from "@/services/posts.service";
-import { supabase } from "@/utils/supabase";
+import { notificationsService } from "@/services/notifications.service";
+import { FEED_PAGE_SIZE, postsService } from "@/services/posts.service";
+import { reportsService } from "@/services/reports.service";
+import { toLocalDateString } from "@/utils/format";
+import { getCurrentUser } from "@/utils/session";
+import { isRunningInExpoGo } from "expo";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { Alert, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { View } from "react-native";
 import Toast from "react-native-toast-message";
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  // Solo se usan para el deep link (tab / alertId); la identidad sale siempre de la sesión
   const params = useLocalSearchParams();
-  const email = params.email as string;
-  const userId = params.userId as string;
 
   // Estados generales
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationsUnread, setNotificationsUnread] = useState(0);
   const [logoutVisible, setLogoutVisible] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [deleteAccountVisible, setDeleteAccountVisible] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
+
+  // Estados para mensajes
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [loadingConversations, setLoadingConversations] = useState(false);
 
   // Estados para mascotas
   const [pets, setPets] = useState<Pet[]>([]);
@@ -52,7 +72,7 @@ export default function DashboardScreen() {
   const [loadingAlerts, setLoadingAlerts] = useState(false);
   const [showAlerts, setShowAlerts] = useState(false);
   const [selectingPetForAlert, setSelectingPetForAlert] = useState(false);
-  const [myAlerts, setMyAlerts] = useState<EmergencyAlert[]>([]);
+  const [myAlerts, setMyAlerts] = useState<MyEmergencyAlert[]>([]);
   const [showMyAlerts, setShowMyAlerts] = useState(false);
   const [foundPets, setFoundPets] = useState<FoundPetWithDetails[]>([]);
   const [showFoundPets, setShowFoundPets] = useState(false);
@@ -60,14 +80,15 @@ export default function DashboardScreen() {
   // Estados para comunidad
   const [comunidadAnnouncements, setComunidadAnnouncements] = useState<any[]>([]);
   const [loadingComunidad, setLoadingComunidad] = useState(false);
-  const [myAnnouncements, setMyAnnouncements] = useState<any[]>([]);
-  const [loadingMyAnnouncements, setLoadingMyAnnouncements] = useState(false);
 
   // Estados para feed
   const [feedPosts, setFeedPosts] = useState<any[]>([]);
   const [loadingFeed, setLoadingFeed] = useState(false);
-  const [myPosts, setMyPosts] = useState<any[]>([]);
-  const [loadingMyPosts, setLoadingMyPosts] = useState(false);
+  const [feedHasMore, setFeedHasMore] = useState(false);
+  // Etiqueta activa en el filtro del feed (null = todo)
+  const [feedTag, setFeedTag] = useState<string | null>(null);
+  const [loadingMoreFeed, setLoadingMoreFeed] = useState(false);
+  const loadingMoreFeedRef = useRef(false);
 
   // Estados para comentarios
   const [commentTarget, setCommentTarget] = useState<{ type: string; id: string } | null>(null);
@@ -76,42 +97,13 @@ export default function DashboardScreen() {
   const [commentText, setCommentText] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
 
+  const isModerator = profile?.role === "moderator" || profile?.role === "admin";
+
   const showToast = useCallback(
     (type: "success" | "error" | "info", text1: string, text2?: string) => {
       Toast.show({ type, text1, text2, position: "top", visibilityTime: 3000 });
     },
     [],
-  );
-
-  // Cargar datos iniciales
-  useEffect(() => {
-    loadUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Registrar token FCM nativo
-  useEffect(() => {
-    const initNotifications = async () => {
-      try {
-        const Notifications = await import("expo-notifications");
-
-        if (user?.id) {
-          registerFcmToken(Notifications);
-        }
-      } catch (error) {
-        console.warn("Notificaciones no disponibles en este entorno:", error);
-      }
-    };
-
-    initNotifications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
-
-  // Recargar mensajes no leídos al volver a la pantalla
-  useFocusEffect(
-    useCallback(() => {
-      if (user?.id) loadUnreadCount(user.id);
-    }, [user?.id]),
   );
 
   const loadComunidad = useCallback(async () => {
@@ -121,70 +113,99 @@ export default function DashboardScreen() {
     setLoadingComunidad(false);
   }, []);
 
-  const loadMyAnnouncements = useCallback(async () => {
-    if (!user?.id) return;
-    setLoadingMyAnnouncements(true);
-    const result = await announcementsService.getMyAnnouncements(user.id);
-    if (result.success) setMyAnnouncements(result.data ?? []);
-    setLoadingMyAnnouncements(false);
-  }, [user?.id]);
-
   const loadFeed = useCallback(async () => {
     if (!user?.id) return;
     setLoadingFeed(true);
-    const result = await postsService.getAllPosts();
-    if (result.success) setFeedPosts(result.data ?? []);
+    const result = await postsService.getAllPosts(null, FEED_PAGE_SIZE, feedTag);
+    if (result.success) {
+      setFeedPosts(result.data ?? []);
+      setFeedHasMore((result.data?.length ?? 0) >= FEED_PAGE_SIZE);
+    }
     setLoadingFeed(false);
-  }, [user?.id]);
+  }, [user?.id, feedTag]);
 
-  const loadMyPosts = useCallback(async () => {
-    if (!user?.id) return;
-    setLoadingMyPosts(true);
-    const result = await postsService.getMyPosts(user.id);
-    if (result.success) setMyPosts(result.data ?? []);
-    setLoadingMyPosts(false);
-  }, [user?.id]);
+  // Siguiente página del feed (scroll infinito); la ref evita pedir la misma página dos veces seguidas
+  const loadMoreFeed = async () => {
+    const last = feedPosts[feedPosts.length - 1];
+    if (!feedHasMore || loadingMoreFeedRef.current || !last) return;
+    loadingMoreFeedRef.current = true;
+    setLoadingMoreFeed(true);
+    const result = await postsService.getAllPosts(last.created_at, FEED_PAGE_SIZE, feedTag);
+    if (result.success) {
+      const page = result.data ?? [];
+      setFeedPosts((current) => [...current, ...page.filter((p) => !current.some((c) => c.id === p.id))]);
+      setFeedHasMore(page.length >= FEED_PAGE_SIZE);
+    }
+    setLoadingMoreFeed(false);
+    loadingMoreFeedRef.current = false;
+  };
 
-  const handleCreatePost = async (data: any) => {
+  const handleCreatePost = async (data: PostFormData) => {
     if (!user?.id) return false;
 
-    let uploadedUrls: string[] = [];
+    if (data.type === "announcements") {
+      const r = await announcementsService.create({
+        user_id: user.id,
+        title: data.title ?? "",
+        content: data.content,
+        category: data.category ?? "general",
+      });
+      if (r.success) {
+        showToast("success", "Publicado");
+        await loadComunidad();
+        return true;
+      }
+      showToast("error", "Error", r.error);
+      return false;
+    }
 
-    if (data.image_urls && data.image_urls.length > 0) {
-      try {
-        for (const uri of data.image_urls) {
-          const result = await dashboardService.uploadImage(uri, "posts");
-          if (result.success && result.url) {
-            uploadedUrls.push(result.url);
-          } else {
-            showToast("error", "Error", `No se pudo subir imagen: ${result.error}`);
-          }
-        }
-      } catch (error: any) {
-        showToast("error", "Error", `Error al subir imágenes: ${error.message}`);
+    // Social: las imágenes se suben primero; si alguna falla no se crea el post y se borran las ya subidas
+    const uploaded: string[] = [];
+    for (const image of data.images ?? []) {
+      const upload = await dashboardService.uploadImage(image, "posts");
+      if (!upload.success || !upload.url) {
+        await Promise.all(uploaded.map((u) => dashboardService.removeImageByUrl(u, "posts")));
+        showToast("error", "No se pudo subir la imagen", upload.error);
         return false;
       }
+      uploaded.push(upload.url);
     }
 
     const result = await postsService.create({
       user_id: user.id,
-      ...data,
-      image_urls: uploadedUrls.length > 0 ? uploadedUrls : undefined
+      content: data.content,
+      image_urls: uploaded,
+      location: data.location,
+      tags: data.tags,
+      links: data.links,
     });
 
     if (result.success) {
       await loadFeed();
-      await loadMyPosts();
       return true;
     }
+    // El post no se creó: las imágenes ya subidas quedan huérfanas, se borran
+    await Promise.all(uploaded.map((u) => dashboardService.removeImageByUrl(u, "posts")));
     showToast("error", "Error", result.error);
     return false;
   };
 
-  const handleDeletePost = async (postId: string) => {
-    const result = await postsService.delete(postId);
-    if (result.success) { await loadFeed(); await loadMyPosts(); }
-    else showToast("error", "Error", result.error);
+  const handleDeletePost = (post: { id: string; image_url?: string | null; image_urls?: string[] | null }) => {
+    confirmDialog({
+      title: "Eliminar publicación",
+      message: "¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await postsService.delete(post.id, [post.image_url, ...(post.image_urls ?? [])]);
+        if (result.success) {
+          showToast("success", "Publicación eliminada");
+          await loadFeed();
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   const loadComments = async (targetType: string, targetId: string) => {
@@ -223,11 +244,23 @@ export default function DashboardScreen() {
     setSendingComment(false);
   };
 
-  useEffect(() => {
-    if (activeTab === "comunidad") { loadComunidad(); loadMyAnnouncements(); }
-    if (activeTab === "feed") { loadFeed(); loadMyPosts(); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
+  const handleDeleteComment = (commentId: string) => {
+    confirmDialog({
+      title: "Eliminar comentario",
+      message: "¿Estás seguro de que quieres eliminar este comentario?",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await commentsService.delete(commentId);
+        if (result.success) {
+          setComments((prev) => prev.filter((c) => c.id !== commentId));
+          await loadFeed();
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
+  };
 
   const registerFcmToken = async (Notifications: any) => {
     try {
@@ -235,21 +268,19 @@ export default function DashboardScreen() {
       if (status !== "granted") return;
 
       const token = (await Notifications.getDevicePushTokenAsync()).data;
-      await dashboardService.saveFcmToken(user.id, token);
-      console.log("FCM token guardado:", token);
+      await dashboardService.saveFcmToken(token);
     } catch (error) {
       console.error("Error registering FCM token:", error);
     }
   };
 
+  // El skeleton solo se muestra en la carga inicial (loading arranca en true);
+  // las recargas posteriores (refresh, foto de perfil) no desmontan la pantalla
   const loadUserData = async () => {
-    setLoading(true);
-
     try {
-      // Obtener usuario actual
       const {
         data: { user: currentUser },
-      } = await supabase.auth.getUser();
+      } = await getCurrentUser();
 
       if (!currentUser) {
         router.replace("/");
@@ -257,34 +288,36 @@ export default function DashboardScreen() {
       }
 
       setUser(currentUser);
-      console.log("Usuario actual:", currentUser.id);
 
-      // Cargar perfil
+      // Siempre el usuario de la sesión: los params de ruta se pueden falsear por deep link
       const profileResult = await dashboardService.getProfileByUserId(
-        userId || currentUser.id,
+        currentUser.id,
       );
 
+      setProfileLoadFailed(!profileResult.success);
       if (profileResult.success && profileResult.data) {
-        console.log("Perfil cargado:", profileResult.data);
-
-        const [followersRes, followingRes] = await Promise.all([
-          import("@/services/follows.service").then((m) => m.followsService.getFollowers(currentUser.id)),
-          import("@/services/follows.service").then((m) => m.followsService.getFollowing(currentUser.id)),
-        ]);
+        const countsRes = await followsService.getCounts(currentUser.id);
 
         setProfile({
           ...profileResult.data,
-          followers_count: followersRes.data?.length ?? 0,
-          following_count: followingRes.data?.length ?? 0,
+          followers_count: countsRes.data?.followers ?? 0,
+          following_count: countsRes.data?.following ?? 0,
         });
 
-        // Cargar mascotas automáticamente
-        await loadPets(currentUser.id);
-
-        // Cargar mensajes no leídos
-        await loadUnreadCount(currentUser.id);
+        const [, , , , , blockedRes] = await Promise.all([
+          loadPets(currentUser.id),
+          loadUnreadCount(currentUser.id),
+          loadNotificationsUnread(currentUser.id),
+          loadMyAlerts(currentUser.id),
+          loadFoundPets(currentUser.id),
+          reportsService.getBlockedUsers(currentUser.id),
+        ]);
+        if (blockedRes.success) setBlockedUserIds(blockedRes.data ?? []);
+      } else if (profileResult.success) {
+        setProfile(null);
       } else {
-        console.log("No se encontró perfil");
+        // Fallo de red: se conserva lo ya cargado; no significa que el perfil no exista
+        showToast("error", "Sin conexión", "No pudimos actualizar tus datos");
       }
     } catch (error) {
       console.error("Error cargando datos:", error);
@@ -299,30 +332,47 @@ export default function DashboardScreen() {
     if (result.success) {
       const totalUnread = (result.data ?? []).reduce((sum, c) => sum + c.unread_count, 0);
       setUnreadCount(totalUnread);
+      setConversations(result.data ?? []);
     }
   };
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await loadUserData();
-    await loadPets(user?.id);
-    if (showAlerts && profile?.address) {
-      await loadEmergencyAlerts(profile.address);
+  const loadNotificationsUnread = async (uid: string) => {
+    setNotificationsUnread(await notificationsService.getUnreadCount(uid));
+  };
+
+  const loadConversations = useCallback(async () => {
+    const uid = user?.id;
+    if (!uid) return;
+    setLoadingConversations(true);
+    const result = await messagesService.getConversations(uid);
+    if (result.success) {
+      setConversations(result.data ?? []);
+      const totalUnread = (result.data ?? []).reduce((sum, c) => sum + c.unread_count, 0);
+      setUnreadCount(totalUnread);
     }
-    if (showMyAlerts && user?.id) await loadMyAlerts(user.id);
-    if (showFoundPets && user?.id) await loadFoundPets(user.id);
-    if (user?.id) await loadUnreadCount(user.id);
-    setRefreshing(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showAlerts, showMyAlerts, showFoundPets, profile, user]);
+    setLoadingConversations(false);
+  }, [user?.id]);
+
+  const handleDeleteConversation = async (convId: string) => {
+    if (!user?.id) return;
+    const result = await messagesService.deleteConversation(convId);
+    if (result.success) {
+      setConversations((prev) => prev.filter((c) => c.id !== convId));
+      showToast("success", "Chat eliminado");
+      await loadUnreadCount(user.id);
+    } else {
+      showToast("error", "Error", result.error);
+    }
+  };
 
   // ============== FUNCIONES DE MASCOTAS ==============
 
   const loadPets = async (uid?: string) => {
-    if (!uid && !user?.id) return;
+    const id = uid || user?.id;
+    if (!id) return;
 
     setLoadingPets(true);
-    const result = await dashboardService.getPets(uid || user?.id);
+    const result = await dashboardService.getPets(id);
     if (result.success) {
       setPets(result.data);
     } else {
@@ -338,7 +388,7 @@ export default function DashboardScreen() {
     }
 
     if (!data.image_url) {
-      showToast("error", "Error", "Debes subir una foto de la mascota");
+      showToast("error", "Error", "Agrega una foto de la mascota");
       return false;
     }
 
@@ -392,30 +442,35 @@ export default function DashboardScreen() {
   };
 
   const handleDeletePet = (petId: string) => {
-    Alert.alert(
-      "Eliminar mascota",
-      "¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            const result = await dashboardService.deletePet(petId);
-            if (result.success) {
-              showToast(
-                "success",
-                "Mascota eliminada",
-                "La mascota ha sido eliminada",
-              );
-              await loadPets(user?.id);
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
+    const pet = pets.find((p) => p.id === petId);
+    const hasActiveAlert = myAlerts.some(
+      (a) => a.pet_id === petId && a.status === "active",
     );
+    confirmDialog({
+      title: "Eliminar mascota",
+      message: hasActiveAlert
+        ? "Esta mascota tiene una alerta de emergencia activa: se cerrará y dejará de mostrarse a tus vecinos. ¿Eliminar la mascota? Esta acción no se puede deshacer."
+        : "¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await dashboardService.deletePet(petId, pet?.image_url);
+        if (result.success) {
+          showToast(
+            "success",
+            "Mascota eliminada",
+            "La mascota ha sido eliminada",
+          );
+          await loadPets(user?.id);
+          if (hasActiveAlert) {
+            await loadMyAlerts(user?.id);
+            if (profile?.address) await loadEmergencyAlerts(profile.address);
+          }
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   // ============== FUNCIONES DE EMERGENCIA ==============
@@ -432,11 +487,10 @@ export default function DashboardScreen() {
   };
 
   const loadMyAlerts = async (uid?: string) => {
-    if (!uid && !user?.id) return;
+    const id = uid || user?.id;
+    if (!id) return;
 
-    const result = await dashboardService.getUserEmergencyAlerts(
-      uid || user?.id,
-    );
+    const result = await dashboardService.getUserEmergencyAlerts(id);
     if (result.success) {
       setMyAlerts(result.data);
     } else {
@@ -445,9 +499,10 @@ export default function DashboardScreen() {
   };
 
   const loadFoundPets = async (uid?: string) => {
-    if (!uid && !user?.id) return;
+    const id = uid || user?.id;
+    if (!id) return;
 
-    const result = await dashboardService.getFoundPetsByUser(uid || user?.id);
+    const result = await dashboardService.getFoundPetsByUser(id);
     if (result.success) {
       setFoundPets(result.data);
     } else {
@@ -456,146 +511,151 @@ export default function DashboardScreen() {
   };
 
   const handleCreateEmergencyAlert = async (pet: Pet) => {
+    if (!profile && profileLoadFailed) {
+      showToast("error", "Sin conexión", "Revisa tu conexión e intenta de nuevo");
+      return;
+    }
+
     if (!profile?.address || !user?.id) {
       showToast("error", "Error", "Completa tu perfil primero");
       return;
     }
 
-    Alert.alert(
-      "Crear alerta de emergencia",
-      `¿Estás seguro de que quieres reportar a ${pet.name} como perdido? Esta alerta será visible para todos los vecinos de tu colonia.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, crear alerta",
-          onPress: async () => {
-            const result = await dashboardService.createEmergencyAlert({
-              user_id: user.id,
-              pet_name: pet.name,
-              type: pet.type,
-              description: `Mascota perdida: ${pet.name}. Color: ${pet.color}, Tamaño: ${pet.size}. ${pet.features || ""}`,
-              last_seen_location: profile.address,
-              disappearance_date: new Date().toISOString().split("T")[0],
-              image_url: pet.image_url,
-            }, `${profile.first_name} ${profile.last_name}`);
+    if (myAlerts.some((a) => a.pet_id === pet.id && a.status === "active")) {
+      showToast("error", "Ya reportada", `${pet.name} ya tiene una alerta activa`);
+      return;
+    }
 
-            if (result.success) {
-              showToast(
-                "success",
-                "Alerta creada",
-                "Se ha notificado a los vecinos",
-              );
-              setSelectingPetForAlert(false);
-              await loadMyAlerts(user.id);
-              if (profile?.address) {
-                await loadEmergencyAlerts(profile.address);
-              }
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+    confirmDialog({
+      title: "Crear alerta de emergencia",
+      icon: "megaphone-outline",
+      message: `¿Estás seguro de que quieres reportar a ${pet.name} como perdido? Esta alerta será visible para todos los vecinos de tu colonia.`,
+      confirmLabel: "Sí, crear alerta",
+      onConfirm: async () => {
+        const result = await dashboardService.createEmergencyAlert({
+          user_id: user.id,
+          pet_id: pet.id,
+          pet_name: pet.name,
+          type: pet.type,
+          description: `Mascota perdida: ${pet.name}. Color: ${pet.color}, Tamaño: ${pet.size}. ${pet.features || ""}`,
+          last_seen_location: profile.address,
+          disappearance_date: toLocalDateString(),
+          image_url: pet.image_url,
+        });
+
+        if (result.success) {
+          if (result.notified) {
+            showToast("success", "Alerta creada", "Se ha notificado a los vecinos");
+          } else {
+            showToast("success", "Alerta publicada", "Tus vecinos la verán en la app");
+          }
+          setSelectingPetForAlert(false);
+          await loadMyAlerts(user.id);
+          if (profile?.address) {
+            await loadEmergencyAlerts(profile.address);
+          }
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   const handleDeleteAlert = async (alertId: string) => {
-    Alert.alert(
-      "Eliminar alerta",
-      "¿Estás seguro de que quieres eliminar esta alerta? Tu mascota ya no aparecerá como perdida.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            const result = await dashboardService.deleteEmergencyAlert(alertId);
-            if (result.success) {
-              showToast(
-                "success",
-                "Alerta eliminada",
-                "La alerta ha sido removida",
-              );
-              await loadMyAlerts(user?.id);
-              if (profile?.address) await loadEmergencyAlerts(profile.address);
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+    confirmDialog({
+      title: "Eliminar alerta",
+      message: "¿Estás seguro de que quieres eliminar esta alerta? Tu mascota ya no aparecerá como perdida.",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const result = await dashboardService.deleteEmergencyAlert(alertId);
+        if (result.success) {
+          showToast(
+            "success",
+            "Alerta eliminada",
+            "La alerta ha sido removida",
+          );
+          await loadMyAlerts(user?.id);
+          if (profile?.address) await loadEmergencyAlerts(profile.address);
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
+  };
+
+  const handleResolveAlert = async (alertId: string) => {
+    confirmDialog({
+      title: "Mascota encontrada",
+      icon: "heart-outline",
+      message: "¿Ya apareció tu mascota? La alerta dejará de mostrarse a tus vecinos.",
+      confirmLabel: "Sí, ya apareció",
+      onConfirm: async () => {
+        const result = await dashboardService.resolveEmergencyAlert(alertId);
+        if (result.success) {
+          showToast("success", "¡Qué alegría!", "La alerta fue cerrada");
+          await loadMyAlerts(user?.id);
+          if (profile?.address) await loadEmergencyAlerts(profile.address);
+        } else {
+          showToast("error", "Error", result.error);
+        }
+      },
+    });
   };
 
   const handleFoundPet = async (alert: EmergencyAlertWithOwner) => {
     if (!user?.id) return;
 
-    Alert.alert(
-      "Reportar mascota encontrada",
-      `¿Has encontrado a ${alert.pet_name}? Al confirmar, te pondremos en contacto con el dueño.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, lo encontré",
-          onPress: async () => {
-            // Buscar la mascota por nombre para obtener su ID
-            const pet = pets.find((p) => p.name === alert.pet_name);
-            if (!pet) {
-              showToast("error", "Error", "No se pudo identificar la mascota");
-              return;
-            }
+    if (alert.user_id === user.id) {
+      showToast("error", "Es tu alerta", "Usa \"Ya apareció\" en Mis alertas");
+      return;
+    }
 
-            const result = await dashboardService.reportFoundPet({
-              user_id: user.id,
-              pet_id: pet.id,
-            });
+    confirmDialog({
+      title: "Reportar mascota encontrada",
+      icon: "checkmark-circle-outline",
+      message: `¿Has encontrado a ${alert.pet_name}? Avisaremos al dueño para que se ponga en contacto contigo.`,
+      confirmLabel: "Sí, lo encontré",
+      onConfirm: async () => {
+        const result = await dashboardService.reportFoundPet(alert, user.id);
 
-            if (result.success) {
-              showToast(
-                "success",
-                "¡Gracias!",
-                `El dueño de ${alert.pet_name} será notificado`,
-              );
-
-              // Eliminar la alerta automáticamente
-              await dashboardService.deleteEmergencyAlert(alert.id);
-
-              // Actualizar listas
-              if (profile?.address) {
-                await loadEmergencyAlerts(profile.address);
-              }
-              await loadFoundPets(user.id);
-            } else {
-              showToast("error", "Error", result.error);
-            }
-          },
-        },
-      ],
-    );
+        if (result.success) {
+          showToast(
+            "success",
+            "¡Gracias!",
+            result.notified
+              ? `El dueño de ${alert.pet_name} fue notificado`
+              : "Tu aviso quedó registrado para el dueño",
+          );
+          await loadFoundPets(user.id);
+        } else {
+          showToast("error", "No se pudo reportar", result.error);
+          if (result.error === "La alerta ya no está activa" && profile?.address) {
+            await loadEmergencyAlerts(profile.address);
+          }
+        }
+      },
+    });
   };
 
   // ============== FUNCIONES DE COMUNIDAD ==============
 
-  const handleComPost = async (title: string, content: string, category: string) => {
-    if (!title.trim() || !content.trim()) {
-      showToast("error", "Completa todos los campos");
-      return false;
-    }
-    const r = await announcementsService.create({ user_id: user?.id || "", title, content, category: category as any });
-    if (r.success) {
-      showToast("success", "Publicado");
-      await loadComunidad();
-      await loadMyAnnouncements();
-      return true;
-    }
-    showToast("error", "Error", r.error);
-    return false;
-  };
-
-  const handleComDelete = async (id: string) => {
-    const r = await announcementsService.delete(id);
-    if (r.success) { loadComunidad(); loadMyAnnouncements(); showToast("success", "Eliminado"); }
-    else showToast("error", "Error", r.error);
+  const handleComDelete = (id: string) => {
+    confirmDialog({
+      title: "Eliminar anuncio",
+      message: "¿Estás seguro de que quieres eliminar este anuncio? Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar",
+      destructive: true,
+      onConfirm: async () => {
+        const r = await announcementsService.delete(id);
+        if (r.success) {
+          showToast("success", "Eliminado");
+          await loadComunidad();
+        } else {
+          showToast("error", "Error", r.error);
+        }
+      },
+    });
   };
 
   // ============== FUNCIONES DE CUENTA ==============
@@ -606,6 +666,7 @@ export default function DashboardScreen() {
 
   const handleLogoutConfirm = async () => {
     setSigningOut(true);
+    if (user?.id) await dashboardService.removeDeviceToken(user.id);
     const result = await dashboardService.signOut();
     setSigningOut(false);
     if (result.success) {
@@ -623,6 +684,24 @@ export default function DashboardScreen() {
       );
     } else {
       showToast("error", "Error", result.error);
+    }
+  };
+
+  const handleDeleteAccountConfirm = async () => {
+    setDeletingAccount(true);
+    const result = await authService.deleteAccount();
+    setDeletingAccount(false);
+    if (result.success) {
+      setDeleteAccountVisible(false);
+      try {
+        await AsyncStorage.removeItem("hasSeenOnboarding");
+      } catch (error) {
+        console.warn("Error borrando onboarding:", error);
+      }
+      router.replace("/");
+      showToast("success", "Cuenta eliminada", "Tus datos fueron borrados");
+    } else {
+      showToast("error", "No se pudo eliminar la cuenta", result.error);
     }
   };
 
@@ -661,42 +740,138 @@ export default function DashboardScreen() {
     setShowMyAlerts(false);
   };
 
+  // Datos de la pestaña Feed (posts, anuncios y emergencias de mi colonia)
+  const loadFeedTabData = async () => {
+    await Promise.all([
+      loadFeed(),
+      loadComunidad(),
+      profile?.address ? loadEmergencyAlerts(profile.address) : Promise.resolve(),
+    ]);
+  };
+
+  const onRefreshFeed = async () => {
+    setRefreshing(true);
+    await loadFeedTabData();
+    setRefreshing(false);
+  };
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- carga inicial al montar: el setState ocurre tras la consulta async
+    loadUserData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al montar
+  }, []);
+
+  // Registrar token FCM nativo
+  useEffect(() => {
+    const initNotifications = async () => {
+      // Expo Go (SDK 53+) no soporta push remotas en Android: requiere build de desarrollo
+      if (isRunningInExpoGo()) return;
+      try {
+        const Notifications = await import("expo-notifications");
+
+        if (user?.id) {
+          registerFcmToken(Notifications);
+        }
+      } catch (error) {
+        console.warn("Notificaciones no disponibles en este entorno:", error);
+      }
+    };
+
+    initNotifications();
+  }, [user?.id]);
+
+  // Recargar mensajes no leídos y contadores de seguidores al volver a la pantalla
+  // (seguir/dejar de seguir en otras pantallas cambia los conteos)
+  useFocusEffect(
+    useCallback(() => {
+      if (user?.id) {
+        loadUnreadCount(user.id);
+        loadNotificationsUnread(user.id);
+        followsService.getCounts(user.id).then((res) => {
+          if (!res.success || !res.data) return;
+          const { followers, following } = res.data;
+          setProfile((p: any) => (p ? { ...p, followers_count: followers, following_count: following } : p));
+        });
+      }
+    }, [user?.id]),
+  );
+
+  useEffect(() => {
+    if (activeTab === "feed") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- recarga al cambiar de pestaña: el setState ocurre tras la consulta async
+      loadFeedTabData();
+    }
+    if (activeTab === "messages") { loadConversations(); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar de pestaña
+  }, [activeTab]);
+
+  // Al elegir o quitar una etiqueta se vuelve a pedir el feed (la primera carga la hace la pestaña)
+  const firstTagRun = useRef(true);
+  useEffect(() => {
+    if (firstTagRun.current) {
+      firstTagRun.current = false;
+      return;
+    }
+    loadFeed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar la etiqueta
+  }, [feedTag]);
+
+  // Deep link de notificaciones: abre Emergencia y muestra la alerta (mía o de un vecino)
+  const handledAlertRef = useRef<string | null>(null);
+  useEffect(() => {
+    const alertId = typeof params.alertId === "string" ? params.alertId : null;
+    if (loading || !user?.id) return;
+    if (params.tab !== "emergency" && !alertId) return;
+    const key = alertId ?? "emergency";
+    if (handledAlertRef.current === key) return;
+    handledAlertRef.current = key;
+
+    setActiveTab("emergency");
+    const open = async () => {
+      const mine = await dashboardService.getUserEmergencyAlerts(user.id);
+      if (mine.success) setMyAlerts(mine.data as MyEmergencyAlert[]);
+      if (alertId && mine.data.some((a) => a.id === alertId)) {
+        setShowMyAlerts(true);
+      } else if (profile?.address) {
+        setShowAlerts(true);
+        await loadEmergencyAlerts(profile.address);
+      }
+    };
+    open();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reacciona solo a los params del deep link y al fin de la carga
+  }, [params.alertId, params.tab, loading, user?.id, profile?.address]);
+
+  // loadUserData ya recarga mascotas, alertas propias, encontradas y no leídos
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadUserData();
+    if (showAlerts && profile?.address) {
+      await loadEmergencyAlerts(profile.address);
+    }
+    if (activeTab === "messages") await loadConversations();
+    setRefreshing(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- las funciones de carga se recrean en cada render
+  }, [showAlerts, profile, user, activeTab]);
+
   if (loading) {
-    return <DashboardSkeleton />;
+    return (
+      <View className="flex-1 bg-[#faf5e0]" style={{ paddingTop: insets.top }}>
+        <DashboardSkeleton />
+      </View>
+    );
   }
 
   return (
-    <View className="flex-1 bg-[#faf5e0]">
+    <View className="flex-1 bg-[#faf5e0]" style={{ paddingTop: insets.top }}>
+      <StatusBar style="dark" />
       <View className="flex-1">
-        {activeTab === "feed" && (
-          <FeedTab
-            userId={user?.id}
-            feedPosts={feedPosts}
-            myPosts={myPosts}
-            loadingFeed={loadingFeed}
-            loadingMyPosts={loadingMyPosts}
-            refreshing={refreshing}
-            comments={comments}
-            commentTarget={commentTarget}
-            commentText={commentText}
-            loadingComments={loadingComments}
-            sendingComment={sendingComment}
-            onRefresh={onRefresh}
-            onLoadFeed={loadFeed}
-            onLoadMyPosts={loadMyPosts}
-            onToggleComments={handleToggleComments}
-            onChangeComment={setCommentText}
-            onAddComment={handleAddComment}
-            onCreatePost={handleCreatePost}
-            onDeletePost={handleDeletePost}
-          />
-        )}
         {activeTab === "home" && (
           <HomeTab
             profileName={profile?.first_name}
             pets={pets}
             loadingPets={loadingPets}
-            myAlerts={myAlerts}
+            myAlerts={myAlerts.filter((a) => a.status === "active")}
             foundPets={foundPets}
             refreshing={refreshing}
             onRefresh={onRefresh}
@@ -707,41 +882,36 @@ export default function DashboardScreen() {
             onDeletePet={handleDeletePet}
           />
         )}
-        {activeTab === "comunidad" && (
-          <ComunidadTab
+        {activeTab === "feed" && (
+          <FeedTab
             userId={user?.id}
+            isModerator={isModerator}
+            blockedUserIds={blockedUserIds}
+            feedPosts={feedPosts}
             announcements={comunidadAnnouncements}
-            myAnnouncements={myAnnouncements}
+            emergencyAlerts={emergencyAlerts}
+            loadingFeed={loadingFeed}
+            loadingMoreFeed={loadingMoreFeed}
+            onLoadMoreFeed={loadMoreFeed}
             loadingAnnouncements={loadingComunidad}
-            loadingMyAnnouncements={loadingMyAnnouncements}
+            loadingAlerts={loadingAlerts}
             refreshing={refreshing}
             comments={comments}
             commentTarget={commentTarget}
             commentText={commentText}
             loadingComments={loadingComments}
             sendingComment={sendingComment}
-            onRefresh={onRefresh}
-            onLoadAnnouncements={loadComunidad}
-            onLoadMyAnnouncements={loadMyAnnouncements}
+            onRefresh={onRefreshFeed}
             onToggleComments={handleToggleComments}
             onChangeComment={setCommentText}
             onAddComment={handleAddComment}
-            onCreateAnnouncement={handleComPost}
+            onDeleteComment={handleDeleteComment}
+            onCreatePost={handleCreatePost}
+            onDeletePost={handleDeletePost}
             onDeleteAnnouncement={handleComDelete}
-          />
-        )}
-        {activeTab === "profile" && (
-          <ProfileTab
-            profile={profile}
-            email={email}
-            userId={user?.id}
-            petsCount={pets.length}
-            unreadCount={unreadCount}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            onLogout={handleLogout}
-            onGoComunidad={() => setActiveTab("comunidad")}
-            onProfileUpdated={loadUserData}
+            feedTag={feedTag}
+            onFilterTag={setFeedTag}
+            defaultLocation={[profile?.address, profile?.city].filter(Boolean).join(", ")}
           />
         )}
         {activeTab === "emergency" && (
@@ -770,11 +940,50 @@ export default function DashboardScreen() {
             onCreateAlert={handleCreateEmergencyAlert}
             onFoundPet={handleFoundPet}
             onDeleteAlert={handleDeleteAlert}
+            onResolveAlert={handleResolveAlert}
             onGoHome={() => setActiveTab("home")}
           />
         )}
+        {activeTab === "messages" && (
+          <MessagesTab
+            userId={user?.id}
+            conversations={conversations}
+            loading={loadingConversations}
+            refreshing={refreshing}
+            unreadCount={unreadCount}
+            onRefresh={onRefresh}
+            onLoadConversations={loadConversations}
+            onDeleteConversation={handleDeleteConversation}
+          />
+        )}
+        {activeTab === "profile" && (
+          <ProfileTab
+            profile={profile}
+            profileLoadFailed={profileLoadFailed}
+            email={user?.email ?? ""}
+            userId={user?.id}
+            petsCount={pets.length}
+            unreadCount={unreadCount}
+            notificationsUnread={notificationsUnread}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            onLogout={handleLogout}
+            onDeleteAccount={() => setDeleteAccountVisible(true)}
+            onGoComunidad={() => setActiveTab("feed")}
+            onProfileUpdated={loadUserData}
+          />
+        )}
       </View>
-      <TabBar activeTab={activeTab} onSelect={setActiveTab} />
+      {activeTab === "messages" && (
+        <FAB
+          icon="add-circle"
+          onPress={() => router.push("/buscar")}
+          backgroundColor="#007275"
+          color="#fff"
+          position="bottom-right"
+        />
+      )}
+      <TabBar activeTab={activeTab} onSelect={setActiveTab} unreadCount={unreadCount} />
       <ConfirmModal
         visible={logoutVisible}
         title="Cerrar sesión"
@@ -784,7 +993,17 @@ export default function DashboardScreen() {
         onConfirm={handleLogoutConfirm}
         onCancel={() => setLogoutVisible(false)}
       />
-      <Toast />
+      <ConfirmModal
+        visible={deleteAccountVisible}
+        destructive
+        title="Eliminar cuenta"
+        message="Se borrarán tu perfil, mascotas, alertas, publicaciones y mensajes. Esta acción no se puede deshacer."
+        confirmLabel="Eliminar cuenta"
+        icon="trash-outline"
+        loading={deletingAccount}
+        onConfirm={handleDeleteAccountConfirm}
+        onCancel={() => setDeleteAccountVisible(false)}
+      />
     </View>
   );
 }
