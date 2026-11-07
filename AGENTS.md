@@ -13,6 +13,12 @@
 - `npx expo prebuild` - generate native android/ios projects before building locally
 - EAS build: `eas build` (configure in eas.json)
 
+## Entorno local y emulador (2026-11-07)
+
+- Expo SDK 58 pide Node >= 22.13; la máquina tiene Node 20.10. Sin actualizar, `npx expo prebuild` falla (`parseEnv is not a function`): usar `bunx --bun expo prebuild --platform android --clean --no-install` y, para Gradle, un script `node` (fuera del repo) que ejecute `bun --bun "$@"` al inicio del `PATH`. Detalle: `docs/auto_testing/EMULATOR_RUN_2026-11-07.md`
+- APK de prueba local: `cd android && ./gradlew assembleRelease -PreactNativeArchitectures=x86_64` (~17 min la primera vez; `android/` no va a git)
+- Cuentas de prueba (normal y admin) en `.maestro/.env` (ignorado por git). Flujos de E2E para CI: `.maestro/flows/`; flujos para capturar imágenes de la documentación: `.maestro/screenshots/` (NO idempotentes: crean datos en el Supabase real)
+
 ## Architecture
 
 - **Frontend**: Expo Router (file-based routing in `app/`), React Native
