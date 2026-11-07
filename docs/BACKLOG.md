@@ -12,6 +12,16 @@
 - [ ] **Play Console**: store listing, adults-only target audience (18+), content rating (user content and chat), Data safety form consistent with the policy, account-deletion URL
 - [ ] **`production` build** (AAB) once everything above is tested
 
+### Cleanup after the 2026-11-07 emulator run
+- [ ] Delete the test data the screenshot campaign left in the live Supabase project (pet Luna, one post, one notice, group "Vecinos de Hacienda el Colorado", story "Milo", chat with the admin, follow, one report) — inventory in `auto_testing/EMULATOR_RUN_2026-11-07.md`
+- [ ] Check the report from flow 14 is dismissed in the moderation panel (the flow dismissed it, final state not re-checked)
+
+### Findings from the emulator run (small app fixes)
+- [ ] User search matches first and last name separately: "Admin Lucky" finds nobody, "Admin" does
+- [ ] Unread badge on the Mensajes tab showed "1" for the account that had just sent a message; check how `getUnreadCount` treats own messages
+- [ ] Confirm Email button still says "Reenviar email" (rest of the app says "correo electrónico")
+- [ ] Free-text fields capitalize every word on display or input ("Mancha blanca en El pecho", "Café Con Blanco")
+
 ### Pending tests
 - [ ] **FCM push end to end** with the SDK 58 build (needs a second device; the token already registers)
 - [ ] On the new build: delete account, moderation and chats after migration B

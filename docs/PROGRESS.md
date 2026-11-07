@@ -275,6 +275,16 @@ Phases are listed in chronological order. **Phases 1–12 are historical:** seve
 | **Camera permission** | `app.json` now declares `cameraPermission` (needs a new build). Location is text only, no GPS, on purpose |
 | **Open question** | "Tags" was built as hashtags; if QA meant tagging people (`@mentions`), that is missing |
 
+## ✅ Phase 18 — Docs overhaul and emulator run (2026-11-07)
+
+| Item | Notes |
+|---|---|
+| **Docs reorganized** | Root keeps only `README.md` and `AGENTS.md`; everything else in `docs/`, in English, updated to the current app (see [`APP_OVERVIEW.md`](APP_OVERVIEW.md)) |
+| **Local Android build** | Release APK built locally for x86_64 (17 min) using Bun as the runtime because Node 20.10 is too old for SDK 58 |
+| **E2E** | The 5 Maestro auth flows passed 5/5 on the emulator (first verified run since the UI V2 redesign) |
+| **Screenshots and diagrams** | 52 screenshots re-captured with flows in `.maestro/screenshots/`; `FLOW_DIAGRAM*.html` rewritten (39 screens) — report: [`auto_testing/EMULATOR_RUN_2026-11-07.md`](auto_testing/EMULATOR_RUN_2026-11-07.md) |
+| **Findings** | Four small app issues (user search by full name, unread badge, one copy string, word capitalization) listed in `BACKLOG.md` |
+
 ---
 
 ## 🔧 Open work / technical debt

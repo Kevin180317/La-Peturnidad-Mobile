@@ -31,6 +31,7 @@ The palette shipped largely as designed (see [`BRANDING.md`](BRANDING.md) for ho
 | **15 · Local audit** (2026-10-31) | Offline-safe session, local-only logout, colonia picker in edit profile, chat fixes, dead code and unused dependencies removed |
 | **16 · Supabase closure and SDK 58** (2026-11-03/05) | `public_profiles` view and contact RPCs, `user_profiles` closed, min age 18, E.164 phones, SDK 54 → 58, no emojis, text limits |
 | **17 · QA tickets** (2026-11-04) | Follower counters, social posts with up to 5 images, location, tags and links, Feed with tag filter, camera permission |
+| **18 · Docs and emulator run** (2026-11-07) | Docs reorganized and translated, screenshots and flow diagrams refreshed for UI V2, local release build, Maestro auth flows 5/5 on an emulator |
 
 ## Documentation
 
