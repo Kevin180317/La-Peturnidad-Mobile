@@ -14,6 +14,7 @@ Newest first. Status: ✅ pass · ❌ fail · ⚠️ flaky · ⏳ not run.
 
 | Date | Where | Commit | Flows run | Passed | Failed | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-07 | Local emulator (Pixel_8, API 37, release APK x86_64) | `33fa8b5` + local docs | 5 | 5 | 0 | All 5 flows passed in 2m 41s (see [`auto_testing/EMULATOR_RUN_2026-11-07.md`](auto_testing/EMULATOR_RUN_2026-11-07.md)) |
 | 2026-11-05 | — | `6e44296` | 0 | — | — | Flows 05 and `complete-profile` updated for UI V2. Not run. |
 | 2026-10-21 | Local (Jest, not Maestro) | `e2bce33` | 65 unit tests | 64 first run; 65 on rerun | 0 | `bun install --frozen-lockfile`, `bun run lint` and `bun run typecheck` clean. `ConfirmModal` › "renders title, message and default labels" timed out (5 s) once on a cold full run (suite took 21 s) and passed in isolation (555 ms) — cold-start flake, watch for repeats. Maestro not run yet. |
 | 2026-10-20 | — | `8c47c90` | 0 | — | — | Baseline written. Nothing re-run: this machine has no Maestro, adb or gh. Status below is the last known result from commit history. |
@@ -25,14 +26,14 @@ Newest first. Status: ✅ pass · ❌ fail · ⚠️ flaky · ⏳ not run.
 
 | # | Flow | Covers | Needs credentials | Last status | Last verified |
 |---|---|---|---|---|---|
-| 01 | `01-onboarding-to-login.yaml` | Onboarding "Saltar" → login screen | No | ✅* | 2026-10-17 `7ed6857` |
-| 02 | `02-login-validation.yaml` | Empty login form → "Campos requeridos" | No | ✅* | 2026-10-17 `7ed6857` |
-| 03 | `03-login-bad-credentials.yaml` | Wrong credentials → "Error de autenticación" | No | ✅* | 2026-10-17 `7ed6857` |
-| 04 | `04-login-success-and-relogin.yaml` | Login → (complete profile if new) → dashboard; auto-login after relaunch | Yes | ✅* | 2026-10-17 `7ed6857` |
-| 05 | `05-logout.yaml` | Profile → "Cerrar Sesión" → ConfirmModal → onboarding → login | Yes | ✅* | 2026-10-17 `7ed6857` |
+| 01 | `01-onboarding-to-login.yaml` | Onboarding "Saltar" → login screen | No | ✅ | 2026-11-07 (emulator) |
+| 02 | `02-login-validation.yaml` | Empty login form → "Campos requeridos" | No | ✅ | 2026-11-07 (emulator) |
+| 03 | `03-login-bad-credentials.yaml` | Wrong credentials → "Error de autenticación" | No | ✅ | 2026-11-07 (emulator) |
+| 04 | `04-login-success-and-relogin.yaml` | Login → (complete profile if new) → dashboard; auto-login after relaunch | Yes | ✅ | 2026-11-07 (emulator) |
+| 05 | `05-logout.yaml` | Profile → "Cerrar Sesión" → ConfirmModal → onboarding → login | Yes | ✅ | 2026-11-07 (emulator) |
 | — | `subflows/complete-profile.yaml` | Fills "Completa tu perfil" (CP 22220 / Hacienda el Colorado) | — | Used by 04 | — |
 
-\* Not confirmed by a saved report. Re-run and replace it with a verified status.
+Verified 2026-11-07 on a local emulator; JUnit result summarized in the run report.
 
 ## Coverage by screen
 

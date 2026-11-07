@@ -1,0 +1,41 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - pet list, detail, edit and delete confirm
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Inicio"
+- tapOn: "Mis mascotas"
+- extendedWaitUntil:
+    visible: "Luna"
+    timeout: 8000
+- waitForAnimationToEnd
+# Open and close the detail once so the photo is cached before the list screenshot.
+- tapOn: "Luna"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/dash-pet-detail
+- tapOn:
+    point: "88%,25%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: ${OUT}/dash-inicio-with-pet
+- tapOn: "Luna"
+- waitForAnimationToEnd
+- tapOn: "Editar"
+- waitForAnimationToEnd
+- scroll
+- takeScreenshot: ${OUT}/dash-pet-form-edit
+- scrollUntilVisible:
+    element: "Cancelar"
+- tapOn: "Cancelar"
+- waitForAnimationToEnd
+- tapOn: "Luna"
+- waitForAnimationToEnd
+- tapOn: "Eliminar"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-pet-delete-confirm
+- tapOn: "Cancelar"

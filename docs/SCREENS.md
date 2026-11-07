@@ -233,7 +233,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 **User events**:
 | Event | What it triggers |
 |---|---|
-| "Publicar" (header) | Opens the post form (modal): text, up to 5 images from gallery or camera, location ("Mi zona" fills colonia and city), tags, up to 3 links, notice category |
+| "Publicar" (header) | Opens the full-screen post form with a type switch: Social (text, 1–5 images from gallery/camera/selfie, location with "Mi zona", tags, up to 3 links) or Anuncio (title, category, description) |
 | Segments | Switches between Emergencias / Anuncios / Social |
 | Tap a `#tag` | Filters the feed on the server; a banner "Mostrando #x" clears the filter |
 | Tap a link | Opens it with the system |

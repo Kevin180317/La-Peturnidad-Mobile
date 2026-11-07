@@ -1,0 +1,31 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - filled social post form (discarded, not published)
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Feed"
+- tapOn: "Publicar"
+- waitForAnimationToEnd
+- tapOn: "Cuéntale a tu comunidad..."
+- inputText: "Milo y Luna ya son mejores amigos. Paseo de hoy en el parque #gatos #perros #paseo"
+- hideKeyboard
+- tapOn: "Galería"
+- extendedWaitUntil:
+    visible: "Photos"
+    timeout: 8000
+- tapOn:
+    point: "50%,46%"
+- extendedWaitUntil:
+    visible: "Done"
+    timeout: 5000
+- tapOn: "Done"
+- waitForAnimationToEnd:
+    timeout: 4000
+- scroll
+- tapOn: "Mi zona"
+- takeScreenshot: ${OUT}/dash-post-form-filled
+- back

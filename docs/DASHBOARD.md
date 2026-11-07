@@ -1,97 +1,72 @@
 # DASHBOARD — Main App Area
 
-> Area doc. Source screens: `docs/images/Dashboard/` — 29 images, numbered 1–26 and 29–31 (there are no images 27 and 28). Cross-checked against `docs/SCREENS.md` §9–29. The screenshots predate the UI V2 redesign (2026-10-29/30), so layout, colors and tab names differ; the notes below mark what changed. Current behavior is in `SCREENS.md`.
-
-## Screens covered
-
-| Screen | Route | Images |
-|---|---|---|
-| Sección Inicio (Home tab) | `/dashboard` | 1, 2, 5 |
-| Buscar | `/buscar` | 3 |
-| Formulario de Mascota | (modal) | 4, 30 |
-| Ficha de Mascota (Pet Detail window) | (modal) | 29 |
-| Confirm: Eliminar mascota | (modal) | 31 |
-| Sección Comunidad (old tab, now Feed → Anuncios) | `/dashboard` | 6 |
-| Sección Emergencia (tab) | `/dashboard` | 7, 13, 14, 15, 17, 18, 24, 25 |
-| Perfil (own, tab) | `/dashboard` | 8, 9, 10, 26 |
-| Sección Feed (tab) | `/dashboard` | 11, 12 |
-| Mensajes | `/mensajes` | 19 |
-| Reuniones Exitosas | `/historias` | 20 |
-| Grupos | `/grupos` | 21 |
-| Notificaciones | `/notificaciones` | 22 |
-| Editar Perfil | `/editar-perfil` | 23 |
-| OS push notification | (system, external) | 16 |
+> Area doc. Screenshots in `images/dash-*.jpg` and `images/screen-*.jpg`, captured 2026-11-07 on the redesigned app (UI V2) with the flows in `.maestro/screenshots/`, using test accounts and made-up data. Per-event detail: [`SCREENS.md`](SCREENS.md) §9+. How the images were produced: [`auto_testing/EMULATOR_RUN_2026-11-07.md`](auto_testing/EMULATOR_RUN_2026-11-07.md).
 
 ## Bottom bar
 
-5 fixed tabs: **Inicio · Feed · Emergencia · Mensajes · Perfil** (UI V2). The active tab has a sliding teal pill; the screenshots show the older bar (**Feed · Inicio · Comunidad · Emergencia · Perfil**, red/coral highlight). The old Comunidad tab became Feed → Anuncios and Messages became a tab; see [`FEED.md`](FEED.md).
+5 fixed tabs: **Inicio · Feed · Emergencia · Mensajes · Perfil**. The active tab has a sliding teal pill (the Emergencia icon stays coral) and Mensajes shows an unread badge. There is no top bar on the dashboard.
 
-## Screen details
+## Tabs
 
-### Sección Inicio (imgs 1, 2, 5)
-*UI V2: the pet list is always shown under "Mis mascotas" (no show/hide toggle) and pets open as a bottom sheet.*
+| Tab | What it shows | Images |
+|---|---|---|
+| Inicio | Greeting and date, summary cards (Mascotas / Alertas / Encontradas), "Registrar mascota", "Mis mascotas" | [empty](images/dash-inicio-empty.jpg), [with a pet](images/dash-inicio-with-pet.jpg) |
+| Feed | Segments Emergencias / Anuncios / Social, "Publicar" ([`FEED.md`](FEED.md)) | [Emergencias](images/dash-feed-emergencias.jpg), [Anuncios](images/dash-feed-anuncios.jpg), [Social](images/dash-feed-social.jpg) |
+| Emergencia | Report-lost banner plus Perdidas / Mis alertas / Encontradas | [grid](images/dash-emergencia.jpg), [pet selector](images/dash-emergencia-report.jpg), [Mis alertas](images/dash-emergencia-mis-alertas.jpg), [Encontradas](images/dash-emergencia-encontradas.jpg) |
+| Mensajes | Conversation list, unread counts | [list](images/dash-mensajes.jpg) |
+| Perfil | Photo, stats, personal info, grouped menu, account info, "Cerrar Sesión", "Eliminar cuenta" | [profile](images/dash-perfil.jpg), [menu](images/dash-perfil-menu.jpg) |
 
-Greeting (`¡Hola, {name}!`) + date, 3 summary cards (Mascotas / Alertas / Encontradas), search icon (top right) opens Buscar. "Registrar mascota" + "Ver mascotas"/"Ocultar mascotas" toggle buttons. Empty state (img 1-2): "No tienes mascotas registradas." Populated state (img 5): pet card w/ photo, name, type, size.
+## Pets (Inicio)
 
-### Buscar (img 3)
-Search bar + 3 tabs: Mascotas / Grupos / Usuarios. Mascotas tab active by default.
+| Screen | Image |
+|---|---|
+| Register pet form (type, name, color, size pills, characteristics, photo) | [filled](images/dash-pet-form-filled.jpg) |
+| Edit pet | [edit](images/dash-pet-form-edit.jpg) |
+| Pet detail (bottom sheet: Editar / Eliminar) | [detail](images/dash-pet-detail.jpg) |
+| Delete pet confirmation | [confirm](images/dash-pet-delete-confirm.jpg) |
 
-### Formulario de Mascota (imgs 4, 30)
-Modal/screen: Tipo (Perro/Gato toggle), Nombre, Color, Tamaño (dropdown), Características especiales (optional), Foto (required, "Seleccionar" button). Two modes, same form:
-- **Register mode** (img 4): empty fields, button reads "Registrar".
-- **Edit mode** (img 30): pre-filled w/ existing pet data, title "Editar mascota", photo field shows a "✓ Foto lista para usar" confirmation state instead of the picker, button reads "Actualizar" instead of "Registrar".
+The photo comes from the system photo picker, then a crop step.
 
-### Ficha de Mascota — Pet Detail window (img 29)
-Modal opened by tapping a pet from Sección Inicio. Shows photo, name (header), Tipo, Color, Tamaño, Características, Registrada (date). Three actions: **Editar** (→ Pet Form in edit mode), **Eliminar** (→ Confirm: Eliminar mascota), **Cerrar**.
+## Feed and posts
 
-### Confirm: Eliminar mascota (img 31)
-Modal triggered from Pet Detail → Eliminar. Copy: *"¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer."* Cancelar / Eliminar buttons.
+| Screen | Image |
+|---|---|
+| Post form, empty (type switch: "Social · con imagen" / "Anuncio") | [empty](images/dash-post-form.jpg) |
+| Social post filled (image, "Mi zona", `#tags`) | [filled](images/dash-post-form-filled.jpg) |
+| Notice form (title, category chips General / Aviso / Evento / Pregunta, description) | [anuncio](images/dash-post-form-announcement.jpg) |
 
-### Sección Comunidad (img 6) — now Feed → Anuncios
-The capture shows the removed Comunidad tab (tabs "Comunidad" / "Mis avisos", "+ Nuevo" button). Notices now appear under Feed → Anuncios and are created with "Publicar". Post card: author, date, category badge (e.g. "Aviso"), title, body, comment count.
+## Emergencia confirmations
 
-### Sección Emergencia (imgs 7, 13, 14, 15, 17, 18, 24, 25)
-*UI V2: the grid cards are now "Reportar", "Perdidas", "Mis alertas" and "Encontradas"; the "Ocultar ..." / "✓ Visible" states below are from the old design.*
+- Create alert: "¿Estás seguro de que quieres reportar a Luna como perdido? Esta alerta será visible para todos los vecinos de tu colonia." — [confirm](images/dash-emergencia-confirm.jpg). Cancelled during capture: no alert was created, to avoid notifying real neighbors.
+- Report found ("Al confirmar, te pondremos en contacto con el dueño") and the OS push notification are not captured: they need a second account with an active alert and working FCM delivery.
 
-2×2 action grid: Reportar mascota perdida / Ver mascotas perdidas / Ver mis alertas / Ver mascotas encontradas — each card toggles into a visible list below and its own label flips to an "Ocultar ..." state with a "✓ Visible" sub-label (e.g. img 14's "Ocultar mascotas perdidas" once expanded).
+## Perfil menu screens
 
-- Img 13: pet selector for reporting ("Selecciona la mascota perdida", REPORTAR button per pet).
-- Img 15: confirm modal "Crear alerta de emergencia" — explicit copy: *"Esta alerta será visible para todos los vecinos de tu colonia."*
-- Img 14: "Mascotas perdidas en tu colonia" list — card per alert (photo, name, type, description, last-seen location + date, owner name + phone, "Lo encontré" button).
-- Img 17: "Mis alertas activas" — own alerts w/ "Eliminar alerta" button.
-- Img 18/25: "Mascotas que he encontrado" — empty vs. populated (found-date shown once reported).
-- Img 24: confirm modal "Reportar mascota encontrada" — *"Al confirmar, te pondremos en contacto con el dueño."*
+| Screen | Route | Image |
+|---|---|---|
+| Notification inbox | `/bandeja` | [inbox](images/screen-bandeja.jpg) |
+| Edit profile | `/editar-perfil` | [edit profile](images/screen-editar-perfil.jpg) |
+| Account and security | `/seguridad` | [security](images/screen-seguridad.jpg) |
+| Notification preferences | `/notificaciones` | [preferences](images/screen-preferencias.jpg) |
+| Groups | `/grupos` | [list](images/screen-grupos.jpg), [create](images/screen-grupos-form.jpg) |
+| Group detail | `/grupos/[id]` | [detail](images/screen-grupo-detalle.jpg) |
+| Success stories | `/historias` | [empty](images/screen-historias-empty.jpg), [form](images/screen-historias-form.jpg), [published](images/screen-historias.jpg) |
+| How it works | `/como-usar` | [guide](images/screen-como-usar.jpg) |
+| FAQ | `/faq` | [FAQ](images/screen-faq.jpg) |
+| Moderation panel (admin) | `/panel-moderacion` | [panel](images/screen-moderacion.jpg) |
+| Log out / Delete account confirmations | (modals) | [logout](images/dash-logout-confirm.jpg), [delete account](images/dash-delete-account-confirm.jpg) |
 
-### Perfil — own profile (imgs 8, 9, 10, 26)
-- Img 8: "Mi Perfil" header, avatar (editable via camera icon overlay), Información personal card (Nombre, Email, Teléfono, Cumpleaños), Dirección card (Calle/Colonia, Ciudad, C.P.).
-- Img 9: Estadísticas (Mascotas/Seguidores/Siguiendo counts) + Acciones list (Editar perfil, Configurar notificaciones, Ir a la comunidad, Mensajes, Grupos, Reuniones exitosas). The current menu is grouped (Mensajería, Exploración, Configuración, Ayuda, Administración) and also has the notification inbox, **Cuenta y seguridad**, **Cómo funciona**, **Preguntas frecuentes**, the legal pages, **Panel de moderación** for moderators/admins, and **Eliminar cuenta** — none of these are in the captures.
-- Img 10: scrolled further — Cuenta card (Miembro desde, Última actualización) + "Cerrar Sesión" button.
-- Img 26: "Cerrar sesión" confirm modal — Cancelar / Cerrar sesión.
+## Search and social
 
-### Sección Feed (imgs 11, 12)
-The captures show the old Feed with tabs "Feed" / "Mis posts"; the current Feed has the segments Emergencias / Anuncios / Social (see [`FEED.md`](FEED.md)). The captures also show the older inline composer (text field + Publicar/Cancelar); "Publicar" now opens the `PostForm` modal (text, images, location, tags, URLs). Post card: author avatar/name, date, text, comment count + "Ver comentarios" link. Empty state on "Mis posts": "No has publicado nada aún."
-
-### Mensajes (img 19)
-Empty state: "No tienes conversaciones aún. Visita un perfil público y envía un mensaje para iniciar una conversación."
-
-### Reuniones Exitosas (img 20)
-"+ Nueva" button, empty state w/ "Publicar historia" CTA: "No hay historias de éxito aún."
-
-### Grupos (img 21)
-"+ Crear" button, list of groups (name, member count, "Unirse" button per row).
-
-### Notificaciones (img 22)
-*UI V2: preferences have two alert types ("Mascotas perdidas en tu colonia", "Alguien encontró a tu mascota"); a separate notification inbox (`/bandeja`) was added.*
-
-"Preferencias" card: main toggle "Notificaciones push" + 3 sub-toggles (Alertas de mascotas perdidas, Mascotas encontradas, Avisos de la comunidad), "Guardar preferencias" + "Volver" buttons.
-
-### Editar Perfil (img 23)
-Pre-filled form: Nombre, Apellido, Teléfono, Dirección/Colonia, Ciudad, Código Postal. "Guardar cambios" / "Cancelar".
-
-### OS push notification (img 16)
-External evidence (Android notification shade) confirming the emergency-alert push actually fires: *"Kevin Ortega reportó a Naranja perdida — Vista por última vez en El Pípila."*
+| Screen | Route | Image |
+|---|---|---|
+| Search | `/buscar` | [search](images/screen-buscar.jpg), [users tab](images/screen-buscar-usuarios.jpg) |
+| Public profile | `/perfil/[id]` | [profile](images/screen-perfil-publico.jpg), [after following](images/screen-perfil-publico-siguiendo.jpg), [report/block menu](images/screen-perfil-publico-menu.jpg), [report reasons](images/screen-reportar-usuario.jpg) |
+| Chat | `/mensajes/[id]` | [chat](images/screen-chat.jpg) |
+| Followers / following | `/seguidores` | [following](images/screen-seguidores.jpg) |
 
 ## Observations
 
-- **Push sender label**: the push notification (img 16) shows the sender as **"La-Peturnidad"**, the old app name. `app.json` now sets the name to "Lucky Tracker", so this was likely an older build — confirm on a fresh build.
-- Img 21: the group named `"2"` is test data, not a UI issue.
+- The Feed → Anuncios screenshot blurs the author of a pre-existing post by another user (live-project data); everything else is test data created for the capture.
+- Screens documented only as text (no screenshot): New Password, found-pet confirmation, OS push notification, pending moderation states other than a single report.
+- The notification sender label on an old build read "La-Peturnidad"; `app.json` now says "Lucky Tracker". Confirm on a device with real push.

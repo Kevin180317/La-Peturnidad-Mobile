@@ -1,0 +1,57 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - register a pet (normal account)
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Inicio"
+- tapOn: "Registrar mascota"
+- extendedWaitUntil:
+    visible: "Registrar nueva mascota"
+    timeout: 5000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: ${OUT}/dash-pet-form-empty
+- tapOn: "Agregar foto"
+- extendedWaitUntil:
+    visible: "Photos"
+    timeout: 8000
+- tapOn:
+    point: "17%,62%"
+- tapOn: "Done"
+- extendedWaitUntil:
+    visible: "CROP"
+    timeout: 8000
+- tapOn: "CROP"
+- waitForAnimationToEnd:
+    timeout: 4000
+- scrollUntilVisible:
+    element: "Nombre de la mascota"
+- tapOn: "Nombre de la mascota"
+- inputText: "Luna"
+- scrollUntilVisible:
+    element: "Color principal"
+- tapOn: "Color principal"
+- inputText: "Café con blanco"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Mediano"
+- tapOn: "Mediano"
+- scrollUntilVisible:
+    element: "Ej: manchas, cicatrices, comportamiento especial..."
+- tapOn: "Ej: manchas, cicatrices, comportamiento especial..."
+- inputText: "Mancha blanca en el pecho, muy juguetona"
+- hideKeyboard
+- takeScreenshot: ${OUT}/dash-pet-form-filled
+- scrollUntilVisible:
+    element: "Registrar mascota"
+- tapOn: "Registrar mascota"
+- extendedWaitUntil:
+    visible: "Luna"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: ${OUT}/dash-inicio-with-pet

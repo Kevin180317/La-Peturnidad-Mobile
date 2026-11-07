@@ -15,7 +15,7 @@
 ### Pending tests
 - [ ] **FCM push end to end** with the SDK 58 build (needs a second device; the token already registers)
 - [ ] On the new build: delete account, moderation and chats after migration B
-- [ ] Re-run Maestro against the UI V2 flows (updated 2026-11-05, results not recorded) — see `E2E_TEST_RESULTS.md`
+- [ ] Add dashboard E2E flows (pets, post, group, chat); only the 5 auth flows exist and they passed 5/5 on 2026-11-07 — see `E2E_TEST_RESULTS.md`
 
 ### Infra (free plan)
 - [ ] Weekly manual backup (`supabase db dump`) and open the dashboard weekly: the free plan has no backups and pauses the project after ~7 days of inactivity
@@ -35,7 +35,7 @@
 - [ ] More fixed countries in the phone selector (Mexico, US/Canada and "other" today)
 - [ ] Tag people (`@mentions`) in posts: only hashtags exist. Build it only if QA asks (search users when posting, store tagged users, notify them)
 - [ ] Decide what to do with the orphaned `/comunidad` screen (remove it or link it)
-- [ ] Refresh the screenshots in `docs/images/` and the flow diagrams for the redesigned UI
+- [ ] Screenshots still missing: New Password, found-pet confirmation, OS push notification (see `auto_testing/EMULATOR_RUN_2026-11-07.md`)
 - [ ] Push on iOS (needs Firebase + `GoogleService-Info.plist`; only if launching on iOS)
 
 ## Decisions made

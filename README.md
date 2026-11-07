@@ -34,8 +34,9 @@ From the Expo CLI output you can open the app in a development build, Android em
 | [`docs/BACKLOG.md`](docs/BACKLOG.md) | Open tasks (Spanish): launch blockers, pending tests, infra, later |
 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Visual language, Kit components, feedback patterns, Uniwind gotchas |
 | [`docs/BRANDING.md`](docs/BRANDING.md) | Brand colors and their roles |
+| [`docs/auto_testing/`](docs/auto_testing/) | Report of the emulator run: build, Maestro E2E results, how the screenshots in `docs/images/` were captured |
 | [`docs/FEED.md`](docs/FEED.md) | The Feed tab: Emergencias / Anuncios / Social |
-| [`docs/images/`](docs/images/) | Screenshots per app area (`AUTH`, `Dashboard`), used as reference for the docs above |
+| [`docs/images/`](docs/images/) | 52 screenshots of the redesigned app (`auth-*`, `dash-*`, `screen-*`), used by the area docs and the flow diagrams |
 
 ## Core flow
 

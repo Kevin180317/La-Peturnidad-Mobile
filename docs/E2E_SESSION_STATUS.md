@@ -3,7 +3,12 @@
 > Handoff file for resuming the Maestro E2E work. Update **Last session** and **Next steps** at the end of each session.
 > Detailed results and coverage live in [`E2E_TEST_RESULTS.md`](E2E_TEST_RESULTS.md).
 
-## Last update — 2026-11-07
+## Last update — 2026-11-07 (evening)
+
+- All 5 Maestro flows passed (5/5, 2m 41s) on a local emulator with a release APK built from `QA_auto`. Full report: [`auto_testing/EMULATOR_RUN_2026-11-07.md`](auto_testing/EMULATOR_RUN_2026-11-07.md).
+- Capture flows for docs screenshots live in `.maestro/screenshots/` (not run by CI).
+
+## Earlier on 2026-11-07
 
 - Maestro flows were adapted to UI V2 on 2026-11-05 (`6e44296`, branch `QA_auto`). Not run since; no results recorded.
 - Still true: no dashboard feature is covered, no `bun`/`maestro`/`adb` check was done on this machine today, and the nightly CI result (`e2e.yml`) hasn't been logged.

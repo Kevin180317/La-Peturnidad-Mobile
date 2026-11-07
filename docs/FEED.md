@@ -10,7 +10,9 @@ A segmented control at the top switches between three views:
 | **Anuncios** | Community notices (general, notice, event, question) | Authors can delete their own; moderators can delete any |
 | **Social** | Pet social posts | Newest first, loaded in pages of 20 (infinite scroll); tapping a `#tag` filters the feed on the server |
 
-"Publicar" (top right) opens `PostForm`: text, up to 5 images (gallery or camera), free-text location ("Mi zona" fills the profile's colonia and city), tags (`#hashtags` in the text are extracted too), up to 3 http(s) links, and a notice category.
+"Publicar" (top right) opens `PostForm`, a full-screen form with a type switch:
+- **Social · con imagen**: text, 1 to 5 images (gallery, camera or selfie), free-text location ("Mi zona" fills the profile's colonia and city), tags (`#hashtags` in the text are extracted too) and up to 3 http(s) links.
+- **Anuncio**: title, category (General / Aviso / Evento / Pregunta) and description.
 
 Posts from users the current user blocked are hidden on the client, so a page can look short.
 

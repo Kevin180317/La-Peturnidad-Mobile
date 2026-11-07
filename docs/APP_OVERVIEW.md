@@ -28,7 +28,7 @@ Community app for finding lost pets. Users register pets, publish emergency aler
 | [`AUTH.md`](AUTH.md) | Onboarding, login, registration, password recovery, email confirmation | §1–8 of `SCREENS.md` |
 | [`DASHBOARD.md`](DASHBOARD.md) | Main app: 5-tab dashboard, messages, groups, stories, notifications, security, edit profile | §9+ of `SCREENS.md` |
 
-The screenshots in `images/` were taken before the UI V2 redesign (2026-10-29/30), so the visuals are outdated; the text in the docs reflects the current app.
+Screenshots in `images/` were re-captured on 2026-11-07 on the redesigned app (see [`auto_testing/EMULATOR_RUN_2026-11-07.md`](auto_testing/EMULATOR_RUN_2026-11-07.md)).
 
 ## Reference docs
 
@@ -45,8 +45,9 @@ The screenshots in `images/` were taken before the UI V2 redesign (2026-10-29/30
 | [`BACKLOG.md`](BACKLOG.md) | Open tasks: launch blockers, pending tests, infra |
 | [`MILESTONES.md`](MILESTONES.md) | Condensed history by phase and the original design proposal |
 | [`E2E_TEST_RESULTS.md`](E2E_TEST_RESULTS.md), [`E2E_SESSION_STATUS.md`](E2E_SESSION_STATUS.md) | Maestro E2E status and handoff |
-| [`FLOW_DIAGRAM.html`](FLOW_DIAGRAM.html), [`FLOW_DIAGRAM_SCREENS.html`](FLOW_DIAGRAM_SCREENS.html) | Interactive navigation graphs (AUTH + Dashboard; the second shows screenshots). Pre-redesign |
-| `images/AUTH/`, `images/Dashboard/` | Screenshots backing the area docs (pre-redesign) |
+| [`FLOW_DIAGRAM.html`](FLOW_DIAGRAM.html), [`FLOW_DIAGRAM_SCREENS.html`](FLOW_DIAGRAM_SCREENS.html) | Interactive navigation graphs, 39 screens (the second shows screenshots). Data in `flow/graph-data.js` |
+| `images/` | 52 screenshots backing the area docs (`auth-*`, `dash-*`, `screen-*`) |
+| [`auto_testing/`](auto_testing/) | Report of the 2026-11-07 emulator run: build, E2E results, screenshot capture |
 
 ## Known issues
 
@@ -58,4 +59,4 @@ The screenshots in `images/` were taken before the UI V2 redesign (2026-10-29/30
 
 ## Future work
 
-- Refresh screenshots and flow diagrams for the redesigned UI, and add the screens that have none (search, groups, chat, followers, public profile, moderation, FAQ, how to use, inbox, security).
+- Screens still without a screenshot: New Password, found-pet confirmation, OS push notification. See the capture report for why.
