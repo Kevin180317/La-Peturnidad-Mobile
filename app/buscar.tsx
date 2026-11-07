@@ -20,6 +20,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { LIMITS } from "@/utils/limits";
+import { FollowingList } from "@/components/FollowingList";
 
 type SearchTab = "pets" | "groups" | "users";
 
@@ -203,6 +204,10 @@ export default function BuscarScreen() {
       {/* Resultados */}
       {loading ? (
         <ListSkeleton count={4} />
+      ) : activeTab === "users" && !query.trim() ? (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-10" keyboardShouldPersistTaps="handled">
+          <FollowingList emptyText="Escribe un nombre para buscar usuarios" onSelect={(u) => router.push(`/perfil/${u.user_id}`)} />
+        </ScrollView>
       ) : isEmpty ? (
         <EmptyCard
           icon="search"

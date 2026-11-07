@@ -89,6 +89,13 @@ export default function DashboardScreen() {
   const [feedTag, setFeedTag] = useState<string | null>(null);
   const [loadingMoreFeed, setLoadingMoreFeed] = useState(false);
   const loadingMoreFeedRef = useRef(false);
+  const [feedScope, setFeedScope] = useState<"all" | "following" | "mine">("all");
+  // Filtros de la última carga del feed; las páginas siguientes los reutilizan
+  const feedSeqRef = useRef(0);
+  const feedFilterRef = useRef<{ authorIds: string[] | null; excludeIds: string[] | null }>({
+    authorIds: null,
+    excludeIds: null,
+  });
 
   // Estados para comentarios
   const [commentTarget, setCommentTarget] = useState<{ type: string; id: string } | null>(null);
@@ -114,24 +121,45 @@ export default function DashboardScreen() {
   }, []);
 
   const loadFeed = useCallback(async () => {
-    if (!user?.id) return;
+    const uid = user?.id;
+    if (!uid) return;
+    // Cada carga invalida a las anteriores: al cambiar de pestaña rápido, una respuesta vieja no pisa la nueva
+    const seq = ++feedSeqRef.current;
     setLoadingFeed(true);
-    const result = await postsService.getAllPosts(null, FEED_PAGE_SIZE, feedTag);
+    // Siguiendo: se piden los ids una vez por carga y las páginas siguientes los reutilizan
+    // Para ti no incluye mis publicaciones (Mías) ni las de quienes sigo (Siguiendo)
+    const followingIds =
+      feedScope === "mine" ? [] : ((await followsService.getFollowing(uid)).data ?? []).map((f) => f.following_id);
+    if (seq !== feedSeqRef.current) return;
+    feedFilterRef.current =
+      feedScope === "mine"
+        ? { authorIds: [uid], excludeIds: null }
+        : feedScope === "following"
+          ? { authorIds: followingIds, excludeIds: null }
+          : { authorIds: null, excludeIds: [uid, ...followingIds] };
+    const { authorIds, excludeIds } = feedFilterRef.current;
+    const result = await postsService.getAllPosts(null, FEED_PAGE_SIZE, feedTag, authorIds, excludeIds);
+    if (seq !== feedSeqRef.current) return;
     if (result.success) {
       setFeedPosts(result.data ?? []);
       setFeedHasMore((result.data?.length ?? 0) >= FEED_PAGE_SIZE);
+    } else {
+      showToast("error", "No se pudo cargar el feed", result.error);
     }
     setLoadingFeed(false);
-  }, [user?.id, feedTag]);
+  }, [user?.id, feedTag, feedScope, showToast]);
 
   // Siguiente página del feed (scroll infinito); la ref evita pedir la misma página dos veces seguidas
   const loadMoreFeed = async () => {
     const last = feedPosts[feedPosts.length - 1];
-    if (!feedHasMore || loadingMoreFeedRef.current || !last) return;
+    if (!feedHasMore || loadingFeed || loadingMoreFeedRef.current || !last) return;
     loadingMoreFeedRef.current = true;
     setLoadingMoreFeed(true);
-    const result = await postsService.getAllPosts(last.created_at, FEED_PAGE_SIZE, feedTag);
-    if (result.success) {
+    const seq = feedSeqRef.current;
+    const { authorIds, excludeIds } = feedFilterRef.current;
+    const result = await postsService.getAllPosts(last.created_at, FEED_PAGE_SIZE, feedTag, authorIds, excludeIds);
+    // Si el feed se recargó (otra pestaña) mientras llegaba esta página, es de la pestaña anterior: se descarta
+    if (result.success && seq === feedSeqRef.current) {
       const page = result.data ?? [];
       setFeedPosts((current) => [...current, ...page.filter((p) => !current.some((c) => c.id === p.id))]);
       setFeedHasMore(page.length >= FEED_PAGE_SIZE);
@@ -181,7 +209,9 @@ export default function DashboardScreen() {
     });
 
     if (result.success) {
-      await loadFeed();
+      // Mi publicación no sale en Para ti: se cambia a Mías (el efecto de feedScope recarga)
+      if (feedScope !== "mine") setFeedScope("mine");
+      else await loadFeed();
       return true;
     }
     // El post no se creó: las imágenes ya subidas quedan huérfanas, se borran
@@ -814,8 +844,8 @@ export default function DashboardScreen() {
       return;
     }
     loadFeed();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar la etiqueta
-  }, [feedTag]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar la etiqueta o la pestaña Para ti/Siguiendo
+  }, [feedTag, feedScope]);
 
   // Deep link de notificaciones: abre Emergencia y muestra la alerta (mía o de un vecino)
   const handledAlertRef = useRef<string | null>(null);
@@ -911,6 +941,8 @@ export default function DashboardScreen() {
             onDeleteAnnouncement={handleComDelete}
             feedTag={feedTag}
             onFilterTag={setFeedTag}
+            feedScope={feedScope}
+            onChangeFeedScope={setFeedScope}
             defaultLocation={[profile?.address, profile?.city].filter(Boolean).join(", ")}
           />
         )}

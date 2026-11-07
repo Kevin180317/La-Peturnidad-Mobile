@@ -204,6 +204,10 @@ export default function RootLayout() {
         options={{ title: "Notificaciones" }}
       />
       <Stack.Screen
+        name="solicitudes"
+        options={{ title: "Solicitudes" }}
+      />
+      <Stack.Screen
         name="seguridad"
         options={{ title: "Cuenta y seguridad" }}
       />

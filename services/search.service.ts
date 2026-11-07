@@ -1,4 +1,6 @@
 import { type ServiceResult } from "@/types";
+import { followsService } from "@/services/follows.service";
+import { getCurrentUser } from "@/utils/session";
 import { supabase } from "@/utils/supabase";
 
 export interface PetSearchResult {
@@ -143,16 +145,35 @@ class SearchService {
       const q = sanitizeSearchQuery(query);
       if (!q) return { success: true, data: [] };
 
-      const { data: users, error } = await supabase
-        .from("public_profiles")
-        .select("user_id, first_name, last_name, profile_picture_url, city")
-        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%`)
-        .order("created_at", { ascending: false })
-        .limit(20);
+      // Cada palabra debe coincidir con nombre o apellido ("Kevin King" encuentra a Kevin King)
+      const words = q.split(" ");
+      const base = () => {
+        let req = supabase
+          .from("public_profiles")
+          .select("user_id, first_name, last_name, profile_picture_url, city");
+        for (const w of words) req = req.or(`first_name.ilike.%${w}%,last_name.ilike.%${w}%`);
+        return req;
+      };
 
-      if (error) throw error;
+      // Los que sigo van primero: sin esto, con muchos usuarios el límite de 20 los dejaba fuera
+      const { data: auth } = await getCurrentUser();
+      const me = auth?.user?.id;
+      const followingIds = me
+        ? ((await followsService.getFollowing(me)).data ?? []).map((f) => f.following_id)
+        : [];
 
-      const transformedData = (users || []).map((u) => ({
+      const [general, followed] = await Promise.all([
+        base().order("created_at", { ascending: false }).limit(20),
+        followingIds.length ? base().in("user_id", followingIds).limit(20) : Promise.resolve({ data: null }),
+      ]);
+      if (general.error) throw general.error;
+
+      const seen = new Set<string>();
+      const users = [...(followed.data ?? []), ...(general.data ?? [])]
+        .filter((u) => !seen.has(u.user_id) && !!seen.add(u.user_id))
+        .slice(0, 20);
+
+      const transformedData = users.map((u) => ({
         user_id: u.user_id,
         first_name: u.first_name,
         last_name: u.last_name,
