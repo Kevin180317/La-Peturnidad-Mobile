@@ -48,8 +48,8 @@ Screenshots were taken before Phase 10/11, so colors differ from the current app
 ## Known issues
 
 - **Push sender label**: an older build showed the notification sender as **"La-Peturnidad"** (see [`DASHBOARD.md`](DASHBOARD.md#observations)). `app.json` now uses "Lucky Tracker"; confirm on a fresh build.
-- **Post fields not saved**: the post form collects location, tags, URLs and multiple images, but only the text and first image are stored — see [`BACKLOG.md`](../BACKLOG.md).
-- Open technical debt: [`PROGRESS.md`](../PROGRESS.md#-open-work--technical-debt).
+- **Post fields not saved**: the post form collects location, tags, URLs and multiple images, but only the text and first image are stored — see [`BACKLOG.md`](BACKLOG.md).
+- Open technical debt: [`PROGRESS.md`](PROGRESS.md#-open-work--technical-debt).
 
 ## Future work
 

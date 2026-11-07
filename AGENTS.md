@@ -42,6 +42,8 @@
 
 ## Sistema de diseño (2026-10-30)
 
+> Versión en inglés: `docs/DESIGN_SYSTEM.md`. Si cambias una, actualiza la otra.
+
 - Toda pantalla nueva o modificada se arma con `components/kit/Kit.tsx`; no duplicar estilos a mano. Piezas: `CARD`/`CARD_SHADOW`/`Card`, `ScreenTitle`, `SectionTitle`, `Avatar` (foto o inicial, aro teal opcional), `RoundIconButton`, `Chip`/`ChipTone`, `EmptyCard`, `PetThumb`, `PrimaryButton` (píldora 52 px: teal/coral/ghost/danger), `Field` (input con etiqueta, ícono y borde teal al enfocar), `ChoiceChips` (reemplaza Pickers con pocas opciones), `ToggleTile`, `ListSection`/`ListRow` (filas tipo ajustes), `Segmented` (pastilla deslizante), `Sheet` (hoja inferior con asa y X)
 - Lenguaje visual: fondo crema `#faf5e0`, tarjetas blancas `rounded-3xl` con sombra suave, botones píldora, íconos en círculos/cuadros tintados (`${color}1A`), títulos de pantalla dentro del contenido (no en la barra)
 - Sin barra de navegación (`headerShown: false`): dashboard y todas las pantallas de acceso (login, register, register-extended, forgot-password, verify-otp, reset-password, email-confirmacion). Usan `useSafeAreaInsets` (en auth: prop `headerless` de `AuthScreen`; `onBack` dibuja el botón de regreso). El resto de pantallas conserva la barra teal con flecha atrás

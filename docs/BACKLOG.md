@@ -1,12 +1,12 @@
 # Backlog - Lucky Tracker
 
-> Actualizado 2026-11-03. Estado detallado de lo hecho: `PROGRESS.md` (Fase 11) y `AGENTS.md`.
+> Actualizado 2026-11-03. Estado detallado de lo hecho: `PROGRESS.md` (Fase 11) y [`AGENTS.md`](../AGENTS.md).
 
 ## Siguiente (esta semana)
 
 ### Bloquea el lanzamiento
 - [ ] **QA en teléfono con el build nuevo** (APK `preview`): registro con edad y teléfono por país, colonias legibles, editar perfil con teléfono viejo, correo de confirmación a `luckytracker.com.mx`, bandeja sin emoji, límites de texto
-- [ ] **Publicar `/policy` y `/terms`** (sábado 2026-11-07) y revisarlas con la lista de `docs/LEGAL_*.md`: ancla `#eliminar-cuenta`, correo en texto plano, domicilio ARCO, proveedores, edad 18
+- [ ] **Publicar `/policy` y `/terms`** (sábado 2026-11-07) y revisarlas con la lista de `LEGAL_*.md`: ancla `#eliminar-cuenta`, correo en texto plano, domicilio ARCO, proveedores, edad 18
 - [ ] **Completar los marcadores** de los textos legales: `[RESPONSABLE]`, `[DOMICILIO]`, `[CORREO]`, `[REGIÓN]`, `[FECHA]`
 - [ ] **Corregir el certificado en okhuysen.dev**: el PDF dice "Claude Code in Action" (mayo 2026), la página dice "Claude AI Developer Certification" (2025)
 - [ ] **Play Console**: fichas, público objetivo solo adultos (18+), clasificación de contenido (contenido de usuarios y chat), formulario Data safety coherente con la política, URL de eliminación de cuenta

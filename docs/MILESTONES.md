@@ -1,7 +1,7 @@
 # Milestones — Lucky Tracker
 
 > Condensed history of what's been built. Project span: first commit 2025-05-31 → latest 2026-10-20.
-> For line-by-line detail see [`PROGRESS.md`](../PROGRESS.md), which is the source of truth. Open work lives in `PROGRESS.md` ("Open work / technical debt") and [`BACKLOG.md`](../BACKLOG.md).
+> For line-by-line detail see [`PROGRESS.md`](PROGRESS.md), which is the source of truth. Open work lives in `PROGRESS.md` ("Open work / technical debt") and [`BACKLOG.md`](BACKLOG.md).
 
 ## How this project started
 

@@ -11,7 +11,7 @@ Community app for finding lost pets. Users register their pets, publish emergenc
 
 ## Project status
 
-Actively evolving, 9 development phases completed (backend foundation through UI polish and a unified color system) — see [`PROGRESS.md`](PROGRESS.md) for the detailed dev log or [`docs/MILESTONES.md`](docs/MILESTONES.md) for the condensed history and open next steps. (`docs/SUPABASE_PENDING_CODE.md` is an older planning snapshot and no longer reflects current state — see the discrepancy note in `MILESTONES.md`.)
+Actively evolving, 9 development phases completed (backend foundation through UI polish and a unified color system) — see [`docs/PROGRESS.md`](docs/PROGRESS.md) for the detailed dev log, [`docs/BACKLOG.md`](docs/BACKLOG.md) for open tasks, or [`docs/MILESTONES.md`](docs/MILESTONES.md) for the condensed history.
 
 ## Getting started
 
@@ -27,13 +27,15 @@ From the Expo CLI output you can open the app in a development build, Android em
 | Doc | Purpose |
 | --- | --- |
 | [`docs/APP_OVERVIEW.md`](docs/APP_OVERVIEW.md) | Entry point: general flow, functionality, area docs, known issues, scope notes |
-| [`PROGRESS.md`](PROGRESS.md) | **Living dev log** (Spanish) — line-by-line record of every phase, bug, and fix as it happens. Source of truth for current state |
+| [`docs/PROGRESS.md`](docs/PROGRESS.md) | **Living dev log** (Spanish) — line-by-line record of every phase, bug, and fix as it happens. Source of truth for current state |
 | [`docs/MILESTONES.md`](docs/MILESTONES.md) | **Point-in-time summary** (English) of `PROGRESS.md` by phase, plus the design-proposal origin story and open next steps. Not auto-synced with `PROGRESS.md` — re-check both if it's been a while |
 | [`docs/SCREENS.md`](docs/SCREENS.md) | Every screen in the app: route, purpose, and what each user interaction triggers |
 | [`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md) | Historical (2026-06-20) Supabase schema snapshot — outdated; source of truth is the remote DB and `types/database.ts` |
-| [`docs/SUPABASE_PENDING_CODE.md`](docs/SUPABASE_PENDING_CODE.md) | Older planning snapshot — mostly superseded by `PROGRESS.md`, see `MILESTONES.md`'s discrepancy note |
+| [`docs/BACKLOG.md`](docs/BACKLOG.md) | Open tasks (Spanish): launch blockers, pending tests, infra, later |
+| [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Visual language, Kit components, feedback patterns, Uniwind gotchas |
+| [`docs/BRANDING.md`](docs/BRANDING.md) | Brand colors and their roles |
+| [`docs/FEED_COMUNIDAD.md`](docs/FEED_COMUNIDAD.md) | Why Feed and Comunidad are separate tabs and how they differ |
 | [`docs/images/`](docs/images/) | Screenshots per app area (`AUTH`, `Dashboard`), used as reference for the docs above |
-| `docs/old/` | Original Spanish versions of the docs above, kept for reference |
 
 ## Core flow
 

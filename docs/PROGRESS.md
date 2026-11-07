@@ -1,7 +1,7 @@
 # Progress — Lucky Tracker
 
 > Living dev log and source of truth for the project's current state. Last updated: 2026-10-21.
-> Condensed history and project origin: [`docs/MILESTONES.md`](docs/MILESTONES.md). Short-term task list: [`BACKLOG.md`](BACKLOG.md).
+> Condensed history and project origin: [`MILESTONES.md`](MILESTONES.md). Short-term task list: [`BACKLOG.md`](BACKLOG.md).
 
 Phases are listed in chronological order. Some early phases record colors that were later replaced (see Phase 11 for the current teal).
 
@@ -223,7 +223,7 @@ Phases are listed in chronological order. Some early phases record colors that w
 
 | Item | Notes |
 |---|---|
-| **E2E coverage** | Only the auth flows are covered; no dashboard feature has an E2E test. Plan: [`docs/E2E_SESSION_STATUS.md`](docs/E2E_SESSION_STATUS.md). |
+| **E2E coverage** | Only the auth flows are covered; no dashboard feature has an E2E test. Plan: [`E2E_SESSION_STATUS.md`](E2E_SESSION_STATUS.md). |
 | **Delete account** | Users have no way to delete their account. |
 | **Image uploads for alerts, found pets and stories** | See [`BACKLOG.md`](BACKLOG.md). |
 
