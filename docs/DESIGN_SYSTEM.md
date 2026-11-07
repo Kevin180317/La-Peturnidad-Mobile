@@ -37,7 +37,7 @@ Other shared pieces: `components/PasswordInput.tsx` (eye toggle), `components/Ph
 
 - No navigation bar (`headerShown: false`) on the dashboard and every auth screen (login, register, register-extended, forgot-password, verify-otp, reset-password, email-confirmacion). They use `useSafeAreaInsets`; in auth, the `headerless` prop of `AuthScreen` is used and `onBack` draws the back button.
 - All other screens keep the teal header with a back arrow.
-- The dashboard has 5 tabs: Feed / Inicio / Comunidad / Emergencia / Perfil (see [`FEED_COMUNIDAD.md`](FEED_COMUNIDAD.md) for Feed vs Comunidad).
+- The dashboard has 5 tabs: Inicio / Feed / Emergencia / Mensajes / Perfil (see [`FEED.md`](FEED.md)).
 
 ## Feedback
 

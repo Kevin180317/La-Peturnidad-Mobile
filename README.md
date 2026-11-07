@@ -11,7 +11,7 @@ Community app for finding lost pets. Users register their pets, publish emergenc
 
 ## Project status
 
-Actively evolving, 9 development phases completed (backend foundation through UI polish and a unified color system) — see [`docs/PROGRESS.md`](docs/PROGRESS.md) for the detailed dev log, [`docs/BACKLOG.md`](docs/BACKLOG.md) for open tasks, or [`docs/MILESTONES.md`](docs/MILESTONES.md) for the condensed history.
+Actively evolving, 17 development phases completed (backend foundation through the UI V2 redesign, Supabase hardening and the SDK 58 upgrade); preparing for QA and launch — see [`docs/PROGRESS.md`](docs/PROGRESS.md) for the detailed dev log, [`docs/BACKLOG.md`](docs/BACKLOG.md) for open tasks, or [`docs/MILESTONES.md`](docs/MILESTONES.md) for the condensed history.
 
 ## Getting started
 
@@ -34,13 +34,13 @@ From the Expo CLI output you can open the app in a development build, Android em
 | [`docs/BACKLOG.md`](docs/BACKLOG.md) | Open tasks (Spanish): launch blockers, pending tests, infra, later |
 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Visual language, Kit components, feedback patterns, Uniwind gotchas |
 | [`docs/BRANDING.md`](docs/BRANDING.md) | Brand colors and their roles |
-| [`docs/FEED_COMUNIDAD.md`](docs/FEED_COMUNIDAD.md) | Why Feed and Comunidad are separate tabs and how they differ |
+| [`docs/FEED.md`](docs/FEED.md) | The Feed tab: Emergencias / Anuncios / Social |
 | [`docs/images/`](docs/images/) | Screenshots per app area (`AUTH`, `Dashboard`), used as reference for the docs above |
 
 ## Core flow
 
 1. **Onboarding → Auth**: welcome carousel, then login/register, email confirmation, and profile completion (name, phone, birth date, neighborhood in Tijuana).
-2. **Dashboard**: 5 sections — Home (pets), Emergency (lost/found alerts), Feed (posts), Community (notices), Profile.
+2. **Dashboard**: 5 tabs — Inicio (pets), Feed (emergencies, notices, social posts), Emergencia (report lost/found), Mensajes, Perfil.
 3. **Social layer**: follow users, direct/group messaging, neighborhood groups, public profiles, successful-reunion stories.
 4. **Moderation**: reports handled by admin/moderator roles via a dedicated panel.
 

@@ -1,9 +1,9 @@
 # Progress — Lucky Tracker
 
-> Living dev log and source of truth for the project's current state. Last updated: 2026-10-21.
+> Living dev log by phase. Last updated: 2026-11-07. For the very latest state, [`../AGENTS.md`](../AGENTS.md) (Spanish, "Progress" section) is the most detailed source; this file keeps the English summary.
 > Condensed history and project origin: [`MILESTONES.md`](MILESTONES.md). Short-term task list: [`BACKLOG.md`](BACKLOG.md).
 
-Phases are listed in chronological order. Some early phases record colors that were later replaced (see Phase 11 for the current teal).
+Phases are listed in chronological order. **Phases 1–12 are historical:** several things they mention no longer exist (`utils/theme.ts`, `constants/Colors.ts`, `components/Button.tsx`, `components/EmptyState.tsx`, `services/matching.service.ts`, the Comunidad tab) and the teal changed again (current value `#007275`, see [`BRANDING.md`](BRANDING.md)). Phases 13–17 below describe the current app.
 
 ---
 
@@ -198,7 +198,7 @@ Phases are listed in chronological order. Some early phases record colors that w
 
 | Item | Notes |
 |---|---|
-| **Teal aligned with the website** | Primary teal changed `#007275` → `#005e66` (`utils/theme.ts`, `constants/Colors.ts`) to match the `secundario` color on luckytracker.com.mx. See [`docs/BRANDING.md`](docs/BRANDING.md). |
+| **Teal aligned with the website** | Primary teal changed `#007275` → `#005e66` (`utils/theme.ts`, `constants/Colors.ts`) to match the `secundario` color on luckytracker.com.mx. See [`BRANDING.md`](BRANDING.md). *Reverted later: the code uses `#007275`.* |
 | **FAQ and How-to screens** | New `app/faq.tsx` and `app/como-usar.tsx`, reachable from the Profile tab menu. |
 | **Copy fixes (bugs #1–9)** | Capitalized days on onboarding and dashboard, accent fixes ("Confirmá" → "Confirma", email confirmation screen), "email" → "correo electrónico" across screens, "Historial propio" → "Historial", singular/plural for pet counts, centered "last updated" date in the profile. |
 | **Advanced post creation** | New `components/PostForm.tsx` modal: gallery/camera images, location, `@user` tags and URLs. Images upload to the new `posts` bucket (falls back to `public`). GPS detection was removed for web compatibility. **Only `content` and the first image are persisted** — see the backlog. |
@@ -212,38 +212,100 @@ Phases are listed in chronological order. Some early phases record colors that w
 | Item | Notes |
 |---|---|
 | **Unit tests (Jest + RNTL)** | `jest-expo` setup with a chainable Supabase mock and expo-router/toast mocks (`test/`). Tests in `__tests__/` for `utils/format`, auth/pets/follows/alerts/matching services, `PasswordInput`, `ConfirmModal`, `EmptyState`, and the login and verify-otp screens. CI runs a parallel test job with a coverage threshold and uploads the report. |
-| **E2E (Maestro)** | 5 flows in `.maestro/flows/` (onboarding skip, login validation, bad credentials, login + auto-login, logout) + a `complete-profile` subflow. Nightly + manual workflow `.github/workflows/e2e.yml`. Status and coverage: [`docs/E2E_TEST_RESULTS.md`](docs/E2E_TEST_RESULTS.md). |
+| **E2E (Maestro)** | 5 flows in `.maestro/flows/` (onboarding skip, login validation, bad credentials, login + auto-login, logout) + a `complete-profile` subflow. Nightly + manual workflow `.github/workflows/e2e.yml`. Status and coverage: [`E2E_TEST_RESULTS.md`](E2E_TEST_RESULTS.md). |
 | **Accessibility** | `PasswordInput` visibility toggle now has an accessibility label. |
+
+## ✅ Phase 13 — Pre-launch hardening (2026-10-24)
+
+| Item | Notes |
+|---|---|
+| **Supabase** | Migrations `20261024000001_prelaunch_rls_hardening` and `20261024000002_messaging_blocks_push`: `WITH CHECK` on UPDATE, no SECURITY DEFINER for `anon`, messages only between participants and not across blocks, unique DM/group chats, `found_pets` filled by trigger from the alert, `device_tokens` with PK = `token` and RPC `register_device_token`, moderators can delete content, realtime on `messages` |
+| **Rate limits** | `20261024000003_rate_limits`: trigger `enforce_rate_limit` per table (posts 10/h, comments 30/h, messages 30/min, announcements 5/h, alerts 5/day, reports 10/h, stories 5/day, groups 3/day); `created_at` is set by the server |
+| **Edge functions** | `delete-account` (account deletion required by Google Play) and `send-push-notification` (atomic `notified_at` claim, recipients from the alert, FCM batches, only `UNREGISTERED` tokens deleted; later versions also write the inbox row) |
+| **App** | Delete account, report/block users, chat realtime, group chat via RPC `join_group_conversation`, password rules (8+ with letters and numbers), auth without back-stack loops, notification deep link on cold start |
+| **Security screen** | `app/seguridad.tsx`: change password (re-authenticates with the current one) and change email (confirmation link to the new address) |
+| **Notification inbox** | `app/bandeja.tsx` + `notificationsService`; tapping an item marks it read and opens its `data.url` (only paths starting with `/`) |
+| **Feed pagination** | `postsService.getAllPosts(before?, limit = 20)` by cursor; infinite scroll in the Social segment |
+| **Typed client** | `createClient<Database>`; `types/index.ts` derives from `Tables<>` |
+| **Icon and splash** | Generated from the isotype (`Isotipo_color_Salmon.png`) on cream `#faf5e0` |
+| **Tests** | 16 suites / 120 tests; the push edge function is tested by loading the Deno code with mocks |
+
+## ✅ Phase 14 — UI V2 redesign (2026-10-29/30)
+
+| Item | Notes |
+|---|---|
+| **Design Kit** | `components/kit/Kit.tsx` shared by every screen — see [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) |
+| **Screens redesigned** | Feed, Emergencia, Inicio (pet form and detail as bottom sheet), Mensajes and chat, Perfil, public profile, edit profile, followers, inbox, preferences, security, all auth and onboarding, search, groups, stories, FAQ, how to use, moderation, `PostForm`, `TabBar`, `ConfirmModal`, not-found. No logic, service or prop changes |
+| **No navigation bar** | Dashboard and every auth screen use `headerShown: false` |
+| **Confirmations** | `confirmDialog` replaces the 12 `Alert.alert` calls |
+| **Toasts** | White card, closable; new `welcome` type |
+| **Animated splash** | `components/AnimatedSplash.tsx`, ~2.2 s, fade only with reduced motion |
+| **Image upload fix** | `dashboardService.uploadImage` reads local files with `new File(uri).arrayBuffer()` (`expo-file-system`); `fetch("file://...")` returned the text "File not found" and uploaded it as the photo |
+| **Dropped** | The "Instagram-style" redesign (spec and plan of 2026-10-29): do not resume it |
+
+## ✅ Phase 15 — Local audit fixes (2026-10-31)
+
+| Item | Notes |
+|---|---|
+| **Offline** | `getCurrentUser()` keeps the stored session; the dashboard shows a retry instead of "incomplete profile" when loading fails |
+| **Logout** | Local scope only, also works offline |
+| **Colonia** | Edit profile uses postal code + `ColoniaPicker`; alerts compare colonias by exact equality |
+| **Chat** | Last 500 messages; "Hoy/Ayer" by calendar day; safe area and keyboard handling; "Conversación cerrada" when the other person left a 1:1 chat |
+| **Cleanup** | Removed `EmptyState`, `ThemedText`, `ThemedView`, `hooks/`, `constants/Colors.ts`, `utils/theme.ts`, the `reset-project` script and unused dependencies (`axios`, `expo-blur`, `expo-image-manipulator`, `expo-location`, `expo-symbols`, `react-native-webview`, `@react-navigation/drawer`, `react-native-url-polyfill`) |
+
+## ✅ Phase 16 — Supabase closure and SDK 58 (2026-11-03/05)
+
+| Item | Notes |
+|---|---|
+| **Profile privacy** | `public_profiles` view, contact RPCs, `user_profiles` closed to non-owners — see [`SUPABASE_HARDENING_PLAN_2026-11-02.md`](SUPABASE_HARDENING_PLAN_2026-11-02.md) |
+| **Age** | Minimum 18 (`utils/age.ts`, trigger `enforce_min_age`) |
+| **Phone** | E.164 with country selector (`PhoneField`, `utils/phone.ts`) |
+| **No emojis** | Anywhere, including push and inbox text; `OptionSheet` replaces the native Picker |
+| **Text limits** | `utils/limits.ts` (`LIMITS`) with `maxLength` on every field |
+| **Expo SDK 54 → 58** | `expo@58`, React Native 0.88, React 19.3, TypeScript 6, Jest 30 + `jest-expo` 58; `app.json` dropped `newArchEnabled`, `edgeToEdgeEnabled` and `navigationBar`; `expo-doctor` clean |
+| **Legal** | The app links to `luckytracker.com.mx/terms` and `/policy` (`utils/legal.ts`); required checkbox in register |
+
+## ✅ Phase 17 — QA ticket fixes (2026-11-04)
+
+| Item | Notes |
+|---|---|
+| **Follower counters** | Profile uses `followsService.getCounts` and reloads on dashboard focus |
+| **Richer posts** | `PostForm`: up to 5 images (gallery or camera), free-text location, tags (also extracted from `#hashtags`), up to 3 links. Migration `posts_media_location_tags_links`: `posts.image_urls`, `location`, `tags`, `links` with CHECK limits and a GIN index on `tags` (`image_url` still holds the first image) |
+| **Feed** | Image carousel, location, tappable tags filtering the feed on the server, links via `Linking` |
+| **Camera permission** | `app.json` now declares `cameraPermission` (needs a new build). Location is text only, no GPS, on purpose |
+| **Open question** | "Tags" was built as hashtags; if QA meant tagging people (`@mentions`), that is missing |
 
 ---
 
 ## 🔧 Open work / technical debt
 
+Open tasks with dates and owners live in [`BACKLOG.md`](BACKLOG.md). Longer-term technical debt:
+
 ### 🟥 High priority
 
 | Item | Notes |
 |---|---|
-| **E2E coverage** | Only the auth flows are covered; no dashboard feature has an E2E test. Plan: [`E2E_SESSION_STATUS.md`](E2E_SESSION_STATUS.md). |
-| **Delete account** | Users have no way to delete their account. |
-| **Image uploads for alerts, found pets and stories** | See [`BACKLOG.md`](BACKLOG.md). |
+| **Launch blockers** | Phone QA on the new build, legal pages published and reviewed, Play Console listing, production build — see `BACKLOG.md` |
+| **Push end to end** | FCM delivery with the SDK 58 build needs a second device |
+| **E2E coverage** | Only the auth flows are covered, and they were adapted to UI V2 but not re-run. Plan: [`E2E_SESSION_STATUS.md`](E2E_SESSION_STATUS.md) |
 
 ### 🟡 Medium priority
 
 | Item | Notes |
 |---|---|
-| **Persist all post fields** | `PostForm` collects multiple images, location, tags and URLs, but `posts` only has `content` and `image_url`. Add columns (or drop the fields from the form). |
-| **Migrate screens to shared components (`Button`/`Card`/`Badge`/`Avatar`)** | `components/Button.tsx` defines these components but almost no screen uses them — the code uses ad-hoc `TouchableOpacity`/`View` (~112 `TouchableOpacity` in 33 files). This is a real refactor, not find-and-replace. Decision (2026-08-29): keep it pending and, if resumed, go screen by screen. |
-| **Offline support** | No cache or offline persistence. |
-| **Dark mode** | Not implemented — `userInterfaceStyle: "light"` is forced (decision: light theme only). |
-| **Versioned migrations** | `supabase/` only holds the Edge Function; the schema lives only in the hosted project. |
+| **Test coverage** | Not covered: `app/dashboard.tsx` as a whole (900+ lines; only its services and `FeedTab`), social screens, `perfil/[id]`, `seguridad`, `bandeja` |
+| **Baseline migration** | `supabase/migrations/` has the recent migrations but no baseline; older ones were applied from the dashboard |
+| **Offline support** | Only the stored session survives without network; no data cache |
+| **Dark mode** | Not implemented — `userInterfaceStyle: "light"` is forced (decision: light theme only) |
+| **Supabase plan** | Free plan: no backups, project pauses after ~7 days idle |
 
 ### 🟢 Low priority
 
 | Item | Notes |
 |---|---|
 | **Analytics / crash reporting** | No Sentry, PostHog, etc. |
-| **i18n** | All copy is hardcoded Spanish (no translation system). |
-| **Clean up storage policies** | Duplicate INSERT policies on `storage.objects` (3 per bucket). |
-| **Serve `colonias.json` from an API** | 3,786 lines shipped in the client (`register-extended.tsx`). |
-| **Database webhooks** | Push is triggered from client/service code. Optionally move it to Supabase webhooks: `emergency_alerts` INSERT + `messages` INSERT → `send-push-notification`. |
-| **Verify the push sender label** | An older build showed "La-Peturnidad" as the notification sender. The app name is now "Lucky Tracker" in `app.json`; confirm on a fresh build. |
+| **i18n** | All copy is hardcoded Spanish (no translation system) |
+| **Clean up storage policies** | Duplicate INSERT policies on `storage.objects` (3 per bucket) |
+| **Serve the colonias catalog from an API** | Large JSON shipped in the client (`ColoniaPicker`) |
+| **Database webhooks** | Push is triggered from client/service code. Optionally move it to Supabase webhooks: `emergency_alerts` INSERT + `messages` INSERT → `send-push-notification` |
+| **Verify the push sender label** | An older build showed "La-Peturnidad" as the notification sender; `app.json` now says "Lucky Tracker" — confirm on a fresh build |

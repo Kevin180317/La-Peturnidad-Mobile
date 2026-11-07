@@ -1,13 +1,13 @@
 # Milestones — Lucky Tracker
 
-> Condensed history of what's been built. Project span: first commit 2025-05-31 → latest 2026-10-20.
+> Condensed history of what's been built. Project span: first commit 2025-05-31 → latest 2026-11-07.
 > For line-by-line detail see [`PROGRESS.md`](PROGRESS.md), which is the source of truth. Open work lives in `PROGRESS.md` ("Open work / technical debt") and [`BACKLOG.md`](BACKLOG.md).
 
 ## How this project started
 
 Two design files in [`flow_reference/`](flow_reference/) capture the original pitch, before any code: `lucky-tracker-flowchart.html` (navigation/flow diagram) and `lucky-tracker-ui.html` (8-screen UI mockup), both labeled "v1.0 · 2026" and based on post-its and the brand guidelines. They proposed a 4-tab app (Home / Alerts / My Pets / Profile) plus an interactive map of nearby lost and found pets, using the salmon/coral (`#ff7e70`), teal, cream (`#faf5e0`) and dark (`#211f1e`) palette.
 
-The palette shipped largely as designed (see [`BRANDING.md`](BRANDING.md) for how teal and coral roles changed). The structure evolved: the app has **5 tabs** (Feed / Inicio / Comunidad / Emergencia / Perfil) because the product grew from lost-pet alerts into a community social network (posts, follows, groups, messaging). The interactive map was **not** built.
+The palette shipped largely as designed (see [`BRANDING.md`](BRANDING.md) for how teal and coral roles changed). The structure evolved: the app has **5 tabs** (Inicio / Feed / Emergencia / Mensajes / Perfil) because the product grew from lost-pet alerts into a community social network (posts, follows, groups, messaging). Notices that used to have their own Comunidad tab now live in Feed → Anuncios. The interactive map was **not** built.
 
 ## Phases
 
@@ -24,8 +24,13 @@ The palette shipped largely as designed (see [`BRANDING.md`](BRANDING.md) for ho
 | **8 · Uniwind fix + icons** | Fixed the scanner bug that dropped styles from `components/`, 2×2 Emergency grid, emojis → Ionicons |
 | **9 · 3-color system** | ~11 ad-hoc colors → teal/coral/dark + neutrals, red only for destructive actions, branded logout modal |
 | **10 · Design system v1.0** | Teal as the only action color, coral only for Emergency, semantic tokens, input focus states, consistent radii and shadows |
-| **11 · Branding & features** | Teal aligned with the website (`#005e66`), FAQ and How-to screens, copy fixes, advanced post creation with images, Android nav bar fix, expo-location SDK fix |
+| **11 · Branding & features** | Teal briefly aligned with the website (`#005e66`; unified back to `#007275` in the redesign), FAQ and How-to screens, copy fixes, post creation form, Android nav bar fix, expo-location SDK fix |
 | **12 · Automated testing** | Jest + RNTL unit tests with a CI job, Maestro E2E flows for auth, nightly E2E workflow |
+| **13 · Pre-launch hardening** (2026-10-24) | RLS hardening, messaging with blocks, push claims and device tokens, delete account, report/block users, rate limits, password change, notification inbox, feed pagination, 120 tests, new app icon |
+| **14 · UI V2 redesign** (2026-10-29/30) | Shared Kit (`components/kit/Kit.tsx`), animated splash, every screen redesigned, no navigation bar on dashboard and auth, `confirmDialog` replaces `Alert.alert`, image-upload fix with `expo-file-system` |
+| **15 · Local audit** (2026-10-31) | Offline-safe session, local-only logout, colonia picker in edit profile, chat fixes, dead code and unused dependencies removed |
+| **16 · Supabase closure and SDK 58** (2026-11-03/05) | `public_profiles` view and contact RPCs, `user_profiles` closed, min age 18, E.164 phones, SDK 54 → 58, no emojis, text limits |
+| **17 · QA tickets** (2026-11-04) | Follower counters, social posts with up to 5 images, location, tags and links, Feed with tag filter, camera permission |
 
 ## Documentation
 
@@ -34,6 +39,7 @@ The palette shipped largely as designed (see [`BRANDING.md`](BRANDING.md) for ho
 - Interactive flow diagrams: [`FLOW_DIAGRAM.html`](FLOW_DIAGRAM.html), [`FLOW_DIAGRAM_SCREENS.html`](FLOW_DIAGRAM_SCREENS.html)
 - Database: [`SUPABASE_SCHEMA.md`](SUPABASE_SCHEMA.md)
 - Testing: [`E2E_TEST_RESULTS.md`](E2E_TEST_RESULTS.md), [`E2E_SESSION_STATUS.md`](E2E_SESSION_STATUS.md)
+- Design: [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md), [`BRANDING.md`](BRANDING.md), [`FEED.md`](FEED.md)
 
 ## Not built from the original proposal
 

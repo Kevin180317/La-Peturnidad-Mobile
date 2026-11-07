@@ -1,107 +1,46 @@
-# Backlog - Lucky Tracker
+# Backlog — Lucky Tracker
 
-> Actualizado 2026-11-03. Estado detallado de lo hecho: `PROGRESS.md` (Fase 11) y [`AGENTS.md`](../AGENTS.md).
+> Updated 2026-11-07. What is done is in [`PROGRESS.md`](PROGRESS.md) and [`../AGENTS.md`](../AGENTS.md).
 
-## Siguiente (esta semana)
+## Next (this week)
 
-### Bloquea el lanzamiento
-- [ ] **QA en teléfono con el build nuevo** (APK `preview`): registro con edad y teléfono por país, colonias legibles, editar perfil con teléfono viejo, correo de confirmación a `luckytracker.com.mx`, bandeja sin emoji, límites de texto
-- [ ] **Publicar `/policy` y `/terms`** (sábado 2026-11-07) y revisarlas con la lista de `LEGAL_*.md`: ancla `#eliminar-cuenta`, correo en texto plano, domicilio ARCO, proveedores, edad 18
-- [ ] **Completar los marcadores** de los textos legales: `[RESPONSABLE]`, `[DOMICILIO]`, `[CORREO]`, `[REGIÓN]`, `[FECHA]`
-- [ ] **Corregir el certificado en okhuysen.dev**: el PDF dice "Claude Code in Action" (mayo 2026), la página dice "Claude AI Developer Certification" (2025)
-- [ ] **Play Console**: fichas, público objetivo solo adultos (18+), clasificación de contenido (contenido de usuarios y chat), formulario Data safety coherente con la política, URL de eliminación de cuenta
-- [ ] **Build `production`** (AAB) cuando todo lo anterior esté probado
+### Blocks the launch
+- [ ] **Phone QA with the new build** (`preview` APK): registration with age and per-country phone, readable colonias, edit profile with an old phone, confirmation email pointing to `luckytracker.com.mx`, inbox without emojis, text limits, Feed (Emergencias / Anuncios / Social) and the new post form
+- [ ] **Publish `/policy` and `/terms`** (target 2026-11-07) and review them against the checklists in `LEGAL_PRIVACY_POLICY.md` and `LEGAL_TERMS_AND_CONDITIONS.md`: `#eliminar-cuenta` anchor, plain-text email, ARCO address, providers, age 18. Published pages must be in Spanish
+- [ ] **Fill in the legal placeholders**: `[RESPONSABLE]`, `[DOMICILIO]`, `[CORREO]`, `[REGIÓN]`, `[FECHA]`
+- [ ] **Fix the certificate on okhuysen.dev**: the PDF says "Claude Code in Action" (May 2026), the page says "Claude AI Developer Certification" (2025)
+- [ ] **Play Console**: store listing, adults-only target audience (18+), content rating (user content and chat), Data safety form consistent with the policy, account-deletion URL
+- [ ] **`production` build** (AAB) once everything above is tested
 
-### Pruebas pendientes
-- [ ] **Push FCM de punta a punta** con el build SDK 58 (necesita un segundo dispositivo; el token ya se registra)
-- [ ] Probar en el build nuevo: borrar cuenta, moderación y chats después de la migración B
+### Pending tests
+- [ ] **FCM push end to end** with the SDK 58 build (needs a second device; the token already registers)
+- [ ] On the new build: delete account, moderation and chats after migration B
+- [ ] Re-run Maestro against the UI V2 flows (updated 2026-11-05, results not recorded) — see `E2E_TEST_RESULTS.md`
 
-### Infra (plan free)
-- [ ] Respaldo manual semanal (`supabase db dump`) y entrar al panel cada semana: el plan free no tiene respaldos y pausa el proyecto tras ~7 días sin actividad
-- [ ] Decidir plan Pro antes de tener clientes reales
-- [ ] Reporte de caídas (Sentry) antes de producción
+### Infra (free plan)
+- [ ] Weekly manual backup (`supabase db dump`) and open the dashboard weekly: the free plan has no backups and pauses the project after ~7 days of inactivity
+- [ ] Decide on the Pro plan before having real customers
+- [ ] Crash reporting (Sentry) before production
+- [ ] Supabase dashboard settings: SMTP (Resend), "Secure email change", 8-digit OTP, allowed URL `https://luckytracker.com.mx/email-confirmed` (details in `SUPABASE_HARDENING_PLAN_2026-11-02.md`)
 
-## Después (sin fecha)
-- [ ] Migración baseline (#8) para poder recrear la base desde cero
-- [ ] Límites de largo en la base de datos (hoy solo `maxLength` en la app)
-- [ ] Quitar el paquete `@react-native-picker/picker` (ya no se usa; es nativo, entra con un build) y su mock en `__tests__/app/editar-perfil.test.tsx`
-- [ ] Color de avatar determinista por `user_id` (hoy siempre teal)
-- [ ] Si alguien te bloqueó, su contenido sigue visible para ti; pets y listas de grupos no se filtran por bloqueo
-- [ ] Guardar la fecha de aceptación de términos en el perfil
-- [ ] Soporte offline, i18n, analítica, servir `colonias.json` desde API (ver "Baja prioridad" en `PROGRESS.md`)
-- [ ] Más países fijos en el selector de teléfono (hoy México, EE. UU./Canadá y otro)
+## Later (no date)
+- [ ] Baseline migration, so the database can be recreated from scratch (older migrations were applied from the dashboard; `posts_media_location_tags_links` is applied remotely but has no file in `supabase/migrations/`)
+- [ ] Text length limits in the database (today only `maxLength` in the app)
+- [ ] Remove `@react-native-picker/picker` (unused; it is native, so it ships with a build) and its mock in `__tests__/app/editar-perfil.test.tsx`
+- [ ] Deterministic avatar color by `user_id` (always teal today)
+- [ ] If someone blocked you, their content is still visible to you; pets and group lists are not filtered by blocks
+- [ ] Store the terms acceptance date in the profile (`terms_accepted_at`; do it before launch, it cannot be reconstructed for existing users)
+- [ ] Delete notifications older than 90 days (`pg_cron`; must match the privacy policy)
+- [ ] Offline support, i18n, analytics, serve `colonias.json` from an API (see "Low priority" in `PROGRESS.md`)
+- [ ] More fixed countries in the phone selector (Mexico, US/Canada and "other" today)
+- [ ] Tag people (`@mentions`) in posts: only hashtags exist. Build it only if QA asks (search users when posting, store tagged users, notify them)
+- [ ] Decide what to do with the orphaned `/comunidad` screen (remove it or link it)
+- [ ] Refresh the screenshots in `docs/images/` and the flow diagrams for the redesigned UI
+- [ ] Push on iOS (needs Firebase + `GoogleService-Info.plist`; only if launching on iOS)
 
-## Decisiones tomadas
-- Edad mínima **18 años** (app + trigger `enforce_min_age` + textos legales). Si cambia: `MIN_AGE` en `utils/age.ts`, el trigger y los textos.
-- Plan Supabase **free** por ahora.
-- Sin emojis en la app ni en notificaciones.
-- Los commits y los builds los hace el usuario.
-
----
-
-## Histórico (2026-10-03): integración de subida de imágenes
-> Sin verificar contra el estado actual. La subida se corrigió con `expo-file-system` el 2026-10-30; revisar cada punto antes de retomarlo.
-
-## Próxima Semana (Image Upload Integration)
-
-### ✅ Completado (Esta Semana)
-- [x] Auditoría completa de UI/UX (24 pantallas + componentes)
-- [x] Corrección de colores de navegación (links de rojo a teal)
-- [x] Limpieza de clases de fuente inválidas (font-[Inter_*])
-- [x] Redesign de ProfileTab (estilo menu consistente)
-- [x] Implementación de subida de imágenes para posts (Feed)
-
-### ⏳ Backlog - Integración de Subida de Imágenes
-
-#### 1. **Emergencia - Mascotas Perdidas** (PRIORITY: HIGH)
-- **Archivo:** `app/dashboard.tsx` → `handleReportMissing` / EmergencyTab
-- **Tarea:** Implementar subida de foto de mascota perdida a bucket `emergency-alerts`
-- **Contexto:** Cuando usuario reporta mascota perdida, debe subir foto a Storage
-- **Código necesario:** Similar a `handleCreatePost` pero para emergencies
-- **Estimado:** 30 min
-
-#### 2. **Emergencia - Mascotas Encontradas** (PRIORITY: HIGH)
-- **Archivo:** `app/dashboard.tsx` → `handleReportFound` / EmergencyTab
-- **Tarea:** Implementar subida de foto de mascota encontrada a bucket `found-pets`
-- **Contexto:** Cuando usuario marca mascota encontrada, debe subir foto
-- **Estimado:** 30 min
-
-#### 3. **Historias de Éxito** (PRIORITY: MEDIUM)
-- **Archivo:** `app/historias.tsx` → `handleCreate`
-- **Tarea:** Implementar subida de imagen de historia a bucket `success-stories`
-- **Contexto:** Las reuniones exitosas pueden tener foto adjunta
-- **Estimado:** 30 min
-
-#### 4. **Perfil - Foto de Mascota** (PRIORITY: MEDIUM)
-- **Archivo:** `components/dashboard/PetForm.tsx` / PetDetailModal
-- **Tarea:** Verificar que subida de foto de mascota funcione correctamente
-- **Contexto:** Cuando registras/editas mascota, foto debe ir a Storage
-- **Estimado:** 20 min
-
-#### 5. **Validación y Testing** (PRIORITY: HIGH)
-- [ ] Probar creación de posts con múltiples imágenes
-- [ ] Probar creación de alertas de emergencia con foto
-- [ ] Verificar que URLs persistan después de reload
-- [ ] Probar visualización de imágenes en feed
-- [ ] Validar RLS policies en Storage buckets
-- **Estimado:** 1 hora
-
-### 📊 Resumen
-- **Total tareas:** 5 + Testing
-- **Tiempo estimado:** 2-3 horas
-- **Buckets necesarios:** `posts`, `emergency-alerts`, `found-pets`, `success-stories`, `pet-images`
-- **Riesgo:** Bajo (patrón idéntico a posts)
-
----
-
-## Notas Técnicas
-- Usar `dashboardService.uploadImage(uri, bucketName)` para todas las subidas
-- Siempre guardar URLs públicas en BD, NO URIs locales
-- Validar que el bucket exista antes de subir (fallback a `public` si no existe)
-- Mostrar toast de error si alguna subida falla
-
----
-
-**Asignado a:** Developer  
-**Target:** Próxima semana  
-**Creado:** 2026-10-03
+## Decisions made
+- Minimum age **18** (app + trigger `enforce_min_age` + legal texts). If it changes: `MIN_AGE` in `utils/age.ts`, the trigger and the texts.
+- Supabase **free** plan for now.
+- No emojis in the app or in notifications.
+- Commits and builds are made by the user.
+- Post location is free text on purpose (no GPS): GPS would need `ACCESS_FINE_LOCATION` and an updated Data safety form.

@@ -2,6 +2,8 @@
 
 > Area doc. Source screens: `docs/images/AUTH/1.jpeg`–`12.jpeg`. Cross-checked against `docs/SCREENS.md` §1–8. All 12 images match a documented screen or state.
 
+> **UI V2 note (2026-11-07):** the screenshots predate the redesign. Current differences: no navigation bar on any auth screen (back button drawn by `AuthScreen`); register requires a password of 8+ characters with letters and numbers and a Terms/Privacy checkbox; Complete Profile asks for a phone with country selector (E.164), a required birth date (18+) and a colonia picker; "Reenviar email" now reads "correo" in the copy. Details in `SCREENS.md` §1–8.
+
 ## Screens covered
 
 | Screen | Route | Images |

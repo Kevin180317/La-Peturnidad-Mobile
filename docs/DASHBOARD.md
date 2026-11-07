@@ -1,6 +1,6 @@
 # DASHBOARD — Main App Area
 
-> Area doc. Source screens: `docs/images/Dashboard/` — 29 images, numbered 1–26 and 29–31 (there are no images 27 and 28). Cross-checked against `docs/SCREENS.md` §9–29. The screenshots predate the Phase 10/11 color changes.
+> Area doc. Source screens: `docs/images/Dashboard/` — 29 images, numbered 1–26 and 29–31 (there are no images 27 and 28). Cross-checked against `docs/SCREENS.md` §9–29. The screenshots predate the UI V2 redesign (2026-10-29/30), so layout, colors and tab names differ; the notes below mark what changed. Current behavior is in `SCREENS.md`.
 
 ## Screens covered
 
@@ -11,7 +11,7 @@
 | Formulario de Mascota | (modal) | 4, 30 |
 | Ficha de Mascota (Pet Detail window) | (modal) | 29 |
 | Confirm: Eliminar mascota | (modal) | 31 |
-| Sección Comunidad (tab) | `/dashboard` | 6 |
+| Sección Comunidad (old tab, now Feed → Anuncios) | `/dashboard` | 6 |
 | Sección Emergencia (tab) | `/dashboard` | 7, 13, 14, 15, 17, 18, 24, 25 |
 | Perfil (own, tab) | `/dashboard` | 8, 9, 10, 26 |
 | Sección Feed (tab) | `/dashboard` | 11, 12 |
@@ -24,11 +24,13 @@
 
 ## Bottom bar
 
-5 fixed tabs: **Feed · Inicio · Comunidad · Emergencia · Perfil**. The active tab is highlighted in teal (the captures show the older red/coral highlight); the Emergency icon is always coral.
+5 fixed tabs: **Inicio · Feed · Emergencia · Mensajes · Perfil** (UI V2). The active tab has a sliding teal pill; the screenshots show the older bar (**Feed · Inicio · Comunidad · Emergencia · Perfil**, red/coral highlight). The old Comunidad tab became Feed → Anuncios and Messages became a tab; see [`FEED.md`](FEED.md).
 
 ## Screen details
 
 ### Sección Inicio (imgs 1, 2, 5)
+*UI V2: the pet list is always shown under "Mis mascotas" (no show/hide toggle) and pets open as a bottom sheet.*
+
 Greeting (`¡Hola, {name}!`) + date, 3 summary cards (Mascotas / Alertas / Encontradas), search icon (top right) opens Buscar. "Registrar mascota" + "Ver mascotas"/"Ocultar mascotas" toggle buttons. Empty state (img 1-2): "No tienes mascotas registradas." Populated state (img 5): pet card w/ photo, name, type, size.
 
 ### Buscar (img 3)
@@ -45,10 +47,12 @@ Modal opened by tapping a pet from Sección Inicio. Shows photo, name (header), 
 ### Confirm: Eliminar mascota (img 31)
 Modal triggered from Pet Detail → Eliminar. Copy: *"¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer."* Cancelar / Eliminar buttons.
 
-### Sección Comunidad (img 6)
-Tabs "Comunidad" / "Mis avisos", "+ Nuevo" button top right. Post card: author, date, category badge (e.g. "Aviso"), title, body, comment count.
+### Sección Comunidad (img 6) — now Feed → Anuncios
+The capture shows the removed Comunidad tab (tabs "Comunidad" / "Mis avisos", "+ Nuevo" button). Notices now appear under Feed → Anuncios and are created with "Publicar". Post card: author, date, category badge (e.g. "Aviso"), title, body, comment count.
 
 ### Sección Emergencia (imgs 7, 13, 14, 15, 17, 18, 24, 25)
+*UI V2: the grid cards are now "Reportar", "Perdidas", "Mis alertas" and "Encontradas"; the "Ocultar ..." / "✓ Visible" states below are from the old design.*
+
 2×2 action grid: Reportar mascota perdida / Ver mascotas perdidas / Ver mis alertas / Ver mascotas encontradas — each card toggles into a visible list below and its own label flips to an "Ocultar ..." state with a "✓ Visible" sub-label (e.g. img 14's "Ocultar mascotas perdidas" once expanded).
 
 - Img 13: pet selector for reporting ("Selecciona la mascota perdida", REPORTAR button per pet).
@@ -60,12 +64,12 @@ Tabs "Comunidad" / "Mis avisos", "+ Nuevo" button top right. Post card: author, 
 
 ### Perfil — own profile (imgs 8, 9, 10, 26)
 - Img 8: "Mi Perfil" header, avatar (editable via camera icon overlay), Información personal card (Nombre, Email, Teléfono, Cumpleaños), Dirección card (Calle/Colonia, Ciudad, C.P.).
-- Img 9: Estadísticas (Mascotas/Seguidores/Siguiendo counts) + Acciones list (Editar perfil, Configurar notificaciones, Ir a la comunidad, Mensajes, Grupos, Reuniones exitosas). The current menu also has **Cómo funciona la app** (`/como-usar`) and **Preguntas frecuentes** (FAQ), plus **Panel de moderación** for moderators/admins — none of these are in the captures.
+- Img 9: Estadísticas (Mascotas/Seguidores/Siguiendo counts) + Acciones list (Editar perfil, Configurar notificaciones, Ir a la comunidad, Mensajes, Grupos, Reuniones exitosas). The current menu is grouped (Mensajería, Exploración, Configuración, Ayuda, Administración) and also has the notification inbox, **Cuenta y seguridad**, **Cómo funciona**, **Preguntas frecuentes**, the legal pages, **Panel de moderación** for moderators/admins, and **Eliminar cuenta** — none of these are in the captures.
 - Img 10: scrolled further — Cuenta card (Miembro desde, Última actualización) + "Cerrar Sesión" button.
 - Img 26: "Cerrar sesión" confirm modal — Cancelar / Cerrar sesión.
 
 ### Sección Feed (imgs 11, 12)
-Tabs "Feed" / "Mis posts". The captures show the older inline composer (text field + Publicar/Cancelar); "Publicar" now opens the `PostForm` modal (text, images, location, tags, URLs). Post card: author avatar/name, date, text, comment count + "Ver comentarios" link. Empty state on "Mis posts": "No has publicado nada aún."
+The captures show the old Feed with tabs "Feed" / "Mis posts"; the current Feed has the segments Emergencias / Anuncios / Social (see [`FEED.md`](FEED.md)). The captures also show the older inline composer (text field + Publicar/Cancelar); "Publicar" now opens the `PostForm` modal (text, images, location, tags, URLs). Post card: author avatar/name, date, text, comment count + "Ver comentarios" link. Empty state on "Mis posts": "No has publicado nada aún."
 
 ### Mensajes (img 19)
 Empty state: "No tienes conversaciones aún. Visita un perfil público y envía un mensaje para iniciar una conversación."
@@ -77,6 +81,8 @@ Empty state: "No tienes conversaciones aún. Visita un perfil público y envía 
 "+ Crear" button, list of groups (name, member count, "Unirse" button per row).
 
 ### Notificaciones (img 22)
+*UI V2: preferences have two alert types ("Mascotas perdidas en tu colonia", "Alguien encontró a tu mascota"); a separate notification inbox (`/bandeja`) was added.*
+
 "Preferencias" card: main toggle "Notificaciones push" + 3 sub-toggles (Alertas de mascotas perdidas, Mascotas encontradas, Avisos de la comunidad), "Guardar preferencias" + "Volver" buttons.
 
 ### Editar Perfil (img 23)

@@ -3,7 +3,13 @@
 > Handoff file for resuming the Maestro E2E work. Update **Last session** and **Next steps** at the end of each session.
 > Detailed results and coverage live in [`E2E_TEST_RESULTS.md`](E2E_TEST_RESULTS.md).
 
-## Last session — 2026-10-20
+## Last update — 2026-11-07
+
+- Maestro flows were adapted to UI V2 on 2026-11-05 (`6e44296`, branch `QA_auto`). Not run since; no results recorded.
+- Still true: no dashboard feature is covered, no `bun`/`maestro`/`adb` check was done on this machine today, and the nightly CI result (`e2e.yml`) hasn't been logged.
+- Tabs are now Inicio / Feed / Emergencia / Mensajes / Perfil (Comunidad folded into Feed): new flows should target those.
+
+## Previous session — 2026-10-20
 
 - **Branch:** `QA_auto` (pushed, tracking `origin/QA_auto`)
 - **Last commit:** `7d7f554` docs: add E2E test results tracker
@@ -23,7 +29,7 @@
    - [ ] `gh run list --workflow e2e.yml` and log the nightly result in `E2E_TEST_RESULTS.md` → Run log.
    - [ ] Or run locally: `maestro test -e TEST_EMAIL=... -e TEST_PASSWORD=... --format junit --output maestro-report.xml .maestro/flows/`
 2. **Groundwork before new flows**
-   - [ ] Add `testID`s: dashboard tab bar, `PetForm` fields + save, `PetDetailModal` edit/delete, EmergencyTab cards + pet picker, alert delete, `ConfirmModal` confirm/cancel, Feed "Publicar", Comunidad "Nuevo".
+   - [ ] Add `testID`s: dashboard tab bar, `PetForm` fields + save, `PetDetailModal` edit/delete, EmergencyTab cards + pet picker, alert delete, `ConfirmModal` cancel, Feed "Publicar".
    - [ ] Extract a `subflows/login.yaml` (login + complete-profile) and use it from 04/05 instead of `runFlow: 04-...`.
    - [ ] Decide how to clean up test data: delete through the UI at the end of each flow, or a Supabase cleanup step in `e2e.yml`.
 3. **P0 flows** (lost-pet core)
@@ -44,4 +50,4 @@
 - Repo secrets used by `e2e.yml`: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`
 - App id: `com.idarko.lapeturnidad`
 - Profile bootstrap data: CP `22220` → colonia "Hacienda el Colorado"
-- Only existing `testID`: `login-submit` (`app/login.tsx`)
+- `testID`s used by flows: `login-submit` (`app/login.tsx`) and `confirm-modal-confirm` (`ConfirmModal`)

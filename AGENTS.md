@@ -33,7 +33,7 @@
 - `.env` - local env vars (ignorado por git; `.env.local` también funciona)
 - `utils/session.ts` - `getCurrentUser()`: usarlo en vez de `supabase.auth.getUser()` en pantallas (sin red conserva la sesión guardada)
 - `components/ColoniaPicker.tsx` - catálogo y selector de colonia (registro y editar perfil)
-- `docs/SUPABASE_IMPLEMENTACION_SEMANA_2026-11-02.md` - plan de Supabase (HECHO el 2026-11-03, ver sección "Supabase pendientes cerrados")
+- `docs/SUPABASE_HARDENING_PLAN_2026-11-02.md` - registro (en inglés) del plan de Supabase (HECHO el 2026-11-03, ver sección "Supabase pendientes cerrados")
 - `components/kit/Kit.tsx` - kit de diseño compartido (ver "Sistema de diseño")
 - `components/auth/AuthScreen.tsx` - marco de las pantallas de acceso
 - `components/messages/ConversationList.tsx` - lista de chats (pestaña Mensajes y `/mensajes`)
