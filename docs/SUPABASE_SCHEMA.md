@@ -1,486 +1,68 @@
-# Supabase Schema — La Peturnidad
+# Supabase Schema
 
-> **HISTÓRICO**: foto del 2026-06-20 (19 migraciones). Ya no refleja el estado actual: faltan las migraciones de 2026-10-24 y 2026-11-03/05 (vista `public_profiles`, RPC de contactos, `clear_conversation`, `user_profiles` cerrada). Fuente de verdad: la base remota (`list_migrations`) y `types/database.ts`.
->
-> Generated on 2026-06-20. 19 migrations applied.
+> Reflects the generated types in `types/database.ts` (regenerated 2026-10-24, plus the 2026-11-03/05 changes). Last reviewed 2026-11-07. **Source of truth:** the remote database (`list_migrations`) and `types/database.ts`; SQL applied so far is in `supabase/migrations/`. Policy-level detail (RLS rules) is in those migrations, not repeated here. Older migrations were applied from the dashboard and there is no baseline file yet (see `BACKLOG.md`).
 
----
-
-## Helper Functions
-
-### `is_moderator_or_admin()`
-
-```sql
-CREATE OR REPLACE FUNCTION public.is_moderator_or_admin()
-RETURNS boolean
-LANGUAGE sql
-SECURITY DEFINER  -- runs as owner, breaks RLS recursion
-STABLE
-AS $$
-  SELECT EXISTS (
-    SELECT 1 FROM user_profiles
-    WHERE user_id = auth.uid()
-    AND role IN ('moderator', 'admin')
-  );
-$$;
-```
-
----
+Regenerate types with the Supabase MCP `generate_typescript_types`, then run `bun run typecheck`. Manual edit to re-apply: `public_profiles.Row.user_id` is `string` (see [`SUPABASE_HARDENING_PLAN_2026-11-02.md`](SUPABASE_HARDENING_PLAN_2026-11-02.md)).
 
 ## Tables
 
-### `user_profiles`
-
-```sql
-CREATE TABLE user_profiles (
-  id            uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  user_id       uuid UNIQUE NOT NULL REFERENCES auth.users(id),
-  first_name    varchar,
-  last_name     varchar,
-  phone         varchar,
-  birth_date    date,
-  address       text,
-  city          varchar,
-  postal_code   varchar,
-  profile_picture_url text,
-  push_token    text,
-  role          text NOT NULL DEFAULT 'user'
-                CHECK (role IN ('user', 'moderator', 'admin')),
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view profiles | SELECT | `true` (public profiles for the community) |
-| Users can insert their own profile | INSERT | `auth.uid() = user_id` (with check) |
-| Users can update their own profile | UPDATE | `auth.uid() = user_id` (using) |
-| Users can delete their own profile | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `pets`
-
-```sql
-CREATE TABLE pets (
-  id            uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  user_id       uuid NOT NULL REFERENCES auth.users(id),
-  type          varchar CHECK (type IN ('perro', 'gato')),
-  name          varchar,
-  color         varchar,
-  size          varchar,
-  features      varchar,
-  image_url     varchar,
-  created_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Users can view their own pets | SELECT | `auth.uid() = user_id` |
-| Users can insert their own pets | INSERT | `auth.uid() = user_id` (with check) |
-| Users can update their own pets | UPDATE | `auth.uid() = user_id` (using) |
-| Users can delete their own pets | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `emergency_alerts`
-
-```sql
-CREATE TABLE emergency_alerts (
-  id                    uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  user_id               uuid NOT NULL REFERENCES auth.users(id),
-  pet_name              varchar,
-  type                  varchar CHECK (type IN ('perro', 'gato')),
-  description           text,
-  last_seen_location    varchar,
-  disappearance_date    date,
-  image_url             text,
-  created_at            timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view emergency alerts | SELECT | `true` |
-| Users can insert their own alerts | INSERT | `auth.uid() = user_id` (with check) |
-| Users can update their own alerts | UPDATE | `auth.uid() = user_id` (using) |
-| Users can delete their own alerts | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `found_pets`
-
-```sql
-CREATE TABLE found_pets (
-  id            uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
-  user_id       uuid NOT NULL REFERENCES auth.users(id),
-  pet_id        uuid NOT NULL REFERENCES pets(id),
-  created_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Users can view found pets for their pets or their own reports | SELECT | `auth.uid() = user_id OR auth.uid() IN (SELECT user_id FROM pets WHERE id = pet_id)` |
-| Users can insert their own found pets | INSERT | `auth.uid() = user_id` (with check) |
-| Users can delete their own found pets | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `notification_preferences`
-
-```sql
-CREATE TABLE notification_preferences (
-  id                      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id                 uuid UNIQUE NOT NULL REFERENCES auth.users(id),
-  push_enabled            boolean DEFAULT true,
-  lost_pet_alerts         boolean DEFAULT true,
-  found_pet_alerts        boolean DEFAULT true,
-  community_announcements boolean DEFAULT true,
-  created_at              timestamptz DEFAULT now(),
-  updated_at              timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Users can view their own notification preferences | SELECT | `auth.uid() = user_id` |
-| Users can insert their own notification preferences | INSERT | `auth.uid() = user_id` (with check) |
-| Users can update their own notification preferences | UPDATE | `auth.uid() = user_id` (using) |
-
----
-
-### `announcements`
-
-```sql
-CREATE TABLE announcements (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       uuid NOT NULL REFERENCES auth.users(id),
-  title         text NOT NULL,
-  content        text NOT NULL,
-  category      text DEFAULT 'general' CHECK (category IN ('aviso', 'evento', 'pregunta', 'general')),
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view announcements | SELECT | `true` |
-| Users can insert their own announcements | INSERT | `auth.uid() = user_id` (with check) |
-| Users can update their own announcements | UPDATE | `auth.uid() = user_id` (using) |
-| Users can delete their own announcements | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `posts`
-
-```sql
-CREATE TABLE posts (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       uuid NOT NULL REFERENCES auth.users(id),
-  content       text NOT NULL,
-  image_url     text,
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view posts | SELECT | `true` |
-| Users can insert their own posts | INSERT | `auth.uid() = user_id` (with check) |
-| Users can update their own posts | UPDATE | `auth.uid() = user_id` (using) |
-| Users can delete their own posts | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `comments`
-
-```sql
-CREATE TABLE comments (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       uuid NOT NULL REFERENCES auth.users(id),
-  target_type   text NOT NULL CHECK (target_type IN ('post', 'announcement', 'alert')),
-  target_id     uuid NOT NULL,
-  content       text NOT NULL,
-  parent_id     uuid REFERENCES comments(id),
-  created_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view comments | SELECT | `true` |
-| Users can insert their own comments | INSERT | `auth.uid() = user_id` (with check) |
-| Users can delete their own comments | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `follows`
-
-```sql
-CREATE TABLE follows (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  follower_id   uuid NOT NULL REFERENCES auth.users(id),
-  following_id  uuid NOT NULL REFERENCES auth.users(id),
-  created_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view follows | SELECT | `true` |
-| Users can follow | INSERT | `auth.uid() = follower_id` (with check) |
-| Users can unfollow | DELETE | `auth.uid() = follower_id` (using) |
-
----
-
-### `conversations`
-
-```sql
-CREATE TABLE conversations (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at    timestamptz DEFAULT now(),
-  updated_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Participants can view conversations | SELECT | `auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = id)` |
-| Users can create conversations | INSERT | `true` (with check) |
-
----
-
-### `conversation_participants`
-
-```sql
-CREATE TABLE conversation_participants (
-  id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  conversation_id   uuid NOT NULL REFERENCES conversations(id),
-  user_id           uuid NOT NULL REFERENCES auth.users(id),
-  created_at        timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Participants can view participants | SELECT | `auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = conversation_id)` |
-| Users can add themselves to conversations | INSERT | `auth.uid() = user_id` (with check) |
-
----
-
-### `messages`
-
-```sql
-CREATE TABLE messages (
-  id                uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  conversation_id   uuid NOT NULL REFERENCES conversations(id),
-  sender_id         uuid NOT NULL REFERENCES auth.users(id),
-  content           text NOT NULL,
-  created_at        timestamptz DEFAULT now(),
-  read_at           timestamptz
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Participants can view messages | SELECT | `auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = messages.conversation_id)` |
-| Participants can insert messages | INSERT | `auth.uid() = sender_id AND auth.uid() IN (SELECT user_id FROM conversation_participants WHERE conversation_id = messages.conversation_id)` (with check) |
-
----
-
-### `groups`
-
-```sql
-CREATE TABLE groups (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name          text NOT NULL,
-  description   text,
-  created_by    uuid REFERENCES auth.users(id),
-  created_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view groups | SELECT | `true` |
-| Authenticated users can create groups | INSERT | `auth.role() = 'authenticated'` (with check) |
-| Group admins can update their groups | UPDATE | `auth.uid() = created_by OR auth.uid() IN (SELECT user_id FROM group_members WHERE group_id = id AND role = 'admin')` (using) |
-
----
-
-### `group_members`
-
-```sql
-CREATE TABLE group_members (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  group_id      uuid NOT NULL REFERENCES groups(id),
-  user_id       uuid NOT NULL REFERENCES auth.users(id),
-  role          text DEFAULT 'member' CHECK (role IN ('member', 'admin')),
-  created_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view group members | SELECT | `true` |
-| Users can join groups | INSERT | `auth.uid() = user_id` (with check) |
-| Users can leave groups | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `success_stories`
-
-```sql
-CREATE TABLE success_stories (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id       uuid NOT NULL REFERENCES auth.users(id),
-  pet_name      text NOT NULL,
-  story         text NOT NULL,
-  image_url     text,
-  created_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Anyone can view success stories | SELECT | `true` |
-| Users can create their own success stories | INSERT | `auth.uid() = user_id` (with check) |
-| Users can delete their own success stories | DELETE | `auth.uid() = user_id` (using) |
-
----
-
-### `reports`
-
-```sql
-CREATE TABLE reports (
-  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  reporter_id     uuid NOT NULL REFERENCES auth.users(id),
-  target_user_id  uuid NOT NULL REFERENCES auth.users(id),
-  reason          text NOT NULL,
-  status          text DEFAULT 'pending' CHECK (status IN ('pending', 'reviewed', 'dismissed')),
-  created_at      timestamptz DEFAULT now(),
-  reviewed_at     timestamptz,
-  reviewed_by     uuid REFERENCES auth.users(id)
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Users can view their own reports | SELECT | `auth.uid() = reporter_id` |
-| Moderators can view all reports | SELECT | `is_moderator_or_admin()` |
-| Users can create reports | INSERT | `auth.uid() = reporter_id` (with check) |
-| Moderators can update reports | UPDATE | `is_moderator_or_admin()` (using) |
-
----
-
-### `blocks`
-
-```sql
-CREATE TABLE blocks (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  blocker_id    uuid NOT NULL REFERENCES auth.users(id),
-  blocked_id    uuid NOT NULL REFERENCES auth.users(id),
-  created_at    timestamptz DEFAULT now()
-);
-```
-
-| Policy | Command | Rule |
-|---|---|---|
-| Users can view their own blocks | SELECT | `auth.uid() = blocker_id` |
-| Users can block others | INSERT | `auth.uid() = blocker_id` (with check) |
-| Users can unblock | DELETE | `auth.uid() = blocker_id` (using) |
-
----
-
-## Storage
-
-### Buckets
-
-| Bucket | Public |
+| Table | Columns |
 |---|---|
-| `pet-images` | ✅ |
-| `profile-pictures` | ✅ |
-| `public` | ✅ |
-| `alternate` | ✅ |
+| `announcements` | `category`, `content`, `created_at`, `id`, `title`, `updated_at`, `user_id` |
+| `blocks` | `blocked_id`, `blocker_id`, `created_at`, `id` |
+| `comments` | `content`, `created_at`, `id`, `parent_id`, `target_id`, `target_type`, `user_id` |
+| `conversation_participants` | `cleared_at`, `conversation_id`, `created_at`, `id`, `user_id` |
+| `conversations` | `created_at`, `group_id`, `id`, `updated_at` |
+| `device_tokens` | `token`, `updated_at`, `user_id` |
+| `emergency_alerts` | `created_at`, `description`, `disappearance_date`, `id`, `image_url`, `last_seen_location`, `notified_at`, `pet_id`, `pet_name`, `resolved_at`, `status`, `type`, `user_id` |
+| `follows` | `created_at`, `follower_id`, `following_id`, `id` |
+| `found_pets` | `alert_id`, `alert_owner_id`, `created_at`, `id`, `image_url`, `note`, `notified_at`, `pet_id`, `pet_name`, `user_id` |
+| `group_members` | `created_at`, `group_id`, `id`, `role`, `user_id` |
+| `groups` | `created_at`, `created_by`, `description`, `id`, `name` |
+| `messages` | `content`, `conversation_id`, `created_at`, `id`, `read_at`, `sender_id` |
+| `notification_preferences` | `community_announcements`, `created_at`, `found_pet_alerts`, `id`, `lost_pet_alerts`, `push_enabled`, `updated_at`, `user_id` |
+| `notifications` | `body`, `created_at`, `data`, `id`, `read`, `title`, `user_id` |
+| `pets` | `color`, `created_at`, `features`, `id`, `image_url`, `name`, `size`, `type`, `user_id` |
+| `posts` | `content`, `created_at`, `id`, `image_url`, `image_urls`, `links`, `location`, `tags`, `updated_at`, `user_id` |
+| `reports` | `created_at`, `id`, `reason`, `reporter_id`, `reviewed_at`, `reviewed_by`, `status`, `target_user_id` |
+| `success_stories` | `created_at`, `id`, `image_url`, `pet_name`, `story`, `user_id` |
+| `user_profiles` | `address`, `birth_date`, `city`, `created_at`, `first_name`, `id`, `last_name`, `phone`, `postal_code`, `profile_picture_url`, `role`, `updated_at`, `user_id` |
 
-### Policies on `storage.objects`
+## Views
 
-| Policy | Command | Bucket | Rule |
-|---|---|---|---|
-| Auth INSERT pet-images | INSERT | pet-images | Auth role = authenticated, bucket check |
-| Auth INSERT profile-pictures | INSERT | profile-pictures | Auth role = authenticated, bucket check |
-| Auth INSERT public | INSERT | public | Auth role = authenticated, bucket check |
-| Auth Upload pet-images | INSERT | pet-images | `auth.role() = 'authenticated'` |
-| Auth Upload profile-pictures | INSERT | profile-pictures | `auth.role() = 'authenticated'` |
-| Authenticated users can upload to pet-images | INSERT | pet-images | `auth.role() = 'authenticated'` |
-| Authenticated users can upload to profile-pictures | INSERT | profile-pictures | `auth.role() = 'authenticated'` |
-| Authenticated users can upload to public | INSERT | public | `auth.role() = 'authenticated'` |
-| Public SELECT pet-images | SELECT | pet-images | Auth or public folder |
-| Public SELECT profile-pictures | SELECT | profile-pictures | Auth or public folder |
-| Public SELECT public | SELECT | public | Auth or public folder |
-| Own UPDATE | UPDATE | any | `auth.uid() = owner` |
-| Users can update their own files | UPDATE | any | `auth.uid() = owner` |
-| Own DELETE | DELETE | any | `auth.uid() = owner` |
-| Users can delete their own files | DELETE | any | `auth.uid() = owner` |
+| View | Columns |
+|---|---|
+| `public_profiles` | `city`, `created_at`, `first_name`, `last_name`, `profile_picture_url`, `role`, `user_id` |
 
-> **Note:** There are multiple overlapping INSERT policies for the same buckets (e.g. 3 policies for `pet-images` INSERT). This is harmless but could be cleaned up.
+## RPC functions (`public`)
 
----
+| Function | Purpose |
+|---|---|
+| `clear_conversation` | Clear a chat for the caller only (sets `cleared_at`); the participant row stays |
+| `get_alert_contacts` | Owner name and phone for active alerts in the caller's colonia |
+| `get_finder_contacts` | Name and phone of people who reported finding the caller's pet |
+| `create_conversation` | Create a 1:1 conversation with both participants (SECURITY DEFINER) |
+| `create_group_conversation` | Create the group chat with all members |
+| `delete_group` | Delete a group, its members, linked chat, messages and participants (creator only) |
+| `is_blocked_between` | True if either user blocked the other |
+| `is_blocked_in_conversation` | True if a block exists between the user and the conversation's other participant |
+| `is_moderator_or_admin` | Role check used by RLS; SECURITY DEFINER to avoid policy recursion |
+| `is_participant` | Participant check used by RLS; SECURITY DEFINER to avoid policy recursion |
+| `join_group_conversation` | Join (or create) the group chat of a group the caller belongs to |
+| `register_device_token` | Register the caller's push token (`device_tokens`, PK = `token`) |
 
-## Entity Relationship Summary
+## Security model (summary)
 
-```
-auth.users
-  ├── user_profiles          (1:1, via user_id)
-  ├── pets                   (1:N, via user_id)
-  │   └── found_pets         (N:1, via pet_id)
-  ├── emergency_alerts       (1:N, via user_id)
-  ├── notification_preferences (1:1, via user_id)
-  ├── announcements          (1:N, via user_id)
-  ├── posts                  (1:N, via user_id)
-  ├── comments               (1:N, via user_id)
-  ├── follows (follower_id)  (1:N)
-  ├── follows (following_id) (1:N)
-  ├── conversation_participants (N:M, via user_id)
-  │   └── conversations      (via conversation_id)
-  │       └── messages       (via conversation_id)
-  ├── groups (created_by)    (1:N)
-  ├── group_members          (N:M, via user_id)
-  ├── success_stories        (1:N, via user_id)
-  ├── reports (reporter_id)  (1:N)
-  ├── reports (target_user_id) (1:N)
-  ├── reports (reviewed_by)  (1:N)
-  └── blocks (blocker_id)    (1:N)
-```
+- RLS is on for every table. `anon` has no SECURITY DEFINER access.
+- `user_profiles` is readable only by the owner or a moderator. Other users' profiles come from the `public_profiles` view; phones are exposed only through `get_alert_contacts` / `get_finder_contacts`.
+- Messages: only participants can read or send, and not across blocks. 1:1 and group chats are unique per pair/group.
+- `emergency_alerts`: `notified_at` and colonia cannot be changed from the client (`protect_emergency_alert`). `found_pets` is filled by a trigger from the alert.
+- Rate limits (trigger `enforce_rate_limit`, server-side `created_at`): posts 10/h, comments 30/h, messages 30/min, announcements 5/h, alerts 5/day, reports 10/h, stories 5/day, groups 3/day. To change one: `drop trigger trg_rate_limit on <table>` and recreate it with other arguments.
+- Triggers: `enforce_min_age` (18+), `enforce_phone_format` (E.164; not yet applied, see the hardening record), `trim_profile_address`, `on_group_member_removed`.
+- Moderators can delete content. Realtime is enabled on `messages`.
+- Storage buckets used by the app: `pet-images`, `profile-pictures` and `posts` (`dashboardService.uploadImage`); `alternate` has a 5 MB, images-only limit. Alerts, found pets and stories have no image upload yet (see `BACKLOG.md`). Storage cannot be deleted with SQL (`storage.protect_delete()`).
 
----
+## Edge Functions
 
-## Migration History
-
-| # | Version | Name |
-|---|---|---|
-| 1 | 20260425180055 | create_storage_buckets |
-| 2 | 20260425180103 | add_storage_policies |
-| 3 | 20260606180857 | cleanup_duplicate_indexes |
-| 4 | 20260606180858 | cleanup_duplicate_rls_found_pets |
-| 5 | 20260606180901 | fix_storage_listing_policies |
-| 6 | 20260606180917 | fix_rls_auth_initplan |
-| 7 | 20260620182759 | fix_found_pets_select_policy |
-| 8 | 20260620182808 | fix_storage_listing_policies |
-| 9 | 20260620190152 | create_notification_preferences |
-| 10 | 20260620190153 | create_announcements |
-| 11 | 20260620192307 | create_posts |
-| 12 | 20260620192308 | create_comments |
-| 13 | 20260620192309 | create_follows |
-| 14 | 20260620192321 | create_conversations |
-| 15 | 20260620193536 | add_role_to_user_profiles |
-| 16 | 20260620193538 | create_groups |
-| 17 | 20260620193539 | create_success_stories |
-| 18 | 20260620193541 | create_reports_and_blocks |
-| 19 | 20260620195713 | fix_rls_recursion_moderators |
-| 20 | 20260621000001 | fix_profiles_select_for_community |
+- `send-push-notification` (v10): FCM v1 push with image, Android channel `emergency_alerts` and iOS badge; claims `notified_at` atomically, resolves recipients from the alert, sends in batches, deletes only `UNREGISTERED` tokens, and writes a row to `notifications` per recipient (same preferences as the push). Titles have no emojis.
+- `delete-account` (v2): deletes the user's rows, own 1:1 chats, other people's comments on their posts, nulls `reports.reviewed_by`, and removes Storage files.

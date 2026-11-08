@@ -1,0 +1,44 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - dismiss the test report as admin and switch back to the normal account
+env:
+  TEST_EMAIL: ${TEST_EMAIL}
+  TEST_PASSWORD: ${TEST_PASSWORD}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Panel de moderación"
+- tapOn: "Panel de moderación"
+- extendedWaitUntil:
+    visible: "Descartar"
+    timeout: 8000
+- tapOn: "Descartar"
+- waitForAnimationToEnd:
+    timeout: 3000
+- back
+- scrollUntilVisible:
+    element: "Cerrar Sesión"
+- tapOn: "Cerrar Sesión"
+- tapOn:
+    text: "Cerrar sesión"
+    index: 1
+- extendedWaitUntil:
+    visible: "Saltar"
+    timeout: 10000
+- tapOn: "Saltar"
+- extendedWaitUntil:
+    visible: "Inicia sesión para continuar"
+    timeout: 10000
+- tapOn: "ejemplo@correo.com"
+- inputText: ${TEST_EMAIL}
+- tapOn: "••••••••"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "login-submit"
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000

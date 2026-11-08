@@ -13,6 +13,12 @@
 - `npx expo prebuild` - generate native android/ios projects before building locally
 - EAS build: `eas build` (configure in eas.json)
 
+## Entorno local y emulador (2026-11-07)
+
+- Expo SDK 58 pide Node >= 22.13; la máquina tiene Node 20.10. Sin actualizar, `npx expo prebuild` falla (`parseEnv is not a function`): usar `bunx --bun expo prebuild --platform android --clean --no-install` y, para Gradle, un script `node` (fuera del repo) que ejecute `bun --bun "$@"` al inicio del `PATH`. Detalle: `docs/auto_testing/EMULATOR_RUN_2026-11-07.md`
+- APK de prueba local: `cd android && ./gradlew assembleRelease -PreactNativeArchitectures=x86_64` (~17 min la primera vez; `android/` no va a git)
+- Cuentas de prueba (normal y admin) en `.maestro/.env` (ignorado por git). Flujos de E2E para CI: `.maestro/flows/`; flujos para capturar imágenes de la documentación: `.maestro/screenshots/` (NO idempotentes: crean datos en el Supabase real)
+
 ## Architecture
 
 - **Frontend**: Expo Router (file-based routing in `app/`), React Native
@@ -33,7 +39,7 @@
 - `.env` - local env vars (ignorado por git; `.env.local` también funciona)
 - `utils/session.ts` - `getCurrentUser()`: usarlo en vez de `supabase.auth.getUser()` en pantallas (sin red conserva la sesión guardada)
 - `components/ColoniaPicker.tsx` - catálogo y selector de colonia (registro y editar perfil)
-- `docs/SUPABASE_IMPLEMENTACION_SEMANA_2026-11-02.md` - plan de Supabase (HECHO el 2026-11-03, ver sección "Supabase pendientes cerrados")
+- `docs/SUPABASE_HARDENING_PLAN_2026-11-02.md` - registro (en inglés) del plan de Supabase (HECHO el 2026-11-03, ver sección "Supabase pendientes cerrados")
 - `components/kit/Kit.tsx` - kit de diseño compartido (ver "Sistema de diseño")
 - `components/auth/AuthScreen.tsx` - marco de las pantallas de acceso
 - `components/messages/ConversationList.tsx` - lista de chats (pestaña Mensajes y `/mensajes`)
@@ -41,6 +47,8 @@
 - `components/ConfirmDialog.tsx` - `confirmDialog()` + `<ConfirmHost />`: confirmaciones con el diseño de la app (reemplaza `Alert.alert`)
 
 ## Sistema de diseño (2026-10-30)
+
+> Versión en inglés: `docs/DESIGN_SYSTEM.md`. Si cambias una, actualiza la otra.
 
 - Toda pantalla nueva o modificada se arma con `components/kit/Kit.tsx`; no duplicar estilos a mano. Piezas: `CARD`/`CARD_SHADOW`/`Card`, `ScreenTitle`, `SectionTitle`, `Avatar` (foto o inicial, aro teal opcional), `RoundIconButton`, `Chip`/`ChipTone`, `EmptyCard`, `PetThumb`, `PrimaryButton` (píldora 52 px: teal/coral/ghost/danger), `Field` (input con etiqueta, ícono y borde teal al enfocar), `ChoiceChips` (reemplaza Pickers con pocas opciones), `ToggleTile`, `ListSection`/`ListRow` (filas tipo ajustes), `Segmented` (pastilla deslizante), `Sheet` (hoja inferior con asa y X)
 - Lenguaje visual: fondo crema `#faf5e0`, tarjetas blancas `rounded-3xl` con sombra suave, botones píldora, íconos en círculos/cuadros tintados (`${color}1A`), títulos de pantalla dentro del contenido (no en la barra)
