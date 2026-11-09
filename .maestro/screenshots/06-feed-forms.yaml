@@ -1,0 +1,23 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - publish a notice (Anuncio)
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Feed"
+- tapOn: "Publicar"
+- waitForAnimationToEnd
+- tapOn: "Anuncio"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-post-form-announcement
+- tapOn: "Título de la publicación"
+- inputText: "Jornada de vacunación gratuita"
+- tapOn: "Cuéntale a tu comunidad..."
+- inputText: "El sábado habrá vacunación antirrábica gratuita para perros y gatos en el parque de la colonia, de 10:00 a 14:00."
+- hideKeyboard
+- tapOn: "Publicar"
+- waitForAnimationToEnd:
+    timeout: 6000

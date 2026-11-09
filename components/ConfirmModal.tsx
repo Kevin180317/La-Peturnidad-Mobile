@@ -83,6 +83,7 @@ export function ConfirmModal({
               disabled={loading}
               accessibilityRole="button"
               accessibilityLabel={confirmLabel}
+              testID="confirm-modal-confirm"
             >
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />

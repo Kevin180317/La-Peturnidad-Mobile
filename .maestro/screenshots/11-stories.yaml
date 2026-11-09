@@ -1,0 +1,29 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - publish a success story
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Reuniones exitosas"
+- tapOn: "Reuniones exitosas"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/screen-historias-empty
+- tapOn: "Nueva"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/screen-historias-form
+- tapOn: "Nombre"
+- inputText: "Milo"
+- hideKeyboard
+- tapOn: "Cuenta tu historia de reencuentro..."
+- inputText: "Milo se escapó por el portón y lo encontró una vecina a dos cuadras. Gracias a la alerta estaba de vuelta en casa esa misma tarde."
+- hideKeyboard
+- tapOn: "Publicar"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: ${OUT}/screen-historias
