@@ -340,7 +340,7 @@ export default function DashboardScreen() {
           loadNotificationsUnread(currentUser.id),
           loadMyAlerts(currentUser.id),
           loadFoundPets(currentUser.id),
-          reportsService.getBlockedUsers(currentUser.id),
+          reportsService.getHiddenUserIds(currentUser.id),
         ]);
         if (blockedRes.success) setBlockedUserIds(blockedRes.data ?? []);
       } else if (profileResult.success) {

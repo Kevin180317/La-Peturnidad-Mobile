@@ -732,6 +732,10 @@ export type Database = {
           owner_phone: string
         }[]
       }
+      get_hidden_user_ids: {
+        Args: never
+        Returns: string[]
+      }
       get_finder_contacts: {
         Args: never
         Returns: {

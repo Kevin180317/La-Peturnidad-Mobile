@@ -41,6 +41,7 @@ Regenerate types with the Supabase MCP `generate_typescript_types`, then run `bu
 | `clear_conversation` | Clear a chat for the caller only (sets `cleared_at`); the participant row stays |
 | `get_alert_contacts` | Owner name and phone for active alerts in the caller's colonia |
 | `get_finder_contacts` | Name and phone of people who reported finding the caller's pet |
+| `get_hidden_user_ids` | Ids of users hidden from the caller: those the caller blocked plus those who blocked the caller (union, direction not revealed) |
 | `create_conversation` | Create a 1:1 conversation with both participants (SECURITY DEFINER) |
 | `create_group_conversation` | Create the group chat with all members |
 | `delete_group` | Delete a group, its members, linked chat, messages and participants (creator only) |

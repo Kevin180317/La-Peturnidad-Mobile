@@ -55,7 +55,7 @@ export default function BuscarScreen() {
         router.replace("/");
         return;
       }
-      const blocked = await reportsService.getBlockedUsers(data.user.id);
+      const blocked = await reportsService.getHiddenUserIds(data.user.id);
       setBlockedIds(blocked.data ?? []);
     });
   }, [router]);

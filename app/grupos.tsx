@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { ListSkeleton } from "@/components/Skeleton";
 import { groupsService } from "@/services/groups.service";
+import { reportsService } from "@/services/reports.service";
 import { getCurrentUser } from "@/utils/session";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -39,9 +40,14 @@ export default function GruposScreen() {
 
   const loadGroups = useCallback(async (uid?: string) => {
     const uid_or_state = uid || userId;
-    const result = await groupsService.getAll();
+    const [result, hiddenRes] = await Promise.all([
+      groupsService.getAll(),
+      uid_or_state ? reportsService.getHiddenUserIds(uid_or_state) : Promise.resolve({ data: [] as string[] }),
+    ]);
     if (result.success) {
-      const list = result.data ?? [];
+      // Grupos creados por alguien con quien hay un bloqueo (en cualquier sentido) no se muestran
+      const hidden = new Set(hiddenRes.data ?? []);
+      const list = (result.data ?? []).filter((g) => !g.created_by || !hidden.has(g.created_by));
       // Una sola consulta a group_members para conteos y membresía (evita N+1)
       const summary = await groupsService.getMembershipSummary(
         list.map((g) => g.id),
