@@ -40,11 +40,11 @@
 - [ ] Deterministic avatar color by `user_id` (always teal today)
 - [x] If someone blocked you, their content is still visible to you; pets and group lists are not filtered by blocks — done 2026-11-09 on `fix/launch-backlog`: RPC `get_hidden_user_ids` (migration `20261109000002`, **not applied to the remote yet**; until then the app falls back to hiding only the users you blocked) feeds Feed, search (pets, groups, users), comunidad, historias, seguidores, the group list and group members. Still visible both ways: someone's profile page (`perfil/[id]`), the chat list (DMs are already blocked both ways server-side) and lost-pet alerts
 - [x] Store the terms acceptance date in the profile (`terms_accepted_at`) — code and migration `20261109000001_terms_accepted_at.sql` done 2026-11-09 on `fix/launch-backlog`; **the migration is NOT applied to the remote yet** and the app change needs the next build. Users created before it stay NULL (cannot be reconstructed)
-- [ ] Delete notifications older than 90 days (`pg_cron`; must match the privacy policy)
+- [ ] Delete notifications older than 90 days (`pg_cron`; must match the privacy policy). Postponed on purpose, not needed for the launch: steps, SQL and rollback in [`NOTIFICATIONS_RETENTION_PLAN.md`](NOTIFICATIONS_RETENTION_PLAN.md)
 - [ ] Offline support, i18n, analytics, serve `colonias.json` from an API (see "Low priority" in `PROGRESS.md`)
 - [ ] More fixed countries in the phone selector (Mexico, US/Canada and "other" today)
 - [ ] Tag people (`@mentions`) in posts: only hashtags exist. Build it only if QA asks (search users when posting, store tagged users, notify them)
-- [ ] Decide what to do with the orphaned `/comunidad` screen (remove it or link it)
+- [x] Orphaned `/comunidad` screen — removed 2026-11-09 on `fix/launch-backlog` (Feed → Anuncios covers it)
 - [ ] Screenshots still missing: New Password, found-pet confirmation, OS push notification (see `auto_testing/EMULATOR_RUN_2026-11-07.md`)
 - [ ] Push on iOS (needs Firebase + `GoogleService-Info.plist`; only if launching on iOS)
 
