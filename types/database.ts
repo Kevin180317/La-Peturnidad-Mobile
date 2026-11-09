@@ -640,6 +640,7 @@ export type Database = {
           postal_code: string | null
           profile_picture_url: string | null
           role: string
+          terms_accepted_at: string | null
           updated_at: string | null
           user_id: string
         }
@@ -656,6 +657,7 @@ export type Database = {
           postal_code?: string | null
           profile_picture_url?: string | null
           role?: string
+          terms_accepted_at?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -672,6 +674,7 @@ export type Database = {
           postal_code?: string | null
           profile_picture_url?: string | null
           role?: string
+          terms_accepted_at?: string | null
           updated_at?: string | null
           user_id?: string
         }

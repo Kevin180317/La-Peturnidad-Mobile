@@ -209,6 +209,10 @@ export default function RegisterExtendedScreen() {
         address: selectedColonia,
         city: city,
         updated_at: new Date().toISOString(),
+        // Solo si la cuenta se creó con el checkbox; el trigger impide cambiarla después
+        ...(typeof user.user_metadata?.terms_accepted_at === "string"
+          ? { terms_accepted_at: user.user_metadata.terms_accepted_at }
+          : {}),
       };
 
       const { error } = await supabase

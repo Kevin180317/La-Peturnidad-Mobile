@@ -26,7 +26,7 @@ Regenerate types with the Supabase MCP `generate_typescript_types`, then run `bu
 | `posts` | `content`, `created_at`, `id`, `image_url`, `image_urls`, `links`, `location`, `tags`, `updated_at`, `user_id` |
 | `reports` | `created_at`, `id`, `reason`, `reporter_id`, `reviewed_at`, `reviewed_by`, `status`, `target_user_id` |
 | `success_stories` | `created_at`, `id`, `image_url`, `pet_name`, `story`, `user_id` |
-| `user_profiles` | `address`, `birth_date`, `city`, `created_at`, `first_name`, `id`, `last_name`, `phone`, `postal_code`, `profile_picture_url`, `role`, `updated_at`, `user_id` |
+| `user_profiles` | `address`, `birth_date`, `city`, `created_at`, `first_name`, `id`, `last_name`, `phone`, `postal_code`, `profile_picture_url`, `role`, `terms_accepted_at`, `updated_at`, `user_id` |
 
 ## Views
 

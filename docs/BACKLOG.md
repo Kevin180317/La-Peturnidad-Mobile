@@ -39,7 +39,7 @@
 - [x] Remove `@react-native-picker/picker` (unused; it is native, so it ships with a build) and its mock in `__tests__/app/editar-perfil.test.tsx` — done 2026-11-09 on `fix/launch-backlog`; takes effect with the next native build
 - [ ] Deterministic avatar color by `user_id` (always teal today)
 - [ ] If someone blocked you, their content is still visible to you; pets and group lists are not filtered by blocks
-- [ ] Store the terms acceptance date in the profile (`terms_accepted_at`; do it before launch, it cannot be reconstructed for existing users)
+- [x] Store the terms acceptance date in the profile (`terms_accepted_at`) — code and migration `20261109000001_terms_accepted_at.sql` done 2026-11-09 on `fix/launch-backlog`; **the migration is NOT applied to the remote yet** and the app change needs the next build. Users created before it stay NULL (cannot be reconstructed)
 - [ ] Delete notifications older than 90 days (`pg_cron`; must match the privacy policy)
 - [ ] Offline support, i18n, analytics, serve `colonias.json` from an API (see "Low priority" in `PROGRESS.md`)
 - [ ] More fixed countries in the phone selector (Mexico, US/Canada and "other" today)
