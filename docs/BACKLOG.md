@@ -36,7 +36,7 @@
 ## Later (no date)
 - [ ] Baseline migration, so the database can be recreated from scratch (older migrations were applied from the dashboard; `posts_media_location_tags_links` is applied remotely but has no file in `supabase/migrations/`)
 - [ ] Text length limits in the database (today only `maxLength` in the app)
-- [ ] Remove `@react-native-picker/picker` (unused; it is native, so it ships with a build) and its mock in `__tests__/app/editar-perfil.test.tsx`
+- [x] Remove `@react-native-picker/picker` (unused; it is native, so it ships with a build) and its mock in `__tests__/app/editar-perfil.test.tsx` — done 2026-11-09 on `fix/launch-backlog`; takes effect with the next native build
 - [ ] Deterministic avatar color by `user_id` (always teal today)
 - [ ] If someone blocked you, their content is still visible to you; pets and group lists are not filtered by blocks
 - [ ] Store the terms acceptance date in the profile (`terms_accepted_at`; do it before launch, it cannot be reconstructed for existing users)
