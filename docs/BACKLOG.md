@@ -1,26 +1,34 @@
 # Backlog — Lucky Tracker
 
-> Updated 2026-11-07. What is done is in [`PROGRESS.md`](PROGRESS.md) and [`../AGENTS.md`](../AGENTS.md).
+> Updated 2026-11-09. What is done is in [`PROGRESS.md`](PROGRESS.md) and [`../AGENTS.md`](../AGENTS.md).
 
 ## Next (this week)
 
 ### Blocks the launch
 - [ ] **Phone QA with the new build** (`preview` APK): registration with age and per-country phone, readable colonias, edit profile with an old phone, confirmation email pointing to `luckytracker.com.mx`, inbox without emojis, text limits, Feed (Emergencias / Anuncios / Social) and the new post form
-- [ ] **Publish `/policy` and `/terms`** (target 2026-11-07) and review them against the checklists in `LEGAL_PRIVACY_POLICY.md` and `LEGAL_TERMS_AND_CONDITIONS.md`: `#eliminar-cuenta` anchor, plain-text email, ARCO address, providers, age 18. Published pages must be in Spanish
-- [ ] **Fill in the legal placeholders**: `[RESPONSABLE]`, `[DOMICILIO]`, `[CORREO]`, `[REGIÓN]`, `[FECHA]`
-- [ ] **Fix the certificate on okhuysen.dev**: the PDF says "Claude Code in Action" (May 2026), the page says "Claude AI Developer Certification" (2025)
+- [x] **Publish `/policy` and `/terms`** — published and checked live on 2026-11-09 (owner, address, providers and `us-west-1`, ARCO, `#eliminar-cuenta` anchor, age 18, date). Contact email is `contact@prometheustij.com`, in plain text (footer included). Open legal-text decisions live in `La-Peturnidad-Web/BACKLOG.md`
+- [x] **Fill in the legal placeholders** — done 2026-11-09 in `LEGAL_PRIVACY_POLICY.md` and `LEGAL_TERMS_AND_CONDITIONS.md` (Prometheus R&D, Fresnos 18 Tijuana, `contact@prometheustij.com`, `us-west-1`, November 3, 2026)
 - [ ] **Play Console**: store listing, adults-only target audience (18+), content rating (user content and chat), Data safety form consistent with the policy, account-deletion URL
 - [ ] **`production` build** (AAB) once everything above is tested
 
 ### Cleanup after the 2026-11-07 emulator run
-- [ ] Delete the test data the screenshot campaign left in the live Supabase project (pet Luna, one post, one notice, group "Vecinos de Hacienda el Colorado", story "Milo", chat with the admin, follow, one report) — inventory in `auto_testing/EMULATOR_RUN_2026-11-07.md`
-- [ ] Check the report from flow 14 is dismissed in the moderation panel (the flow dismissed it, final state not re-checked)
+- [ ] Delete the test data the screenshot campaign left in the live Supabase project (pet Luna, one post, one notice, group "Vecinos de Hacienda el Colorado", story "Milo", chat with the admin, follow, one report) — inventory in `auto_testing/EMULATOR_RUN_2026-11-07.md`. Checked 2026-11-09 (read-only): there are **two** pets named Luna (2026-10-17 and 2026-11-07), the group and the story exist, and the live project has 7 profiles, 10 pets, 8 posts, 2 notices, 3 groups, 6 conversations, 5 follows. Which profiles are test accounts has to be confirmed before deleting
+- [x] Report from flow 14: confirmed `dismissed` in the database on 2026-11-09
 
 ### Findings from the emulator run (small app fixes)
-- [ ] User search matches first and last name separately: "Admin Lucky" finds nobody, "Admin" does
-- [ ] Unread badge on the Mensajes tab showed "1" for the account that had just sent a message; check how `getUnreadCount` treats own messages
-- [ ] Confirm Email button still says "Reenviar email" (rest of the app says "correo electrónico")
-- [ ] Free-text fields capitalize every word on display or input ("Mancha blanca en El pecho", "Café Con Blanco")
+- [ ] (not reproducible from the code, confirm on the emulator) User search matches first and last name separately: "Admin Lucky" finds nobody, "Admin" does
+- [ ] (not reproducible from the code: the query already excludes own messages) Unread badge on the Mensajes tab showed "1" for the account that had just sent a message; check how `getUnreadCount` treats own messages
+- [x] Confirm Email button now says "Reenviar correo electrónico" (2026-11-09)
+- [ ] (not reproducible from the code: nothing capitalizes words; likely the emulator keyboard) Free-text fields capitalize every word on display or input ("Mancha blanca en El pecho", "Café Con Blanco")
+
+### Supabase state checked on 2026-11-09 (read-only, then two migrations applied)
+- [x] Applied to the live project: `terms_accepted_at` (column + trigger, existing profiles stay NULL) and `hidden_user_ids` (RPC `get_hidden_user_ids`, execute only for `authenticated`). Verified by query. They were applied with `apply_migration`, so their remote versions are `20261109221351` and `20261109221400`, not the file names
+- [x] The four `feat-followers` migrations (`20261107000001` to `04`) were already applied on the remote
+- [x] The three SECURITY DEFINER functions that take ids as parameters (`create_conversation`, `create_group_conversation`, `delete_group`) were read: they check `auth.uid()` and use an empty `search_path`; nothing to change
+- Advisors: `public_profiles` as SECURITY DEFINER view (ERROR) is intentional, it hides phone, address and birth date; 17 SECURITY DEFINER functions callable by signed-in users (WARN, reviewed above for the id-taking ones); leaked-password protection is off (free plan). Performance advisors were not run
+- Local migration file names and remote versions differ (for example `20261105000001_close_profile_access` locally, `20261103233201` remotely), so do not use `supabase db push`; this is part of the baseline task in Later
+- `enforce_phone_format` is applied remotely: any bulk import of users must send E.164 phones, an 18+ birth date and respect the rate limits
+- The next build must be generated **after** these migrations (done) because the app now sends `terms_accepted_at`
 
 ### Pending tests
 - [ ] **FCM push end to end** with the SDK 58 build (needs a second device; the token already registers)
