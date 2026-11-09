@@ -15,7 +15,7 @@
 
 # TERMS AND CONDITIONS — Lucky Tracker
 
-Last updated: `[FECHA]`
+Last updated: November 3, 2026
 
 ## 1. Acceptance
 By creating an account or using Lucky Tracker you accept these Terms and the Privacy Policy (`https://luckytracker.com.mx/policy`). If you do not agree, do not use the app.
@@ -65,4 +65,4 @@ We may update these Terms. We will publish the new version with its date and, if
 These Terms are governed by the laws of Mexico. For their interpretation, the parties submit to the competent courts of Tijuana, Baja California.
 
 ## 13. Contact
-`[CORREO]`
+contact@prometheustij.com
