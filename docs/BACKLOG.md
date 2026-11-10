@@ -5,7 +5,15 @@
 ## Next (this week)
 
 ### Blocks the launch
-- [ ] **Phone QA with the new build** (`preview` APK): registration with age and per-country phone, readable colonias, edit profile with an old phone, confirmation email pointing to `luckytracker.com.mx`, inbox without emojis, text limits, Feed (Emergencias / Anuncios / Social) and the new post form
+- [ ] **Phone QA with the new build** (`preview` APK, generated 2026-11-09 after the Expo patch update and the two migrations; uninstall the old APK first). Needs 2 accounts, ideally 2 phones. Checklist:
+  - [ ] Registration: terms checkbox, 18+ birth date (minor rejected), per-country phone in E.164, confirmation email pointing to `luckytracker.com.mx`, 8-digit OTP; afterwards verify `terms_accepted_at` is set in the database
+  - [ ] Edit profile with an old 10-digit phone (read as Mexico, saved with `+52`), readable colonia sheet (no picker)
+  - [ ] Blocks in both directions: A blocks B, then B and A both stop seeing each other's content in Feed, search and groups, and neither learns who blocked
+  - [ ] Followers (from `feat-followers`): private profile, follow requests (accept and reject), suggested users and dismiss, counters match the lists, new chat sheet
+  - [ ] Confirm-email button reads "Reenviar correo electrónico"; no dead link after removing `/comunidad`
+  - [ ] Inbox without emojis, unread badge ignores own messages, user search with "first last", text limits, free-text capitalization (likely the keyboard)
+  - [ ] Feed (Emergencias / Anuncios / Social) and the post form with photos, location, tags and links
+  - [ ] Critical flows: lost-pet alert with push to a second account in the same colonia, delete account (use a throwaway), report and moderation panel, logout and login
 - [x] **Publish `/policy` and `/terms`** — published and checked live on 2026-11-09 (owner, address, providers and `us-west-1`, ARCO, `#eliminar-cuenta` anchor, age 18, date). Contact email is `contact@prometheustij.com`, in plain text (footer included). Open legal-text decisions live in `La-Peturnidad-Web/BACKLOG.md`
 - [x] **Fill in the legal placeholders** — done 2026-11-09 in `LEGAL_PRIVACY_POLICY.md` and `LEGAL_TERMS_AND_CONDITIONS.md` (Prometheus R&D, Fresnos 18 Tijuana, `contact@prometheustij.com`, `us-west-1`, November 3, 2026)
 - [ ] **Play Console**: store listing, adults-only target audience (18+), content rating (user content and chat), Data safety form consistent with the policy, account-deletion URL
@@ -29,6 +37,8 @@
 - Local migration file names and remote versions differ (for example `20261105000001_close_profile_access` locally, `20261103233201` remotely), so do not use `supabase db push`; this is part of the baseline task in Later
 - `enforce_phone_format` is applied remotely: any bulk import of users must send E.164 phones, an 18+ birth date and respect the rate limits
 - The next build must be generated **after** these migrations (done) because the app now sends `terms_accepted_at`
+- [x] Expo SDK 58 patch versions aligned on 2026-11-09 (`npx expo install --fix`: `expo` 58.0.23, `expo-constants`, `expo-linking`, `expo-notifications`, `expo-router`, `expo-splash-screen`, `react-native-safe-area-context` 5.11.1, `jest-expo`). `expo-doctor` 20/20, lint, typecheck and 33 suites / 256 tests pass. Native modules changed, so it only takes effect with a new build. `bun pm untrusted` still lists 2 blocked postinstalls (`@parcel/watcher`, one more): harmless, not trusted on purpose
+- [x] Removed `@react-native-picker/picker` and the orphaned `/comunidad` screen in the same build; birth date was never a date picker (text field with automatic format, validated in the app and by `enforce_min_age`)
 
 ### Pending tests
 - [ ] **FCM push end to end** with the SDK 58 build (needs a second device; the token already registers)
