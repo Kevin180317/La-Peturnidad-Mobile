@@ -1,0 +1,26 @@
+# Fresh launch + login with EMAIL / PASSWORD (any account). Bootstraps the profile if the account has none.
+appId: com.idarko.lapeturnidad
+env:
+  EMAIL: ${EMAIL}
+  PASSWORD: ${PASSWORD}
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "Saltar"
+    timeout: 15000
+- tapOn: "Saltar"
+- tapOn: "ejemplo@correo.com"
+- inputText: ${EMAIL}
+- tapOn: "••••••••"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "login-submit"
+- runFlow:
+    when:
+      visible: "Completa tu perfil"
+    file: complete-profile.yaml
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000

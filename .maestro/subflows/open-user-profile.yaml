@@ -1,0 +1,16 @@
+# From the dashboard: search a user by name in /buscar and open their public profile.
+appId: com.idarko.lapeturnidad
+env:
+  NAME: ${NAME}
+---
+- openLink: lapeturnidad://buscar
+- extendedWaitUntil:
+    visible: "Buscar mascotas, grupos, usuarios..."
+    timeout: 8000
+- tapOn: "Usuarios"
+- tapOn: "Buscar mascotas, grupos, usuarios..."
+- inputText: ${NAME}
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 4000
+- tapOn: ${NAME}

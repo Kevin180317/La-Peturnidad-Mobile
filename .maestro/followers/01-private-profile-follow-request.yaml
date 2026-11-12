@@ -1,0 +1,111 @@
+# Private profile + follow request, two accounts.
+#   A = TEST_* (becomes private), B = ADMIN_* (requests, is accepted, unfollows).
+# Env: TEST_EMAIL TEST_PASSWORD TEST_NAME (A's display name, e.g. "Test User")
+#      ADMIN_EMAIL ADMIN_PASSWORD ADMIN_FIRST_NAME (B's first name, e.g. "Admin")
+# Idempotent: ends with A public again and B not following A. NOT run in CI (writes to live Supabase).
+appId: com.idarko.lapeturnidad
+name: Followers - private profile, request, accept, unfollow
+env:
+  TEST_NAME: ${TEST_NAME}
+  ADMIN_FIRST_NAME: ${ADMIN_FIRST_NAME}
+---
+# 1. A turns the profile private
+- runFlow:
+    file: ../subflows/login-as.yaml
+    env: { EMAIL: "${TEST_EMAIL}", PASSWORD: "${TEST_PASSWORD}" }
+- tapOn: "Perfil"
+- tapOn: "Editar perfil"
+- extendedWaitUntil:
+    visible: "Perfil privado"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Perfil privado"
+- tapOn: "Perfil privado"
+- scrollUntilVisible:
+    element: "Guardar cambios"
+- tapOn: "Guardar cambios"
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 10000
+- runFlow: ../subflows/logout.yaml
+
+# 2. B sees the lock and sends a request, then cancels it, then sends it again
+- runFlow:
+    file: ../subflows/login-as.yaml
+    env: { EMAIL: "${ADMIN_EMAIL}", PASSWORD: "${ADMIN_PASSWORD}" }
+- runFlow:
+    file: ../subflows/open-user-profile.yaml
+    env: { NAME: "${TEST_NAME}" }
+- extendedWaitUntil:
+    visible: "Perfil privado"
+    timeout: 8000
+- tapOn: "Seguir"
+- extendedWaitUntil:
+    visible: "Solicitado"
+    timeout: 8000
+- tapOn: "Solicitado"
+- extendedWaitUntil:
+    visible: "Seguir"
+    timeout: 8000
+- tapOn: "Seguir"
+- extendedWaitUntil:
+    visible: "Solicitado"
+    timeout: 8000
+- assertVisible: "Perfil privado"
+- launchApp
+- runFlow: ../subflows/logout.yaml
+
+# 3. A accepts
+- runFlow:
+    file: ../subflows/login-as.yaml
+    env: { EMAIL: "${TEST_EMAIL}", PASSWORD: "${TEST_PASSWORD}" }
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Solicitudes de seguimiento"
+- tapOn: "Solicitudes de seguimiento"
+- extendedWaitUntil:
+    visible: "Personas que quieren seguirte"
+    timeout: 8000
+- tapOn: "Aceptar a ${ADMIN_FIRST_NAME}"
+- extendedWaitUntil:
+    visible: "No tienes solicitudes pendientes"
+    timeout: 8000
+- back
+- runFlow: ../subflows/logout.yaml
+
+# 4. B is following now: lock gone, then unfollow
+- runFlow:
+    file: ../subflows/login-as.yaml
+    env: { EMAIL: "${ADMIN_EMAIL}", PASSWORD: "${ADMIN_PASSWORD}" }
+- runFlow:
+    file: ../subflows/open-user-profile.yaml
+    env: { NAME: "${TEST_NAME}" }
+- extendedWaitUntil:
+    visible: "Siguiendo"
+    timeout: 8000
+- assertNotVisible: "Perfil privado"
+- tapOn: "Siguiendo"
+- extendedWaitUntil:
+    visible: "Seguir"
+    timeout: 8000
+- assertVisible: "Perfil privado"
+- runFlow: ../subflows/logout.yaml
+
+# 5. Cleanup: A public again
+- runFlow:
+    file: ../subflows/login-as.yaml
+    env: { EMAIL: "${TEST_EMAIL}", PASSWORD: "${TEST_PASSWORD}" }
+- tapOn: "Perfil"
+- tapOn: "Editar perfil"
+- extendedWaitUntil:
+    visible: "Perfil privado"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Perfil privado"
+- tapOn: "Perfil privado"
+- scrollUntilVisible:
+    element: "Guardar cambios"
+- tapOn: "Guardar cambios"
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 10000
