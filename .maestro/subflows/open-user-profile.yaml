@@ -13,4 +13,7 @@ env:
 - hideKeyboard
 - waitForAnimationToEnd:
     timeout: 4000
-- tapOn: ${NAME}
+# The search box also contains NAME: only match the result row below the tabs.
+- tapOn:
+    text: ${NAME}
+    below: "Usuarios"

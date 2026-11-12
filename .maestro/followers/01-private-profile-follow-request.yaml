@@ -2,7 +2,7 @@
 #   A = TEST_* (becomes private), B = ADMIN_* (requests, is accepted, unfollows).
 # Env: TEST_EMAIL TEST_PASSWORD TEST_NAME (A's display name, e.g. "Test User")
 #      ADMIN_EMAIL ADMIN_PASSWORD ADMIN_FIRST_NAME (B's first name, e.g. "Admin")
-# Idempotent: ends with A public again and B not following A. NOT run in CI (writes to live Supabase).
+# Precondition: A is public and B does not follow A. Idempotent when it passes: ends with A public again and B not following A. NOT run in CI (writes to live Supabase).
 appId: com.idarko.lapeturnidad
 name: Followers - private profile, request, accept, unfollow
 env:
@@ -14,10 +14,9 @@ env:
     file: ../subflows/login-as.yaml
     env: { EMAIL: "${TEST_EMAIL}", PASSWORD: "${TEST_PASSWORD}" }
 - tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Editar perfil"
 - tapOn: "Editar perfil"
-- extendedWaitUntil:
-    visible: "Perfil privado"
-    timeout: 10000
 - scrollUntilVisible:
     element: "Perfil privado"
 - tapOn: "Perfil privado"
@@ -80,15 +79,23 @@ env:
 - runFlow:
     file: ../subflows/open-user-profile.yaml
     env: { NAME: "${TEST_NAME}" }
+# "Siguiendo" is also a counter label (above the buttons): scope to the button row.
 - extendedWaitUntil:
-    visible: "Siguiendo"
+    visible:
+      text: "Siguiendo"
+      below: "Seguidores"
     timeout: 8000
 - assertNotVisible: "Perfil privado"
-- tapOn: "Siguiendo"
+- tapOn:
+    text: "Siguiendo"
+    below: "Seguidores"
 - extendedWaitUntil:
-    visible: "Seguir"
+    visible:
+      text: "Seguir"
+      below: "Seguidores"
     timeout: 8000
 - assertVisible: "Perfil privado"
+- launchApp
 - runFlow: ../subflows/logout.yaml
 
 # 5. Cleanup: A public again
@@ -96,10 +103,9 @@ env:
     file: ../subflows/login-as.yaml
     env: { EMAIL: "${TEST_EMAIL}", PASSWORD: "${TEST_PASSWORD}" }
 - tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Editar perfil"
 - tapOn: "Editar perfil"
-- extendedWaitUntil:
-    visible: "Perfil privado"
-    timeout: 10000
 - scrollUntilVisible:
     element: "Perfil privado"
 - tapOn: "Perfil privado"

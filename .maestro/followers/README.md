@@ -1,6 +1,6 @@
 # Followers flows (not CI)
 
-Cover `feat-followers`: private profile, follow request (`/solicitudes`), suggested users, user search hint.
+Cover `feat-followers`: private profile, follow request (`/solicitudes`), suggested users, followed-users list in Buscar.
 Run from repo root, e.g.:
 
     maestro test -e TEST_EMAIL=... -e TEST_PASSWORD=... -e TEST_NAME="Test User" \
