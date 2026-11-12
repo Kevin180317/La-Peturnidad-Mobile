@@ -26,13 +26,21 @@ describe("authService", () => {
     expect(auth.signInWithPassword).toHaveBeenCalledWith({ email: "a@b.com", password: "pw" });
   });
 
-  it("signUp sends redirect url", async () => {
+  it("signUp sends redirect url and the terms acceptance date", async () => {
+    const before = Date.now();
     await authService.signUp(" a@b.com", "pw");
     expect(auth.signUp).toHaveBeenCalledWith({
       email: "a@b.com",
       password: "pw",
-      options: { emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL },
+      options: {
+        emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL,
+        data: { terms_accepted_at: expect.any(String) },
+      },
     });
+    const sent = auth.signUp.mock.calls[0][0].options.data.terms_accepted_at;
+    expect(new Date(sent).toISOString()).toBe(sent);
+    expect(new Date(sent).getTime()).toBeGreaterThanOrEqual(before);
+    expect(new Date(sent).getTime()).toBeLessThanOrEqual(Date.now());
   });
 
   it("sendOtp never creates users", async () => {

@@ -176,10 +176,6 @@ export default function RootLayout() {
         options={{ title: "Notificaciones" }}
       />
       <Stack.Screen
-        name="comunidad"
-        options={{ title: "Comunidad" }}
-      />
-      <Stack.Screen
         name="mensajes"
         options={{ title: "Mensajes" }}
       />
@@ -202,6 +198,10 @@ export default function RootLayout() {
       <Stack.Screen
         name="bandeja"
         options={{ title: "Notificaciones" }}
+      />
+      <Stack.Screen
+        name="solicitudes"
+        options={{ title: "Solicitudes" }}
       />
       <Stack.Screen
         name="seguridad"

@@ -113,6 +113,21 @@ class ReportsService {
       return { success: false, error: error.message, data: [] };
     }
   }
+
+  /**
+   * Usuarios cuyo contenido se oculta: a quienes bloqueé Y quienes me bloquearon (no se distingue
+   * el sentido, para no revelar quién bloqueó). Si la función de Supabase no existe todavía o
+   * falla, se cae a solo los que yo bloqueé.
+   */
+  async getHiddenUserIds(userId: string): Promise<ServiceResult<string[]>> {
+    try {
+      const { data, error } = await supabase.rpc("get_hidden_user_ids");
+      if (error) throw error;
+      return { success: true, data: [...new Set((data ?? []) as string[])] };
+    } catch {
+      return this.getBlockedUsers(userId);
+    }
+  }
 }
 
 export const reportsService = new ReportsService();

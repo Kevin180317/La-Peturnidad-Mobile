@@ -80,11 +80,22 @@ class PostsService {
   }
 
   // Paginación por cursor: pasa el created_at del último post cargado para pedir la página siguiente
-  async getAllPosts(before?: string | null, limit = FEED_PAGE_SIZE, tag?: string | null): Promise<ServiceResult<PostWithOwner[]>> {
+  /** `authorIds`: solo de esos usuarios (Siguiendo, Mías). `excludeAuthorIds`: oculta a esos autores (Para ti: yo y a quienes sigo). */
+  async getAllPosts(
+    before?: string | null,
+    limit = FEED_PAGE_SIZE,
+    tag?: string | null,
+    authorIds?: string[] | null,
+    excludeAuthorIds?: string[] | null,
+  ): Promise<ServiceResult<PostWithOwner[]>> {
     try {
+      if (authorIds && authorIds.length === 0) return { success: true, data: [] };
       let query = supabase.from("posts").select("*").order("created_at", { ascending: false }).limit(limit);
       if (before) query = query.lt("created_at", before);
       if (tag) query = query.contains("tags", [tag]);
+      if (authorIds) query = query.in("user_id", authorIds);
+      // shortcut: los ids van en la URL; con miles de seguidos habría que filtrar por RPC
+      if (excludeAuthorIds?.length) query = query.not("user_id", "in", `(${excludeAuthorIds.join(",")})`);
       const { data: posts, error } = await query;
 
       if (error) throw error;

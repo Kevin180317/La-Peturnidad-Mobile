@@ -52,7 +52,7 @@ export default function HistoriasScreen() {
     if (!user?.user) { router.replace("/"); return; }
     setUserId(user.user.id);
     const [blocked] = await Promise.all([
-      reportsService.getBlockedUsers(user.user.id),
+      reportsService.getHiddenUserIds(user.user.id),
       loadStories(),
     ]);
     setBlockedIds(blocked.data ?? []);
