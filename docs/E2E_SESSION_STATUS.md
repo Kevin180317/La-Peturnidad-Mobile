@@ -3,7 +3,14 @@
 > Handoff file for resuming the Maestro E2E work. Update **Last session** and **Next steps** at the end of each session.
 > Detailed results and coverage live in [`E2E_TEST_RESULTS.md`](E2E_TEST_RESULTS.md).
 
-## Last update — 2026-11-07 (evening)
+## Last update — 2026-11-11
+
+- Branch `QA_v2` = `origin/dev` + `origin/fix/launch-backlog` (clean merge; `feat-followers` was already inside the backlog branch). Pushed to `origin/QA_v2`.
+- New flows for the followers features in `.maestro/followers/` (F01 private profile + follow request with two accounts, F02 suggested users, F03 followed list in Buscar). All 3 passed on a local emulator. Report: [`auto_testing/FOLLOWERS_RUN_2026-11-11.md`](auto_testing/FOLLOWERS_RUN_2026-11-11.md).
+- The 5 CI flows in `.maestro/flows/` were not re-run on `QA_v2`.
+- Next: re-run `.maestro/flows/` on `QA_v2`, add follower flows to CI only if a second CI account is available, cover reject request and follow-from-suggestion.
+
+## 2026-11-07 (evening)
 
 - All 5 Maestro flows passed (5/5, 2m 41s) on a local emulator with a release APK built from `QA_auto`. Full report: [`auto_testing/EMULATOR_RUN_2026-11-07.md`](auto_testing/EMULATOR_RUN_2026-11-07.md).
 - Capture flows for docs screenshots live in `.maestro/screenshots/` (not run by CI).
