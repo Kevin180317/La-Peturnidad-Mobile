@@ -1,0 +1,42 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - public auth screens
+env:
+  OUT: ${OUT}
+---
+# Not part of CI (CI runs .maestro/flows). Captures PNGs for docs/images; run with -e OUT=<dir>.
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible: "Saltar"
+    timeout: 15000
+- extendedWaitUntil:
+    visible: "Reporta"
+    timeout: 10000
+- takeScreenshot: ${OUT}/auth-onboarding-1
+- tapOn: "Siguiente"
+- takeScreenshot: ${OUT}/auth-onboarding-2
+- tapOn: "Siguiente"
+- takeScreenshot: ${OUT}/auth-onboarding-3
+- tapOn: "Comenzar"
+- extendedWaitUntil:
+    visible: "Inicia sesión para continuar"
+    timeout: 10000
+- takeScreenshot: ${OUT}/auth-login
+- tapOn: "Regístrate"
+- takeScreenshot: ${OUT}/auth-register
+- back
+- tapOn: "¿Olvidaste tu contraseña?"
+- takeScreenshot: ${OUT}/auth-forgot-password
+- openLink: lapeturnidad://verify-otp?email=ana.prueba%40example.com
+- extendedWaitUntil:
+    visible: "Verificar código"
+    timeout: 10000
+- takeScreenshot: ${OUT}/auth-verify-otp
+- openLink: lapeturnidad://email-confirmacion?email=ana.prueba%40example.com
+- extendedWaitUntil:
+    visible: ".*correo.*"
+    timeout: 10000
+- takeScreenshot: ${OUT}/auth-confirm-email
+- openLink: lapeturnidad://register-extended?email=ana.prueba%40example.com
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/auth-complete-profile

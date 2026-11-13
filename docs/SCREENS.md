@@ -1,8 +1,8 @@
-# SCREENS.md — Screen and Event Documentation
+# Screens — Screen and Event Documentation
 
 > Lucky Tracker (formerly "La Peturnidad") · Community app for finding lost pets
 
-Documentation of **all app screens**: what each one does and **what event each user interaction triggers**.
+Documentation of **all app screens**: what each one does and **what event each user interaction triggers**. Last reviewed 2026-11-07 against the code (UI V2 redesign, 5-tab dashboard). Button labels in the app are in Spanish; they are translated here.
 
 ---
 
@@ -18,9 +18,9 @@ Documentation of **all app screens**: what each one does and **what event each u
 | Forgot Password | `/forgot-password` | Request the code to be sent |
 | New Password | `/reset-password` | Set the new password |
 | Confirm Email | `/email-confirmacion` | Confirm the account's email |
-| Dashboard | `/dashboard` | Main screen with 5 sections |
+| Dashboard | `/dashboard` | Main screen with 5 tabs: Inicio, Feed, Emergencia, Mensajes, Perfil |
 | Search | `/buscar` | Search for pets, groups, and users |
-| Community | `/comunidad` | Community announcements wall |
+| Community (orphaned) | `/comunidad` | Standalone announcements wall; nothing links to it (Feed → Anuncios replaced it) |
 | Successful Reunions | `/historias` | Pet reunion stories |
 | Groups | `/grupos` | List of neighborhood groups |
 | Group Detail | `/grupos/[id]` | Group detail + group chat |
@@ -29,8 +29,12 @@ Documentation of **all app screens**: what each one does and **what event each u
 | Followers | `/seguidores` | Follower and following lists |
 | Profile | `/perfil/[id]` | Public profile of a user |
 | Moderation Panel | `/panel-moderacion` | Report management (admin/moderator only) |
-| Notifications | `/notificaciones` | Notification preferences |
+| Notification Inbox | `/bandeja` | Received push notices (lost-pet alerts, found-pet notices) |
+| Notification Preferences | `/notificaciones` | Choose which notices to receive |
+| Account and Security | `/seguridad` | Change password and email |
 | Edit Profile | `/editar-perfil` | Edit personal data |
+| How to Use | `/como-usar` | Step-by-step guide to the app |
+| FAQ | `/faq` | Frequently asked questions |
 | Not Found | — | 404 screen |
 
 ---
@@ -86,19 +90,20 @@ Documentation of **all app screens**: what each one does and **what event each u
 **User events**:
 | Event | What it triggers |
 |---|---|
-| "Register" button | Validates fields, password match, and a minimum of 6 characters → creates the account. Success: shows "Confirm your email" and goes to Confirm Email |
+| "Register" button | Validates fields, password match, the password rules (8+ characters with letters and numbers) and the required Terms/Privacy checkbox (links to `luckytracker.com.mx/terms` and `/policy`) → creates the account. While it runs, a "Procesando registro..." spinner shows. Success: shows "Confirm your email" and goes to Confirm Email |
 
 ---
 
 ### 4. Complete Profile — Route `/register-extended`
 
-**What it does**: Register first name, last name, phone, birth date, postal code, and select the neighborhood (Tijuana).
+**What it does**: Register first name, last name, phone (country selector, stored as E.164), birth date (required; must be 18 or older), postal code, and select the colonia (neighborhood) with the colonia picker.
 
 **User events**:
 | Event | What it triggers |
 |---|---|
-| Typing the postal code | Numbers only (max 5); once 5 digits are complete, searches for neighborhoods with that code; if none found, shows "Code not found" |
-| Typing the date | Live-formatted as day/month/year |
+| Typing the postal code | Numbers only (max 5); once 5 digits are complete, searches for colonias with that code; if none found, shows "Code not found" |
+| Phone field | Country selector (Mexico, US/Canada, other with +code); digits only, 10 for MX/US |
+| Typing the date | Live-formatted as day/month/year; under-18 dates are rejected |
 | "Complete profile" button | Validates fields → saves the profile. Success: welcome notice and entry to the Dashboard |
 | "Skip for now" | Returns to start |
 
@@ -155,135 +160,136 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ### 9. Dashboard — Route `/dashboard`
 
-**What it does**: Main screen with a bottom bar of 5 sections: Feed, Home, Community, Emergency, and Profile. Centralizes pets, alerts, notices, posts, comments, and profile.
+**What it does**: Main screen with a bottom bar of 5 tabs: **Inicio, Feed, Emergencia, Mensajes, Perfil**. No navigation bar on top. Centralizes pets, alerts, notices, posts, messages and profile.
 
 **What happens internally**:
-- Loads profile, pets, follower/following counts, and unread messages.
-- Registers the device to receive notifications.
-- Opening the Community or Feed sections loads their content.
-- Pulling down refreshes everything (pull-to-refresh).
+- Loads profile, pets, follower/following counts and unread messages. If the profile fails to load (e.g. offline) it shows a retry card instead of "incomplete profile".
+- Registers the device for push notifications.
+- Opening Feed or Mensajes loads their content; the follower counters reload when the dashboard regains focus.
+- Pulling down refreshes the active tab.
 
 **User events**:
 | Event | What it triggers |
 |---|---|
-| Magnifying glass button | Opens the Search screen |
-| Register pet | Creates the pet (validates data). Success: notice and reload |
-| Edit pet | Updates the pet |
+| Magnifying glass button (Inicio) | Opens the Search screen |
+| Register / edit pet | Creates or updates the pet (validates data). Success: toast and reload |
 | Delete pet | Confirmation → deletes and reloads |
 | Create emergency alert | Checks the address and confirms → publishes the alert **and notifies neighbors** |
 | Delete alert | Confirmation → deletes and reloads |
 | "Found it" | Reports the pet as found and removes its alert |
-| Publish post | Creates the post and reloads |
-| Delete post | Deletes the post |
+| Publish (Feed) | Opens the post form; creates the post or notice and reloads |
+| Delete post / notice | Deletes it (own content; moderators can delete any) |
 | Comment | Saves the comment |
-| Publish notice | Creates the community notice with its category |
-| Delete notice | Deletes the notice |
-| Log out | Confirmation modal → logs out and returns to start |
+| Log out | Confirmation → logs out on this device and returns to start |
 
 ---
 
-### 10. Section bar
+### 10. Tab bar
 
-**What it does**: Fixed bottom bar with the 5 sections (Feed, Home, Community, Emergency, Profile).
+**What it does**: Fixed bottom bar with the 5 tabs (Inicio, Feed, Emergencia, Mensajes, Perfil), a sliding pill indicator, and an unread badge on Mensajes.
 
-**Events**: tapping a section → shows it on the Dashboard.
+**Events**: tapping a tab → shows it on the Dashboard.
 
 ---
 
-### 11. Home Section
+### 11. Inicio Tab
 
-**What it does**: Greeting and date, summary cards (Pets / Alerts / Found), access to Search, and pet tools.
+**What it does**: Greeting and date, summary cards (Pets / Alerts / Found), access to Search, and "Mis mascotas".
 
 **User events**:
 | Event | What it triggers |
 |---|---|
 | Magnifying glass button | Opens Search |
-| "Register pet" | Opens the pet form |
-| Show / Hide pets | Shows or hides the list (and reloads) |
-| Tap a pet | Opens its detail card in a window |
+| "Register pet" | Opens the pet form (bottom sheet) |
+| Tap a pet | Opens its detail as a bottom sheet |
 | Save the form | Registers or updates the pet depending on the mode |
-| "Edit" on the detail card | Opens the form with the pet's data |
-| "Delete" on the detail card | Asks for confirmation to delete |
+| "Edit" on the detail | Opens the form with the pet's data |
+| "Delete" on the detail | Confirmation ("This action can't be undone") → deletes the pet |
 
 ---
 
-### 12. Emergency Section
+### 12. Emergencia Tab
 
-**What it does**: 2×2 grid of actions: Report lost pet, View lost pets, My alerts, and Found pets; plus the pet selector and the listings.
+**What it does**: 2×2 grid of actions (Report lost pet, Lost, My alerts, Found) plus the pet selector and the listings.
 
 **User events**:
 | Event | What it triggers |
 |---|---|
 | "Report lost" | Shows pets to choose from |
-| "View lost" | Loads and shows the neighborhood's alerts |
+| "Lost" | Loads the alerts in the user's colonia |
 | "My alerts" | Loads own alerts |
-| "Found pets" | Shows pets reported as found by me |
-| Choose a pet | Confirmation → publishes the alert with notification to others |
-| "Found it" | Reports as found and removes the alert |
+| "Found" | Shows pets I have reported as found |
+| Choose a pet | Confirmation → publishes the alert with notification to neighbors |
+| "Found it" | Reports as found; the alert's owner gets the finder's contact |
 | "Delete alert" | Confirms and deletes |
-| "Register pet" (if none exist) | Goes to the Home section |
+| "Register pet" (if none exist) | Goes to the Inicio tab |
 
 ---
 
-### 13. Feed Section
+### 13. Feed Tab
 
-**What it does**: Community posts with "Feed" and "My posts" sub-sections, post form, and comments.
+**What it does**: Community hub with a segmented control: **Emergencias** (active lost-pet alerts), **Anuncios** (community notices) and **Social** (posts). See [`FEED.md`](FEED.md).
 
 **User events**:
 | Event | What it triggers |
 |---|---|
-| "Post" (header) | Opens the form |
-| Feed / My posts sub-sections | Toggles the shown list |
-| "Post" on the form | Publishes and clears the text |
-| Tap a post | Opens the comments section |
+| "Publicar" (header) | Opens the full-screen post form with a type switch: Social (text, 1–5 images from gallery/camera/selfie, location with "Mi zona", tags, up to 3 links) or Anuncio (title, category, description) |
+| Segments | Switches between Emergencias / Anuncios / Social |
+| Tap a `#tag` | Filters the feed on the server; a banner "Mostrando #x" clears the filter |
+| Tap a link | Opens it with the system |
 | Tap the author | Opens their Profile |
-| Trash icon (own post) | Deletes the post |
+| Trash icon (own content, or any content for moderators) | Confirms and deletes |
 | Send a comment | Publishes it |
+| Scroll near the end (Social) | Loads the next page of 20 posts |
 
 ---
 
-### 14. Community Section
+### 14. Mensajes Tab
 
-**What it does**: Community notices with "Community" and "My notices" sub-sections, categories (general, notice, event, question), and comments.
+**What it does**: The conversation list (same component as `/mensajes`) inside the dashboard, with a subtitle showing the count and unread messages.
+
+**User events**: tap a conversation → opens the Chat; long press → confirm and clear the chat; pull to refresh.
+
+---
+
+### 14b. Perfil Tab
+
+**What it does**: Own profile — photo, stats (pets, followers, following), personal information, grouped menu, account info, "Eliminar cuenta" and log out.
 
 **User events**:
 | Event | What it triggers |
 |---|---|
-| "New" | Opens the form in a window |
-| Sub-sections | Toggles the list |
-| Tap the author | Opens their Profile |
-| Trash icon (own notice) | Deletes the notice |
-| "Comment" / "Hide" | Shows or hides comments |
-| Choose category | Selects the notice's category |
-| "Publish" | Validates title and content → publishes and closes the window |
+| Camera icon on the avatar | Picks a photo, then "Guardar foto" uploads it to `profile-pictures` |
+| Followers / Following | Opens Followers on that list |
+| Menu — Mensajería: Mensajes (unread badge), Notificaciones (inbox, unread count), Comunidad | Opens `/mensajes`, `/bandeja`, or switches to the Feed tab |
+| Menu — Exploración: Grupos, Reuniones exitosas | Opens the matching screen |
+| Menu — Configuración: Editar perfil, Cuenta y seguridad, Preferencias de notificaciones | Opens the matching screen |
+| Menu — Ayuda: Cómo funciona, Preguntas frecuentes, Términos y condiciones, Política de privacidad | Opens the guide/FAQ, or the legal pages in the in-app browser |
+| Menu — Administración: Panel de moderación (moderators/admins only) | Opens the Moderation Panel |
+| "Eliminar cuenta" | Destructive confirmation → deletes the account permanently (edge function `delete-account`) |
+| "Cerrar Sesión" | Confirmation → logs out and returns to start |
 
 ---
 
 ### 15. Pet Form
 
-**What it does**: Register or edit a pet: type (dog/cat), name, size, characteristics, and photo.
+**What it does**: Register or edit a pet: type (dog/cat), name, size (pills), characteristics, and photo.
 
 **User events**:
 | Event | What it triggers |
 |---|---|
 | Choose dog / cat | Sets the type |
-| "Select" (photo) | Opens the image picker |
-| "Upload" (photo) | Saves the image |
+| Photo picker | Opens the image picker and uploads to `pet-images` |
 | "Register" / "Update" | Saves the pet depending on the mode |
-| "Cancel" | Closes without saving |
+| "Cancel" / X | Closes without saving |
 
 ---
 
-### 16. Pet Detail (window)
+### 16. Pet Detail (bottom sheet)
 
-**What it shows**: Photo, type, color, size, characteristics, and registration date of the pet.
+**What it shows**: Photo, type, color, size, characteristics and registration date of the pet.
 
-**User events**:
-| Event | What it triggers |
-|---|---|
-| "Edit" | Opens the form with the pet's data |
-| "Delete" | Asks for confirmation to delete |
-| "Close" | Closes the window |
+**User events**: "Edit" opens the form with the pet's data; "Delete" asks for confirmation; X closes.
 
 ---
 
@@ -382,7 +388,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ### 24. Chat — Route `/mensajes/[id]`
 
-**What it does**: Message thread (individual or group) with visible names in groups; marks messages as read and auto-scrolls to the end.
+**What it does**: Message thread (individual or group) with visible names in groups; loads the last 500 messages, groups them by day ("Hoy"/"Ayer"), marks messages as read, auto-scrolls to the end and receives new messages in real time. If the other person left a 1:1 chat it shows "Conversación cerrada" and disables sending.
 
 **User events**:
 | Event | What it triggers |
@@ -415,6 +421,8 @@ Documentation of **all app screens**: what each one does and **what event each u
 | "Follow" / "Following" (another user's profile) | Starts or stops following and updates the button |
 | "Message" | Opens the conversation with the user (creates it if it doesn't exist) |
 | Follower/following counters | Opens Followers on that list |
+| Report user (another user's profile) | Choose a reason → sends a report to moderation |
+| Block / Unblock user | Destructive confirmation → hides their content for you and blocks direct messages both ways |
 
 ---
 
@@ -430,32 +438,72 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 28. Notifications — Route `/notificaciones`
+### 28. Notification Inbox — Route `/bandeja`
 
-**What it does**: Notification preferences: main switch and 3 types (lost pet, found pets, community notices). Secondary switches are disabled if the main one is off.
+**What it does**: Lists the notices the user received (last 50): lost-pet alerts in their colonia and found-pet notices. Each push also creates an inbox row, even if the device has no token.
+
+**User events**:
+| Event | What it triggers |
+|---|---|
+| Tap a notice | Marks it read and opens its target (`data.url`, only paths starting with `/`) |
+| "Marcar leídas" | Marks everything read |
+| Pull to refresh | Reloads (there is no realtime) |
+
+---
+
+### 28b. Notification Preferences — Route `/notificaciones`
+
+**What it does**: Preferences: main "Notificaciones push" switch and two alert types (lost pets in my colonia, someone found my pet). Secondary switches are disabled if the main one is off. Missing values are shown as on.
 
 **User events**:
 | Event | What it triggers |
 |---|---|
 | Toggle switches | Updates the selection |
-| "Save preferences" | Saves and shows a notice |
-| "Back" | Goes back |
+| "Guardar preferencias" | Saves and shows a toast |
+
+---
+
+### 28c. Account and Security — Route `/seguridad`
+
+**What it does**: Change password and change email while signed in.
+
+**User events**:
+| Event | What it triggers |
+|---|---|
+| "Actualizar contraseña" | Asks for the current password (re-authenticates), validates the new one (8+ with letters and numbers) → updates it |
+| "Cambiar correo" | Sends a confirmation link to the new address; the current email stays valid until confirmed |
 
 ---
 
 ### 29. Edit Profile — Route `/editar-perfil`
 
-**What it does**: Form with pre-loaded data (first name, last name, phone, address, city, postal code).
+**What it does**: Form with pre-loaded data (first name, last name, phone with country selector, postal code + colonia picker, city) and profile photo. If the profile cannot be loaded (offline) it goes back instead of showing an empty form.
 
 **User events**:
 | Event | What it triggers |
 |---|---|
-| "Save changes" | Validates, saves, shows a notice, and goes back |
-| "Cancel" | Goes back without saving |
+| "Guardar cambios" | Validates (name, valid phone, colonia required), saves, shows a toast, and goes back |
 
 ---
 
-### 30. Not Found
+### 30. How to Use — Route `/como-usar`
+
+**What it shows**: static guide in sections (the Dashboard, registering pets, reporting a lost pet, etc.). Opened from the Profile menu. No interactions besides scrolling.
+
+---
+
+### 31. FAQ — Route `/faq`
+
+**What it shows**: accordion of frequently asked questions (what Lucky Tracker is, alerts, reporting lost and found pets, fees). Opened from the Profile menu.
+
+**User events**:
+| Event | What it triggers |
+|---|---|
+| Tap a question | Expands or collapses its answer (animated) |
+
+---
+
+### 32. Not Found
 
 **What it shows**: "this screen doesn't exist" and a link to the start.
 
@@ -463,5 +511,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ## General observations
 
-- Data refreshes when returning to a screen (focus) or by pulling down; there is no live channel kept with the server.
-- The only "live" connection is notifications: tapping them opens the corresponding screen (e.g., an emergency alert).
+- Data refreshes when returning to a screen (focus) or by pulling down. The only realtime channel is the chat (`messages`).
+- Notifications: tapping a push opens the corresponding screen (e.g., an emergency alert) and the notice is also stored in the inbox (`/bandeja`).
+- Other users' profiles are read from the `public_profiles` view (no phone, address or birth date).
+- Group detail: members can leave (also leaving the group chat); only the creator can delete the group.
