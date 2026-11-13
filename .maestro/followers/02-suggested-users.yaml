@@ -1,0 +1,20 @@
+# "Sugeridos para ti" in Feed: section renders and a suggestion can be dismissed.
+# Env: TEST_EMAIL TEST_PASSWORD. Suggestions depend on live data: steps are skipped when none exist.
+# Dismissing persists in dismissed_suggestions (not undone): use a test account.
+appId: com.idarko.lapeturnidad
+name: Followers - suggested users
+---
+- runFlow:
+    file: ../subflows/login-as.yaml
+    env: { EMAIL: "${TEST_EMAIL}", PASSWORD: "${TEST_PASSWORD}" }
+- tapOn: "Feed"
+- waitForAnimationToEnd:
+    timeout: 4000
+- runFlow:
+    when:
+      visible: "Sugeridos para ti"
+    commands:
+      - assertVisible: "Seguir a .*"
+      - tapOn: "Descartar a .*"
+      - waitForAnimationToEnd:
+          timeout: 3000

@@ -15,9 +15,11 @@
 
 ## Entorno local y emulador (2026-11-07)
 
-- Expo SDK 58 pide Node >= 22.13; la máquina tiene Node 20.10. Sin actualizar, `npx expo prebuild` falla (`parseEnv is not a function`): usar `bunx --bun expo prebuild --platform android --clean --no-install` y, para Gradle, un script `node` (fuera del repo) que ejecute `bun --bun "$@"` al inicio del `PATH`. Detalle: `docs/auto_testing/EMULATOR_RUN_2026-11-07.md`
+- Expo SDK 58 pide Node >= 22.13; con Node 20.10 (máquina anterior). Sin actualizar, `npx expo prebuild` falla (`parseEnv is not a function`): usar `bunx --bun expo prebuild --platform android --clean --no-install` y, para Gradle, un script `node` (fuera del repo) que ejecute `bun --bun "$@"` al inicio del `PATH`. Detalle: `docs/auto_testing/EMULATOR_RUN_2026-11-07.md`
+- Con Node 26 (nvm, 2026-11-11) `npx expo prebuild --platform android --clean --no-install` funciona sin el rodeo de Bun. JDK 17 en `~/tools/jdk-17` (`JAVA_HOME` + `PATH`), Android SDK en `~/Android/Sdk`, AVD `Medium_Phone_API_37.0`, Maestro 2.11.0 en `~/.maestro/bin`
+- El APK local NECESITA `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY` en el entorno al compilar (sin `.env` la app se cierra al abrir con "Faltan variables de entorno de Supabase"; los valores están en `eas.json`, perfil `development`). Si `createBundleReleaseJsAndAssets` sale `UP-TO-DATE` el bundle viejo se reutiliza: recompilar con `--rerun-tasks`
 - APK de prueba local: `cd android && ./gradlew assembleRelease -PreactNativeArchitectures=x86_64` (~17 min la primera vez; `android/` no va a git)
-- Cuentas de prueba (normal y admin) en `.maestro/.env` (ignorado por git). Flujos de E2E para CI: `.maestro/flows/`; flujos para capturar imágenes de la documentación: `.maestro/screenshots/` (NO idempotentes: crean datos en el Supabase real)
+- Cuentas de prueba (normal y admin) en `.maestro/.env` (ignorado por git). Flujos de E2E para CI: `.maestro/flows/`; flujos de seguidores (perfil privado, solicitudes, sugeridos; 2 cuentas, solo local): `.maestro/followers/` (ver su README; en `.maestro/.env` los valores con espacios van entre comillas); flujos para capturar imágenes de la documentación: `.maestro/screenshots/` (NO idempotentes: crean datos en el Supabase real)
 
 ## Architecture
 

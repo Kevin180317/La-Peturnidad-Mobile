@@ -82,11 +82,16 @@ class AuthService {
     return supabase.auth.signInWithPassword({ email: email.trim(), password: password.trim() });
   }
 
+  // Solo se llama después de marcar el checkbox de Términos y Privacidad: la fecha viaja en
+  // user_metadata y register-extended la copia a user_profiles.terms_accepted_at.
   async signUp(email: string, password: string) {
     return supabase.auth.signUp({
       email: email.trim(),
       password: password.trim(),
-      options: { emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL },
+      options: {
+        emailRedirectTo: EMAIL_CONFIRMATION_REDIRECT_URL,
+        data: { terms_accepted_at: new Date().toISOString() },
+      },
     });
   }
 

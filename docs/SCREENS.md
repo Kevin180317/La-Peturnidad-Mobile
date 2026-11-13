@@ -20,7 +20,6 @@ Documentation of **all app screens**: what each one does and **what event each u
 | Confirm Email | `/email-confirmacion` | Confirm the account's email |
 | Dashboard | `/dashboard` | Main screen with 5 tabs: Inicio, Feed, Emergencia, Mensajes, Perfil |
 | Search | `/buscar` | Search for pets, groups, and users |
-| Community (orphaned) | `/comunidad` | Standalone announcements wall; nothing links to it (Feed → Anuncios replaced it) |
 | Successful Reunions | `/historias` | Pet reunion stories |
 | Groups | `/grupos` | List of neighborhood groups |
 | Group Detail | `/grupos/[id]` | Group detail + group chat |
@@ -316,21 +315,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 19. Community — Route `/comunidad`
-
-**What it does**: Community notices wall with categories; creation and deletion. Reloads when returning to the screen.
-
-**User events**:
-| Event | What it triggers |
-|---|---|
-| "New" | Opens the form |
-| Trash icon (own notice) | Confirms and deletes |
-| "Publish" | Publishes the notice |
-| Pull to refresh | Reloads the wall |
-
----
-
-### 20. Successful Reunions — Route `/historias`
+### 19. Successful Reunions — Route `/historias`
 
 **What it does**: Pet reunion stories; the author can create and delete them.
 
@@ -344,7 +329,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 21. Groups — Route `/grupos`
+### 20. Groups — Route `/grupos`
 
 **What it does**: List of groups with member count and join/leave button; creation and deletion.
 
@@ -360,7 +345,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 22. Group Detail — Route `/grupos/[id]`
+### 21. Group Detail — Route `/grupos/[id]`
 
 **What it does**: Group information, member list (photo, name, "Admin" badge), and group chat. Only the creator can delete it.
 
@@ -373,7 +358,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 23. Messages — Route `/mensajes`
+### 22. Messages — Route `/mensajes`
 
 **What it does**: List of conversations (individual and group) with the last message, unread notice, and deletion.
 
@@ -386,7 +371,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 24. Chat — Route `/mensajes/[id]`
+### 23. Chat — Route `/mensajes/[id]`
 
 **What it does**: Message thread (individual or group) with visible names in groups; loads the last 500 messages, groups them by day ("Hoy"/"Ayer"), marks messages as read, auto-scrolls to the end and receives new messages in real time. If the other person left a 1:1 chat it shows "Conversación cerrada" and disables sending.
 
@@ -398,7 +383,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 25. Followers — Route `/seguidores`
+### 24. Followers — Route `/seguidores`
 
 **What it does**: Follower and following lists of a user.
 
@@ -410,7 +395,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 26. Profile — Route `/perfil/[id]`
+### 25. Profile — Route `/perfil/[id]`
 
 **What it does**: Public profile of a user: photo, data, role badge (admin/moderator), counters (pets, followers, following), Follow/Message buttons, and their pets.
 
@@ -426,7 +411,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 27. Moderation Panel — Route `/panel-moderacion`
+### 26. Moderation Panel — Route `/panel-moderacion`
 
 **What it does**: List of reports; moderators and admins only (others cannot enter).
 
@@ -438,7 +423,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 28. Notification Inbox — Route `/bandeja`
+### 27. Notification Inbox — Route `/bandeja`
 
 **What it does**: Lists the notices the user received (last 50): lost-pet alerts in their colonia and found-pet notices. Each push also creates an inbox row, even if the device has no token.
 
@@ -475,7 +460,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 29. Edit Profile — Route `/editar-perfil`
+### 28. Edit Profile — Route `/editar-perfil`
 
 **What it does**: Form with pre-loaded data (first name, last name, phone with country selector, postal code + colonia picker, city) and profile photo. If the profile cannot be loaded (offline) it goes back instead of showing an empty form.
 
@@ -486,13 +471,13 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 30. How to Use — Route `/como-usar`
+### 29. How to Use — Route `/como-usar`
 
 **What it shows**: static guide in sections (the Dashboard, registering pets, reporting a lost pet, etc.). Opened from the Profile menu. No interactions besides scrolling.
 
 ---
 
-### 31. FAQ — Route `/faq`
+### 30. FAQ — Route `/faq`
 
 **What it shows**: accordion of frequently asked questions (what Lucky Tracker is, alerts, reporting lost and found pets, fees). Opened from the Profile menu.
 
@@ -503,7 +488,7 @@ Documentation of **all app screens**: what each one does and **what event each u
 
 ---
 
-### 32. Not Found
+### 31. Not Found
 
 **What it shows**: "this screen doesn't exist" and a link to the start.
 

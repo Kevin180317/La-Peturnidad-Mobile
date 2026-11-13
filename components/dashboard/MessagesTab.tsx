@@ -1,7 +1,9 @@
 import { confirmDialog } from "@/components/ConfirmDialog";
 import { useRouter } from "expo-router";
-import { RefreshControl, ScrollView } from "react-native";
-import { ScreenTitle } from "@/components/kit/Kit";
+import { useState } from "react";
+import { RefreshControl, ScrollView, View } from "react-native";
+import { RoundIconButton, ScreenTitle } from "@/components/kit/Kit";
+import { NewChatSheet } from "@/components/messages/NewChatSheet";
 import {
   ConversationList,
   ConversationListSkeleton,
@@ -30,6 +32,7 @@ export function MessagesTab({
   onDeleteConversation,
 }: MessagesTabProps) {
   const router = useRouter();
+  const [newChat, setNewChat] = useState(false);
 
   const handleDelete = (convId: string, otherUserName: string) => {
     confirmDialog({
@@ -48,16 +51,22 @@ export function MessagesTab({
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       contentContainerClassName="p-5 pb-10"
     >
-      <ScreenTitle
-        title="Mensajes"
-        subtitle={
-          loading
-            ? "Cargando conversaciones..."
-            : conversations.length === 0
-              ? "Inicia una conversación"
-              : `${conversations.length} conversación${conversations.length !== 1 ? "es" : ""}${unreadCount > 0 ? ` · ${unreadCount} sin leer` : ""}`
-        }
-      />
+      <View className="flex-row items-start justify-between">
+        <View className="flex-1">
+          <ScreenTitle
+            title="Mensajes"
+            subtitle={
+              loading
+                ? "Cargando conversaciones..."
+                : conversations.length === 0
+                  ? "Inicia una conversación"
+                  : `${conversations.length} conversación${conversations.length !== 1 ? "es" : ""}${unreadCount > 0 ? ` · ${unreadCount} sin leer` : ""}`
+            }
+          />
+        </View>
+        <RoundIconButton icon="add" tint="solid" size={44} label="Nuevo mensaje" onPress={() => setNewChat(true)} />
+      </View>
+      <NewChatSheet visible={newChat} onClose={() => setNewChat(false)} />
       {loading ? (
         <ConversationListSkeleton />
       ) : (

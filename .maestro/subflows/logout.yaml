@@ -1,0 +1,12 @@
+# Logs out from the dashboard (same steps as flows/05-logout.yaml).
+appId: com.idarko.lapeturnidad
+---
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Cerrar Sesión"
+- tapOn: "Cerrar Sesión"
+- tapOn:
+    id: "confirm-modal-confirm"
+- extendedWaitUntil:
+    visible: "Saltar"
+    timeout: 10000
