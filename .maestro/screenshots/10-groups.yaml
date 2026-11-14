@@ -1,0 +1,35 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - create a group
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Grupos"
+- tapOn: "Grupos"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/screen-grupos-empty
+- tapOn: "Crear"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/screen-grupos-form
+- tapOn: "Nombre del grupo"
+- inputText: "Vecinos de Hacienda el Colorado"
+- hideKeyboard
+- tapOn: "Descripción (opcional)"
+- inputText: "Grupo para avisarnos entre vecinos cuando se pierde una mascota."
+- hideKeyboard
+- tapOn:
+    text: "Crear grupo"
+    index: 1
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: ${OUT}/screen-grupos
+- tapOn: "Vecinos de Hacienda el Colorado"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/screen-grupo-detalle

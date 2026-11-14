@@ -1,0 +1,44 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - search, public profile, follow, chat, followers
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- openLink: lapeturnidad://buscar
+- extendedWaitUntil:
+    visible: "Buscar mascotas, grupos, usuarios..."
+    timeout: 8000
+- hideKeyboard
+- takeScreenshot: ${OUT}/screen-buscar
+- tapOn: "Usuarios"
+- tapOn: "Buscar mascotas, grupos, usuarios..."
+- inputText: "Admin"
+- hideKeyboard
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/screen-buscar-usuarios
+- tapOn: "Admin Lucky Tracker"
+- extendedWaitUntil:
+    visible: "Seguir"
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: ${OUT}/screen-perfil-publico
+- tapOn: "Seguir"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: ${OUT}/screen-perfil-publico-siguiendo
+- tapOn: "Mensaje"
+- extendedWaitUntil:
+    visible: "Escribe un mensaje..."
+    timeout: 8000
+- tapOn: "Escribe un mensaje..."
+- inputText: "Hola, ¿pueden avisar si ven a un perro café con mancha blanca por la colonia?"
+- hideKeyboard
+- tapOn: "Enviar mensaje"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/screen-chat

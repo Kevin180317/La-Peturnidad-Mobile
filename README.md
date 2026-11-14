@@ -11,7 +11,7 @@ Community app for finding lost pets. Users register their pets, publish emergenc
 
 ## Project status
 
-Actively evolving, 9 development phases completed (backend foundation through UI polish and a unified color system) — see [`PROGRES.md`](PROGRES.md) for the detailed dev log or [`docs/MILESTONES.md`](docs/MILESTONES.md) for the condensed history and open next steps. (`docs/SUPABASE_PENDING_CODE.md` is an older planning snapshot and no longer reflects current state — see the discrepancy note in `MILESTONES.md`.)
+Actively evolving, 17 development phases completed (backend foundation through the UI V2 redesign, Supabase hardening and the SDK 58 upgrade); preparing for QA and launch — see [`docs/PROGRESS.md`](docs/PROGRESS.md) for the detailed dev log, [`docs/BACKLOG.md`](docs/BACKLOG.md) for open tasks, or [`docs/MILESTONES.md`](docs/MILESTONES.md) for the condensed history.
 
 ## Getting started
 
@@ -27,18 +27,21 @@ From the Expo CLI output you can open the app in a development build, Android em
 | Doc | Purpose |
 | --- | --- |
 | [`docs/APP_OVERVIEW.md`](docs/APP_OVERVIEW.md) | Entry point: general flow, functionality, area docs, known issues, scope notes |
-| [`PROGRES.md`](PROGRES.md) | **Living dev log** (Spanish) — line-by-line record of every phase, bug, and fix as it happens. Source of truth for current state |
-| [`docs/MILESTONES.md`](docs/MILESTONES.md) | **Point-in-time summary** (English) of `PROGRES.md` by phase, plus the design-proposal origin story and open next steps. Not auto-synced with `PROGRES.md` — re-check both if it's been a while |
+| [`docs/PROGRESS.md`](docs/PROGRESS.md) | **Living dev log** (Spanish) — line-by-line record of every phase, bug, and fix as it happens. Source of truth for current state |
+| [`docs/MILESTONES.md`](docs/MILESTONES.md) | **Point-in-time summary** (English) of `PROGRESS.md` by phase, plus the design-proposal origin story and open next steps. Not auto-synced with `PROGRESS.md` — re-check both if it's been a while |
 | [`docs/SCREENS.md`](docs/SCREENS.md) | Every screen in the app: route, purpose, and what each user interaction triggers |
 | [`docs/SUPABASE_SCHEMA.md`](docs/SUPABASE_SCHEMA.md) | Historical (2026-06-20) Supabase schema snapshot — outdated; source of truth is the remote DB and `types/database.ts` |
-| [`docs/SUPABASE_PENDING_CODE.md`](docs/SUPABASE_PENDING_CODE.md) | Older planning snapshot — mostly superseded by `PROGRES.md`, see `MILESTONES.md`'s discrepancy note |
-| [`docs/images/`](docs/images/) | Screenshots per app area (`AUTH`, `Dashboard`), used as reference for the docs above |
-| `docs/old/` | Original Spanish versions of the docs above, kept for reference |
+| [`docs/BACKLOG.md`](docs/BACKLOG.md) | Open tasks (Spanish): launch blockers, pending tests, infra, later |
+| [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | Visual language, Kit components, feedback patterns, Uniwind gotchas |
+| [`docs/BRANDING.md`](docs/BRANDING.md) | Brand colors and their roles |
+| [`docs/auto_testing/`](docs/auto_testing/) | Report of the emulator run: build, Maestro E2E results, how the screenshots in `docs/images/` were captured |
+| [`docs/FEED.md`](docs/FEED.md) | The Feed tab: Emergencias / Anuncios / Social |
+| [`docs/images/`](docs/images/) | 52 screenshots of the redesigned app (`auth-*`, `dash-*`, `screen-*`), used by the area docs and the flow diagrams |
 
 ## Core flow
 
 1. **Onboarding → Auth**: welcome carousel, then login/register, email confirmation, and profile completion (name, phone, birth date, neighborhood in Tijuana).
-2. **Dashboard**: 5 sections — Home (pets), Emergency (lost/found alerts), Feed (posts), Community (notices), Profile.
+2. **Dashboard**: 5 tabs — Inicio (pets), Feed (emergencies, notices, social posts), Emergencia (report lost/found), Mensajes, Perfil.
 3. **Social layer**: follow users, direct/group messaging, neighborhood groups, public profiles, successful-reunion stories.
 4. **Moderation**: reports handled by admin/moderator roles via a dedicated panel.
 

@@ -1,0 +1,59 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - Perfil menu screens and destructive dialogs (cancelled)
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Perfil"
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element: "Notificaciones"
+- tapOn: "Notificaciones"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/screen-bandeja
+- back
+- scrollUntilVisible:
+    element: "Editar perfil"
+- tapOn: "Editar perfil"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/screen-editar-perfil
+- back
+- scrollUntilVisible:
+    element: "Cuenta y seguridad"
+- tapOn: "Cuenta y seguridad"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/screen-seguridad
+- back
+- scrollUntilVisible:
+    element: "Preferencias de notificaciones"
+- tapOn: "Preferencias de notificaciones"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/screen-preferencias
+- back
+- scrollUntilVisible:
+    element: "Cómo funciona"
+- tapOn: "Cómo funciona"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/screen-como-usar
+- back
+- scrollUntilVisible:
+    element: "Preguntas frecuentes"
+- tapOn: "Preguntas frecuentes"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/screen-faq
+- back
+- scrollUntilVisible:
+    element: "Eliminar cuenta"
+- tapOn: "Eliminar cuenta"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-delete-account-confirm
+- tapOn: "Cancelar"
+- tapOn: "Cerrar Sesión"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-logout-confirm
+- tapOn: "Cancelar"

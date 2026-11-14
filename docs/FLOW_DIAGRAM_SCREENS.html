@@ -19,8 +19,8 @@
   * { box-sizing: border-box; }
   html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family: -apple-system, "Segoe UI", Roboto, sans-serif; overflow:hidden; height:100%; }
   #canvas-wrap { position:relative; width:100%; height:100vh; overflow:auto; }
-  #canvas { position:relative; width:2500px; height:1700px; }
-  svg#edges { position:absolute; top:0; left:0; width:2500px; height:1700px; pointer-events:none; }
+  #canvas { position:relative; width:2700px; height:1500px; }
+  svg#edges { position:absolute; top:0; left:0; width:2700px; height:1500px; pointer-events:none; }
   .node {
     position:absolute; width:170px; padding:10px 12px; border-radius:10px;
     background:var(--panel); border:1.5px solid var(--node-border); cursor:grab;
@@ -105,114 +105,8 @@
   <div class="cap" id="lightbox-cap"></div>
 </div>
 
+<script src="flow/graph-data.js"></script>
 <script>
-// Same graph as FLOW_DIAGRAM.html, plus `shots` mapping each node to its screenshot(s)
-// in docs/images/{AUTH,Dashboard}/. Paths are relative to this file (docs/).
-
-const nodes = [
-  // AUTH column
-  { id:'onboarding', title:'Onboarding', route:'/', kind:'auth', x:280, y:240, purpose:'3-step welcome carousel (Reporta/Conecta/Actúa). Decides entry point based on session state.',
-    shots:[['images/AUTH/1.jpeg','Step 1 — Reporta'],['images/AUTH/2.jpeg','Step 2 — Conecta'],['images/AUTH/3.jpeg','Step 3 — Actúa']] },
-  { id:'login', title:'Login', route:'/login', kind:'auth', x:540, y:240, purpose:'Email + password access. Auto-enters if session already exists.',
-    shots:[['images/AUTH/4.jpeg','Login form']] },
-  { id:'register', title:'Register', route:'/register', kind:'auth', x:800, y:240, purpose:'Create account: email, password, confirm password.',
-    shots:[['images/AUTH/5.jpeg','Register form']] },
-  { id:'register-processing', title:'Register — processing', route:'(transient)', kind:'auth', modal:true, x:800, y:400, purpose:'Brief "Registro exitoso / Procesando registro..." loading state after submit, before redirect.',
-    shots:[['images/AUTH/6.jpeg','Processing state']] },
-  { id:'confirm-email', title:'Confirm Email', route:'/email-confirmacion', kind:'auth', x:800, y:560, purpose:'Prompts user to confirm via emailed link. Shows account email.',
-    shots:[['images/AUTH/7.jpeg','In-app screen'],['images/AUTH/8.jpeg','Actual confirmation email (external)']] },
-  { id:'register-extended', title:'Complete Profile', route:'/register-extended', kind:'auth', x:540, y:560, purpose:'Personal data: name, phone, birth date, postal code → neighborhood lookup (Tijuana).',
-    shots:[['images/AUTH/9.jpeg','Complete profile form']] },
-  { id:'forgot-password', title:'Forgot Password', route:'/forgot-password', kind:'auth', x:280, y:560, purpose:'Requests OTP code sent to email.',
-    shots:[['images/AUTH/10.jpeg','Forgot password form']] },
-  { id:'verify-otp', title:'Verify OTP', route:'/verify-otp', kind:'auth', x:280, y:720, purpose:'8-digit OTP input, auto-verifies on completion.',
-    shots:[['images/AUTH/11.jpeg','Verify OTP form']] },
-  { id:'reset-password', title:'New/Reset Password', route:'/reset-password', kind:'auth', x:540, y:720, purpose:'Set new password after OTP verification.',
-    shots:[['images/AUTH/12.jpeg','New password form']] },
-
-  // DASHBOARD hub + tabs
-  { id:'dashboard', title:'Dashboard (shell)', route:'/dashboard', kind:'hub', x:1240, y:460, purpose:'Main screen. 5-tab bottom bar: Feed, Inicio, Comunidad, Emergencia, Perfil.',
-    shots:[['images/Dashboard/1.jpeg','Shell — Inicio tab, empty state']] },
-  { id:'tab-inicio', title:'Sección Inicio', route:'/dashboard (tab)', kind:'dash', x:1540, y:280, purpose:'Greeting, summary cards, pet list, pet tools.',
-    shots:[['images/Dashboard/1.jpeg','Empty state'],['images/Dashboard/2.jpeg','List expanded, empty'],['images/Dashboard/5.jpeg','1 pet registered']] },
-  { id:'tab-emergencia', title:'Sección Emergencia', route:'/dashboard (tab)', kind:'dash', x:1540, y:460, purpose:'2×2 action grid: report lost, view lost, my alerts, found pets.',
-    shots:[['images/Dashboard/7.jpeg','Grid — default'],['images/Dashboard/14.jpeg','Ver mascotas perdidas — list'],['images/Dashboard/17.jpeg','Mis alertas activas'],['images/Dashboard/18.jpeg','Mascotas encontradas — empty']] },
-  { id:'tab-feed', title:'Sección Feed', route:'/dashboard (tab)', kind:'dash', x:1540, y:640, purpose:'Community posts. Feed / Mis posts sub-tabs, composer, comments.',
-    shots:[['images/Dashboard/11.jpeg','Feed tab'],['images/Dashboard/12.jpeg','Mis posts — composer + empty state']] },
-  { id:'tab-comunidad', title:'Sección Comunidad', route:'/dashboard (tab)', kind:'dash', x:1540, y:820, purpose:'Community notices. Categories: general, aviso, evento, pregunta.',
-    shots:[['images/Dashboard/6.jpeg','Comunidad tab, 1 post']] },
-  { id:'tab-perfil', title:'Perfil (own)', route:'/dashboard (tab)', kind:'dash', x:1540, y:1000, purpose:'Stats, Acciones list, account info, log out.',
-    shots:[['images/Dashboard/8.jpeg','Mi Perfil — info'],['images/Dashboard/9.jpeg','Estadísticas + Acciones'],['images/Dashboard/10.jpeg','Cuenta + Cerrar sesión']] },
-
-  // Modals / satellites off Inicio + Emergencia
-  { id:'pet-form', title:'Pet Form', route:'(modal)', kind:'dash', modal:true, x:1840, y:240, purpose:'Register/edit pet: type, name, color, size, features, photo.',
-    shots:[['images/Dashboard/4.jpeg','Registrar nueva mascota (register mode)'],['images/Dashboard/30.jpeg','Editar mascota (edit mode, pre-filled)']] },
-  { id:'pet-detail', title:'Pet Detail (window)', route:'(modal)', kind:'dash', modal:true, x:2090, y:240, purpose:'Shows photo, name, type, color, size, features, registration date.',
-    shots:[['images/Dashboard/29.jpeg','Ficha de mascota']] },
-  { id:'pet-delete-confirm', title:'Confirm: Delete Pet', route:'(modal)', kind:'dash', modal:true, x:2090, y:400, purpose:'"¿Estás seguro de que quieres eliminar esta mascota? Esta acción no se puede deshacer."',
-    shots:[['images/Dashboard/31.jpeg','Eliminar mascota — confirm']] },
-  { id:'alert-confirm', title:'Confirm: Create Alert', route:'(modal)', kind:'dash', modal:true, x:1840, y:460, purpose:'"Esta alerta será visible para todos los vecinos de tu colonia."',
-    shots:[['images/Dashboard/15.jpeg','Crear alerta de emergencia — confirm']] },
-  { id:'found-confirm', title:'Confirm: Report Found', route:'(modal)', kind:'dash', modal:true, x:2090, y:460, purpose:'"Al confirmar, te pondremos en contacto con el dueño."',
-    shots:[['images/Dashboard/24.jpeg','Reportar mascota encontrada — confirm']] },
-  { id:'push-notif', title:'OS Push Notification', route:'(system)', kind:'dash', modal:true, x:1840, y:580, purpose:'Fires to neighbors when an emergency alert is created. NOTE: sender label still shows old app name "La-Peturnidad".',
-    shots:[['images/Dashboard/16.jpeg','Android notification shade']] },
-
-  // Secondary dashboard-linked screens (own routes)
-  { id:'buscar', title:'Buscar', route:'/buscar', kind:'dash', x:940, y:460, purpose:'Global search, 3 tabs: Mascotas, Grupos, Usuarios.',
-    shots:[['images/Dashboard/3.jpeg','Buscar — Mascotas tab']] },
-  { id:'mensajes', title:'Mensajes', route:'/mensajes', kind:'dash', x:1240, y:1000, purpose:'List of conversations (individual/group), unread badge.',
-    shots:[['images/Dashboard/19.jpeg','Mensajes — empty state']] },
-  { id:'grupos', title:'Grupos', route:'/grupos', kind:'dash', x:1240, y:1140, purpose:'List of neighborhood groups, join/leave, create.',
-    shots:[['images/Dashboard/21.jpeg','Grupos — list']] },
-  { id:'historias', title:'Reuniones Exitosas', route:'/historias', kind:'dash', x:1240, y:1280, purpose:'Pet reunion stories, author can create/delete.',
-    shots:[['images/Dashboard/20.jpeg','Reuniones exitosas — empty state']] },
-  { id:'notificaciones', title:'Notificaciones', route:'/notificaciones', kind:'dash', x:1540, y:1140, purpose:'Push preferences: main toggle + 3 sub-types.',
-    shots:[['images/Dashboard/22.jpeg','Configuración de notificaciones']] },
-  { id:'editar-perfil', title:'Editar Perfil', route:'/editar-perfil', kind:'dash', x:1540, y:1280, purpose:'Pre-filled form: name, phone, address, city, postal code.',
-    shots:[['images/Dashboard/23.jpeg','Editar perfil — form']] },
-  { id:'cerrar-sesion-confirm', title:'Confirm: Log Out', route:'(modal)', kind:'dash', modal:true, x:1840, y:1000, purpose:'"¿Estás seguro de que quieres cerrar sesión?"',
-    shots:[['images/Dashboard/26.jpeg','Cerrar sesión — confirm']] },
-];
-
-const edges = [
-  ['onboarding','login',''],
-  ['login','forgot-password',''],
-  ['login','register',''],
-  ['login','confirm-email','unconfirmed email'],
-  ['login','dashboard','confirmed + profile'],
-  ['login','register-extended','confirmed, no profile'],
-  ['register','register-processing','modal'],
-  ['register-processing','confirm-email',''],
-  ['confirm-email','login','after email link'],
-  ['register-extended','dashboard',''],
-  ['register-extended','onboarding','Omitir'],
-  ['forgot-password','verify-otp',''],
-  ['verify-otp','reset-password',''],
-  ['reset-password','login',''],
-  ['dashboard','tab-inicio',''],
-  ['dashboard','tab-emergencia',''],
-  ['dashboard','tab-feed',''],
-  ['dashboard','tab-comunidad',''],
-  ['dashboard','tab-perfil',''],
-  ['dashboard','buscar','search icon'],
-  ['tab-inicio','pet-form','modal'],
-  ['tab-inicio','pet-detail','modal'],
-  ['pet-detail','pet-form','Editar'],
-  ['pet-detail','pet-delete-confirm','Eliminar'],
-  ['tab-emergencia','alert-confirm','modal'],
-  ['alert-confirm','push-notif','on confirm'],
-  ['tab-emergencia','found-confirm','modal'],
-  ['tab-perfil','editar-perfil',''],
-  ['tab-perfil','notificaciones',''],
-  ['tab-perfil','tab-comunidad','Ir a la comunidad'],
-  ['tab-perfil','mensajes',''],
-  ['tab-perfil','grupos',''],
-  ['tab-perfil','historias',''],
-  ['tab-perfil','cerrar-sesion-confirm','modal'],
-  ['cerrar-sesion-confirm','onboarding','on confirm'],
-];
-
 // ---------- RENDER ----------
 const canvas = document.getElementById('canvas');
 const svg = document.getElementById('edges');

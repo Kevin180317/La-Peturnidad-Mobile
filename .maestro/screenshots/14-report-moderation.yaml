@@ -1,0 +1,66 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - report a user, then moderation panel as admin
+env:
+  OUT: ${OUT}
+  ADMIN_EMAIL: ${ADMIN_EMAIL}
+  ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- openLink: lapeturnidad://buscar
+- extendedWaitUntil:
+    visible: "Buscar mascotas, grupos, usuarios..."
+    timeout: 8000
+- tapOn: "Usuarios"
+- tapOn: "Buscar mascotas, grupos, usuarios..."
+- inputText: "Admin"
+- hideKeyboard
+- tapOn: "Admin Lucky Tracker"
+- extendedWaitUntil:
+    visible: "Siguiendo"
+    timeout: 8000
+- tapOn:
+    point: "94%,9%"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/screen-perfil-publico-menu
+- tapOn: "Reportar usuario"
+- waitForAnimationToEnd
+- tapOn: "Spam"
+- takeScreenshot: ${OUT}/screen-reportar-usuario
+- tapOn: "Enviar reporte"
+- waitForAnimationToEnd:
+    timeout: 4000
+# Switch to the admin account
+- launchApp
+- tapOn: "Perfil"
+- scrollUntilVisible:
+    element: "Cerrar Sesión"
+- tapOn: "Cerrar Sesión"
+- tapOn:
+    text: "Cerrar sesión"
+    index: 1
+- extendedWaitUntil:
+    visible: "Saltar"
+    timeout: 10000
+- tapOn: "Saltar"
+- tapOn: "ejemplo@correo.com"
+- inputText: ${ADMIN_EMAIL}
+- tapOn: "••••••••"
+- inputText: ${ADMIN_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "login-submit"
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Perfil"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-perfil-admin
+- scrollUntilVisible:
+    element: "Panel de moderación"
+- tapOn: "Panel de moderación"
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: ${OUT}/screen-moderacion

@@ -1,0 +1,46 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - dashboard tabs (normal account)
+env:
+  OUT: ${OUT}
+  TEST_EMAIL: ${TEST_EMAIL}
+  TEST_PASSWORD: ${TEST_PASSWORD}
+---
+- launchApp:
+    clearState: true
+- tapOn: "Saltar"
+- tapOn: "ejemplo@correo.com"
+- inputText: ${TEST_EMAIL}
+- tapOn: "••••••••"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "login-submit"
+- runFlow:
+    when:
+      visible: "Completa tu perfil"
+    file: ../subflows/complete-profile.yaml
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-inicio
+- tapOn: "Feed"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-feed-emergencias
+- tapOn: "Anuncios"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-feed-anuncios
+- tapOn: "Social"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-feed-social
+- tapOn: "Emergencia"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-emergencia
+- tapOn: "Mensajes"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-mensajes
+- tapOn: "Perfil"
+- waitForAnimationToEnd
+- takeScreenshot: ${OUT}/dash-perfil
+- scroll
+- takeScreenshot: ${OUT}/dash-perfil-menu

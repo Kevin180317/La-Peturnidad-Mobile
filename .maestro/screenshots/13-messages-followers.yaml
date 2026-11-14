@@ -1,0 +1,19 @@
+appId: com.idarko.lapeturnidad
+name: Docs screenshots - Mensajes tab and Seguidores
+env:
+  OUT: ${OUT}
+---
+- launchApp
+- extendedWaitUntil:
+    visible: "Inicio"
+    timeout: 25000
+- tapOn: "Mensajes"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/dash-mensajes
+- tapOn: "Perfil"
+- waitForAnimationToEnd
+- tapOn: "Siguiendo"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: ${OUT}/screen-seguidores

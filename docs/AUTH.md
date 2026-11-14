@@ -1,21 +1,21 @@
 # AUTH — Onboarding, Login & Account Flows
 
-> Area doc. Source screens: `docs/images/AUTH/1.jpeg`–`12.jpeg`. Cross-checked against `docs/SCREENS.md` §1-8. All 12 images matched to a documented screen or state — no undocumented screens found.
+> Area doc. Screenshots in `images/auth-*.jpg`, captured 2026-11-07 on the redesigned app (UI V2) with the Maestro flow `.maestro/screenshots/01-auth-public.yaml`. Details of every event: [`SCREENS.md`](SCREENS.md) §1–8. How the images were produced: [`auto_testing/EMULATOR_RUN_2026-11-07.md`](auto_testing/EMULATOR_RUN_2026-11-07.md).
 
 ## Screens covered
 
-| Screen | Route | Images |
+| Screen | Route | Image |
 |---|---|---|
-| Onboarding (3-step carousel) | `/` | 1, 2, 3 |
-| Login | `/login` | 4 |
-| Register | `/register` | 5, 6 |
-| Confirm Email | `/email-confirmacion` | 7, 8* |
-| Complete Profile | `/register-extended` | 9 |
-| Forgot Password | `/forgot-password` | 10 |
-| Verify OTP | `/verify-otp` | 11 |
-| New/Reset Password | `/reset-password` | 12 |
+| Onboarding (3-step carousel) | `/` | [1](images/auth-onboarding-1.jpg), [2](images/auth-onboarding-2.jpg), [3](images/auth-onboarding-3.jpg) |
+| Login | `/login` | [login](images/auth-login.jpg) |
+| Register | `/register` | [register](images/auth-register.jpg) |
+| Confirm Email | `/email-confirmacion` | [confirm email](images/auth-confirm-email.jpg) |
+| Complete Profile | `/register-extended` | [complete profile](images/auth-complete-profile.jpg) |
+| Forgot Password | `/forgot-password` | [forgot password](images/auth-forgot-password.jpg) |
+| Verify OTP | `/verify-otp` | [verify OTP](images/auth-verify-otp.jpg) |
+| New Password | `/reset-password` | no screenshot (the route needs a recovery session; see the run report) |
 
-\* Image 8 is the actual Supabase confirmation email (external, Gmail app), included as supporting evidence for the Confirm Email flow — not an in-app screen.
+Confirm Email, Verify OTP and Complete Profile were captured by deep link (`lapeturnidad://...?email=ana.prueba@example.com`) so no real email was sent.
 
 ## Flow
 
@@ -30,31 +30,18 @@ Onboarding (1→2→3, "Saltar"/"Comenzar" at any point)
 
 ## Screen details
 
-### Onboarding (imgs 1-3)
-3-step carousel: "Reporta" / "Conecta" / "Actúa". Top-right "Saltar" always visible; last step's primary button reads "Comenzar" instead of "Siguiente". Bottom dots indicate step. Skip/finish both persist "welcome seen" and route to Login.
+- **Onboarding**: 3 steps ("Reporta" / "Conecta" / "Actúa"). "Saltar" is always visible; the last step's button reads "Comenzar". Skip and finish both save the "welcome seen" flag (cleared on logout).
+- **Login**: email and password (eye toggle), "Iniciar sesión", "¿Olvidaste tu contraseña?", "Regístrate". Enters automatically when a session exists.
+- **Register**: email, password (hint "Mínimo 8 caracteres, con letras y números"), confirmation, and a required "Acepto los Términos y Condiciones y la Política de Privacidad" checkbox (links open the in-app browser). "Registrarse" stays disabled until the form is valid.
+- **Confirm Email**: shows the account email, a "Reenviar email" button and "Volver al inicio". The Supabase confirmation email itself is external and not shown here.
+- **Complete Profile**: Nombre\*, Apellido\*, Teléfono\* (country selector, default +52, 10 digits), Fecha de nacimiento (DD/MM/AAAA, 18+ required), then "Tu colonia": Código Postal\* (looks up colonias at 5 digits), Ciudad (defaults to Tijuana) and the colonia picker.
+- **Forgot Password**: one email field and "Enviar código".
+- **Verify OTP**: 8-digit segmented input that verifies automatically, "Verificar código", "Reenviar código".
+- **New Password**: "Nueva contraseña" + "Confirmar contraseña" (8+ with letters and numbers), "Actualizar contraseña".
 
-### Login (img 4)
-Email + password fields, "Iniciar sesión" primary button, "¿Olvidaste tu contraseña?" link, "Regístrate" link at bottom.
+All auth screens have no navigation bar; a round back button is drawn by `AuthScreen`.
 
-### Register (imgs 5-6)
-Fields: email, password, confirm password. Img 6 shows the post-submit transient state — a "Registro exitoso" toast overlaying a "Procesando registro..." spinner — before redirecting to Confirm Email. **Not currently listed as a distinct row in SCREENS.md §3; worth a one-line addition noting this transient/processing state.**
+## Observations
 
-### Confirm Email (img 7, evidence img 8)
-Shows the account email, "Reenviar email" and "Volver al inicio" actions. Img 8 confirms the actual Supabase Auth email template ("Confirm your signup" / "Confirm your mail" link) — useful reference if the email template itself ever needs debugging or restyling.
-
-### Complete Profile (img 9)
-Fields: Nombre, Apellido, Teléfono (all required, marked `*`), Fecha de nacimiento (optional, `DD/MM/YYYY`), Código Postal (required — triggers neighborhood lookup at 5 digits), Ciudad (defaults to "Tijuana", shown as pre-filled/read-only in this capture). "Completar perfil" primary button.
-
-### Forgot Password (img 10)
-Single email field, "Enviar código" button, "Inicia sesión" link back.
-
-### Verify OTP (img 11)
-8-digit OTP input (segmented), auto-verifies on completion. "Verificar código" button + "Reenviar código" link. Shows target email for confirmation.
-
-### New/Reset Password (img 12)
-"Nueva contraseña" + "Confirmar contraseña" fields, "Actualizar contraseña" button.
-
-## Observations / flags
-
-- **Transient loading state** (img 6) not documented as its own row — low priority doc gap, not a bug.
-- No visual mismatches or missing states found otherwise; AUTH area matches `SCREENS.md` fully.
+- No visual mismatches between these screens and `SCREENS.md`.
+- The first screenshot of onboarding step 1 must wait for the splash to end (~2 s); the Maestro flow waits for the text "Reporta".
