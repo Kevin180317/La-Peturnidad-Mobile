@@ -98,7 +98,7 @@ export default function EmailConfirmacionScreen() {
         </Text>
       </View>
       <PrimaryButton
-        title={cooldown > 0 ? `Reenviar email en ${cooldown} s` : "Reenviar email"}
+        title={cooldown > 0 ? `Reenviar correo en ${cooldown} s` : "Reenviar correo electrónico"}
         icon="refresh"
         variant={cooldown > 0 ? "ghost" : "teal"}
         onPress={handleResend}

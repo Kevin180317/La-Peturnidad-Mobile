@@ -1,4 +1,5 @@
 import { followsService } from "@/services/follows.service";
+import { supabase } from "@/utils/supabase";
 import { calls, mockTable, resetSupabaseMock } from "../../test/supabaseMock";
 
 beforeEach(resetSupabaseMock);
@@ -21,6 +22,25 @@ describe("followsService", () => {
     });
     mockTable("follows", { error: { message: "dup" } });
     expect(await followsService.follow("a", "b")).toEqual({ success: false, error: "dup" });
+  });
+
+  it("followOrRequest: público inserta, privado pide solicitud por RPC", async () => {
+    mockTable("follows", { error: null });
+    expect(await followsService.followOrRequest("a", "b", false)).toEqual({
+      success: true,
+      data: { status: "following" },
+    });
+    expect(calls).toContainEqual({ table: "follows", method: "insert", args: [[{ follower_id: "a", following_id: "b" }]] });
+
+    const rpc = jest.spyOn(supabase, "rpc").mockResolvedValue({ data: null, error: null } as never);
+    expect(await followsService.followOrRequest("a", "b", true)).toEqual({
+      success: true,
+      data: { status: "requested" },
+    });
+    expect(rpc).toHaveBeenCalledWith("request_follow", { target: "b" });
+    rpc.mockResolvedValue({ data: null, error: { message: "bloqueado" } } as never);
+    expect(await followsService.followOrRequest("a", "b", true)).toEqual({ success: false, error: "bloqueado" });
+    rpc.mockRestore();
   });
 
   it("unfollow deletes by both ids", async () => {

@@ -230,6 +230,45 @@ export type Database = {
         }
         Relationships: []
       }
+      dismissed_suggestions: {
+        Row: {
+          created_at: string
+          dismissed_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dismissed_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dismissed_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      follow_requests: {
+        Row: {
+          created_at: string
+          id: string
+          requester_id: string
+          target_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          requester_id: string
+          target_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          requester_id?: string
+          target_id?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string | null
@@ -595,11 +634,13 @@ export type Database = {
           created_at: string | null
           first_name: string | null
           id: string
+          is_private: boolean
           last_name: string | null
           phone: string | null
           postal_code: string | null
           profile_picture_url: string | null
           role: string
+          terms_accepted_at: string | null
           updated_at: string | null
           user_id: string
         }
@@ -610,11 +651,13 @@ export type Database = {
           created_at?: string | null
           first_name?: string | null
           id?: string
+          is_private?: boolean
           last_name?: string | null
           phone?: string | null
           postal_code?: string | null
           profile_picture_url?: string | null
           role?: string
+          terms_accepted_at?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -625,11 +668,13 @@ export type Database = {
           created_at?: string | null
           first_name?: string | null
           id?: string
+          is_private?: boolean
           last_name?: string | null
           phone?: string | null
           postal_code?: string | null
           profile_picture_url?: string | null
           role?: string
+          terms_accepted_at?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -642,6 +687,7 @@ export type Database = {
           city: string | null
           created_at: string | null
           first_name: string | null
+          is_private: boolean | null
           last_name: string | null
           profile_picture_url: string | null
           role: string | null
@@ -653,6 +699,27 @@ export type Database = {
       }
     }
     Functions: {
+      request_follow: {
+        Args: { target: string }
+        Returns: undefined
+      }
+      respond_follow_request: {
+        Args: { request_id: string; accept: boolean }
+        Returns: undefined
+      }
+      suggested_users: {
+        Args: { limit_n?: number }
+        Returns: {
+          user_id: string
+          first_name: string
+          last_name: string
+          profile_picture_url: string | null
+          city: string
+          is_private: boolean
+          score: number
+          reason: string
+        }[]
+      }
       clear_conversation: {
         Args: { p_conversation_id: string }
         Returns: undefined
@@ -664,6 +731,10 @@ export type Database = {
           owner_name: string
           owner_phone: string
         }[]
+      }
+      get_hidden_user_ids: {
+        Args: never
+        Returns: string[]
       }
       get_finder_contacts: {
         Args: never

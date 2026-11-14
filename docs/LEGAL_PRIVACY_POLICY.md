@@ -20,10 +20,10 @@ Confirm: backups (none today, free plan), what Expo receives, and add any new pr
 
 # PRIVACY POLICY — Lucky Tracker
 
-Last updated: `[FECHA]`
+Last updated: November 3, 2026
 
 ## 1. Data controller
-`[RESPONSABLE]`, located at `[DOMICILIO]`, is responsible for processing your personal data under Mexico's Federal Law on Protection of Personal Data Held by Private Parties (LFPDPPP). Contact: `[CORREO]`.
+Prometheus R&D, located at Fresnos 18, Ramirez, 22115 Tijuana, B.C., is responsible for processing your personal data under Mexico's Federal Law on Protection of Personal Data Held by Private Parties (LFPDPPP). Contact: contact@prometheustij.com.
 
 ## 2. Data we collect
 When you use the Lucky Tracker app we collect:
@@ -62,7 +62,7 @@ We use these services to run the app. They receive only the data needed for thei
 
 | Provider | Purpose | Data |
 |---|---|---|
-| Supabase | Database, authentication and file storage (servers in `[REGIÓN]`) | All data in section 2 |
+| Supabase | Database, authentication and file storage (servers in us-west-1) | All data in section 2 |
 | Google Firebase Cloud Messaging | Push notifications | Device token and the notification text |
 | Resend | Sending sign-in emails | Email address and message content |
 | Expo | Building the app | No users' personal data, except technical app diagnostics |
@@ -76,7 +76,7 @@ These providers may store or process data outside Mexico. We do not sell your da
 - Moderation reports in which you appear as the reported person are deleted along with your account.
 
 ## 7. How to delete your account <a id="eliminar-cuenta"></a>
-From the app: **Perfil → Eliminar cuenta** and confirm. You can also write to `[CORREO]` from your account's email.
+From the app: **Perfil → Eliminar cuenta** and confirm. You can also write to contact@prometheustij.com from your account's email.
 
 Deleting your account permanently erases:
 - Your profile, profile photo, preferences and notification tokens.
@@ -88,7 +88,7 @@ Deleting your account permanently erases:
 This cannot be undone.
 
 ## 8. ARCO rights
-You have the right to **Access** your data, **Rectify** it, **Cancel** it or **Oppose** its processing. You can edit most of your data in Perfil → Editar perfil, delete your account from the app, or send your request to `[CORREO]` with your name, account email and the right you are exercising. We will reply within 20 business days. Address for requests: `[DOMICILIO]`.
+You have the right to **Access** your data, **Rectify** it, **Cancel** it or **Oppose** its processing. You can edit most of your data in Perfil → Editar perfil, delete your account from the app, or send your request to contact@prometheustij.com with your name, account email and the right you are exercising. We will reply within 20 business days. Address for requests: Fresnos 18, Ramirez, 22115 Tijuana, B.C..
 
 ## 9. Minors
 The app is intended for people aged 18 or older. If we detect an account belonging to a minor, we will delete it.
@@ -100,4 +100,4 @@ We use encrypted connections (HTTPS), encrypted passwords and per-user access co
 If we change this policy we will publish the new version here with its date and, if the change is significant, tell you inside the app.
 
 ## 12. Contact
-`[CORREO]` — `[DOMICILIO]`
+contact@prometheustij.com — Fresnos 18, Ramirez, 22115 Tijuana, B.C.

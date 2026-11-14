@@ -143,6 +143,13 @@ export function ProfileTab({
           badge: notificationsUnread,
         },
         {
+          icon: "person-add-outline",
+          color: "#007275",
+          bg: "bg-[#007275]/10",
+          label: "Solicitudes de seguimiento",
+          onPress: () => router.push("/solicitudes"),
+        },
+        {
           icon: "chatbubbles-outline",
           color: "#007275",
           bg: "bg-[#007275]/10",

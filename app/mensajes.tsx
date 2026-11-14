@@ -1,11 +1,12 @@
 import { confirmDialog } from "@/components/ConfirmDialog";
 import { messagesService } from "@/services/messages.service";
 import { getCurrentUser } from "@/utils/session";
-import { ScreenTitle } from "@/components/kit/Kit";
+import { RoundIconButton, ScreenTitle } from "@/components/kit/Kit";
+import { NewChatSheet } from "@/components/messages/NewChatSheet";
 import { ConversationList, ConversationListSkeleton } from "@/components/messages/ConversationList";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RefreshControl, ScrollView } from "react-native";
+import { RefreshControl, ScrollView, View } from "react-native";
 
 export default function MensajesScreen() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function MensajesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [newChat, setNewChat] = useState(false);
 
   const init = async () => {
     const { data: user } = await getCurrentUser();
@@ -79,7 +81,13 @@ export default function MensajesScreen() {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       contentContainerClassName="p-5 pb-10"
     >
-      <ScreenTitle title="Mensajes" subtitle="Mantén presionado un chat para eliminarlo" />
+      <View className="flex-row items-start justify-between">
+        <View className="flex-1">
+          <ScreenTitle title="Mensajes" subtitle="Mantén presionado un chat para eliminarlo" />
+        </View>
+        <RoundIconButton icon="add" tint="solid" size={44} label="Nuevo mensaje" onPress={() => setNewChat(true)} />
+      </View>
+      <NewChatSheet visible={newChat} onClose={() => setNewChat(false)} />
       {loading ? (
         <ConversationListSkeleton />
       ) : (

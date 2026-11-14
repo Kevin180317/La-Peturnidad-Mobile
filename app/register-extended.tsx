@@ -1,12 +1,15 @@
 import { AuthScreen } from "@/components/auth/AuthScreen";
 import { ColoniaPicker, coloniasForPostalCode } from "@/components/ColoniaPicker";
 import { Field, PrimaryButton } from "@/components/kit/Kit";
+import { confirmDialog } from "@/components/ConfirmDialog";
 import { PhoneField } from "@/components/PhoneField";
+import { authService } from "@/services/auth.service";
 import { supabase } from "@/utils/supabase";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Text,
   View,
 } from "react-native";
@@ -109,6 +112,30 @@ export default function RegisterExtendedScreen() {
     router.replace("/dashboard");
   };
 
+  // Esta pantalla es la raíz al reabrir con sesión sin perfil: "atrás" cerraba la app.
+  // Salir = cerrar sesión; el perfil se completa la próxima vez que inicie sesión.
+  const handleExit = () => {
+    confirmDialog({
+      title: "Salir sin completar",
+      message: "Cerraremos tu sesión. Podrás completar tu perfil cuando vuelvas a iniciar sesión.",
+      confirmLabel: "Cerrar sesión",
+      icon: "log-out-outline",
+      onConfirm: async () => {
+        await authService.signOut();
+        router.replace("/login");
+      },
+    });
+  };
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      handleExit();
+      return true;
+    });
+    return () => sub.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleCompleteProfile = async () => {
     // Validaciones
     if (!firstName?.trim() || !lastName?.trim() || !phone?.trim()) {
@@ -182,6 +209,10 @@ export default function RegisterExtendedScreen() {
         address: selectedColonia,
         city: city,
         updated_at: new Date().toISOString(),
+        // Solo si la cuenta se creó con el checkbox; el trigger impide cambiarla después
+        ...(typeof user.user_metadata?.terms_accepted_at === "string"
+          ? { terms_accepted_at: user.user_metadata.terms_accepted_at }
+          : {}),
       };
 
       const { error } = await supabase
@@ -229,7 +260,7 @@ export default function RegisterExtendedScreen() {
   }
 
   return (
-    <AuthScreen headerless title="Completa tu perfil" subtitle={`Usuario: ${email}`}>
+    <AuthScreen headerless onBack={handleExit} title="Completa tu perfil" subtitle={`Usuario: ${email}`}>
       <Text className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 ml-1">Datos personales</Text>
       <Field
         label="Nombre *"

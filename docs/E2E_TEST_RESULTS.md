@@ -2,7 +2,7 @@
 
 > Tracks Maestro end-to-end results and coverage. Update the **Run log** after every local or CI run, and the **Coverage** / **Backlog** tables when flows are added.
 >
-> - Flows: `.maestro/flows/` · subflows: `.maestro/subflows/`
+> - Flows: `.maestro/flows/` (CI) · followers flows: `.maestro/followers/` (local only, two accounts) · subflows: `.maestro/subflows/`
 > - Run locally: `maestro test -e TEST_EMAIL=... -e TEST_PASSWORD=... .maestro/flows/`
 > - CI: `.github/workflows/e2e.yml` (nightly + manual, API 34 emulator, release APK, JUnit report in the `maestro-results` artifact)
 
@@ -14,6 +14,7 @@ Newest first. Status: ✅ pass · ❌ fail · ⚠️ flaky · ⏳ not run.
 
 | Date | Where | Commit | Flows run | Passed | Failed | Notes |
 |---|---|---|---|---|---|---|
+| 2026-11-11 | Local emulator (Medium_Phone_API_37.0, release APK x86_64) | `0b78555` (`QA_v2`) | 3 (followers) | 3 | 0 | Only `.maestro/followers/` was run; the 5 CI flows were not re-run on `QA_v2`. First attempts failed on selectors (see [`auto_testing/FOLLOWERS_RUN_2026-11-11.md`](auto_testing/FOLLOWERS_RUN_2026-11-11.md)). |
 | 2026-11-07 | Local emulator (Pixel_8, API 37, release APK x86_64) | `33fa8b5` + local docs | 5 | 5 | 0 | All 5 flows passed in 2m 41s (see [`auto_testing/EMULATOR_RUN_2026-11-07.md`](auto_testing/EMULATOR_RUN_2026-11-07.md)) |
 | 2026-11-05 | — | `6e44296` | 0 | — | — | Flows 05 and `complete-profile` updated for UI V2. Not run. |
 | 2026-10-21 | Local (Jest, not Maestro) | `e2bce33` | 65 unit tests | 64 first run; 65 on rerun | 0 | `bun install --frozen-lockfile`, `bun run lint` and `bun run typecheck` clean. `ConfirmModal` › "renders title, message and default labels" timed out (5 s) once on a cold full run (suite took 21 s) and passed in isolation (555 ms) — cold-start flake, watch for repeats. Maestro not run yet. |
@@ -35,6 +36,16 @@ Newest first. Status: ✅ pass · ❌ fail · ⚠️ flaky · ⏳ not run.
 
 Verified 2026-11-07 on a local emulator; JUnit result summarized in the run report.
 
+### Followers flows (`.maestro/followers/`, not run by CI)
+
+Need `TEST_*` and `ADMIN_*` accounts (`.maestro/.env`, plus `TEST_NAME` and `ADMIN_FIRST_NAME`; quote values with spaces). They write to the live Supabase; see `.maestro/followers/README.md`.
+
+| # | Flow | Covers | Last status | Last verified |
+|---|---|---|---|---|
+| F01 | `01-private-profile-follow-request.yaml` | A turns "Perfil privado" on; B sees the lock, requests, cancels, re-requests; A accepts in "Solicitudes de seguimiento"; B unfollows; A back to public. Precondition: A public, B not following A. | ✅ | 2026-11-11 (emulator) |
+| F02 | `02-suggested-users.yaml` | "Sugeridos para ti" in Feed and dismiss one suggestion (skips silently if none; the dismissal is permanent) | ✅ | 2026-11-11 (emulator) |
+| F03 | `03-buscar-following-list.yaml` | Buscar → Usuarios lists "Personas que sigues"; opening one shows the profile | ✅ | 2026-11-11 (emulator) |
+
 ## Coverage by screen
 
 5 of 27 routes covered (all auth). **0 of 5 dashboard tabs** (Inicio, Feed, Emergencia, Mensajes, Perfil) have feature coverage beyond appearing on screen.
@@ -55,13 +66,16 @@ Verified 2026-11-07 on a local emulator; JUnit result summarized in the run repo
 | Dashboard · Feed | Segments (Emergencias / Anuncios / Social), post, comment, tag filter, delete | ❌ |
 | Dashboard · Mensajes | Conversation list, open chat | ❌ |
 | Dashboard · Perfil | Profile photo, menu actions | ❌ (logout only) |
-| Social | `buscar.tsx` | ❌ |
+| Social | `buscar.tsx` | ⚠️ Usuarios tab, empty query (F03); search and the other tabs ❌ |
 | Social | `grupos.tsx`, `grupos/[id].tsx` | ❌ |
 | Social | `mensajes.tsx`, `mensajes/[id].tsx` | ❌ |
-| Social | `perfil/[id].tsx`, `seguidores.tsx` (follow/unfollow) | ❌ |
+| Social | `perfil/[id].tsx` (private lock, follow request, unfollow) | ✅ (F01) |
+| Social | `solicitudes.tsx` (accept) | ✅ (F01); reject ❌ |
+| Social | Suggested users (`SuggestedUsers`) | ✅ (F02, dismiss only; follow from a suggestion ❌) |
+| Social | `seguidores.tsx` | ❌ |
 | Social | `historias.tsx`, `notificaciones.tsx`, `bandeja.tsx` | ❌ |
 | Profile | `seguridad.tsx` (change password / email) | ❌ |
-| Profile | `editar-perfil.tsx` | ❌ |
+| Profile | `editar-perfil.tsx` | ⚠️ "Perfil privado" switch only (F01) |
 | Info | `faq.tsx`, `como-usar.tsx` | ❌ |
 | Admin | `panel-moderacion.tsx` | ❌ |
 | Push | Deep link `alertId` → alert | ❌ |
@@ -86,7 +100,7 @@ Verified 2026-11-07 on a local emulator; JUnit result summarized in the run repo
 | P2 | Buscar (3 tabs, open result) | ⏳ Todo | Needs predictable seed data |
 | P2 | Grupos: join / leave | ⏳ Todo | — |
 | P2 | Mensajes: start + send | ⏳ Todo | Needs a 2nd account |
-| P2 | Follow / unfollow + counters | ⏳ Todo | Needs a 2nd account |
+| P2 | Follow / unfollow + counters | ⚠️ Follow request and unfollow done (F01); public follow and counters Todo | Admin account is the 2nd account |
 | P2 | Historias / Notificaciones load + pull-to-refresh | ⏳ Todo | — |
 | P3 | FAQ / Cómo usar navigation | ⏳ Todo | — |
 | P3 | Moderation panel | ⏳ Todo | Needs a moderator account |
@@ -98,7 +112,8 @@ Verified 2026-11-07 on a local emulator; JUnit result summarized in the run repo
 |---|---|---|
 | Only 2 `testID`s used by flows (`login-submit`, `confirm-modal-confirm`) | Flows depend on labels/placeholders, so changing copy breaks them (UI V2 already broke flow 05 and `complete-profile`) | ⏳ Open |
 | Flow 05 runs all of flow 04 via `runFlow` | A full run logs in twice; slower and repeats 04's checks | ⏳ Open (extract a `login` subflow) |
+| F01 is not re-runnable after a failure | Step 1 toggles the privacy switch, so A must start public and B must not follow A (check `user_profiles.is_private`, `follows`) | ⏳ Open |
 | No seed / teardown for test data | Flows that create data will pile up records on the test account | ⏳ Open |
-| Single test account (`E2E_TEST_EMAIL`) | Can't test two-user features (found pet, messaging, follows) | ⏳ Open |
+| Single test account in CI (`E2E_TEST_EMAIL`) | CI can't test two-user features. Locally the followers flows use `TEST_*` + `ADMIN_*` | ⏳ Open (CI has no second account) |
 | CI runs `.maestro/flows/`, not `.maestro` | `config.yaml` is ignored; future tags or ordering won't apply in CI | ⏳ Open |
 | No saved run reports | Results can't be checked after the fact | ⏳ Open (use the CI JUnit artifact; keep local `--format junit` output) |

@@ -13,6 +13,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Switch,
   Text,
   TouchableOpacity,
   View,
@@ -37,6 +38,7 @@ export default function EditarPerfilScreen() {
   const [userId, setUserId] = useState<string | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const loadProfile = async () => {
     const { data: user } = await getCurrentUser();
@@ -58,6 +60,7 @@ export default function EditarPerfilScreen() {
       setPhoneCountry(savedPhone.country);
       setPhone(savedPhone.number);
       setCity(result.data.city || "");
+      setIsPrivate(result.data.is_private);
       const savedCode = result.data.postal_code || "";
       const savedAddress = (result.data.address || "").trim();
       setPostalCode(savedCode);
@@ -111,6 +114,7 @@ export default function EditarPerfilScreen() {
       address: colonia,
       city: city.trim() || "Tijuana",
       postal_code: postalCode,
+      is_private: isPrivate,
     });
 
     if (result.success) {
@@ -238,6 +242,17 @@ export default function EditarPerfilScreen() {
           )
         )}
         <Field label="Ciudad" icon="location-outline" placeholder="Ciudad" value={city || "Tijuana"} editable={false} />
+      </View>
+
+      <View className={`${CARD} p-4 mb-4 flex-row items-center`}>
+        <Ionicons name={isPrivate ? "lock-closed" : "globe-outline"} size={22} color="#007275" />
+        <View className="flex-1 mx-3">
+          <Text className="font-bold text-[#211f1e]">Perfil privado</Text>
+          <Text className="text-gray-500 text-xs mt-0.5">
+            Solo quienes te siguen ven tus publicaciones y mascotas.
+          </Text>
+        </View>
+        <Switch value={isPrivate} onValueChange={setIsPrivate} trackColor={{ true: "#007275" }} accessibilityLabel="Perfil privado" />
       </View>
 
       <PrimaryButton

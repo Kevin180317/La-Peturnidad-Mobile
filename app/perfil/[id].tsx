@@ -37,6 +37,7 @@ export default function PublicProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [requested, setRequested] = useState(false);
   const [followBusy, setFollowBusy] = useState(false);
   const [messaging, setMessaging] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -52,10 +53,11 @@ export default function PublicProfileScreen() {
 
   const loadProfile = async (uid: string) => {
     if (!id) return;
-    const [profileResult, petsResult, following, countsRes, blockedRes] = await Promise.all([
+    const [profileResult, petsResult, following, pending, countsRes, blockedRes] = await Promise.all([
       profileService.getPublicByUserId(id),
       petsService.getAll(id),
       uid !== id ? followsService.isFollowing(uid, id) : Promise.resolve(false),
+      uid !== id ? followsService.hasPendingRequest(uid, id) : Promise.resolve(false),
       followsService.getCounts(id),
       uid !== id
         ? reportsService.getBlockedUsers(uid)
@@ -67,6 +69,7 @@ export default function PublicProfileScreen() {
     }
     if (petsResult.success) setPets(petsResult.data ?? []);
     setIsFollowing(following);
+    setRequested(pending);
     if (countsRes.success && countsRes.data) {
       setFollowersCount(countsRes.data.followers);
       setFollowingCount(countsRes.data.following);
@@ -102,16 +105,24 @@ export default function PublicProfileScreen() {
       if (r.success) {
         setIsFollowing(false);
         setFollowersCount((c) => Math.max(0, c - 1));
+        if (profile?.is_private) setPets([]);
       } else {
         Toast.show({ type: "error", text1: "Error", text2: r.error, position: "top" });
       }
+    } else if (requested) {
+      const r = await followsService.cancelRequest(currentUserId, id);
+      if (r.success) setRequested(false);
+      else Toast.show({ type: "error", text1: "Error", text2: r.error, position: "top" });
     } else {
-      const r = await followsService.follow(currentUserId, id);
-      if (r.success) {
+      const r = await followsService.followOrRequest(currentUserId, id, !!profile?.is_private);
+      if (!r.success) {
+        Toast.show({ type: "error", text1: "Error", text2: r.error, position: "top" });
+      } else if (r.data?.status === "requested") {
+        setRequested(true);
+        Toast.show({ type: "info", text1: "Solicitud enviada", text2: "Te avisaremos cuando la acepte", position: "top" });
+      } else {
         setIsFollowing(true);
         setFollowersCount((c) => c + 1);
-      } else {
-        Toast.show({ type: "error", text1: "Error", text2: r.error, position: "top" });
       }
     }
     setFollowBusy(false);
@@ -236,6 +247,7 @@ export default function PublicProfileScreen() {
 
   const initial = profile.first_name?.[0]?.toUpperCase() || "U";
   const isOwn = currentUserId === id;
+  const locked = !!profile.is_private && !isOwn && !isFollowing;
   const userRole: string | null = profile.role ?? null;
 
   return (
@@ -290,9 +302,9 @@ export default function PublicProfileScreen() {
             ) : (
               <View className="flex-row gap-3">
                 <PrimaryButton
-                  title={isFollowing ? "Siguiendo" : "Seguir"}
-                  icon={isFollowing ? "checkmark" : "person-add"}
-                  variant={isFollowing ? "ghost" : "teal"}
+                  title={isFollowing ? "Siguiendo" : requested ? "Solicitado" : "Seguir"}
+                  icon={isFollowing ? "checkmark" : requested ? "time-outline" : "person-add"}
+                  variant={isFollowing || requested ? "ghost" : "teal"}
                   onPress={handleFollow}
                   loading={followBusy}
                   className="flex-1"
@@ -311,7 +323,9 @@ export default function PublicProfileScreen() {
         </View>
 
         <SectionTitle icon="paw" title="Mascotas" />
-        {pets.length === 0 ? (
+        {locked ? (
+          <EmptyCard icon="lock-closed-outline" title="Perfil privado" text="Envía una solicitud de seguimiento para ver sus mascotas y su contenido." />
+        ) : pets.length === 0 ? (
           <EmptyCard icon="paw-outline" text="Sin mascotas registradas" />
         ) : (
           pets.map((pet) => (

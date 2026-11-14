@@ -40,7 +40,7 @@ export default function SeguidoresScreen() {
       followsService.getFollowers(id),
       followsService.getFollowing(id),
       me
-        ? reportsService.getBlockedUsers(me)
+        ? reportsService.getHiddenUserIds(me)
         : Promise.resolve({ success: true, data: [] as string[] }),
     ]);
 

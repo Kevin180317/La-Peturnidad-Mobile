@@ -2,6 +2,7 @@ import { Avatar, CARD, Chip, ListSection, PrimaryButton } from "@/components/kit
 import { Ionicons } from "@expo/vector-icons";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { groupsService } from "@/services/groups.service";
+import { reportsService } from "@/services/reports.service";
 import { supabase } from "@/utils/supabase";
 import { getCurrentUser } from "@/utils/session";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -33,16 +34,20 @@ export default function GrupoDetailScreen() {
 
   const loadGroup = async () => {
     if (!id) return;
-    const [groupRes, membersRes] = await Promise.all([
+    const [groupRes, membersRes, authRes] = await Promise.all([
       groupsService.getById(id),
       groupsService.getMembers(id),
+      getCurrentUser(),
     ]);
+    // Miembros con un bloqueo de por medio (en cualquier sentido) no aparecen en la lista
+    const me = authRes.data?.user?.id;
+    const hidden = new Set(me ? ((await reportsService.getHiddenUserIds(me)).data ?? []) : []);
 
     if (groupRes.success) setGroup(groupRes.data);
     else setGroup(null);
 
     if (membersRes.success) {
-      const memberRows = membersRes.data ?? [];
+      const memberRows = (membersRes.data ?? []).filter((m) => !hidden.has(m.user_id));
       const userIds = memberRows.map((m) => m.user_id);
       const profileMap: Record<string, any> = {};
       if (userIds.length > 0) {

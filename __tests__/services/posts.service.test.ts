@@ -39,6 +39,25 @@ describe("postsService.getAllPosts tag filter", () => {
   });
 });
 
+describe("postsService.getAllPosts authorIds (Siguiendo)", () => {
+  it("filters by the given authors", async () => {
+    mockTable("posts", { data: [post] });
+    await postsService.getAllPosts(null, FEED_PAGE_SIZE, null, ["u1", "u2"]);
+    expect(calls).toContainEqual({ table: "posts", method: "in", args: ["user_id", ["u1", "u2"]] });
+  });
+
+  it("excludeAuthorIds hides those authors (Para ti: yo y a quienes sigo)", async () => {
+    mockTable("posts", { data: [post] });
+    await postsService.getAllPosts(null, FEED_PAGE_SIZE, null, null, ["me", "f1"]);
+    expect(calls).toContainEqual({ table: "posts", method: "not", args: ["user_id", "in", "(me,f1)"] });
+  });
+
+  it("empty author list: no query, empty feed", async () => {
+    expect(await postsService.getAllPosts(null, FEED_PAGE_SIZE, null, [])).toEqual({ success: true, data: [] });
+    expect(calls.some((c) => c.table === "posts")).toBe(false);
+  });
+});
+
 describe("postsService.create", () => {
   it("saves gallery, location, tags and links; image_url is the first image", async () => {
     mockTable("posts", { data: { id: "p9" } });

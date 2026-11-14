@@ -1,4 +1,6 @@
-import { Avatar, CARD as CARD_BASE, EmptyCard, RoundIconButton, Segmented, type SegmentOption } from "@/components/kit/Kit";
+import { SuggestedUsers } from "@/components/SuggestedUsers";
+import { UserSearchResults } from "@/components/UserRows";
+import { Avatar, CARD as CARD_BASE, EmptyCard, Field, RoundIconButton, Segmented, type SegmentOption } from "@/components/kit/Kit";
 import { PostForm, type PostFormData } from "@/components/PostForm";
 import { Skeleton } from "@/components/Skeleton";
 import { messagesService } from "@/services/messages.service";
@@ -59,6 +61,9 @@ interface FeedTabProps {
   /** Etiqueta con la que se filtra el feed social (null = sin filtro) */
   feedTag?: string | null;
   onFilterTag?: (tag: string | null) => void;
+  /** Pestaña del feed social: todas las visibles o solo de quienes sigo */
+  feedScope?: FeedScope;
+  onChangeFeedScope?: (scope: FeedScope) => void;
   /** Colonia y ciudad del perfil, sugeridas como ubicación al publicar */
   defaultLocation?: string;
 }
@@ -71,6 +76,14 @@ const SEGMENTS: SegmentOption<MainTab>[] = [
   { key: "emergencies", label: "Emergencias", icon: "warning", color: "#ff7e70" },
   { key: "announcements", label: "Anuncios", icon: "megaphone", color: "#007275" },
   { key: "social", label: "Social", icon: "people", color: "#007275" },
+];
+
+type FeedScope = "all" | "following" | "mine";
+
+const SCOPES: SegmentOption<FeedScope>[] = [
+  { key: "all", label: "Para ti", icon: "globe-outline", color: "#007275" },
+  { key: "following", label: "Siguiendo", icon: "person-add", color: "#007275" },
+  { key: "mine", label: "Mías", icon: "person", color: "#007275" },
 ];
 
 export function FeedTab({
@@ -101,6 +114,8 @@ export function FeedTab({
   onDeleteAnnouncement = () => {},
   feedTag = null,
   onFilterTag = () => {},
+  feedScope = "all",
+  onChangeFeedScope = () => {},
   defaultLocation = "",
 }: FeedTabProps) {
   const router = useRouter();
@@ -108,6 +123,10 @@ export function FeedTab({
   const [showPostForm, setShowPostForm] = useState(false);
   const [posting, setPosting] = useState(false);
   const [contactingUserId, setContactingUserId] = useState<string | null>(null);
+  const [userQuery, setUserQuery] = useState("");
+  const searching = userQuery.trim().length > 0;
+  // Mientras se busca usuarios se oculta el resto del feed
+  const shownTab: MainTab | null = searching ? null : mainTab;
 
   const blocked = new Set(blockedUserIds);
   // Incluye mis propios posts para que pueda verlos y borrarlos
@@ -163,7 +182,11 @@ export function FeedTab({
         </TouchableOpacity>
       </View>
 
-      <Segmented options={SEGMENTS} value={mainTab} onChange={setMainTab} />
+      <Field icon="search" placeholder="Buscar usuarios" value={userQuery} onChangeText={setUserQuery} autoCapitalize="none" />
+      {searching && <UserSearchResults query={userQuery.trim()} />}
+      {!searching && <SuggestedUsers />}
+
+      {!searching && <Segmented options={SEGMENTS} value={mainTab} onChange={setMainTab} />}
 
       <PostForm
         visible={showPostForm}
@@ -174,7 +197,7 @@ export function FeedTab({
       />
 
       {/* EMERGENCIAS */}
-      {mainTab === "emergencies" &&
+      {shownTab === "emergencies" &&
         (loadingAlerts ? (
           <FeedSkeleton />
         ) : !emergencyAlerts?.length ? (
@@ -184,7 +207,7 @@ export function FeedTab({
         ))}
 
       {/* ANUNCIOS */}
-      {mainTab === "announcements" &&
+      {shownTab === "announcements" &&
         (loadingAnnouncements ? (
           <FeedSkeleton />
         ) : !visibleAnnouncements.length ? (
@@ -223,7 +246,10 @@ export function FeedTab({
         ))}
 
       {/* SOCIAL */}
-      {mainTab === "social" && !!feedTag && (
+      {shownTab === "social" && (
+        <Segmented options={SCOPES} value={feedScope} onChange={onChangeFeedScope} className="mb-4" />
+      )}
+      {shownTab === "social" && !!feedTag && (
         <View className="flex-row items-center justify-between bg-[#007275]/10 rounded-2xl px-4 py-2.5 mb-4">
           <Text className="text-[#007275] font-semibold">Mostrando #{feedTag}</Text>
           <TouchableOpacity onPress={() => onFilterTag(null)} accessibilityRole="button" accessibilityLabel="Quitar filtro">
@@ -231,11 +257,24 @@ export function FeedTab({
           </TouchableOpacity>
         </View>
       )}
-      {mainTab === "social" &&
+      {shownTab === "social" &&
         (loadingFeed ? (
           <FeedSkeleton />
         ) : visiblePosts.length === 0 ? (
-          <EmptyCard icon="images-outline" color="#007275" title={feedTag ? "Sin resultados" : "Aún no hay publicaciones"} text={feedTag ? `Nadie ha publicado con #${feedTag}` : "Sé el primero en compartir algo con tu comunidad"} />
+          <EmptyCard
+            icon="images-outline"
+            color="#007275"
+            title={feedTag ? "Sin resultados" : "Aún no hay publicaciones"}
+            text={
+              feedTag
+                ? `Nadie ha publicado con #${feedTag}`
+                : feedScope === "following"
+                  ? "Cuando las personas que sigues publiquen, las verás aquí"
+                  : feedScope === "mine"
+                    ? "Aún no has publicado nada. Toca Publicar para compartir algo"
+                    : "No hay publicaciones nuevas de personas que no sigues. Las de quienes sigues están en Siguiendo"
+            }
+          />
         ) : (
           visiblePosts.map((post) => {
             const isMine = post.user_id === userId;
@@ -350,7 +389,7 @@ export function FeedTab({
             );
           })
         ))}
-      {mainTab === "social" && loadingMoreFeed && <ActivityIndicator className="mt-2" color="#007275" />}
+      {shownTab === "social" && loadingMoreFeed && <ActivityIndicator className="mt-2" color="#007275" />}
     </ScrollView>
   );
 }

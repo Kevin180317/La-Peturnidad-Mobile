@@ -16,9 +16,9 @@ A segmented control at the top switches between three views:
 
 Posts from users the current user blocked are hidden on the client, so a page can look short.
 
-## Standalone `/comunidad` screen
+## Removed `/comunidad` screen
 
-`app/comunidad.tsx` ("Comunidad — Avisos de tus vecinos") still exists as a route, but nothing in the app links to it any more. Either remove it or link it from somewhere; until then, treat Feed → Anuncios as the real entry point.
+The standalone `app/comunidad.tsx` ("Comunidad — Avisos de tus vecinos") was removed on 2026-11-09: nothing linked to it and Feed → Anuncios covers the same function. It is still in git history if it is ever needed again.
 
 ## History
 

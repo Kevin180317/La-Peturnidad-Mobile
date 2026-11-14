@@ -5,12 +5,6 @@ import Toast from "react-native-toast-message";
 import { resetRouterMock, router } from "../../test/routerMock";
 import { resetSupabaseMock, supabaseMock } from "../../test/supabaseMock";
 
-jest.mock("@react-native-picker/picker", () => {
-  const Picker: any = () => null;
-  Picker.Item = () => null;
-  return { Picker };
-});
-
 const toast = Toast.show as jest.Mock;
 const profile = (over: object) => ({
   first_name: "Ana",

@@ -26,7 +26,7 @@ Regenerate types with the Supabase MCP `generate_typescript_types`, then run `bu
 | `posts` | `content`, `created_at`, `id`, `image_url`, `image_urls`, `links`, `location`, `tags`, `updated_at`, `user_id` |
 | `reports` | `created_at`, `id`, `reason`, `reporter_id`, `reviewed_at`, `reviewed_by`, `status`, `target_user_id` |
 | `success_stories` | `created_at`, `id`, `image_url`, `pet_name`, `story`, `user_id` |
-| `user_profiles` | `address`, `birth_date`, `city`, `created_at`, `first_name`, `id`, `last_name`, `phone`, `postal_code`, `profile_picture_url`, `role`, `updated_at`, `user_id` |
+| `user_profiles` | `address`, `birth_date`, `city`, `created_at`, `first_name`, `id`, `last_name`, `phone`, `postal_code`, `profile_picture_url`, `role`, `terms_accepted_at`, `updated_at`, `user_id` |
 
 ## Views
 
@@ -41,6 +41,7 @@ Regenerate types with the Supabase MCP `generate_typescript_types`, then run `bu
 | `clear_conversation` | Clear a chat for the caller only (sets `cleared_at`); the participant row stays |
 | `get_alert_contacts` | Owner name and phone for active alerts in the caller's colonia |
 | `get_finder_contacts` | Name and phone of people who reported finding the caller's pet |
+| `get_hidden_user_ids` | Ids of users hidden from the caller: those the caller blocked plus those who blocked the caller (union, direction not revealed) |
 | `create_conversation` | Create a 1:1 conversation with both participants (SECURITY DEFINER) |
 | `create_group_conversation` | Create the group chat with all members |
 | `delete_group` | Delete a group, its members, linked chat, messages and participants (creator only) |
