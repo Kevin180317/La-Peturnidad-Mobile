@@ -228,7 +228,7 @@ Phases are listed in chronological order. **Phases 1–12 are historical:** seve
 | **Feed pagination** | `postsService.getAllPosts(before?, limit = 20)` by cursor; infinite scroll in the Social segment |
 | **Typed client** | `createClient<Database>`; `types/index.ts` derives from `Tables<>` |
 | **Icon and splash** | Generated from the isotype (`Isotipo_color_Salmon.png`) on cream `#faf5e0` |
-| **Tests** | 16 suites / 120 tests; the push edge function is tested by loading the Deno code with mocks |
+| **Tests** | 16 suites / 120 tests at this phase (now 33 / 256, see `docs/BACKLOG.md`); the push edge function is tested by loading the Deno code with mocks |
 
 ## ✅ Phase 14 — UI V2 redesign (2026-10-29/30)
 

@@ -32,6 +32,7 @@
 
 - Expo SDK 58, React Native 0.88, React 19.3
 - TypeScript 6 (strict mode; `tsconfig.json` declara `types: ["jest", "node"]` porque TS 6 ya no carga los `@types/*` solos)
+- Tests: Jest, 33 suites / 256 tests (2026-11-15; `npx jest`). Incluye `follows.service` y `pets.service` (`__tests__/services/`)
 - Bun as package manager (bun.lockb). Es el ÚNICO lockfile: `package-lock.json` se eliminó el 2026-10-30 (expo-doctor/EAS se confunden con dos). No usar `npm install`
 
 ## Key Files
@@ -131,7 +132,7 @@
 - **Fix subida de imágenes** (`dashboardService.uploadImage`): la imagen local se lee con `new File(uri).arrayBuffer()` de `expo-file-system` (declarado en `package.json`). Antes `fetch("file://...")` no resolvía las rutas con `%25` de Expo Go (`ExperienceData/%2540...`), devolvía el texto "File not found" (14 bytes) y eso se subía como foto (perfil/mascotas/posts quedaban en blanco con "unknown image format"). Si el archivo sale vacío ya no se sube. Archivos dañados previos: `select bucket_id, name from storage.objects where (metadata->>'size')::int < 100;` y volver a subirlos desde la app
 - Confirmaciones: los 12 `Alert.alert` (dashboard, mensajes, comunidad, historias) pasaron a `confirmDialog` (ver "Sistema de diseño"); eliminar cuenta, eliminar grupo y bloquear usuario usan `ConfirmModal` con `destructive`
 - Toast `welcome` y sin barras superiores en dashboard y auth (ver "Sistema de diseño")
-- Tests: 23 suites / 174 tests (kit, ConversationList, ToastConfig, ConfirmDialog, HomeTab/PetForm/PetDetailModal, EmergencyTab, AnimatedSplash, upload con expo-file-system)
+- Tests (histórico; hoy 33 suites / 256 tests, ver línea de Tests actual en "Tech Stack"): 23 suites / 174 tests (kit, ConversationList, ToastConfig, ConfirmDialog, HomeTab/PetForm/PetDetailModal, EmergencyTab, AnimatedSplash, upload con expo-file-system)
 
 ### Correcciones de la auditoría local (2026-10-31)
 Solo app, sin cambios en Supabase ni build generado todavía. Tests: 26 suites / 194 tests. No probado en teléfono.
