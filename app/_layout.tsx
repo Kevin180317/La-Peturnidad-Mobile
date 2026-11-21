@@ -7,7 +7,8 @@ import {
 } from "@expo-google-fonts/inter";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { Platform } from "react-native";
+import { Platform, Text, View } from "react-native";
+import { isBuildExpired } from "../utils/buildExpiry";
 import { Stack, router, type Href } from "expo-router";
 import Toast from "react-native-toast-message";
 import { AnimatedSplash } from "../components/AnimatedSplash";
@@ -139,6 +140,17 @@ export default function RootLayout() {
 
   if (!fontsLoaded && !fontError) {
     return null;
+  }
+
+  if (isBuildExpired()) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#faf5e0] px-8">
+        <Text className="text-center text-2xl font-bold text-[#211f1e]">Esta versión de prueba venció</Text>
+        <Text className="mt-3 text-center text-base text-gray-700">
+          Instala la versión más reciente de Lucky Tracker para seguir usando la app.
+        </Text>
+      </View>
+    );
   }
 
   return (
