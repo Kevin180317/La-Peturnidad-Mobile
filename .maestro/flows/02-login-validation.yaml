@@ -4,6 +4,12 @@ name: Login rejects empty form
 - launchApp:
     clearState: true
 - tapOn: "Saltar"
+# Wait for the login screen before tapping, then for the 3 s toast to render.
+- extendedWaitUntil:
+    visible: "Inicia sesión para continuar"
+    timeout: 10000
 - tapOn:
     id: "login-submit"
-- assertVisible: "Campos requeridos"
+- extendedWaitUntil:
+    visible: "Campos requeridos"
+    timeout: 5000
